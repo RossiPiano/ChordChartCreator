@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎸 Chord Chart Creator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+    body {
+      background: #f2f4f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 12px;
+    }
+    .app {
+      max-width: 1200px;
+      width: 100%;
+      height: 100%;
+      max-height: 98vh;
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 16px 32px -12px rgba(0,0,0,0.2);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .toolbar {
+      background: #fafbfc;
+      padding: 8px 16px;
+      border-bottom: 1px solid #e6e9f0;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px 10px;
+      flex-shrink: 0;
+    }
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-right: auto;
+    }
+    .toolbar h1 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #1a1e2b;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-group {
+      display: flex;
+      gap: 3px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .btn {
+      background: white;
+      border: 1px solid #d0d7e2;
+      padding: 3px 8px;
+      border-radius: 40px;
+      font-size: 0.6rem;
+      font-weight: 500;
+      color: #1f2937;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .btn:hover {
+      background: #f1f4f9;
+      border-color: #b0bcca;
+    }
+    .btn-success {
+      background: #0b7e4b;
+      border-color: #0b7e4b;
+      color: white;
+    }
+    .btn-success:hover {
+      background: #0e9258;
+      border-color: #0e9258;
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid #d0d7e2;
+    }
+    .btn.active {
+      background: #1a1e2b;
+      border-color: #1a1e2b;
+      color: white;
+    }
+    .btn.active:hover {
+      background: #2d3345;
+      border-color: #2d3345;
+    }
+    .btn-toggle {
+      background: transparent;
+      border: 1px solid #d0d7e2;
+      padding: 3px 8px;
+      border-radius: 40px;
+      font-size: 0.6rem;
+      font-weight: 500;
+      color: #1f2937;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      white-space: nowrap;
+    }
+    .btn-toggle:hover {
+      background: #f1f4f9;
+      border-color: #b0bcca;
+    }
+    .btn-toggle.active {
+      background: #1a1e2b;
+      border-color: #1a1e2b;
+      color: white;
+    }
+    .btn-toggle.active:hover {
+      background: #2d3345;
+      border-color: #2d3345;
+    }
+    .editor-wrapper {
+      display: flex;
+      flex-direction: row;
+      gap: 0;
+      flex: 1;
+      min-height: 0;
+      height: 100%;
+      transition: all 0.3s ease;
+    }
+    .input-area {
+      width: 30%;
+      padding: 8px 10px 8px 14px;
+      background: #ffffff;
+      border-right: 1px solid #e6e9f0;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    .input-area.collapsed {
+      width: 0;
+      padding: 0;
+      border-right: none;
+      min-width: 0;
+    }
+    .preview-area {
+      width: 70%;
+      background: #f9fafc;
+      padding: 8px 16px 12px 16px;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+    }
+    .preview-area.expanded {
+      width: 100%;
+    }
+    textarea {
+      width: 100%;
+      flex: 1;
+      border: 1px solid #d8dee9;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 0.7rem;
+      line-height: 1.5;
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      resize: none;
+      background: #fefefe;
+      color: #1e2533;
+      transition: border 0.1s;
+      tab-size: 2;
+      outline: none;
+      min-height: 80px;
+    }
+    textarea:focus {
+      border-color: #6c7b9a;
+      box-shadow: 0 0 0 3px rgba(28, 46, 82, 0.08);
+    }
+    .chord-preview {
+      background: white;
+      border-radius: 12px;
+      padding: 10px 16px;
+      flex: 1;
+      min-height: 80px;
+      overflow: hidden;
+      border: 1px solid #e2e7ef;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      line-height: 1.9;
+      color: #151b26;
+    }
+    .chord-preview .content-wrapper {
+      display: block;
+      width: 100%;
+    }
+    .empty-preview {
+      color: #8d9bb0;
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    @media (max-width: 720px) {
+      .editor-wrapper {
+        flex-direction: column-reverse;
+      }
+      .input-area {
+        width: 100%;
+        border-right: none;
+        border-top: 1px solid #e6e9f0;
+        border-bottom: none;
+        height: 35%;
+        min-height: 100px;
+        padding: 8px 14px 10px 14px;
+      }
+      .input-area.collapsed {
+        height: 0;
+        padding: 0;
+        border-top: none;
+        min-height: 0;
+      }
+      .preview-area {
+        width: 100%;
+        height: 65%;
+        min-height: 100px;
+        padding: 8px 14px 10px 14px;
+      }
+      .preview-area.expanded {
+        height: 100%;
+      }
+      textarea {
+        min-height: 60px;
+        font-size: 0.65rem;
+      }
+      .chord-preview {
+        min-height: 60px;
+        font-size: 0.7rem;
+        padding: 8px 12px;
+      }
+      .toolbar h1 {
+        font-size: 0.8rem;
+      }
+      .btn {
+        font-size: 0.55rem;
+        padding: 2px 6px;
+      }
+    }
+
+    /* GRID: Each bar is a flex item with equal width */
+    .chord-line {
+      display: flex;
+      flex-wrap: nowrap;
+      width: 100%;
+      gap: 0;
+    }
+    /* Each bar takes equal space */
+    .chord-line .bar {
+      display: flex;
+      flex-wrap: nowrap;
+      flex: 1 1 0;
+      min-width: 0;
+      border-right: 1px solid #eef2f7;
+      position: relative;
+    }
+    .chord-line .bar:last-child {
+      border-right: none;
+    }
+    .chord-line .bar .bar-inner {
+      display: flex;
+      flex-wrap: nowrap;
+      width: 100%;
+    }
+    .chord-line .cell {
+      display: inline-block;
+      padding: 1px 2px;
+      vertical-align: middle;
+      text-align: left;
+      overflow: visible;
+      flex: 0 0 25%;
+      min-width: 25%;
+      max-width: 25%;
+    }
+    .chord-line .cell .chord-item {
+      display: inline-block;
+      padding: 1px 2px;
+      font-weight: 700;
+      white-space: nowrap;
+      text-align: left;
+      min-height: 18px;
+      letter-spacing: 0.01em;
+      max-width: 100%;
+      overflow: visible;
+    }
+    .chord-line .cell .chord-item.empty {
+      font-weight: 300;
+    }
+    .chord-line .cell .chord-item.lyric {
+      font-weight: 400;
+      color: #000000;
+    }
+    /* Bar line inside the bar at the end */
+    .chord-line .bar .barline {
+      position: absolute;
+      right: -1px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #000000;
+      font-weight: 700;
+      font-size: 0.85rem;
+      opacity: 0.8;
+      line-height: 1;
+      z-index: 1;
+    }
+    .chord-line .bar .barline.double {
+      letter-spacing: -2px;
+    }
+
+    .lyrics-line {
+      display: block;
+      width: 100%;
+      padding: 1px 0;
+    }
+    .lyrics-line .lyric-text {
+      display: block;
+      padding: 1px 2px;
+      font-weight: 400;
+      white-space: nowrap;
+      text-align: left;
+      min-height: 18px;
+      color: #000000;
+    }
+
+    .hr-line {
+      display: block;
+      width: 100%;
+      padding: 6px 0;
+      margin: 0;
+    }
+    .hr-line .hr {
+      display: block;
+      width: 100%;
+      height: 0;
+      border: none;
+      border-top: 2px solid #c5cedb;
+      margin: 0;
+      padding: 0;
+    }
+
+    .empty-line {
+      display: block;
+      width: 100%;
+      padding: 4px 0;
+      height: 24px;
+    }
+
+    .chord-item.section-intro { color: #87CEEB; }
+    .chord-item.section-verse { color: #2E8B57; }
+    .chord-item.section-pre-chorus { color: #FF8C00; }
+    .chord-item.section-chorus { color: #DC143C; }
+    .chord-item.section-post-chorus { color: #8B4513; }
+    .chord-item.section-bridge { color: #8A2BE2; }
+    .chord-item.section-instrumental { color: #000000; }
+    .chord-item.section-outro { color: #87CEEB; }
+    .chord-item.empty.section-intro { color: #87CEEB; }
+    .chord-item.empty.section-verse { color: #2E8B57; }
+    .chord-item.empty.section-pre-chorus { color: #FF8C00; }
+    .chord-item.empty.section-chorus { color: #DC143C; }
+    .chord-item.empty.section-post-chorus { color: #8B4513; }
+    .chord-item.empty.section-bridge { color: #8A2BE2; }
+    .chord-item.empty.section-instrumental { color: #000000; }
+    .chord-item.empty.section-outro { color: #87CEEB; }
+
+    .chord-item.section-custom { color: #888888; }
+    .chord-item.empty.section-custom { color: #888888; }
+
+    .section-block {
+      margin: 3px 0 2px 0;
+      padding: 1px 0;
+      display: inline-block;
+      border-radius: 4px;
+      padding: 0px 10px;
+    }
+    .section-block .section {
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #FFFFFF;
+      display: inline-block;
+    }
+    .section-block .section-parens {
+      color: rgba(255,255,255,0.7);
+      margin-left: 3px;
+      font-weight: 400;
+    }
+    .section-block.section-intro { background-color: #87CEEB; }
+    .section-block.section-verse { background-color: #2E8B57; }
+    .section-block.section-pre-chorus { background-color: #FF8C00; }
+    .section-block.section-chorus { background-color: #DC143C; }
+    .section-block.section-post-chorus { background-color: #8B4513; }
+    .section-block.section-bridge { background-color: #8A2BE2; }
+    .section-block.section-instrumental { background-color: #000000; }
+    .section-block.section-outro { background-color: #87CEEB; }
+    .section-block.section-custom { background-color: #888888; }
+
+    .chord-line:hover .cell {
+      background: #f8faff;
+    }
+    .lyrics-line:hover {
+      background: #f8faff;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <h1>🎸 Chord Chart Creator</h1>
+      <button class="btn-toggle" id="toggleEditor">◀ Hide Editor</button>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-outline" id="loadSample1">Sample 1</button>
+      <button class="btn btn-outline" id="loadSample2">Sample 2</button>
+      <button class="btn btn-outline" id="loadSample3">Test</button>
+      <button class="btn btn-outline" id="loadBeatExample">Beat Demo</button>
+      <button class="btn btn-outline" id="loadLyricsExample">Lyrics Demo</button>
+      <button class="btn btn-outline" id="loadNumberShortcuts">Number Shortcuts</button>
+      <button class="btn btn-outline" id="clearAll">Clear</button>
+      <button class="btn btn-success" id="copyPreview">Copy</button>
+    </div>
+  </div>
+
+  <div class="editor-wrapper">
+    <div class="input-area" id="inputArea">
+      <textarea id="chartInput" spellcheck="false">Intro
+Ebm7sus Eb7 Ab Bb |
+Cmaj9 |
+Ab/Bb |
+Ebm |
+Verse
+Ebm | Cb | Abm | Ab/Bb Bb |
+Ebm | Cb | Abm | Ab/Bb Bb |
+Chorus
+Ebm7sus | Cmaj9 | Ab/Bb | Ebm |
+Ebm | Cb | Db | Ebm |
+Outro
+Ebm ||</textarea>
+    </div>
+    <div class="preview-area" id="previewArea">
+      <div id="previewContainer" class="chord-preview">
+        <div class="content-wrapper" id="previewContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  (function() {
+    const inputEl = document.getElementById('chartInput');
+    const previewContent = document.getElementById('previewContent');
+    const previewContainer = document.getElementById('previewContainer');
+    const inputArea = document.getElementById('inputArea');
+    const previewArea = document.getElementById('previewArea');
+    const toggleBtn = document.getElementById('toggleEditor');
+
+    let currentSection = '';
+    let activeButton = null;
+    let isEditorCollapsed = false;
+
+    function setActiveButton(buttonId) {
+      document.querySelectorAll('.btn-group .btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      if (buttonId) {
+        const btn = document.getElementById(buttonId);
+        if (btn) {
+          btn.classList.add('active');
+          activeButton = buttonId;
+        }
+      }
+    }
+
+    toggleBtn.addEventListener('click', function() {
+      isEditorCollapsed = !isEditorCollapsed;
+      inputArea.classList.toggle('collapsed');
+      previewArea.classList.toggle('expanded');
+
+      if (isEditorCollapsed) {
+        toggleBtn.textContent = '▶ Show Editor';
+        toggleBtn.classList.add('active');
+      } else {
+        toggleBtn.textContent = '◀ Hide Editor';
+        toggleBtn.classList.remove('active');
+      }
+
+      updatePreview();
+    });
+
+    function expandSectionShortcut(name) {
+      const trimmed = name.trim();
+      const lower = trimmed.toLowerCase();
+
+      const numberMap = {
+        '21': 'Verse 1',
+        '22': 'Verse 2',
+        '23': 'Verse 3',
+        '24': 'Verse 4',
+        '25': 'Verse 5',
+        '26': 'Verse 6',
+        '27': 'Verse 7',
+        '28': 'Verse 8',
+        '29': 'Verse 9',
+        '31': 'Pre-Chorus 1',
+        '32': 'Pre-Chorus 2',
+        '33': 'Pre-Chorus 3',
+        '34': 'Pre-Chorus 4',
+        '35': 'Pre-Chorus 5',
+        '36': 'Pre-Chorus 6',
+        '37': 'Pre-Chorus 7',
+        '38': 'Pre-Chorus 8',
+        '39': 'Pre-Chorus 9',
+        '41': 'Chorus 1',
+        '42': 'Chorus 2',
+        '43': 'Chorus 3',
+        '44': 'Chorus 4',
+        '45': 'Chorus 5',
+        '46': 'Chorus 6',
+        '47': 'Chorus 7',
+        '48': 'Chorus 8',
+        '49': 'Chorus 9',
+        '51': 'Post-Chorus 1',
+        '52': 'Post-Chorus 2',
+        '53': 'Post-Chorus 3',
+        '54': 'Post-Chorus 4',
+        '55': 'Post-Chorus 5',
+        '56': 'Post-Chorus 6',
+        '57': 'Post-Chorus 7',
+        '58': 'Post-Chorus 8',
+        '59': 'Post-Chorus 9',
+        '61': 'Instrumental 1',
+        '62': 'Instrumental 2',
+        '63': 'Instrumental 3',
+        '64': 'Instrumental 4',
+        '65': 'Instrumental 5',
+        '66': 'Instrumental 6',
+        '67': 'Instrumental 7',
+        '68': 'Instrumental 8',
+        '69': 'Instrumental 9',
+        '71': 'Bridge 1',
+        '72': 'Bridge 2',
+        '73': 'Bridge 3',
+        '74': 'Bridge 4',
+        '75': 'Bridge 5',
+        '76': 'Bridge 6',
+        '77': 'Bridge 7',
+        '78': 'Bridge 8',
+        '79': 'Bridge 9'
+      };
+
+      const singleNumberMap = {
+        '1': 'Intro',
+        '2': 'Verse',
+        '3': 'Pre-Chorus',
+        '4': 'Chorus',
+        '5': 'Post-Chorus',
+        '6': 'Instrumental',
+        '7': 'Bridge',
+        '8': 'Outro'
+      };
+
+      const textShortcuts = {
+        'int': 'Intro',
+        'i': 'Intro',
+        'v': 'Verse',
+        'ver': 'Verse',
+        'pr': 'Pre-Chorus',
+        'pre': 'Pre-Chorus',
+        'ch': 'Chorus',
+        'cho': 'Chorus',
+        'po': 'Post-Chorus',
+        'post': 'Post-Chorus',
+        'b': 'Bridge',
+        'bri': 'Bridge',
+        'ins': 'Instrumental',
+        'inst': 'Instrumental',
+        'out': 'Outro',
+        'o': 'Outro',
+        'tag': 'Tag',
+        't': 'Tag',
+        'end': 'Ending',
+        'ending': 'Ending'
+      };
+
+      if (lower.match(/^[2-7][1-9]$/)) {
+        return numberMap[lower] || name;
+      }
+
+      if (lower.match(/^[1-8]$/)) {
+        return singleNumberMap[lower] || name;
+      }
+
+      const match = lower.match(/^(int|i|v|ver|pr|pre|ch|cho|po|post|b|bri|ins|inst|out|o|tag|t|end|ending)(?:\s*(\d+))?$/);
+      if (match) {
+        const shortcut = match[1];
+        const number = match[2] || '';
+        let fullName = textShortcuts[shortcut] || shortcut;
+        fullName = fullName.split(' ').map(word =>
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
+        return number ? `${fullName} ${number}` : fullName;
+      }
+
+      const fullMatch = lower.match(/^(intro|verse|pre-chorus|chorus|post-chorus|bridge|instrumental|outro|tag|ending)(?:\s*(\d+))?$/);
+      if (fullMatch) {
+        const fullName = fullMatch[1];
+        const number = fullMatch[2] || '';
+        const capitalized = fullName.split(' ').map(word =>
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
+        const finalName = capitalized.replace(/Pre-Chorus/, 'Pre-Chorus').replace(/Post-Chorus/, 'Post-Chorus');
+        return number ? `${finalName} ${number}` : finalName;
+      }
+
+      return name;
+    }
+
+    function capitalizeSectionName(name) {
+      let expanded = expandSectionShortcut(name);
+      return expanded.split(' ').map(word => {
+        if (word.toLowerCase() === 'pre-chorus') return 'Pre-Chorus';
+        if (word.toLowerCase() === 'post-chorus') return 'Post-Chorus';
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      }).join(' ');
+    }
+
+    function getSectionClass(sectionName) {
+      const name = sectionName.toLowerCase().trim();
+      if (name.includes('intro')) return 'section-intro';
+      if (name.includes('verse')) return 'section-verse';
+      if (name.includes('pre-chorus')) return 'section-pre-chorus';
+      if (name.includes('post-chorus')) return 'section-post-chorus';
+      if (name.includes('chorus')) return 'section-chorus';
+      if (name.includes('bridge')) return 'section-bridge';
+      if (name.includes('instrumental')) return 'section-instrumental';
+      if (name.includes('outro')) return 'section-outro';
+      return '';
+    }
+
+    function normalizeChord(chord) {
+      if (!chord || chord === '_' || chord === '') return chord;
+
+      const match = chord.match(/^([a-gA-G])([#b]?)(.*)$/);
+      if (match) {
+        const root = match[1].toUpperCase();
+        const accidental = match[2];
+        const rest = match[3];
+        return root + accidental + rest;
+      }
+      return chord;
+    }
+
+    function simplifyChord(chord) {
+      if (!chord || chord === '_' || chord === '') return chord;
+
+      let simplified = normalizeChord(chord);
+
+      if (simplified.match(/[A-G][#b]?d\b/i) ||
+          simplified.match(/[A-G][#b]?dim\b/i) ||
+          simplified.includes('°')) {
+        simplified = simplified.replace(/d|dim|°/gi, '°');
+        return simplified.trim();
+      }
+
+      if (simplified.match(/[A-G][#b]?h\b/i) ||
+          simplified.toLowerCase().includes('halfdim') ||
+          simplified.toLowerCase().includes('half-dim') ||
+          simplified.toLowerCase().includes('half diminished') ||
+          simplified.includes('ø')) {
+        return simplified.replace(/h|halfdim|half-dim|half diminished|half-diminished|ø/gi, 'ø').trim();
+      }
+
+      if (simplified.match(/[A-G][#b]?M7?\b/)) {
+        simplified = simplified.replace(/M7?/g, 'Δ');
+        return simplified.trim();
+      }
+
+      if (simplified.match(/[A-G][#b]?Maj7\b/i) ||
+          simplified.match(/[A-G][#b]?maj7\b/i) ||
+          simplified.includes('Δ')) {
+        simplified = simplified.replace(/Maj7|maj7|Δ7|Δ/gi, 'Δ');
+        return simplified.trim();
+      }
+
+      return simplified;
+    }
+
+    function splitIntoBars(line) {
+      let protected = line;
+
+      const slashChordRegex = /([A-Za-z0-9#b]+)\/([A-Za-z0-9#b]+)/g;
+      let matches = [];
+      let match;
+      while ((match = slashChordRegex.exec(protected)) !== null) {
+        matches.push({
+          start: match.index,
+          end: match.index + match[0].length,
+          full: match[0]
+        });
+      }
+
+      let placeholders = [];
+      let result = protected;
+      for (let i = matches.length - 1; i >= 0; i--) {
+        const placeholder = `__SLASH_${i}__`;
+        placeholders.push({ original: matches[i].full, placeholder: placeholder });
+        result = result.substring(0, matches[i].start) + placeholder + result.substring(matches[i].end);
+      }
+
+      let bars = result.split(/[|/\\]/).map(b => b.trim()).filter(b => b !== '');
+
+      bars = bars.map(bar => {
+        let restored = bar;
+        for (let p of placeholders) {
+          restored = restored.replace(p.placeholder, p.original);
+        }
+        return restored;
+      });
+
+      return bars;
+    }
+
+    function getGlobalMaxBars(text) {
+      const lines = text.split('\n');
+      let maxBars = 0;
+      for (let line of lines) {
+        if (line.includes('|') || line.includes('/') || line.includes('\\')) {
+          const bars = splitIntoBars(line);
+          maxBars = Math.max(maxBars, bars.length);
+        }
+      }
+      return maxBars;
+    }
+
+    function parseBarToCells(barContent) {
+      let tokens = barContent.split(/\s+/).filter(t => t !== '');
+      tokens = tokens.map(token => simplifyChord(token));
+
+      let cells = ['_', '_', '_', '_'];
+
+      if (tokens.length === 0) {
+        return cells;
+      }
+
+      if (tokens.length === 1) {
+        cells[0] = tokens[0];
+        return cells;
+      }
+
+      if (tokens.length === 2) {
+        cells[0] = tokens[0];
+        cells[2] = tokens[1];
+        return cells;
+      }
+
+      if (tokens.length === 3) {
+        const hasEmpty = tokens.includes('_');
+        if (hasEmpty) {
+          let result = ['_', '_', '_', '_'];
+          let tokenIndex = 0;
+          for (let i = 0; i < 4 && tokenIndex < tokens.length; i++) {
+            if (tokens[tokenIndex] === '_') {
+              result[i] = '_';
+              tokenIndex++;
+            } else {
+              result[i] = tokens[tokenIndex];
+              tokenIndex++;
+            }
+          }
+          return result;
+        } else {
+          cells[0] = tokens[0];
+          cells[1] = tokens[1];
+          cells[2] = tokens[2];
+          return cells;
+        }
+      }
+
+      if (tokens.length === 4) {
+        return tokens;
+      }
+
+      for (let i = 0; i < Math.min(4, tokens.length); i++) {
+        cells[i] = tokens[i];
+      }
+      return cells;
+    }
+
+    function adjustChordSizes() {
+      const content = previewContent;
+      if (!content) return;
+
+      const chordItems = content.querySelectorAll('.chord-item:not(.empty)');
+      if (chordItems.length === 0) return;
+
+      const firstCell = content.querySelector('.cell');
+      if (!firstCell) return;
+
+      const cellWidth = firstCell.offsetWidth - 8;
+      if (cellWidth < 10) return;
+
+      const baseSize = isEditorCollapsed ? 1.0 : 0.85;
+      const stepSize = 0.05;
+      const minSize = 0.3;
+
+      chordItems.forEach(item => {
+        const text = item.textContent;
+        if (!text || text === '_') return;
+
+        let fontSize = baseSize;
+        let fits = false;
+
+        const tempSpan = document.createElement('span');
+        tempSpan.style.cssText = `position:absolute; visibility:hidden; white-space:nowrap; font-family: "SF Mono", "Fira Code", monospace; font-size: ${fontSize}rem; font-weight: 700;`;
+        tempSpan.textContent = text;
+        document.body.appendChild(tempSpan);
+        let width = tempSpan.offsetWidth;
+        document.body.removeChild(tempSpan);
+
+        if (width <= cellWidth) {
+          fits = true;
+        }
+
+        while (!fits && fontSize > minSize) {
+          fontSize -= stepSize;
+          fontSize = Math.round(fontSize * 100) / 100;
+
+          const testSpan = document.createElement('span');
+          testSpan.style.cssText = `position:absolute; visibility:hidden; white-space:nowrap; font-family: "SF Mono", "Fira Code", monospace; font-size: ${fontSize}rem; font-weight: 700;`;
+          testSpan.textContent = text;
+          document.body.appendChild(testSpan);
+          width = testSpan.offsetWidth;
+          document.body.removeChild(testSpan);
+
+          if (width <= cellWidth) {
+            fits = true;
+          }
+        }
+
+        item.style.fontSize = fontSize + 'rem';
+      });
+
+      const emptyItems = content.querySelectorAll('.chord-item.empty');
+      emptyItems.forEach(item => {
+        item.style.fontSize = (baseSize * 0.8) + 'rem';
+      });
+    }
+
+    function renderPreview(text) {
+      if (!text || text.trim() === '') {
+        previewContent.innerHTML = `<div class="empty-preview">✨ Type or paste your chord chart in the editor</div>`;
+        return;
+      }
+
+      let html = '';
+      const lines = text.split('\n');
+      currentSection = '';
+      const globalMaxBars = getGlobalMaxBars(text);
+
+      for (let line of lines) {
+        const trimmed = line.trim();
+
+        if (trimmed === '---' || trimmed === '___' || trimmed === '***') {
+          html += `<div class="hr-line"><span class="hr"></span></div>`;
+          continue;
+        }
+
+        if (trimmed === '') {
+          html += `<div class="empty-line"></div>`;
+          continue;
+        }
+
+        const customLabelMatch = trimmed.match(/^\[(.*?)\]$/);
+        if (customLabelMatch) {
+          const labelText = customLabelMatch[1].trim();
+          html += `<div class="section-block section-custom"><span class="section">${labelText}</span></div>`;
+          currentSection = 'custom';
+          continue;
+        }
+
+        const sectionMatch = trimmed.match(/^\s*(Intro|Verse|Pre-Chorus|Chorus|Post-Chorus|Bridge|Outro|Instrumental|Tag|Ending|Coda|int|i|v|ver|pr|pre|ch|cho|po|post|b|bri|ins|inst|out|o|tag|t|end|ending|[1-8]|[2-7][1-9])(?:\s+\d+)?(?:\s*\([^)]*\))?\s*$/i);
+        if (sectionMatch) {
+          let sectionName = trimmed.trim();
+          sectionName = capitalizeSectionName(sectionName);
+          currentSection = sectionName;
+
+          const parensMatch = sectionName.match(/(.*?)\s*(\([^)]*\))$/);
+          let displayName = sectionName;
+          let parensText = '';
+          if (parensMatch) {
+            displayName = parensMatch[1].trim();
+            parensText = parensMatch[2];
+          }
+          const sectionClass = getSectionClass(displayName);
+          html += `<div class="section-block ${sectionClass}"><span class="section">${displayName}</span>${parensText ? ` <span class="section-parens">${parensText}</span>` : ''}</div>`;
+          continue;
+        }
+
+        if (line.includes('|') || line.includes('/') || line.includes('\\')) {
+          let bars = splitIntoBars(line);
+
+          if (bars.length > 0) {
+            let chordLineHtml = '<div class="chord-line">';
+
+            // Pad bars to match global max
+            while (bars.length < globalMaxBars) {
+              bars.push('_ _ _ _');
+            }
+
+            bars.forEach((bar, barIndex) => {
+              const cells = parseBarToCells(bar);
+              let sectionClass = getSectionClass(currentSection);
+              if (currentSection === 'custom' || currentSection.toLowerCase().includes('custom')) {
+                sectionClass = 'section-custom';
+              }
+
+              const isLastBar = barIndex === bars.length - 1;
+              const isEmptyBar = bar === '_ _ _ _' || bar === '';
+
+              chordLineHtml += `<div class="bar">`;
+              chordLineHtml += `<div class="bar-inner">`;
+
+              cells.forEach((cellContent) => {
+                const isUnderscore = cellContent === '_' || cellContent === '';
+                const displayText = isUnderscore ? '_' : cellContent;
+
+                let classes = 'chord-item';
+                if (isUnderscore) {
+                  classes += ' empty';
+                }
+                if (sectionClass) classes += ` ${sectionClass}`;
+
+                chordLineHtml += `<span class="cell">`;
+                chordLineHtml += `<span class="${classes}">${displayText}</span>`;
+                chordLineHtml += `</span>`;
+              });
+
+              chordLineHtml += `</div>`;
+
+              // Only show barline if this is a real bar or the last bar of the line
+              // For empty padding bars, don't show barline
+              if (!isEmptyBar || barIndex === bars.length - 1) {
+                const barlineText = (isLastBar && trimmed.endsWith('.')) ? '||' : '|';
+                const doubleClass = (isLastBar && trimmed.endsWith('.')) ? ' double' : '';
+                chordLineHtml += `<span class="barline${doubleClass}">${barlineText}</span>`;
+              }
+
+              chordLineHtml += `</div>`;
+            });
+
+            chordLineHtml += '</div>';
+            html += chordLineHtml;
+          }
+        } else if (trimmed !== '') {
+          const isLyrics = !trimmed.match(/[A-G]/i) || trimmed.length > 10;
+
+          if (isLyrics) {
+            html += `<div class="lyrics-line"><span class="lyric-text">${trimmed}</span></div>`;
+          } else {
+            html += `<div style="color: #5d6a7e; font-size: 0.65rem; padding: 1px 0; opacity: 0.8;">${trimmed}</div>`;
+          }
+        }
+      }
+
+      previewContent.innerHTML = html;
+
+      requestAnimationFrame(() => {
+        adjustChordSizes();
+      });
+    }
+
+    function updatePreview() {
+      const raw = inputEl.value;
+      renderPreview(raw);
+    }
+
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        adjustChordSizes();
+      }, 100);
+    });
+
+    function loadSample(sampleText, buttonId) {
+      inputEl.value = sampleText;
+      updatePreview();
+      if (buttonId) {
+        setActiveButton(buttonId);
+      }
+    }
+
+    function clearAll() {
+      inputEl.value = '';
+      updatePreview();
+      setActiveButton(null);
+    }
+
+    function copyPreviewText() {
+      const raw = inputEl.value;
+      if (!raw || raw.trim() === '') {
+        alert('No text to copy');
+        return;
+      }
+      navigator.clipboard.writeText(raw).then(() => {
+        const btn = document.getElementById('copyPreview');
+        const orig = btn.textContent;
+        btn.textContent = '✅ Copied!';
+        setTimeout(() => { btn.textContent = orig; }, 1800);
+      }).catch(() => {
+        const textarea = document.createElement('textarea');
+        textarea.value = raw;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        alert('Text copied');
+      });
+    }
+
+    const SAMPLE1 = `Intro
+Ebm | Cb | Abm | Ab/Bb Bb |
+Ebm | Cb | Abm | Ab/Bb Bb |
+Verse
+Ebm | Cb | Abm | Ab/Bb Bb |
+Ebm | Cb | Abm | Ab/Bb Bb |
+Chorus
+Ebm | Cb | Db | Ebm |
+Ebm | Cb | Db | Ebm |
+Outro
+Ebm ||`;
+
+    const SAMPLE2 = `Intro
+Gb | Ebm | Cb | Cb/Db |
+Gb | Ebm | Cb | Cb/Db |
+Verse
+Gb | Ebm    | Abm    | Cb/Db Db |
+Gb | Ebm Eb | Abm Db | Gb       |
+Chorus
+Cb Cbm | Bbm   Ebm       | Abm _  Cb/Db Db | Gb |
+Cb Cbm | Bbm _ Ebsus4 Eb | Abm Db          | Gb |
+Db |`;
+
+    const SAMPLE3 = `Intro
+Gb | Ebm7sus4 | Cmaj9 | Cb/Db |
+Verse 1
+Gb | Ebm _ _ G7 | Abm | Cb/Db Db |
+Pre-Chorus 1
+Cb Cbm | Bbm _ Ebsus4 Eb | Abm _ Cb/Db Db | Gb |
+Chorus 1
+Cb Cbm | Bbm   Ebm       | Abm _  Cb/Db Db | Gb |
+Cb Cbm | Bbm _ Ebsus4 Eb | Abm Db          | Gb |
+Bridge
+Dm _ _ G7 | C _ _ _ |
+Instrumental 1
+Gb | Ebm | Abm | Cb/Db |`;
+
+    const BEAT_EXAMPLE = `Intro
+Ebm7sus Eb7 Ab Bb |
+Cmaj9 |
+Ab/Bb |
+Ebm |
+Verse
+Ebm | Cb | Abm | Ab/Bb Bb |
+Ebm | Cb | Abm | Ab/Bb Bb |
+Chorus
+Ebm7sus | Cmaj9 | Ab/Bb | Ebm |
+Ebm | Cb | Db | Ebm |
+Outro
+Ebm ||`;
+
+    const LYRICS_EXAMPLE = `Intro
+C | G | Am | F |
+
+Verse 1
+C G | Am _ F | C _ _ G7 | C
+
+---
+[Optional Guitar Solo]
+C | G | Am | F |
+
+Chorus
+F | C | G | Am |
+
+---
+[Bridge with key change]
+Dm | G7 | C | Am |`;
+
+    const NUMBER_SHORTCUTS = `1
+C | G | Am | F |
+2
+C | G | Am | F |
+21
+C | G | Am | F |
+22
+C | G | Am | F |
+3
+C | G | Am | F |
+31
+C | G | Am | F |
+4
+C | G | Am | F |
+41
+C | G | Am | F |
+5
+C | G | Am | F |
+51
+C | G | Am | F |
+6
+C | G | Am | F |
+61
+C | G | Am | F |
+7
+C | G | Am | F |
+71
+C | G | Am | F |
+8
+C | G | Am | F |
+81
+C | G | Am | F |`;
+
+    document.getElementById('loadSample1').addEventListener('click', () => loadSample(SAMPLE1, 'loadSample1'));
+    document.getElementById('loadSample2').addEventListener('click', () => loadSample(SAMPLE2, 'loadSample2'));
+    document.getElementById('loadSample3').addEventListener('click', () => loadSample(SAMPLE3, 'loadSample3'));
+    document.getElementById('loadBeatExample').addEventListener('click', () => loadSample(BEAT_EXAMPLE, 'loadBeatExample'));
+    document.getElementById('loadLyricsExample').addEventListener('click', () => loadSample(LYRICS_EXAMPLE, 'loadLyricsExample'));
+    document.getElementById('loadNumberShortcuts').addEventListener('click', () => loadSample(NUMBER_SHORTCUTS, 'loadNumberShortcuts'));
+    document.getElementById('clearAll').addEventListener('click', clearAll);
+    document.getElementById('copyPreview').addEventListener('click', copyPreviewText);
+
+    inputEl.addEventListener('input', updatePreview);
+    updatePreview();
+  })();
+</script>
+</body>
+</html>
