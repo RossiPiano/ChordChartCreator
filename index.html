@@ -693,7 +693,10 @@
       font-size: 0.85rem;
     }
     .chord-line .cell .chord-item.empty {
-      display: none;
+      display: inline-block;
+      font-weight: 400;
+      padding: 1px 2px;
+      opacity: 0.6;
     }
     .chord-line .cell .chord-item.lyric {
       font-weight: 400;
@@ -771,16 +774,16 @@
     .chord-item.section-bridge { color: #8a6a9a; }
     .chord-item.section-instrumental { color: #5a5a5a; }
     .chord-item.section-outro { color: #6a8caf; }
-    .chord-item.empty.section-intro { display: none; }
-    .chord-item.empty.section-verse { display: none; }
-    .chord-item.empty.section-pre-chorus { display: none; }
-    .chord-item.empty.section-chorus { display: none; }
-    .chord-item.empty.section-post-chorus { display: none; }
-    .chord-item.empty.section-bridge { display: none; }
-    .chord-item.empty.section-instrumental { display: none; }
-    .chord-item.empty.section-outro { display: none; }
+    .chord-item.empty.section-intro { color: #6a8caf; opacity: 0.6; }
+    .chord-item.empty.section-verse { color: #5a8a5a; opacity: 0.6; }
+    .chord-item.empty.section-pre-chorus { color: #d4953a; opacity: 0.6; }
+    .chord-item.empty.section-chorus { color: #c45a4a; opacity: 0.6; }
+    .chord-item.empty.section-post-chorus { color: #8b6b4a; opacity: 0.6; }
+    .chord-item.empty.section-bridge { color: #8a6a9a; opacity: 0.6; }
+    .chord-item.empty.section-instrumental { color: #5a5a5a; opacity: 0.6; }
+    .chord-item.empty.section-outro { color: #6a8caf; opacity: 0.6; }
     .chord-item.section-custom { color: #888888; }
-    .chord-item.empty.section-custom { display: none; }
+    .chord-item.empty.section-custom { color: #888888; opacity: 0.6; }
     .section-block {
       margin: 3px 0 2px 0;
       padding: 1px 0;
@@ -2252,9 +2255,7 @@
             return;
         }
 
-        // Get song name if available - PRESERVE Thai and Unicode characters
         const songName = document.querySelector('.dropdown-item.active .song-name')?.textContent || 'chord-chart';
-        // Only remove characters that are illegal in filenames
         const sanitizedName = songName.replace(/[<>:"/\\|?*\x00-\x1f]/g, '').trim() || 'chord-chart';
         const timestamp = new Date().toISOString().slice(0,10);
         const fileName = `${sanitizedName}_${timestamp}.txt`;
@@ -2349,7 +2350,6 @@
             preview.style.width = '';
 
             const link = document.createElement('a');
-            // PRESERVE Thai and Unicode characters in filename
             const sanitizedName = songName.replace(/[<>:"/\\|?*\x00-\x1f]/g, '').trim() || 'chord-chart';
             const timestamp = new Date().toISOString().slice(0,19).replace(/[:-]/g, '');
             const fileName = `${sanitizedName}_${timestamp}.png`;
@@ -2408,7 +2408,6 @@
     resetTransposition();
 
     inputEl.addEventListener('input', function() {
-      // When user manually edits, update originalText
       originalText = inputEl.value;
       transposeSemitones = 0;
       transposeInfo.textContent = '0';
