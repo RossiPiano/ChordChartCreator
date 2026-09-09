@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🎸 Chord Chart Creator</title>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
     * {
       box-sizing: border-box;
@@ -16,7 +17,7 @@
       overflow: hidden;
     }
     body {
-      background: #f2f4f8;
+      background: #d4c5a0;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -27,17 +28,18 @@
       width: 100%;
       height: 100%;
       max-height: 98vh;
-      background: white;
+      background: #f5ede0;
       border-radius: 24px;
-      box-shadow: 0 16px 32px -12px rgba(0,0,0,0.2);
+      box-shadow: 0 16px 32px -12px rgba(0,0,0,0.3);
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      border: 1px solid #dcc9b0;
     }
     .toolbar {
-      background: #fafbfc;
+      background: #e8dccc;
       padding: 8px 16px;
-      border-bottom: 1px solid #e6e9f0;
+      border-bottom: 2px solid #dcc9b0;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -49,11 +51,12 @@
       align-items: center;
       gap: 8px;
       margin-right: auto;
+      flex-wrap: wrap;
     }
     .toolbar h1 {
       font-size: 0.9rem;
       font-weight: 600;
-      color: #1a1e2b;
+      color: #5c4033;
       letter-spacing: -0.01em;
       display: flex;
       align-items: center;
@@ -66,13 +69,13 @@
       align-items: center;
     }
     .btn {
-      background: white;
-      border: 1px solid #d0d7e2;
-      padding: 3px 8px;
+      background: #dcc9b0;
+      border: 1px solid #c4ad92;
+      padding: 3px 10px;
       border-radius: 40px;
       font-size: 0.6rem;
       font-weight: 500;
-      color: #1f2937;
+      color: #3d2b1f;
       cursor: pointer;
       transition: all 0.15s ease;
       display: inline-flex;
@@ -80,39 +83,48 @@
       gap: 2px;
     }
     .btn:hover {
-      background: #f1f4f9;
-      border-color: #b0bcca;
+      background: #c4ad92;
+      border-color: #b0987a;
     }
     .btn-success {
-      background: #0b7e4b;
-      border-color: #0b7e4b;
+      background: #8b6b4a;
+      border-color: #7a5d3f;
       color: white;
     }
     .btn-success:hover {
-      background: #0e9258;
-      border-color: #0e9258;
+      background: #7a5d3f;
+      border-color: #6b4f35;
+    }
+    .btn-success:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
     .btn-outline {
       background: transparent;
-      border: 1px solid #d0d7e2;
+      border: 1px solid #c4ad92;
+      color: #5c4033;
+    }
+    .btn-outline:hover {
+      background: #dcc9b0;
+      border-color: #b0987a;
     }
     .btn.active {
-      background: #1a1e2b;
-      border-color: #1a1e2b;
+      background: #5c4033;
+      border-color: #4a3328;
       color: white;
     }
     .btn.active:hover {
-      background: #2d3345;
-      border-color: #2d3345;
+      background: #4a3328;
+      border-color: #3d2b1f;
     }
     .btn-toggle {
-      background: transparent;
-      border: 1px solid #d0d7e2;
-      padding: 3px 8px;
+      background: #dcc9b0;
+      border: 1px solid #c4ad92;
+      padding: 3px 10px;
       border-radius: 40px;
       font-size: 0.6rem;
       font-weight: 500;
-      color: #1f2937;
+      color: #3d2b1f;
       cursor: pointer;
       transition: all 0.15s ease;
       display: inline-flex;
@@ -121,48 +133,315 @@
       white-space: nowrap;
     }
     .btn-toggle:hover {
-      background: #f1f4f9;
-      border-color: #b0bcca;
+      background: #c4ad92;
+      border-color: #b0987a;
     }
     .btn-toggle.active {
-      background: #1a1e2b;
-      border-color: #1a1e2b;
+      background: #5c4033;
+      border-color: #4a3328;
       color: white;
     }
     .btn-toggle.active:hover {
-      background: #2d3345;
-      border-color: #2d3345;
+      background: #4a3328;
+      border-color: #3d2b1f;
+    }
+    .btn-clear {
+      background: #e8dccc;
+      border: 1px solid #c4ad92;
+      padding: 3px 10px;
+      border-radius: 40px;
+      font-size: 0.6rem;
+      font-weight: 500;
+      color: #5c4033;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .btn-clear:hover {
+      background: #dcc9b0;
+      border-color: #b0987a;
+    }
+    .btn-transpose {
+      background: #8b6b4a;
+      border-color: #7a5d3f;
+      color: white;
+      font-weight: 700;
+      min-width: 28px;
+      justify-content: center;
+      padding: 3px 6px;
+    }
+    .btn-transpose:hover {
+      background: #7a5d3f;
+      border-color: #6b4f35;
+    }
+    .btn-transpose:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .transpose-info {
+      font-size: 0.55rem;
+      color: #5c4033;
+      background: #dcc9b0;
+      padding: 2px 8px;
+      border-radius: 40px;
+      font-weight: 500;
+      min-width: 20px;
+      text-align: center;
+    }
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background-color: #f5ede0;
+      min-width: 220px;
+      max-height: 350px;
+      overflow-y: auto;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+      border-radius: 8px;
+      border: 1px solid #dcc9b0;
+      z-index: 100;
+      padding: 4px 0;
+      margin-top: 2px;
+    }
+    .dropdown-content.show {
+      display: block;
+    }
+    .dropdown-content .dropdown-item {
+      padding: 6px 14px;
+      font-size: 0.6rem;
+      font-weight: 500;
+      color: #5c4033;
+      cursor: pointer;
+      transition: background 0.1s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      position: relative;
+    }
+    .dropdown-content .dropdown-item:hover {
+      background: #ece0cf;
+    }
+    .dropdown-content .dropdown-item.active {
+      background: #5c4033;
+      color: white;
+    }
+    .dropdown-content .dropdown-item.active:hover {
+      background: #4a3328;
+    }
+    .dropdown-content .dropdown-item.song-item {
+      padding-left: 8px;
+      font-size: 0.55rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .dropdown-content .dropdown-item.song-item .song-name {
+      flex: 1;
+      padding-left: 8px;
+    }
+    .dropdown-content .dropdown-item.song-item .song-name::before {
+      content: '🎵 ';
+    }
+    .dropdown-content .dropdown-item.song-item .remove-btn {
+      background: none;
+      border: none;
+      color: #c45a4a;
+      font-size: 0.7rem;
+      cursor: pointer;
+      padding: 0 4px;
+      font-weight: 600;
+      opacity: 0.6;
+      transition: opacity 0.15s ease;
+    }
+    .dropdown-content .dropdown-item.song-item .remove-btn:hover {
+      opacity: 1;
+    }
+    .dropdown-content .dropdown-item.folder-item {
+      padding-left: 8px;
+      font-weight: 600;
+      font-size: 0.6rem;
+      color: #8b6b4a;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .dropdown-content .dropdown-item.folder-item:hover {
+      background: #ece0cf;
+    }
+    .dropdown-content .dropdown-item.folder-item::before {
+      content: '📁 ';
+    }
+    .dropdown-content .dropdown-item.folder-item .folder-arrow {
+      font-size: 0.5rem;
+      color: #b0987a;
+      margin-left: 8px;
+    }
+    .dropdown-divider {
+      border-top: 1px solid #dcc9b0;
+      margin: 4px 8px;
+    }
+    .dropdown-label {
+      padding: 4px 14px 2px 14px;
+      font-size: 0.5rem;
+      font-weight: 600;
+      color: #b0987a;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .dropdown-content::-webkit-scrollbar {
+      width: 5px;
+    }
+    .dropdown-content::-webkit-scrollbar-track {
+      background: #e8dccc;
+      border-radius: 4px;
+    }
+    .dropdown-content::-webkit-scrollbar-thumb {
+      background: #c4ad92;
+      border-radius: 4px;
+    }
+    .dropdown-content::-webkit-scrollbar-thumb:hover {
+      background: #b0987a;
+    }
+    .subfolder-popup {
+      display: none;
+      position: absolute;
+      left: 100%;
+      top: -4px;
+      background-color: #f5ede0;
+      min-width: 180px;
+      max-height: 300px;
+      overflow-y: auto;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+      border-radius: 8px;
+      border: 1px solid #dcc9b0;
+      z-index: 200;
+      padding: 4px 0;
+      margin-left: 2px;
+    }
+    .subfolder-popup.show {
+      display: block;
+    }
+    .subfolder-popup .dropdown-item {
+      padding: 6px 14px;
+      font-size: 0.55rem;
+      font-weight: 500;
+      color: #5c4033;
+      cursor: pointer;
+      transition: background 0.1s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      position: relative;
+    }
+    .subfolder-popup .dropdown-item:hover {
+      background: #ece0cf;
+    }
+    .subfolder-popup .dropdown-item.song-item {
+      padding-left: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .subfolder-popup .dropdown-item.song-item .song-name {
+      flex: 1;
+      padding-left: 8px;
+    }
+    .subfolder-popup .dropdown-item.song-item .song-name::before {
+      content: '🎵 ';
+    }
+    .subfolder-popup .dropdown-item.song-item .remove-btn {
+      background: none;
+      border: none;
+      color: #c45a4a;
+      font-size: 0.7rem;
+      cursor: pointer;
+      padding: 0 4px;
+      font-weight: 600;
+      opacity: 0.6;
+      transition: opacity 0.15s ease;
+    }
+    .subfolder-popup .dropdown-item.song-item .remove-btn:hover {
+      opacity: 1;
+    }
+    .subfolder-popup .dropdown-item.folder-item {
+      padding-left: 8px;
+      font-weight: 600;
+      color: #8b6b4a;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .subfolder-popup .dropdown-item.folder-item::before {
+      content: '📂 ';
+    }
+    .subfolder-popup .dropdown-item.folder-item .folder-arrow {
+      font-size: 0.5rem;
+      color: #b0987a;
+      margin-left: 8px;
+    }
+    .subfolder-popup::-webkit-scrollbar {
+      width: 5px;
+    }
+    .subfolder-popup::-webkit-scrollbar-track {
+      background: #e8dccc;
+      border-radius: 4px;
+    }
+    .subfolder-popup::-webkit-scrollbar-thumb {
+      background: #c4ad92;
+      border-radius: 4px;
+    }
+    .subfolder-popup::-webkit-scrollbar-thumb:hover {
+      background: #b0987a;
+    }
+    .drop-zone {
+      position: relative;
+    }
+    .drop-zone.drag-over textarea {
+      border-color: #8b6b4a;
+      background-color: #f8f0e8;
+      box-shadow: 0 0 0 3px rgba(139, 107, 74, 0.2);
+    }
+    .drop-zone .drop-message {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(245, 237, 224, 0.95);
+      padding: 20px 30px;
+      border-radius: 12px;
+      border: 2px dashed #8b6b4a;
+      color: #5c4033;
+      font-size: 0.9rem;
+      font-weight: 600;
+      pointer-events: none;
+      z-index: 20;
+      text-align: center;
+    }
+    .drop-zone.drag-over .drop-message {
+      display: block;
     }
     .editor-wrapper {
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
       gap: 0;
       flex: 1;
       min-height: 0;
       height: 100%;
       transition: all 0.3s ease;
     }
-    .input-area {
-      width: 30%;
-      padding: 8px 10px 8px 14px;
-      background: #ffffff;
-      border-right: 1px solid #e6e9f0;
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-      transition: all 0.3s ease;
-      overflow: hidden;
-    }
-    .input-area.collapsed {
-      width: 0;
-      padding: 0;
-      border-right: none;
-      min-width: 0;
-    }
     .preview-area {
-      width: 70%;
-      background: #f9fafc;
+      width: 100%;
+      background: #f5ede0;
       padding: 8px 16px 12px 16px;
       flex: 1;
       min-height: 0;
@@ -171,82 +450,156 @@
       transition: all 0.3s ease;
     }
     .preview-area.expanded {
+      height: 100%;
+    }
+    .input-area {
       width: 100%;
+      padding: 8px 14px 10px 14px;
+      background: #f5ede0;
+      border-top: 2px solid #dcc9b0;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 60px;
+      max-height: 60%;
+      height: 200px;
+      transition: all 0.3s ease;
+      overflow: hidden;
+      position: relative;
+    }
+    .input-area.collapsed {
+      max-height: 0;
+      padding: 0;
+      border-top: none;
+      min-height: 0;
+      height: 0;
+    }
+    .resize-handle {
+      position: absolute;
+      top: -4px;
+      left: 0;
+      right: 0;
+      height: 8px;
+      cursor: ns-resize;
+      z-index: 10;
+      background: transparent;
+      transition: background 0.15s ease;
+    }
+    .resize-handle:hover {
+      background: rgba(92, 64, 51, 0.1);
+    }
+    .resize-handle::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 3px;
+      background: #c4ad92;
+      border-radius: 2px;
+      opacity: 0.5;
+      transition: opacity 0.15s ease;
+    }
+    .resize-handle:hover::after {
+      opacity: 1;
+      background: #8b6b4a;
+    }
+    .drop-zone {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      position: relative;
     }
     textarea {
       width: 100%;
       flex: 1;
-      border: 1px solid #d8dee9;
+      border: 1px solid #dcc9b0;
       border-radius: 10px;
       padding: 8px 12px;
       font-size: 0.7rem;
       line-height: 1.5;
       font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
       resize: none;
-      background: #fefefe;
-      color: #1e2533;
-      transition: border 0.1s;
+      background: #ffffff;
+      color: #3d2b1f;
+      transition: border 0.1s, background-color 0.2s;
       tab-size: 2;
       outline: none;
-      min-height: 80px;
+      min-height: 50px;
     }
     textarea:focus {
-      border-color: #6c7b9a;
-      box-shadow: 0 0 0 3px rgba(28, 46, 82, 0.08);
+      border-color: #8b6b4a;
+      box-shadow: 0 0 0 3px rgba(139, 107, 74, 0.15);
+    }
+    .drop-zone .drop-message {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(245, 237, 224, 0.95);
+      padding: 20px 30px;
+      border-radius: 12px;
+      border: 2px dashed #8b6b4a;
+      color: #5c4033;
+      font-size: 0.9rem;
+      font-weight: 600;
+      pointer-events: none;
+      z-index: 20;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .drop-zone.drag-over .drop-message {
+      display: block;
+    }
+    .drop-zone.drag-over textarea {
+      border-color: #8b6b4a;
+      background-color: #f8f0e8;
+      box-shadow: 0 0 0 3px rgba(139, 107, 74, 0.2);
     }
     .chord-preview {
-      background: white;
+      background: #ffffff;
       border-radius: 12px;
       padding: 10px 16px;
       flex: 1;
       min-height: 80px;
-      overflow: hidden;
-      border: 1px solid #e2e7ef;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+      overflow-y: auto;
+      overflow-x: hidden;
+      border: 1px solid #dcc9b0;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.04);
       font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
       line-height: 1.9;
-      color: #151b26;
+      color: #3d2b1f;
     }
     .chord-preview .content-wrapper {
       display: block;
       width: 100%;
     }
     .empty-preview {
-      color: #8d9bb0;
+      color: #b0987a;
       font-style: italic;
       font-weight: 400;
+      text-align: center;
+      line-height: 2.2;
+      padding: 20px 0;
     }
-
+    .empty-preview .main-text {
+      font-size: 1rem;
+      color: #5c4033;
+    }
+    .empty-preview .sub-text {
+      font-size: 0.85rem;
+      color: #b0987a;
+    }
     @media (max-width: 720px) {
-      .editor-wrapper {
-        flex-direction: column-reverse;
-      }
       .input-area {
-        width: 100%;
-        border-right: none;
-        border-top: 1px solid #e6e9f0;
-        border-bottom: none;
-        height: 35%;
-        min-height: 100px;
-        padding: 8px 14px 10px 14px;
-      }
-      .input-area.collapsed {
-        height: 0;
-        padding: 0;
-        border-top: none;
-        min-height: 0;
-      }
-      .preview-area {
-        width: 100%;
-        height: 65%;
-        min-height: 100px;
-        padding: 8px 14px 10px 14px;
-      }
-      .preview-area.expanded {
-        height: 100%;
+        max-height: 50%;
+        height: 160px;
       }
       textarea {
-        min-height: 60px;
+        min-height: 40px;
         font-size: 0.65rem;
       }
       .chord-preview {
@@ -259,33 +612,63 @@
       }
       .btn {
         font-size: 0.55rem;
-        padding: 2px 6px;
+        padding: 2px 8px;
+      }
+      .dropdown-content {
+        min-width: 160px;
+        max-height: 250px;
+      }
+      .dropdown-content .dropdown-item {
+        font-size: 0.55rem;
+        padding: 5px 12px;
+      }
+      .subfolder-popup {
+        min-width: 150px;
+        max-height: 200px;
+        left: 0;
+        top: 100%;
+      }
+      .drop-zone .drop-message {
+        font-size: 0.75rem;
+        padding: 15px 20px;
+      }
+      .empty-preview .main-text {
+        font-size: 0.85rem;
+      }
+      .empty-preview .sub-text {
+        font-size: 0.75rem;
       }
     }
-
-    /* GRID: Each bar is a flex item with equal width */
     .chord-line {
       display: flex;
       flex-wrap: nowrap;
       width: 100%;
       gap: 0;
     }
-    /* Each bar takes equal space */
     .chord-line .bar {
       display: flex;
       flex-wrap: nowrap;
       flex: 1 1 0;
       min-width: 0;
-      border-right: 1px solid #eef2f7;
+      padding-right: 6px;
       position: relative;
     }
-    .chord-line .bar:last-child {
-      border-right: none;
+    .chord-line .bar.empty-bar {
+      visibility: hidden;
+    }
+    .chord-line .bar.empty-bar .bar-inner {
+      visibility: hidden;
+    }
+    .chord-line .bar.empty-bar::after {
+      display: none;
     }
     .chord-line .bar .bar-inner {
       display: flex;
       flex-wrap: nowrap;
       width: 100%;
+      padding-right: 4px;
+      gap: 2px;
+      justify-content: flex-start;
     }
     .chord-line .cell {
       display: inline-block;
@@ -293,9 +676,9 @@
       vertical-align: middle;
       text-align: left;
       overflow: visible;
-      flex: 0 0 25%;
-      min-width: 25%;
-      max-width: 25%;
+      flex: 0 0 calc(100% / var(--num-cells));
+      min-width: calc(100% / var(--num-cells));
+      max-width: calc(100% / var(--num-cells));
     }
     .chord-line .cell .chord-item {
       display: inline-block;
@@ -307,31 +690,44 @@
       letter-spacing: 0.01em;
       max-width: 100%;
       overflow: visible;
+      font-size: 0.85rem;
     }
     .chord-line .cell .chord-item.empty {
-      font-weight: 300;
+      display: none;
     }
     .chord-line .cell .chord-item.lyric {
       font-weight: 400;
-      color: #000000;
+      color: #3d2b1f;
     }
-    /* Bar line inside the bar at the end */
     .chord-line .bar .barline {
+      display: none;
+    }
+    .chord-line .bar:not(.empty-bar)::after {
+      content: '';
       position: absolute;
-      right: -1px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #000000;
-      font-weight: 700;
-      font-size: 0.85rem;
-      opacity: 0.8;
-      line-height: 1;
-      z-index: 1;
+      right: 0;
+      top: 0;
+      height: 100%;
+      width: 2px;
+      background-color: #c4ad92;
+      z-index: 2;
+      pointer-events: none;
     }
-    .chord-line .bar .barline.double {
-      letter-spacing: -2px;
+    .chord-line .bar:not(.empty-bar) .bar-inner {
+      padding-right: 6px;
     }
-
+    .chord-line .bar:last-child:not(.empty-bar)::after {
+      display: none;
+    }
+    .chord-line:hover .bar:not(.empty-bar) {
+      background-color: #f8f0e8;
+    }
+    .chord-line:hover .bar::after {
+      background-color: #c4ad92 !important;
+    }
+    .chord-line:hover .bar .cell {
+      background-color: transparent;
+    }
     .lyrics-line {
       display: block;
       width: 100%;
@@ -344,9 +740,8 @@
       white-space: nowrap;
       text-align: left;
       min-height: 18px;
-      color: #000000;
+      color: #3d2b1f;
     }
-
     .hr-line {
       display: block;
       width: 100%;
@@ -358,38 +753,34 @@
       width: 100%;
       height: 0;
       border: none;
-      border-top: 2px solid #c5cedb;
+      border-top: 2px solid #dcc9b0;
       margin: 0;
       padding: 0;
     }
-
     .empty-line {
       display: block;
       width: 100%;
       padding: 4px 0;
       height: 24px;
     }
-
-    .chord-item.section-intro { color: #87CEEB; }
-    .chord-item.section-verse { color: #2E8B57; }
-    .chord-item.section-pre-chorus { color: #FF8C00; }
-    .chord-item.section-chorus { color: #DC143C; }
-    .chord-item.section-post-chorus { color: #8B4513; }
-    .chord-item.section-bridge { color: #8A2BE2; }
-    .chord-item.section-instrumental { color: #000000; }
-    .chord-item.section-outro { color: #87CEEB; }
-    .chord-item.empty.section-intro { color: #87CEEB; }
-    .chord-item.empty.section-verse { color: #2E8B57; }
-    .chord-item.empty.section-pre-chorus { color: #FF8C00; }
-    .chord-item.empty.section-chorus { color: #DC143C; }
-    .chord-item.empty.section-post-chorus { color: #8B4513; }
-    .chord-item.empty.section-bridge { color: #8A2BE2; }
-    .chord-item.empty.section-instrumental { color: #000000; }
-    .chord-item.empty.section-outro { color: #87CEEB; }
-
+    .chord-item.section-intro { color: #6a8caf; }
+    .chord-item.section-verse { color: #5a8a5a; }
+    .chord-item.section-pre-chorus { color: #d4953a; }
+    .chord-item.section-chorus { color: #c45a4a; }
+    .chord-item.section-post-chorus { color: #8b6b4a; }
+    .chord-item.section-bridge { color: #8a6a9a; }
+    .chord-item.section-instrumental { color: #5a5a5a; }
+    .chord-item.section-outro { color: #6a8caf; }
+    .chord-item.empty.section-intro { display: none; }
+    .chord-item.empty.section-verse { display: none; }
+    .chord-item.empty.section-pre-chorus { display: none; }
+    .chord-item.empty.section-chorus { display: none; }
+    .chord-item.empty.section-post-chorus { display: none; }
+    .chord-item.empty.section-bridge { display: none; }
+    .chord-item.empty.section-instrumental { display: none; }
+    .chord-item.empty.section-outro { display: none; }
     .chord-item.section-custom { color: #888888; }
-    .chord-item.empty.section-custom { color: #888888; }
-
+    .chord-item.empty.section-custom { display: none; }
     .section-block {
       margin: 3px 0 2px 0;
       padding: 1px 0;
@@ -403,26 +794,80 @@
       color: #FFFFFF;
       display: inline-block;
     }
+    .section-block .section .section-name {
+      font-weight: 700;
+    }
+    .section-block .section .section-extra {
+      font-weight: 400;
+      opacity: 0.9;
+    }
     .section-block .section-parens {
       color: rgba(255,255,255,0.7);
       margin-left: 3px;
       font-weight: 400;
     }
-    .section-block.section-intro { background-color: #87CEEB; }
-    .section-block.section-verse { background-color: #2E8B57; }
-    .section-block.section-pre-chorus { background-color: #FF8C00; }
-    .section-block.section-chorus { background-color: #DC143C; }
-    .section-block.section-post-chorus { background-color: #8B4513; }
-    .section-block.section-bridge { background-color: #8A2BE2; }
-    .section-block.section-instrumental { background-color: #000000; }
-    .section-block.section-outro { background-color: #87CEEB; }
+    .section-block.section-intro { background-color: #6a8caf; }
+    .section-block.section-verse { background-color: #5a8a5a; }
+    .section-block.section-pre-chorus { background-color: #d4953a; }
+    .section-block.section-chorus { background-color: #c45a4a; }
+    .section-block.section-post-chorus { background-color: #8b6b4a; }
+    .section-block.section-bridge { background-color: #8a6a9a; }
+    .section-block.section-instrumental { background-color: #5a5a5a; }
+    .section-block.section-outro { background-color: #6a8caf; }
     .section-block.section-custom { background-color: #888888; }
-
-    .chord-line:hover .cell {
-      background: #f8faff;
+    .chord-line:hover .bar:not(.empty-bar) {
+      background: #f8f0e8;
     }
     .lyrics-line:hover {
-      background: #f8faff;
+      background: #f8f0e8;
+    }
+    /* Key selector styles */
+    .key-selector {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.6rem;
+      color: #5c4033;
+      font-weight: 500;
+      background: #dcc9b0;
+      padding: 2px 8px 2px 10px;
+      border-radius: 40px;
+    }
+    .key-selector select {
+      background: #f5ede0;
+      border: 1px solid #c4ad92;
+      border-radius: 40px;
+      padding: 1px 6px;
+      font-size: 0.55rem;
+      font-weight: 500;
+      color: #3d2b1f;
+      outline: none;
+      cursor: pointer;
+    }
+    .key-selector select:hover {
+      border-color: #8b6b4a;
+    }
+    .key-selector select:focus {
+      border-color: #8b6b4a;
+      box-shadow: 0 0 0 2px rgba(139, 107, 74, 0.2);
+    }
+    .key-mode-select {
+      background: #f5ede0;
+      border: 1px solid #c4ad92;
+      border-radius: 40px;
+      padding: 1px 6px;
+      font-size: 0.5rem;
+      font-weight: 500;
+      color: #3d2b1f;
+      outline: none;
+      cursor: pointer;
+    }
+    .key-mode-select:hover {
+      border-color: #8b6b4a;
+    }
+    .key-mode-select:focus {
+      border-color: #8b6b4a;
+      box-shadow: 0 0 0 2px rgba(139, 107, 74, 0.2);
     }
   </style>
 </head>
@@ -431,39 +876,60 @@
   <div class="toolbar">
     <div class="toolbar-left">
       <h1>🎸 Chord Chart Creator</h1>
-      <button class="btn-toggle" id="toggleEditor">◀ Hide Editor</button>
-    </div>
-    <div class="btn-group">
-      <button class="btn btn-outline" id="loadSample1">Sample 1</button>
-      <button class="btn btn-outline" id="loadSample2">Sample 2</button>
-      <button class="btn btn-outline" id="loadSample3">Test</button>
-      <button class="btn btn-outline" id="loadBeatExample">Beat Demo</button>
-      <button class="btn btn-outline" id="loadLyricsExample">Lyrics Demo</button>
-      <button class="btn btn-outline" id="loadNumberShortcuts">Number Shortcuts</button>
-      <button class="btn btn-outline" id="clearAll">Clear</button>
-      <button class="btn btn-success" id="copyPreview">Copy</button>
+      <button class="btn-toggle" id="toggleEditor">▲ Hide Editor</button>
+      <div class="key-selector">
+        <span>Key:</span>
+        <select id="keySelect">
+          <option value="C">C</option>
+          <option value="G">G</option>
+          <option value="D">D</option>
+          <option value="A">A</option>
+          <option value="E">E</option>
+          <option value="B">B</option>
+          <option value="F#">F#</option>
+          <option value="Gb">Gb</option>
+          <option value="Db">Db</option>
+          <option value="Ab">Ab</option>
+          <option value="Eb">Eb</option>
+          <option value="Bb">Bb</option>
+          <option value="F" selected>F</option>
+        </select>
+        <select class="key-mode-select" id="keyModeSelect">
+          <option value="major">Major</option>
+          <option value="minor" selected>Minor</option>
+        </select>
+        <span style="font-size:0.5rem; opacity:0.7;" id="keyDisplay">(Dm)</span>
+      </div>
+      <button class="btn-transpose" id="transposeDown" title="Transpose down a semitone">♭</button>
+      <span class="transpose-info" id="transposeInfo">0</span>
+      <button class="btn-transpose" id="transposeUp" title="Transpose up a semitone">♯</button>
+      <div class="dropdown">
+        <button class="btn btn-outline" id="dropdownToggle">📄 Songs ▼</button>
+        <div class="dropdown-content" id="dropdownContent">
+          <div class="dropdown-label" id="songsLabel">📂 LOAD/CLEAR SONGS</div>
+          <div class="dropdown-item" id="selectFolder" style="color: #8b6b4a; font-weight: 600;">📁 Select Song Folder</div>
+          <div class="dropdown-item" id="loadSingleFile" style="color: #8b6b4a; font-weight: 600;">📄 Open 1 Song File</div>
+          <div class="dropdown-item" id="clearStoredSongs" style="color: #5c4033; font-weight: 500;">🗑️ Clear Song List Below</div>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-label">🎵 SONG LIST</div>
+          <div id="songsList"></div>
+        </div>
+      </div>
+      <button class="btn btn-success" id="exportPNG">📷 Export PNG</button>
+      <button class="btn btn-success" id="saveTXT">💾 Save TXT</button>
     </div>
   </div>
-
   <div class="editor-wrapper">
-    <div class="input-area" id="inputArea">
-      <textarea id="chartInput" spellcheck="false">Intro
-Ebm7sus Eb7 Ab Bb |
-Cmaj9 |
-Ab/Bb |
-Ebm |
-Verse
-Ebm | Cb | Abm | Ab/Bb Bb |
-Ebm | Cb | Abm | Ab/Bb Bb |
-Chorus
-Ebm7sus | Cmaj9 | Ab/Bb | Ebm |
-Ebm | Cb | Db | Ebm |
-Outro
-Ebm ||</textarea>
-    </div>
     <div class="preview-area" id="previewArea">
       <div id="previewContainer" class="chord-preview">
         <div class="content-wrapper" id="previewContent"></div>
+      </div>
+    </div>
+    <div class="input-area" id="inputArea">
+      <div class="resize-handle" id="resizeHandle"></div>
+      <div class="drop-zone" id="dropZone">
+        <div class="drop-message">📂 Drop .txt files here</div>
+        <textarea id="chartInput" spellcheck="false"></textarea>
       </div>
     </div>
   </div>
@@ -476,23 +942,785 @@ Ebm ||</textarea>
     const inputArea = document.getElementById('inputArea');
     const previewArea = document.getElementById('previewArea');
     const toggleBtn = document.getElementById('toggleEditor');
+    const resizeHandle = document.getElementById('resizeHandle');
+    const dropdownToggle = document.getElementById('dropdownToggle');
+    const dropdownContent = document.getElementById('dropdownContent');
+    const songsList = document.getElementById('songsList');
+    const dropZone = document.getElementById('dropZone');
+    const transposeUpBtn = document.getElementById('transposeUp');
+    const transposeDownBtn = document.getElementById('transposeDown');
+    const transposeInfo = document.getElementById('transposeInfo');
+    const keySelect = document.getElementById('keySelect');
+    const keyModeSelect = document.getElementById('keyModeSelect');
+    const keyDisplay = document.getElementById('keyDisplay');
 
     let currentSection = '';
     let activeButton = null;
     let isEditorCollapsed = false;
+    let isResizing = false;
+    let startY = 0;
+    let startHeight = 0;
+    let transposeSemitones = 0;
+    let currentKey = 'Dm';
+    let currentMode = 'minor';
+    let originalText = '';
 
-    function setActiveButton(buttonId) {
-      document.querySelectorAll('.btn-group .btn').forEach(btn => {
-        btn.classList.remove('active');
+    // Chord transpose functions - with key limiting
+    const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+    const NOTE_MAP = {
+      'C': 0, 'B#': 0,
+      'C#': 1, 'Db': 1,
+      'D': 2,
+      'D#': 3, 'Eb': 3,
+      'E': 4, 'Fb': 4,
+      'F': 5, 'E#': 5,
+      'F#': 6, 'Gb': 6,
+      'G': 7,
+      'G#': 8, 'Ab': 8,
+      'A': 9,
+      'A#': 10, 'Bb': 10,
+      'B': 11, 'Cb': 11
+    };
+
+    // Valid keys (24-key list)
+    const VALID_MAJOR_KEYS = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'Gb', 'Db', 'Ab', 'Eb', 'Bb', 'F'];
+    const VALID_MINOR_KEYS = ['Am', 'Em', 'Bm', 'F#m', 'C#m', 'G#m', 'D#m', 'Ebm', 'Bbm', 'Fm', 'Cm', 'Gm', 'Dm'];
+    const VALID_ROOTS = [...VALID_MAJOR_KEYS, ...VALID_MINOR_KEYS];
+
+    const MINOR_KEY_MAP = {
+      'C': 'Am', 'G': 'Em', 'D': 'Bm', 'A': 'F#m', 'E': 'C#m', 'B': 'G#m',
+      'F#': 'D#m', 'Gb': 'Ebm', 'Db': 'Bbm', 'Ab': 'Fm', 'Eb': 'Cm', 'Bb': 'Gm', 'F': 'Dm'
+    };
+
+    function updateKeyDisplay() {
+      const majorRoot = keySelect.value;
+      const minorRoot = MINOR_KEY_MAP[majorRoot] || 'Am';
+      const displayKey = currentMode === 'minor' ? minorRoot : majorRoot;
+      keyDisplay.textContent = `(${displayKey})`;
+    }
+
+    function getCurrentKey() {
+      const majorRoot = keySelect.value;
+      if (currentMode === 'minor') {
+        return MINOR_KEY_MAP[majorRoot] || majorRoot;
+      }
+      return majorRoot;
+    }
+
+    // Key selector change handler
+    keySelect.addEventListener('change', function() {
+      currentKey = getCurrentKey();
+      updateKeyDisplay();
+      resetTransposition();
+    });
+
+    keyModeSelect.addEventListener('change', function() {
+      currentMode = this.value;
+      currentKey = getCurrentKey();
+      updateKeyDisplay();
+      resetTransposition();
+    });
+
+    // Key-based transposition - preserves interval relationships
+    function transposeChordWithKey(chord, semitones, key) {
+      if (!chord || chord === '_' || chord === '') return chord;
+      if (semitones === 0) return chord;
+
+      const match = chord.match(/^([A-G][#b]?)(.*)$/);
+      if (!match) return chord;
+
+      const root = match[1];
+      const rest = match[2] || '';
+
+      const keyIndex = NOTE_MAP[key];
+      const rootIndex = NOTE_MAP[root];
+
+      if (keyIndex === undefined || rootIndex === undefined) return chord;
+
+      let interval = (rootIndex - keyIndex + 12) % 12;
+      let newKeyIndex = (keyIndex + semitones + 12) % 12;
+
+      const validKeys = VALID_ROOTS.filter(r => NOTE_MAP[r] === newKeyIndex);
+      if (validKeys.length === 0) return chord;
+
+      const keyHasSharp = key.includes('#');
+      const keyHasFlat = key.includes('b');
+
+      let newKey;
+      if (keyHasSharp) {
+        newKey = validKeys.find(r => r.includes('#'));
+      } else if (keyHasFlat) {
+        newKey = validKeys.find(r => r.includes('b'));
+      } else {
+        newKey = validKeys.find(r => !r.includes('#') && !r.includes('b'));
+      }
+      newKey = newKey || validKeys[0];
+
+      const newKeyIndexActual = NOTE_MAP[newKey];
+      let newRootIndex = (newKeyIndexActual + interval) % 12;
+
+      const validRoots = VALID_ROOTS.filter(r => NOTE_MAP[r] === newRootIndex);
+      if (validRoots.length === 0) return chord;
+
+      const originalHasSharp = root.includes('#');
+      const originalHasFlat = root.includes('b');
+
+      let newRoot;
+      if (originalHasSharp) {
+        newRoot = validRoots.find(r => r.includes('#'));
+      } else if (originalHasFlat) {
+        newRoot = validRoots.find(r => r.includes('b'));
+      } else {
+        newRoot = validRoots.find(r => !r.includes('#') && !r.includes('b'));
+      }
+      newRoot = newRoot || validRoots[0];
+
+      return newRoot + rest;
+    }
+
+    function transposeText(text, semitones, key) {
+      if (semitones === 0) return text;
+
+      const lines = text.split('\n');
+      const transposedLines = lines.map(line => {
+        const tokens = line.split(/(\s+)/);
+        return tokens.map(token => {
+          if (token.match(/^[A-G][#b]?[A-Za-z0-9#b/]*$/)) {
+            if (token.includes('/')) {
+              const parts = token.split('/');
+              const transposedParts = parts.map(part => transposeChordWithKey(part, semitones, key));
+              return transposedParts.join('/');
+            }
+            return transposeChordWithKey(token, semitones, key);
+          }
+          return token;
+        }).join('');
       });
-      if (buttonId) {
-        const btn = document.getElementById(buttonId);
-        if (btn) {
-          btn.classList.add('active');
-          activeButton = buttonId;
+
+      return transposedLines.join('\n');
+    }
+
+    function applyTransposition() {
+      const key = getCurrentKey();
+
+      if (transposeSemitones === 0) {
+        inputEl.value = originalText;
+      } else {
+        inputEl.value = transposeText(originalText, transposeSemitones, key);
+      }
+      updatePreview();
+      transposeInfo.textContent = transposeSemitones;
+    }
+
+    function transposeUp() {
+      if (transposeSemitones >= 6) {
+        alert('Maximum transposition is +6 semitones (up a tritone)');
+        return;
+      }
+      transposeSemitones++;
+      applyTransposition();
+    }
+
+    function transposeDown() {
+      if (transposeSemitones <= -6) {
+        alert('Maximum transposition is -6 semitones (down a tritone)');
+        return;
+      }
+      transposeSemitones--;
+      applyTransposition();
+    }
+
+    function resetTransposition() {
+      transposeSemitones = 0;
+      transposeInfo.textContent = '0';
+      if (originalText) {
+        inputEl.value = originalText;
+        updatePreview();
+      }
+    }
+
+    function loadSong(content) {
+      originalText = content;
+      inputEl.value = content;
+      resetTransposition();
+    }
+
+    // Drag and drop handlers
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.classList.add('drag-over');
+    }
+
+    function handleDragLeave(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.classList.remove('drag-over');
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.classList.remove('drag-over');
+
+      const files = e.dataTransfer.files;
+      if (files.length === 0) return;
+
+      const txtFiles = Array.from(files).filter(file => file.name.endsWith('.txt'));
+
+      if (txtFiles.length === 0) {
+        alert('Please drop .txt files only.');
+        return;
+      }
+
+      if (txtFiles.length === 1) {
+        const file = txtFiles[0];
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const content = event.target.result;
+          const fileName = file.name.replace('.txt', '');
+          const folder = file.webkitRelativePath ? getFolderPath(file.webkitRelativePath) : '';
+
+          const storedSongs = loadStoredSongs() || [];
+          const existingIndex = storedSongs.findIndex(s => s.name === fileName && s.folder === folder);
+          if (existingIndex >= 0) {
+            storedSongs[existingIndex].content = content;
+          } else {
+            storedSongs.push({ name: fileName, content: content, folder: folder });
+          }
+          saveSongsToStorage(storedSongs);
+
+          loadSong(content);
+          displayStoredSongs();
+
+          const btn = dropdownToggle;
+          const origText = btn.textContent;
+          btn.textContent = `📄 ${fileName}`;
+          setTimeout(() => {
+            btn.textContent = origText;
+          }, 3000);
+        };
+        reader.readAsText(file);
+        return;
+      }
+
+      const storedSongs = loadStoredSongs() || [];
+      let loadedCount = 0;
+
+      txtFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const content = event.target.result;
+          const fileName = file.name.replace('.txt', '');
+          const folder = file.webkitRelativePath ? getFolderPath(file.webkitRelativePath) : '';
+
+          const existingIndex = storedSongs.findIndex(s => s.name === fileName && s.folder === folder);
+          if (existingIndex >= 0) {
+            storedSongs[existingIndex].content = content;
+          } else {
+            storedSongs.push({ name: fileName, content: content, folder: folder });
+          }
+
+          loadedCount++;
+          if (loadedCount === txtFiles.length) {
+            saveSongsToStorage(storedSongs);
+            displayStoredSongs();
+
+            const firstFile = txtFiles[0];
+            const firstReader = new FileReader();
+            firstReader.onload = function(e) {
+              loadSong(e.target.result);
+            };
+            firstReader.readAsText(firstFile);
+
+            const btn = dropdownToggle;
+            const origText = btn.textContent;
+            btn.textContent = `📄 ${txtFiles.length} songs loaded`;
+            setTimeout(() => {
+              btn.textContent = origText;
+            }, 3000);
+          }
+        };
+        reader.readAsText(file);
+      });
+    }
+
+    document.addEventListener('dragover', function(e) {
+      e.preventDefault();
+    });
+    document.addEventListener('drop', function(e) {
+      e.preventDefault();
+    });
+
+    dropZone.addEventListener('dragover', handleDragOver);
+    dropZone.addEventListener('dragleave', handleDragLeave);
+    dropZone.addEventListener('drop', handleDrop);
+
+    // Load saved songs from localStorage
+    function loadStoredSongs() {
+      try {
+        const stored = localStorage.getItem('chordChartSongs');
+        if (stored) {
+          const songs = JSON.parse(stored);
+          return songs;
+        }
+      } catch (e) {
+        console.log('Could not load stored songs');
+      }
+      return null;
+    }
+
+    // Save songs to localStorage
+    function saveSongsToStorage(songs) {
+      try {
+        localStorage.setItem('chordChartSongs', JSON.stringify(songs));
+      } catch (e) {
+        console.log('Could not save songs to storage');
+      }
+    }
+
+    // Clear stored songs
+    function clearStoredSongs() {
+      if (confirm('Clear all saved songs from memory? (This will not delete your files)')) {
+        localStorage.removeItem('chordChartSongs');
+        displayStoredSongs();
+      }
+    }
+
+    // Remove a single song
+    function removeSong(songName, songFolder) {
+      const storedSongs = loadStoredSongs() || [];
+      const index = storedSongs.findIndex(s => s.name === songName && s.folder === (songFolder || ''));
+      if (index >= 0) {
+        if (confirm(`Are you sure you want to remove "${songName}"?`)) {
+          storedSongs.splice(index, 1);
+          saveSongsToStorage(storedSongs);
+          displayStoredSongs();
         }
       }
     }
+
+    function getFolderPath(filePath) {
+      const parts = filePath.split(/[\/\\]/);
+      parts.pop();
+      return parts.join('/');
+    }
+
+    // Display stored songs with nested folder structure and remove buttons
+    function displayStoredSongs() {
+      const storedSongs = loadStoredSongs();
+      songsList.innerHTML = '';
+
+      if (storedSongs && storedSongs.length > 0) {
+        const tree = {};
+
+        storedSongs.forEach(song => {
+          const folder = song.folder || '';
+          if (folder === '') {
+            if (!tree._root) {
+              tree._root = [];
+            }
+            tree._root.push(song);
+          } else {
+            const parts = folder.split('/').filter(p => p !== '');
+            let current = tree;
+            for (let part of parts) {
+              if (!current[part]) {
+                current[part] = {};
+              }
+              current = current[part];
+            }
+            if (!current._songs) {
+              current._songs = [];
+            }
+            current._songs.push(song);
+          }
+        });
+
+        const folderNames = Object.keys(tree).filter(k => k !== '_root');
+        folderNames.sort((a, b) => a.localeCompare(b, 'th', { sensitivity: 'base' }));
+
+        folderNames.forEach(folderName => {
+          const folderItem = document.createElement('div');
+          folderItem.className = 'dropdown-item folder-item';
+          folderItem.textContent = folderName;
+
+          const arrow = document.createElement('span');
+          arrow.className = 'folder-arrow';
+          arrow.textContent = '▶';
+          folderItem.appendChild(arrow);
+
+          const popup = document.createElement('div');
+          popup.className = 'subfolder-popup';
+
+          const subTree = tree[folderName];
+          if (subTree._songs) {
+            subTree._songs.sort((a, b) => a.name.localeCompare(b.name, 'th', { sensitivity: 'base' }));
+            subTree._songs.forEach(song => {
+              const songItem = createSongItem(song);
+              popup.appendChild(songItem);
+            });
+          }
+
+          const subFolderNames = Object.keys(subTree).filter(k => k !== '_songs');
+          subFolderNames.sort((a, b) => a.localeCompare(b, 'th', { sensitivity: 'base' }));
+
+          subFolderNames.forEach(subFolderName => {
+            const subFolderTree = subTree[subFolderName];
+            const subFolderItem = document.createElement('div');
+            subFolderItem.className = 'dropdown-item folder-item';
+            subFolderItem.textContent = subFolderName;
+
+            const subArrow = document.createElement('span');
+            subArrow.className = 'folder-arrow';
+            subArrow.textContent = '▶';
+            subFolderItem.appendChild(subArrow);
+
+            const subPopup = document.createElement('div');
+            subPopup.className = 'subfolder-popup';
+
+            if (subFolderTree._songs) {
+              subFolderTree._songs.sort((a, b) => a.name.localeCompare(b.name, 'th', { sensitivity: 'base' }));
+              subFolderTree._songs.forEach(song => {
+                const songItem = createSongItem(song);
+                subPopup.appendChild(songItem);
+              });
+            }
+
+            subFolderItem.appendChild(subPopup);
+
+            subFolderItem.addEventListener('mouseenter', function(e) {
+              document.querySelectorAll('.subfolder-popup.show').forEach(p => {
+                if (p !== subPopup) p.classList.remove('show');
+              });
+              subPopup.style.top = '0px';
+              subPopup.style.left = '100%';
+              subPopup.classList.add('show');
+            });
+
+            subFolderItem.addEventListener('mouseleave', function(e) {
+              setTimeout(() => {
+                if (!subPopup.matches(':hover') && !subFolderItem.matches(':hover')) {
+                  subPopup.classList.remove('show');
+                }
+              }, 300);
+            });
+
+            subPopup.addEventListener('mouseenter', function(e) {
+              subPopup.classList.add('show');
+            });
+
+            subPopup.addEventListener('mouseleave', function(e) {
+              setTimeout(() => {
+                if (!subFolderItem.matches(':hover')) {
+                  subPopup.classList.remove('show');
+                }
+              }, 300);
+            });
+
+            popup.appendChild(subFolderItem);
+          });
+
+          folderItem.appendChild(popup);
+
+          folderItem.addEventListener('mouseenter', function(e) {
+            document.querySelectorAll('.subfolder-popup.show').forEach(p => {
+              if (p !== popup) p.classList.remove('show');
+            });
+            popup.style.top = '0px';
+            popup.style.left = '100%';
+            popup.classList.add('show');
+          });
+
+          folderItem.addEventListener('mouseleave', function(e) {
+            setTimeout(() => {
+              if (!popup.matches(':hover') && !folderItem.matches(':hover')) {
+                popup.classList.remove('show');
+              }
+            }, 300);
+          });
+
+          popup.addEventListener('mouseenter', function(e) {
+            popup.classList.add('show');
+          });
+
+          popup.addEventListener('mouseleave', function(e) {
+            setTimeout(() => {
+              if (!folderItem.matches(':hover')) {
+                popup.classList.remove('show');
+              }
+            }, 300);
+          });
+
+          songsList.appendChild(folderItem);
+        });
+
+        if (tree._root) {
+          tree._root.sort((a, b) => a.name.localeCompare(b.name, 'th', { sensitivity: 'base' }));
+          tree._root.forEach(song => {
+            const songItem = createSongItem(song);
+            songsList.appendChild(songItem);
+          });
+        }
+
+        if (folderNames.length === 0 && (!tree._root || tree._root.length === 0)) {
+          const emptyMsg = document.createElement('div');
+          emptyMsg.className = 'dropdown-item';
+          emptyMsg.style.cssText = 'color: #b0987a; font-size: 0.55rem; padding: 4px 14px; font-style: italic;';
+          emptyMsg.textContent = 'No songs loaded';
+          songsList.appendChild(emptyMsg);
+        }
+      } else {
+        const emptyMsg = document.createElement('div');
+        emptyMsg.className = 'dropdown-item';
+        emptyMsg.style.cssText = 'color: #b0987a; font-size: 0.55rem; padding: 4px 14px; font-style: italic;';
+        emptyMsg.textContent = 'No songs loaded';
+        songsList.appendChild(emptyMsg);
+      }
+    }
+
+    // Create a song item with remove button
+    function createSongItem(song) {
+      const songItem = document.createElement('div');
+      songItem.className = 'dropdown-item song-item';
+
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'song-name';
+      nameSpan.textContent = song.name;
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-btn';
+      removeBtn.textContent = '✕';
+      removeBtn.title = 'Remove this song';
+      removeBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        removeSong(song.name, song.folder || '');
+      });
+
+      nameSpan.addEventListener('click', function(e) {
+        e.stopPropagation();
+        loadSong(song.content);
+        dropdownContent.classList.remove('show');
+        document.querySelectorAll('.dropdown-item.song-item, .subfolder-popup .dropdown-item.song-item').forEach(el => {
+          el.classList.remove('active');
+        });
+        songItem.classList.add('active');
+      });
+
+      songItem.appendChild(nameSpan);
+      songItem.appendChild(removeBtn);
+      return songItem;
+    }
+
+    // Dropdown toggle
+    dropdownToggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      dropdownContent.classList.toggle('show');
+      document.querySelectorAll('.subfolder-popup.show').forEach(p => p.classList.remove('show'));
+      displayStoredSongs();
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!dropdownToggle.contains(e.target) && !dropdownContent.contains(e.target)) {
+        dropdownContent.classList.remove('show');
+        document.querySelectorAll('.subfolder-popup.show').forEach(p => p.classList.remove('show'));
+      }
+    });
+
+    // Clear stored songs button
+    document.getElementById('clearStoredSongs').addEventListener('click', function(e) {
+      e.stopPropagation();
+      clearStoredSongs();
+      dropdownContent.classList.remove('show');
+    });
+
+    // Load single file
+    document.getElementById('loadSingleFile').addEventListener('click', function(e) {
+      e.stopPropagation();
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.txt';
+
+      fileInput.onchange = function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const content = event.target.result;
+          const fileName = file.name.replace('.txt', '');
+          const folder = file.webkitRelativePath ? getFolderPath(file.webkitRelativePath) : '';
+
+          const storedSongs = loadStoredSongs() || [];
+          const existingIndex = storedSongs.findIndex(s => s.name === fileName && s.folder === folder);
+          if (existingIndex >= 0) {
+            storedSongs[existingIndex].content = content;
+          } else {
+            storedSongs.push({ name: fileName, content: content, folder: folder });
+          }
+          saveSongsToStorage(storedSongs);
+
+          loadSong(content);
+          dropdownContent.classList.remove('show');
+          displayStoredSongs();
+
+          const btn = dropdownToggle;
+          const origText = btn.textContent;
+          btn.textContent = `📄 ${fileName}`;
+          setTimeout(() => {
+            btn.textContent = origText;
+          }, 3000);
+        };
+        reader.readAsText(file);
+      };
+
+      fileInput.click();
+    });
+
+    // Select Folder
+    document.getElementById('selectFolder').addEventListener('click', function(e) {
+      e.stopPropagation();
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.txt';
+      fileInput.webkitdirectory = true;
+      fileInput.multiple = true;
+
+      fileInput.onchange = function(e) {
+        const files = e.target.files;
+        const songFiles = [];
+        const storedSongs = loadStoredSongs() || [];
+
+        for (let file of files) {
+          if (file.name.endsWith('.txt')) {
+            const fileName = file.name.replace('.txt', '');
+            const fullPath = file.webkitRelativePath || file.name;
+            const parts = fullPath.split(/[\/\\]/);
+            parts.pop();
+            const folder = parts.join('/');
+            songFiles.push({
+              name: fileName,
+              file: file,
+              fullPath: fullPath,
+              folder: folder
+            });
+          }
+        }
+
+        if (songFiles.length === 0) {
+          alert('No .txt files found in the selected folder.\n\nPlease select a folder that contains .txt chord chart files.');
+          return;
+        }
+
+        songFiles.sort((a, b) => {
+          return a.name.localeCompare(b.name, 'th', { sensitivity: 'base' });
+        });
+
+        let loadedCount = 0;
+        songFiles.forEach((song, index) => {
+          const reader = new FileReader();
+          reader.onload = function(event) {
+            const content = event.target.result;
+            const existingIndex = storedSongs.findIndex(s => s.name === song.name && s.folder === song.folder);
+            if (existingIndex >= 0) {
+              storedSongs[existingIndex].content = content;
+            } else {
+              storedSongs.push({ name: song.name, content: content, folder: song.folder });
+            }
+            loadedCount++;
+            if (loadedCount === songFiles.length) {
+              saveSongsToStorage(storedSongs);
+              displayStoredSongs();
+              resetTransposition();
+              const firstContent = songFiles[0] ? songFiles[0].file : null;
+              if (firstContent) {
+                const firstReader = new FileReader();
+                firstReader.onload = function(e) {
+                  originalText = e.target.result;
+                  inputEl.value = e.target.result;
+                  resetTransposition();
+                };
+                firstReader.readAsText(firstContent);
+              }
+              const btn = dropdownToggle;
+              const origText = btn.textContent;
+              btn.textContent = `📄 ${songFiles.length} songs loaded`;
+              setTimeout(() => {
+                btn.textContent = origText;
+              }, 3000);
+            }
+          };
+          reader.readAsText(song.file);
+        });
+      };
+
+      fileInput.click();
+    });
+
+    // Resize functionality
+    resizeHandle.addEventListener('mousedown', function(e) {
+      isResizing = true;
+      startY = e.clientY;
+      startHeight = inputArea.offsetHeight;
+      document.body.style.cursor = 'ns-resize';
+      document.body.style.userSelect = 'none';
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function(e) {
+      if (!isResizing) return;
+      const deltaY = startY - e.clientY;
+      let newHeight = startHeight + deltaY;
+      const maxHeight = window.innerHeight * 0.6;
+      const minHeight = 60;
+      newHeight = Math.max(minHeight, Math.min(maxHeight, newHeight));
+      inputArea.style.height = newHeight + 'px';
+      inputArea.style.maxHeight = newHeight + 'px';
+      clearTimeout(window._resizeTimeout);
+      window._resizeTimeout = setTimeout(() => {
+        adjustChordSizes();
+      }, 100);
+    });
+
+    document.addEventListener('mouseup', function(e) {
+      if (isResizing) {
+        isResizing = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        setTimeout(adjustChordSizes, 150);
+      }
+    });
+
+    resizeHandle.addEventListener('touchstart', function(e) {
+      isResizing = true;
+      startY = e.touches[0].clientY;
+      startHeight = inputArea.offsetHeight;
+      e.preventDefault();
+    }, { passive: false });
+
+    document.addEventListener('touchmove', function(e) {
+      if (!isResizing) return;
+      const deltaY = startY - e.touches[0].clientY;
+      let newHeight = startHeight + deltaY;
+      const maxHeight = window.innerHeight * 0.6;
+      const minHeight = 60;
+      newHeight = Math.max(minHeight, Math.min(maxHeight, newHeight));
+      inputArea.style.height = newHeight + 'px';
+      inputArea.style.maxHeight = newHeight + 'px';
+      clearTimeout(window._resizeTimeout);
+      window._resizeTimeout = setTimeout(() => {
+        adjustChordSizes();
+      }, 100);
+    }, { passive: false });
+
+    document.addEventListener('touchend', function() {
+      if (isResizing) {
+        isResizing = false;
+        setTimeout(adjustChordSizes, 150);
+      }
+    });
 
     toggleBtn.addEventListener('click', function() {
       isEditorCollapsed = !isEditorCollapsed;
@@ -500,16 +1728,18 @@ Ebm ||</textarea>
       previewArea.classList.toggle('expanded');
 
       if (isEditorCollapsed) {
-        toggleBtn.textContent = '▶ Show Editor';
+        toggleBtn.textContent = '▼ Show Editor';
         toggleBtn.classList.add('active');
       } else {
-        toggleBtn.textContent = '◀ Hide Editor';
+        toggleBtn.textContent = '▲ Hide Editor';
         toggleBtn.classList.remove('active');
       }
-
-      updatePreview();
+      setTimeout(() => {
+        adjustChordSizes();
+      }, 350);
     });
 
+    // Chord chart functions
     function expandSectionShortcut(name) {
       const trimmed = name.trim();
       const lower = trimmed.toLowerCase();
@@ -608,33 +1838,25 @@ Ebm ||</textarea>
       if (lower.match(/^[2-7][1-9]$/)) {
         return numberMap[lower] || name;
       }
-
       if (lower.match(/^[1-8]$/)) {
         return singleNumberMap[lower] || name;
       }
-
       const match = lower.match(/^(int|i|v|ver|pr|pre|ch|cho|po|post|b|bri|ins|inst|out|o|tag|t|end|ending)(?:\s*(\d+))?$/);
       if (match) {
         const shortcut = match[1];
         const number = match[2] || '';
         let fullName = textShortcuts[shortcut] || shortcut;
-        fullName = fullName.split(' ').map(word =>
-          word.charAt(0).toUpperCase() + word.slice(1)
-        ).join(' ');
+        fullName = fullName.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
         return number ? `${fullName} ${number}` : fullName;
       }
-
       const fullMatch = lower.match(/^(intro|verse|pre-chorus|chorus|post-chorus|bridge|instrumental|outro|tag|ending)(?:\s*(\d+))?$/);
       if (fullMatch) {
         const fullName = fullMatch[1];
         const number = fullMatch[2] || '';
-        const capitalized = fullName.split(' ').map(word =>
-          word.charAt(0).toUpperCase() + word.slice(1)
-        ).join(' ');
+        const capitalized = fullName.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
         const finalName = capitalized.replace(/Pre-Chorus/, 'Pre-Chorus').replace(/Post-Chorus/, 'Post-Chorus');
         return number ? `${finalName} ${number}` : finalName;
       }
-
       return name;
     }
 
@@ -662,7 +1884,6 @@ Ebm ||</textarea>
 
     function normalizeChord(chord) {
       if (!chord || chord === '_' || chord === '') return chord;
-
       const match = chord.match(/^([a-gA-G])([#b]?)(.*)$/);
       if (match) {
         const root = match[1].toUpperCase();
@@ -675,53 +1896,33 @@ Ebm ||</textarea>
 
     function simplifyChord(chord) {
       if (!chord || chord === '_' || chord === '') return chord;
-
       let simplified = normalizeChord(chord);
-
-      if (simplified.match(/[A-G][#b]?d\b/i) ||
-          simplified.match(/[A-G][#b]?dim\b/i) ||
-          simplified.includes('°')) {
+      if (simplified.match(/[A-G][#b]?d\b/i) || simplified.match(/[A-G][#b]?dim\b/i) || simplified.includes('°')) {
         simplified = simplified.replace(/d|dim|°/gi, '°');
         return simplified.trim();
       }
-
-      if (simplified.match(/[A-G][#b]?h\b/i) ||
-          simplified.toLowerCase().includes('halfdim') ||
-          simplified.toLowerCase().includes('half-dim') ||
-          simplified.toLowerCase().includes('half diminished') ||
-          simplified.includes('ø')) {
+      if (simplified.match(/[A-G][#b]?h\b/i) || simplified.toLowerCase().includes('halfdim') || simplified.toLowerCase().includes('half-dim') || simplified.toLowerCase().includes('half diminished') || simplified.includes('ø')) {
         return simplified.replace(/h|halfdim|half-dim|half diminished|half-diminished|ø/gi, 'ø').trim();
       }
-
       if (simplified.match(/[A-G][#b]?M7?\b/)) {
         simplified = simplified.replace(/M7?/g, 'Δ');
         return simplified.trim();
       }
-
-      if (simplified.match(/[A-G][#b]?Maj7\b/i) ||
-          simplified.match(/[A-G][#b]?maj7\b/i) ||
-          simplified.includes('Δ')) {
+      if (simplified.match(/[A-G][#b]?Maj7\b/i) || simplified.match(/[A-G][#b]?maj7\b/i) || simplified.includes('Δ')) {
         simplified = simplified.replace(/Maj7|maj7|Δ7|Δ/gi, 'Δ');
         return simplified.trim();
       }
-
       return simplified;
     }
 
     function splitIntoBars(line) {
       let protected = line;
-
       const slashChordRegex = /([A-Za-z0-9#b]+)\/([A-Za-z0-9#b]+)/g;
       let matches = [];
       let match;
       while ((match = slashChordRegex.exec(protected)) !== null) {
-        matches.push({
-          start: match.index,
-          end: match.index + match[0].length,
-          full: match[0]
-        });
+        matches.push({ start: match.index, end: match.index + match[0].length, full: match[0] });
       }
-
       let placeholders = [];
       let result = protected;
       for (let i = matches.length - 1; i >= 0; i--) {
@@ -729,9 +1930,7 @@ Ebm ||</textarea>
         placeholders.push({ original: matches[i].full, placeholder: placeholder });
         result = result.substring(0, matches[i].start) + placeholder + result.substring(matches[i].end);
       }
-
       let bars = result.split(/[|/\\]/).map(b => b.trim()).filter(b => b !== '');
-
       bars = bars.map(bar => {
         let restored = bar;
         for (let p of placeholders) {
@@ -739,7 +1938,6 @@ Ebm ||</textarea>
         }
         return restored;
       });
-
       return bars;
     }
 
@@ -755,15 +1953,28 @@ Ebm ||</textarea>
       return maxBars;
     }
 
-    function parseBarToCells(barContent) {
-      let tokens = barContent.split(/\s+/).filter(t => t !== '');
+    function getGlobalMaxChords(text) {
+      const lines = text.split('\n');
+      let maxChords = 0;
+      for (let line of lines) {
+        if (line.includes('|') || line.includes('/') || line.includes('\\')) {
+          const bars = splitIntoBars(line);
+          bars.forEach(bar => {
+            const tokens = bar.split(/\s+/).filter(t => t !== '' && t !== '_');
+            if (tokens.length > maxChords) maxChords = tokens.length;
+          });
+        }
+      }
+      return Math.max(maxChords, 1);
+    }
+
+    function parseBarToCellsDynamic(barContent, numCells) {
+      let tokens = barContent.split(/\s+/).filter(t => t !== '' && t !== '_');
       tokens = tokens.map(token => simplifyChord(token));
 
-      let cells = ['_', '_', '_', '_'];
+      let cells = new Array(numCells).fill('_');
 
-      if (tokens.length === 0) {
-        return cells;
-      }
+      if (tokens.length === 0) return cells;
 
       if (tokens.length === 1) {
         cells[0] = tokens[0];
@@ -771,128 +1982,131 @@ Ebm ||</textarea>
       }
 
       if (tokens.length === 2) {
-        cells[0] = tokens[0];
-        cells[2] = tokens[1];
+        if (numCells === 2) {
+          cells[0] = tokens[0];
+          cells[1] = tokens[1];
+        } else if (numCells === 3) {
+          cells[0] = tokens[0];
+          cells[2] = tokens[1];
+        } else {
+          cells[0] = tokens[0];
+          cells[2] = tokens[1];
+        }
         return cells;
       }
 
       if (tokens.length === 3) {
-        const hasEmpty = tokens.includes('_');
-        if (hasEmpty) {
-          let result = ['_', '_', '_', '_'];
-          let tokenIndex = 0;
-          for (let i = 0; i < 4 && tokenIndex < tokens.length; i++) {
-            if (tokens[tokenIndex] === '_') {
-              result[i] = '_';
-              tokenIndex++;
-            } else {
-              result[i] = tokens[tokenIndex];
-              tokenIndex++;
-            }
-          }
-          return result;
+        if (numCells === 3) {
+          cells[0] = tokens[0];
+          cells[1] = tokens[1];
+          cells[2] = tokens[2];
         } else {
           cells[0] = tokens[0];
           cells[1] = tokens[1];
           cells[2] = tokens[2];
-          return cells;
         }
+        return cells;
       }
 
-      if (tokens.length === 4) {
-        return tokens;
-      }
-
-      for (let i = 0; i < Math.min(4, tokens.length); i++) {
+      for (let i = 0; i < Math.min(numCells, tokens.length); i++) {
         cells[i] = tokens[i];
       }
       return cells;
+    }
+
+    function isBarEmpty(barContent) {
+      let tokens = barContent.split(/\s+/).filter(t => t !== '' && t !== '_');
+      return tokens.length === 0;
     }
 
     function adjustChordSizes() {
       const content = previewContent;
       if (!content) return;
 
-      const chordItems = content.querySelectorAll('.chord-item:not(.empty)');
-      if (chordItems.length === 0) return;
+      const chordLines = content.querySelectorAll('.chord-line');
+      if (chordLines.length === 0) return;
 
       const firstCell = content.querySelector('.cell');
       if (!firstCell) return;
 
-      const cellWidth = firstCell.offsetWidth - 8;
+      const firstLine = content.querySelector('.chord-line');
+      const numCells = firstLine ? parseInt(firstLine.style.getPropertyValue('--num-cells')) || 4 : 4;
+
+      const cellWidth = (firstCell.parentElement.offsetWidth / numCells) - 8;
       if (cellWidth < 10) return;
 
-      const baseSize = isEditorCollapsed ? 1.0 : 0.85;
-      const stepSize = 0.05;
-      const minSize = 0.3;
-
-      chordItems.forEach(item => {
-        const text = item.textContent;
-        if (!text || text === '_') return;
-
-        let fontSize = baseSize;
-        let fits = false;
-
-        const tempSpan = document.createElement('span');
-        tempSpan.style.cssText = `position:absolute; visibility:hidden; white-space:nowrap; font-family: "SF Mono", "Fira Code", monospace; font-size: ${fontSize}rem; font-weight: 700;`;
-        tempSpan.textContent = text;
-        document.body.appendChild(tempSpan);
-        let width = tempSpan.offsetWidth;
-        document.body.removeChild(tempSpan);
-
-        if (width <= cellWidth) {
-          fits = true;
-        }
-
-        while (!fits && fontSize > minSize) {
-          fontSize -= stepSize;
-          fontSize = Math.round(fontSize * 100) / 100;
-
-          const testSpan = document.createElement('span');
-          testSpan.style.cssText = `position:absolute; visibility:hidden; white-space:nowrap; font-family: "SF Mono", "Fira Code", monospace; font-size: ${fontSize}rem; font-weight: 700;`;
-          testSpan.textContent = text;
-          document.body.appendChild(testSpan);
-          width = testSpan.offsetWidth;
-          document.body.removeChild(testSpan);
-
-          if (width <= cellWidth) {
-            fits = true;
+      let globalMaxText = '';
+      chordLines.forEach(row => {
+        const cells = row.querySelectorAll('.cell .chord-item:not(.empty)');
+        cells.forEach(cell => {
+          const text = cell.textContent || '';
+          if (text.length > globalMaxText.length) {
+            globalMaxText = text;
           }
-        }
-
-        item.style.fontSize = fontSize + 'rem';
+        });
       });
 
-      const emptyItems = content.querySelectorAll('.chord-item.empty');
-      emptyItems.forEach(item => {
-        item.style.fontSize = (baseSize * 0.8) + 'rem';
+      if (!globalMaxText) return;
+
+      const testSpan = document.createElement('span');
+      testSpan.style.cssText = `position:absolute; visibility:hidden; white-space:nowrap; font-family: "SF Mono", "Fira Code", monospace; font-weight: 700;`;
+      testSpan.textContent = globalMaxText;
+      document.body.appendChild(testSpan);
+
+      const maxSize = isEditorCollapsed ? 2.5 : 1.8;
+      let low = 0.1;
+      let high = maxSize * 2;
+      let bestSize = maxSize * 0.4;
+      let iterations = 30;
+
+      for (let i = 0; i < iterations; i++) {
+        const mid = (low + high) / 2;
+        testSpan.style.fontSize = mid + 'rem';
+        const width = testSpan.offsetWidth;
+        if (width <= cellWidth * 0.90) {
+          bestSize = mid;
+          low = mid;
+        } else {
+          high = mid;
+        }
+      }
+
+      document.body.removeChild(testSpan);
+
+      chordLines.forEach(row => {
+        const cells = row.querySelectorAll('.cell .chord-item:not(.empty)');
+        cells.forEach(cell => {
+          cell.style.fontSize = Math.round(bestSize * 100) / 100 + 'rem';
+        });
       });
     }
 
     function renderPreview(text) {
       if (!text || text.trim() === '') {
-        previewContent.innerHTML = `<div class="empty-preview">✨ Type or paste your chord chart in the editor</div>`;
+        previewContent.innerHTML = `
+          <div class="empty-preview">
+            <div class="main-text">Type or Paste your chord chart (in the editor area below)</div>
+            <div class="sub-text">or Drag &amp; Drop a TXT file with a chord chart (into the editor area below)</div>
+          </div>
+        `;
         return;
       }
-
       let html = '';
       const lines = text.split('\n');
       currentSection = '';
       const globalMaxBars = getGlobalMaxBars(text);
+      const globalMaxChords = getGlobalMaxChords(text);
 
       for (let line of lines) {
         const trimmed = line.trim();
-
         if (trimmed === '---' || trimmed === '___' || trimmed === '***') {
           html += `<div class="hr-line"><span class="hr"></span></div>`;
           continue;
         }
-
         if (trimmed === '') {
           html += `<div class="empty-line"></div>`;
           continue;
         }
-
         const customLabelMatch = trimmed.match(/^\[(.*?)\]$/);
         if (customLabelMatch) {
           const labelText = customLabelMatch[1].trim();
@@ -901,258 +2115,316 @@ Ebm ||</textarea>
           continue;
         }
 
-        const sectionMatch = trimmed.match(/^\s*(Intro|Verse|Pre-Chorus|Chorus|Post-Chorus|Bridge|Outro|Instrumental|Tag|Ending|Coda|int|i|v|ver|pr|pre|ch|cho|po|post|b|bri|ins|inst|out|o|tag|t|end|ending|[1-8]|[2-7][1-9])(?:\s+\d+)?(?:\s*\([^)]*\))?\s*$/i);
-        if (sectionMatch) {
-          let sectionName = trimmed.trim();
-          sectionName = capitalizeSectionName(sectionName);
-          currentSection = sectionName;
+        const sectionNameMatch = trimmed.match(/^(Intro|Verse|Pre-Chorus|Chorus|Post-Chorus|Bridge|Outro|Instrumental|Tag|Ending|Coda)/i);
 
-          const parensMatch = sectionName.match(/(.*?)\s*(\([^)]*\))$/);
-          let displayName = sectionName;
-          let parensText = '';
-          if (parensMatch) {
-            displayName = parensMatch[1].trim();
-            parensText = parensMatch[2];
+        if (sectionNameMatch) {
+          const sectionName = sectionNameMatch[1].trim();
+          const rest = trimmed.substring(sectionName.length).trim();
+
+          let isLabel = false;
+
+          if (!rest) {
+            isLabel = true;
+          } else if (rest.length < 40 && !rest.endsWith('.') && !rest.endsWith('!') && !rest.endsWith('?')) {
+            isLabel = true;
+          } else if (rest.match(/^[\(\[].*[\)\]]$/)) {
+            isLabel = true;
+          } else if (rest.match(/^[0-9]/)) {
+            isLabel = true;
           }
-          const sectionClass = getSectionClass(displayName);
-          html += `<div class="section-block ${sectionClass}"><span class="section">${displayName}</span>${parensText ? ` <span class="section-parens">${parensText}</span>` : ''}</div>`;
+
+          if (isLabel) {
+            let displayName = sectionName.charAt(0).toUpperCase() + sectionName.slice(1);
+
+            currentSection = displayName;
+            const sectionClass = getSectionClass(displayName);
+
+            if (!rest) {
+              html += `<div class="section-block ${sectionClass}"><span class="section"><span class="section-name">${displayName}</span></span></div>`;
+            } else {
+              const numberMatch = rest.match(/^(\d+)\s*(.*)$/);
+              let boldPart = displayName;
+              let thinPart = rest;
+
+              if (numberMatch) {
+                const number = numberMatch[1];
+                const restAfterNumber = numberMatch[2] ? numberMatch[2].trim() : '';
+                boldPart = displayName + ' ' + number;
+                thinPart = restAfterNumber;
+              }
+
+              let fullLabel = `<span class="section-name">${boldPart}</span>`;
+              if (thinPart) {
+                fullLabel += ` <span class="section-extra">${thinPart}</span>`;
+              }
+              html += `<div class="section-block ${sectionClass}"><span class="section">${fullLabel}</span></div>`;
+            }
+            continue;
+          }
+        }
+
+        const numberShortcutMatch = trimmed.match(/^\s*([2-7][1-9]|[1-8])\s*(.*)$/i);
+        if (numberShortcutMatch) {
+          const shortcut = numberShortcutMatch[1].trim();
+          let extraText = numberShortcutMatch[2] ? numberShortcutMatch[2].trim() : '';
+
+          const expandedName = expandSectionShortcut(shortcut);
+
+          currentSection = expandedName;
+          const sectionClass = getSectionClass(expandedName);
+
+          const numberMatch = extraText.match(/^(\d+)\s*(.*)$/);
+          let boldPart = expandedName;
+          let thinPart = extraText;
+
+          if (numberMatch) {
+            const number = numberMatch[1];
+            const restAfterNumber = numberMatch[2] ? numberMatch[2].trim() : '';
+            boldPart = expandedName + ' ' + number;
+            thinPart = restAfterNumber;
+          }
+
+          let fullLabel = `<span class="section-name">${boldPart}</span>`;
+          if (thinPart) {
+            fullLabel += ` <span class="section-extra">${thinPart}</span>`;
+          }
+
+          html += `<div class="section-block ${sectionClass}"><span class="section">${fullLabel}</span></div>`;
           continue;
         }
 
         if (line.includes('|') || line.includes('/') || line.includes('\\')) {
           let bars = splitIntoBars(line);
-
           if (bars.length > 0) {
-            let chordLineHtml = '<div class="chord-line">';
-
-            // Pad bars to match global max
-            while (bars.length < globalMaxBars) {
-              bars.push('_ _ _ _');
-            }
-
+            let chordLineHtml = `<div class="chord-line" style="--num-cells: ${globalMaxChords};">`;
+            while (bars.length < globalMaxBars) { bars.push('_ _ _ _'); }
             bars.forEach((bar, barIndex) => {
-              const cells = parseBarToCells(bar);
+              const cells = parseBarToCellsDynamic(bar, globalMaxChords);
               let sectionClass = getSectionClass(currentSection);
               if (currentSection === 'custom' || currentSection.toLowerCase().includes('custom')) {
                 sectionClass = 'section-custom';
               }
-
-              const isLastBar = barIndex === bars.length - 1;
+              const isEmpty = isBarEmpty(bar);
               const isEmptyBar = bar === '_ _ _ _' || bar === '';
-
-              chordLineHtml += `<div class="bar">`;
+              const emptyClass = isEmpty || isEmptyBar ? ' empty-bar' : '';
+              chordLineHtml += `<div class="bar${emptyClass}">`;
               chordLineHtml += `<div class="bar-inner">`;
-
               cells.forEach((cellContent) => {
                 const isUnderscore = cellContent === '_' || cellContent === '';
                 const displayText = isUnderscore ? '_' : cellContent;
-
                 let classes = 'chord-item';
-                if (isUnderscore) {
-                  classes += ' empty';
-                }
+                if (isUnderscore) { classes += ' empty'; }
                 if (sectionClass) classes += ` ${sectionClass}`;
-
                 chordLineHtml += `<span class="cell">`;
                 chordLineHtml += `<span class="${classes}">${displayText}</span>`;
                 chordLineHtml += `</span>`;
               });
-
               chordLineHtml += `</div>`;
-
-              // Only show barline if this is a real bar or the last bar of the line
-              // For empty padding bars, don't show barline
-              if (!isEmptyBar || barIndex === bars.length - 1) {
-                const barlineText = (isLastBar && trimmed.endsWith('.')) ? '||' : '|';
-                const doubleClass = (isLastBar && trimmed.endsWith('.')) ? ' double' : '';
-                chordLineHtml += `<span class="barline${doubleClass}">${barlineText}</span>`;
-              }
-
               chordLineHtml += `</div>`;
             });
-
             chordLineHtml += '</div>';
             html += chordLineHtml;
           }
         } else if (trimmed !== '') {
           const isLyrics = !trimmed.match(/[A-G]/i) || trimmed.length > 10;
-
           if (isLyrics) {
             html += `<div class="lyrics-line"><span class="lyric-text">${trimmed}</span></div>`;
           } else {
-            html += `<div style="color: #5d6a7e; font-size: 0.65rem; padding: 1px 0; opacity: 0.8;">${trimmed}</div>`;
+            html += `<div style="color: #b0987a; font-size: 0.65rem; padding: 1px 0; opacity: 0.8;">${trimmed}</div>`;
           }
         }
       }
-
       previewContent.innerHTML = html;
-
       requestAnimationFrame(() => {
-        adjustChordSizes();
+        setTimeout(() => { adjustChordSizes(); }, 50);
       });
     }
 
     function updatePreview() {
-      const raw = inputEl.value;
-      renderPreview(raw);
+      renderPreview(inputEl.value);
     }
 
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        adjustChordSizes();
-      }, 100);
+    // Save as TXT functionality
+    document.getElementById('saveTXT').addEventListener('click', function() {
+        const content = inputEl.value;
+        if (!content || content.trim() === '') {
+            alert('Nothing to save. The editor is empty.');
+            return;
+        }
+
+        // Get song name if available - PRESERVE Thai and Unicode characters
+        const songName = document.querySelector('.dropdown-item.active .song-name')?.textContent || 'chord-chart';
+        // Only remove characters that are illegal in filenames
+        const sanitizedName = songName.replace(/[<>:"/\\|?*\x00-\x1f]/g, '').trim() || 'chord-chart';
+        const timestamp = new Date().toISOString().slice(0,10);
+        const fileName = `${sanitizedName}_${timestamp}.txt`;
+
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
+
+        this.textContent = '✅ Saved!';
+        setTimeout(() => {
+            this.textContent = '💾 Save TXT';
+        }, 2000);
     });
 
-    function loadSample(sampleText, buttonId) {
-      inputEl.value = sampleText;
-      updatePreview();
-      if (buttonId) {
-        setActiveButton(buttonId);
+    // PNG Export functionality
+    document.getElementById('exportPNG').addEventListener('click', async function() {
+        const preview = document.getElementById('previewContainer');
+        const contentWrapper = document.getElementById('previewContent');
+        const songName = document.querySelector('.dropdown-item.active .song-name')?.textContent || 'chord-chart';
+
+        this.textContent = '⏳ Exporting...';
+        this.disabled = true;
+
+        try {
+            const originalHeight = preview.style.height;
+            const originalMaxHeight = preview.style.maxHeight;
+            const originalOverflow = preview.style.overflow;
+            const originalPadding = preview.style.padding;
+            const originalBorder = preview.style.border;
+            const originalBorderRadius = preview.style.borderRadius;
+            const originalBoxShadow = preview.style.boxShadow;
+            const originalBackground = preview.style.background;
+
+            preview.style.height = 'auto';
+            preview.style.maxHeight = 'none';
+            preview.style.overflow = 'visible';
+            preview.style.padding = '40px';
+            preview.style.border = 'none';
+            preview.style.borderRadius = '0';
+            preview.style.boxShadow = 'none';
+            preview.style.background = '#ffffff';
+
+            preview.offsetHeight;
+
+            const fullWidth = contentWrapper.scrollWidth || preview.scrollWidth;
+            const fullHeight = contentWrapper.scrollHeight || preview.scrollHeight;
+
+            const padding = 40;
+            const totalWidth = fullWidth + (padding * 2);
+            const totalHeight = fullHeight + (padding * 2);
+
+            preview.style.width = totalWidth + 'px';
+            preview.style.height = totalHeight + 'px';
+
+            const canvas = await html2canvas(preview, {
+                scale: 3,
+                backgroundColor: '#ffffff',
+                useCORS: true,
+                logging: false,
+                width: totalWidth,
+                height: totalHeight,
+                allowTaint: false,
+                foreignObjectRendering: false,
+                onclone: function(doc) {
+                    const container = doc.getElementById('previewContainer');
+                    if (container) {
+                        container.style.padding = '40px';
+                        container.style.background = '#ffffff';
+                        container.style.border = 'none';
+                        container.style.borderRadius = '0';
+                        container.style.boxShadow = 'none';
+                        container.style.height = 'auto';
+                        container.style.maxHeight = 'none';
+                        container.style.overflow = 'visible';
+                        container.style.width = totalWidth + 'px';
+                    }
+                }
+            });
+
+            preview.style.height = originalHeight || '';
+            preview.style.maxHeight = originalMaxHeight || '';
+            preview.style.overflow = originalOverflow || '';
+            preview.style.padding = originalPadding || '';
+            preview.style.border = originalBorder || '';
+            preview.style.borderRadius = originalBorderRadius || '';
+            preview.style.boxShadow = originalBoxShadow || '';
+            preview.style.background = originalBackground || '';
+            preview.style.width = '';
+
+            const link = document.createElement('a');
+            // PRESERVE Thai and Unicode characters in filename
+            const sanitizedName = songName.replace(/[<>:"/\\|?*\x00-\x1f]/g, '').trim() || 'chord-chart';
+            const timestamp = new Date().toISOString().slice(0,19).replace(/[:-]/g, '');
+            const fileName = `${sanitizedName}_${timestamp}.png`;
+            link.download = fileName;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+
+            this.textContent = '✅ Exported!';
+            setTimeout(() => {
+                this.textContent = '📷 Export PNG';
+                this.disabled = false;
+            }, 2000);
+
+        } catch (err) {
+            console.error('Export failed:', err);
+            preview.style.height = '';
+            preview.style.maxHeight = '';
+            preview.style.overflow = '';
+            preview.style.padding = '';
+            preview.style.border = '';
+            preview.style.borderRadius = '';
+            preview.style.boxShadow = '';
+            preview.style.background = '';
+            preview.style.width = '';
+            this.textContent = '❌ Export failed';
+            setTimeout(() => {
+                this.textContent = '📷 Export PNG';
+                this.disabled = false;
+            }, 2000);
+        }
+    });
+
+    // Transpose event listeners
+    transposeUpBtn.addEventListener('click', transposeUp);
+    transposeDownBtn.addEventListener('click', transposeDown);
+
+    // Keyboard shortcuts for transpose
+    document.addEventListener('keydown', function(e) {
+      if (e.ctrlKey && e.shiftKey && (e.key === 'ArrowUp' || e.key === '=' || e.key === '+')) {
+        e.preventDefault();
+        transposeUp();
       }
-    }
-
-    function clearAll() {
-      inputEl.value = '';
-      updatePreview();
-      setActiveButton(null);
-    }
-
-    function copyPreviewText() {
-      const raw = inputEl.value;
-      if (!raw || raw.trim() === '') {
-        alert('No text to copy');
-        return;
+      if (e.ctrlKey && e.shiftKey && (e.key === 'ArrowDown' || e.key === '-')) {
+        e.preventDefault();
+        transposeDown();
       }
-      navigator.clipboard.writeText(raw).then(() => {
-        const btn = document.getElementById('copyPreview');
-        const orig = btn.textContent;
-        btn.textContent = '✅ Copied!';
-        setTimeout(() => { btn.textContent = orig; }, 1800);
-      }).catch(() => {
-        const textarea = document.createElement('textarea');
-        textarea.value = raw;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-        alert('Text copied');
-      });
-    }
+    });
 
-    const SAMPLE1 = `Intro
-Ebm | Cb | Abm | Ab/Bb Bb |
-Ebm | Cb | Abm | Ab/Bb Bb |
-Verse
-Ebm | Cb | Abm | Ab/Bb Bb |
-Ebm | Cb | Abm | Ab/Bb Bb |
-Chorus
-Ebm | Cb | Db | Ebm |
-Ebm | Cb | Db | Ebm |
-Outro
-Ebm ||`;
+    // Initialize: load stored songs on page load
+    displayStoredSongs();
 
-    const SAMPLE2 = `Intro
-Gb | Ebm | Cb | Cb/Db |
-Gb | Ebm | Cb | Cb/Db |
-Verse
-Gb | Ebm    | Abm    | Cb/Db Db |
-Gb | Ebm Eb | Abm Db | Gb       |
-Chorus
-Cb Cbm | Bbm   Ebm       | Abm _  Cb/Db Db | Gb |
-Cb Cbm | Bbm _ Ebsus4 Eb | Abm Db          | Gb |
-Db |`;
+    // Set initial key
+    originalText = inputEl.value;
+    currentKey = getCurrentKey();
+    updateKeyDisplay();
+    resetTransposition();
 
-    const SAMPLE3 = `Intro
-Gb | Ebm7sus4 | Cmaj9 | Cb/Db |
-Verse 1
-Gb | Ebm _ _ G7 | Abm | Cb/Db Db |
-Pre-Chorus 1
-Cb Cbm | Bbm _ Ebsus4 Eb | Abm _ Cb/Db Db | Gb |
-Chorus 1
-Cb Cbm | Bbm   Ebm       | Abm _  Cb/Db Db | Gb |
-Cb Cbm | Bbm _ Ebsus4 Eb | Abm Db          | Gb |
-Bridge
-Dm _ _ G7 | C _ _ _ |
-Instrumental 1
-Gb | Ebm | Abm | Cb/Db |`;
+    inputEl.addEventListener('input', function() {
+      // When user manually edits, update originalText
+      originalText = inputEl.value;
+      transposeSemitones = 0;
+      transposeInfo.textContent = '0';
+      updatePreview();
+    });
 
-    const BEAT_EXAMPLE = `Intro
-Ebm7sus Eb7 Ab Bb |
-Cmaj9 |
-Ab/Bb |
-Ebm |
-Verse
-Ebm | Cb | Abm | Ab/Bb Bb |
-Ebm | Cb | Abm | Ab/Bb Bb |
-Chorus
-Ebm7sus | Cmaj9 | Ab/Bb | Ebm |
-Ebm | Cb | Db | Ebm |
-Outro
-Ebm ||`;
-
-    const LYRICS_EXAMPLE = `Intro
-C | G | Am | F |
-
-Verse 1
-C G | Am _ F | C _ _ G7 | C
-
----
-[Optional Guitar Solo]
-C | G | Am | F |
-
-Chorus
-F | C | G | Am |
-
----
-[Bridge with key change]
-Dm | G7 | C | Am |`;
-
-    const NUMBER_SHORTCUTS = `1
-C | G | Am | F |
-2
-C | G | Am | F |
-21
-C | G | Am | F |
-22
-C | G | Am | F |
-3
-C | G | Am | F |
-31
-C | G | Am | F |
-4
-C | G | Am | F |
-41
-C | G | Am | F |
-5
-C | G | Am | F |
-51
-C | G | Am | F |
-6
-C | G | Am | F |
-61
-C | G | Am | F |
-7
-C | G | Am | F |
-71
-C | G | Am | F |
-8
-C | G | Am | F |
-81
-C | G | Am | F |`;
-
-    document.getElementById('loadSample1').addEventListener('click', () => loadSample(SAMPLE1, 'loadSample1'));
-    document.getElementById('loadSample2').addEventListener('click', () => loadSample(SAMPLE2, 'loadSample2'));
-    document.getElementById('loadSample3').addEventListener('click', () => loadSample(SAMPLE3, 'loadSample3'));
-    document.getElementById('loadBeatExample').addEventListener('click', () => loadSample(BEAT_EXAMPLE, 'loadBeatExample'));
-    document.getElementById('loadLyricsExample').addEventListener('click', () => loadSample(LYRICS_EXAMPLE, 'loadLyricsExample'));
-    document.getElementById('loadNumberShortcuts').addEventListener('click', () => loadSample(NUMBER_SHORTCUTS, 'loadNumberShortcuts'));
-    document.getElementById('clearAll').addEventListener('click', clearAll);
-    document.getElementById('copyPreview').addEventListener('click', copyPreviewText);
-
-    inputEl.addEventListener('input', updatePreview);
     updatePreview();
+    window.addEventListener('load', function() {
+      setTimeout(adjustChordSizes, 100);
+    });
+
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(adjustChordSizes, 100);
+    });
   })();
 </script>
 </body>
