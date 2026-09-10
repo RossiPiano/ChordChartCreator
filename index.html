@@ -8,13 +8,13 @@
   <style>
     * {
       box-sizing: border-box;
-      font-family: var(--font-chord, 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace);
+      font-family: Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace;
       margin: 0;
       padding: 0;
     }
     :root {
-      --font-chord: 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace;
-      --font-lyric: 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace;
+      --font-chord: Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace;
+      --font-lyric: Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace;
       --chord-size-mult: 1;
       --lyric-size: 0.85rem;
       --label-size: 1rem;
@@ -353,7 +353,6 @@
       content: '📂 ';
     }
 
-    /* ====== TOOLBAR ZOOM (master scale) ====== */
     .toolbar-zoom {
       display: inline-flex;
       align-items: center;
@@ -500,12 +499,17 @@
       padding: 8px 12px;
       font-size: calc(0.8rem * var(--editor-scale));
       line-height: 1.5;
-      font-family: var(--font-chord, 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace);
+      font-family: Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace;
       resize: none;
       background: #ffffff;
       color: #3d2b1f;
       outline: none;
       min-height: 50px;
+      font-variant-ligatures: none;
+      font-feature-settings: "liga" 0, "calt" 0;
+      font-kerning: none;
+      letter-spacing: 0;
+      word-spacing: 0;
     }
     textarea:focus {
       border-color: #8b6b4a;
@@ -540,7 +544,7 @@
       overflow-x: hidden;
       border: 1px solid #dcc9b0;
       box-shadow: inset 0 2px 4px rgba(0,0,0,0.04);
-      font-family: var(--font-chord, 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace);
+      font-family: Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace;
       line-height: 1.9;
       color: #3d2b1f;
     }
@@ -559,7 +563,15 @@
       color: #b0987a;
     }
 
-    /* CHORD LINE - free-flow, sized to content */
+    .chord-line,
+    .chord-line * {
+      font-variant-ligatures: none;
+      font-feature-settings: "liga" 0, "calt" 0;
+      font-kerning: none;
+      letter-spacing: 0;
+      word-spacing: 0;
+      font-family: Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace;
+    }
     .chord-line {
       display: block;
       width: 100%;
@@ -567,24 +579,31 @@
       white-space: nowrap;
     }
     .chord-line .chord-token {
-      display: inline-block;
-      padding: 0.05em 0.25em;
+      display: inline;
+      padding: 0;
       font-weight: 700;
-      white-space: nowrap;
-      font-family: var(--font-chord, 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace);
+      white-space: pre;
       font-size: 0.85rem;
-      vertical-align: middle;
+      vertical-align: baseline;
     }
     .chord-line .chord-token.empty {
       font-weight: 700;
     }
     .chord-line .pipe {
-      color: #a89078;
-      font-weight: 400;
+      color: #c0c0c0;
+      font-weight: 700;
+      text-shadow: 0.03em 0 0 currentColor, -0.03em 0 0 currentColor;
+      display: inline-block;
+      transform: scaleY(2.25);
+      transform-origin: center;
+      vertical-align: 0.2em;
+      font-size: 0.85rem;
     }
     .chord-line .space {
       display: inline-block;
-      white-space: pre;
+      width: 0.6em;
+      height: 1em;
+      vertical-align: baseline;
     }
 
     .lyrics-line {
@@ -604,7 +623,7 @@
       color: #3d2b1f;
       font-size: var(--lyric-size, 0.85rem);
       line-height: 1.5;
-      font-family: var(--font-lyric, 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace);
+      font-family: Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace;
     }
     .hr-line {
       display: block;
@@ -625,7 +644,6 @@
       height: 24px;
     }
 
-    /* SECTION LABELS */
     .section-block {
       margin: 3px 0 2px 0;
       display: inline-block;
@@ -634,7 +652,7 @@
       font-size: var(--label-size, 1rem);
     }
     .section-block .section {
-      font-family: var(--font-chord, 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace);
+      font-family: Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace;
       color: #FFFFFF;
       display: inline-block;
     }
@@ -655,7 +673,6 @@
     .section-block.section-outro { background-color: #6a8caf; }
     .section-block.section-custom { background-color: #888888; }
 
-    /* Section colors for chords */
     .chord-token.section-intro { color: #6a8caf; }
     .chord-token.section-verse { color: #5a8a5a; }
     .chord-token.section-pre-chorus { color: #d4953a; }
@@ -675,7 +692,6 @@
     .chord-token.empty.section-outro { color: #6a8caf; }
     .chord-token.empty.section-custom { color: #888888; }
 
-    /* Key selector */
     .key-selector {
       display: flex;
       align-items: center;
@@ -711,7 +727,6 @@
       cursor: pointer;
     }
 
-    /* ====== EASY MODE ====== */
     body.easy-mode .advanced-only {
       display: none !important;
     }
@@ -723,7 +738,6 @@
       height: 0 !important;
     }
 
-    /* ====== SETTINGS MODAL ====== */
     .settings-overlay {
       display: none;
       position: fixed;
@@ -984,7 +998,6 @@
   </div>
 </div>
 
-<!-- Settings modal -->
 <div class="settings-overlay" id="settingsOverlay">
   <div class="settings-panel">
     <div class="settings-header">
@@ -1012,14 +1025,12 @@
         <div class="settings-row">
           <label for="chordFontSelect">Font family</label>
           <select id="chordFontSelect">
-            <option value="'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace">Fira Code</option>
-            <option value="'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', monospace">JetBrains Mono</option>
-            <option value="'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Menlo', 'Consolas', monospace">Cascadia Code</option>
-            <option value="'Roboto Mono', 'Fira Code', 'JetBrains Mono', 'Menlo', 'Consolas', monospace">Roboto Mono</option>
-            <option value="'IBM Plex Mono', 'Fira Code', 'JetBrains Mono', 'Menlo', 'Consolas', monospace">IBM Plex Mono</option>
-            <option value="'Menlo', 'Consolas', 'Fira Code', monospace">Menlo</option>
-            <option value="'Consolas', 'Menlo', 'Fira Code', monospace">Consolas</option>
-            <option value="monospace">System monospace</option>
+            <option value="Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace">System Monospace (recommended)</option>
+            <option value="'Courier New', Courier, monospace">Courier New</option>
+            <option value="Consolas, 'Courier New', monospace">Consolas</option>
+            <option value="Menlo, Monaco, 'Courier New', monospace">Menlo / Monaco</option>
+            <option value="'DejaVu Sans Mono', 'Liberation Mono', monospace">DejaVu Sans Mono</option>
+            <option value="'Fira Code', 'JetBrains Mono', 'Cascadia Code', Consolas, Menlo, Monaco, 'DejaVu Sans Mono', monospace">Fira Code (if installed)</option>
             <option value="__custom__">Custom…</option>
           </select>
         </div>
@@ -1039,18 +1050,13 @@
         <div class="settings-row">
           <label for="lyricFontSelect">Font family</label>
           <select id="lyricFontSelect">
-            <option value="'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace">Fira Code</option>
-            <option value="'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', monospace">JetBrains Mono</option>
-            <option value="'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Menlo', 'Consolas', monospace">Cascadia Code</option>
-            <option value="'Roboto Mono', 'Fira Code', 'JetBrains Mono', 'Menlo', 'Consolas', monospace">Roboto Mono</option>
-            <option value="'IBM Plex Mono', 'Fira Code', 'JetBrains Mono', 'Menlo', 'Consolas', monospace">IBM Plex Mono</option>
-            <option value="'IBM Plex Sans Thai', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">IBM Plex Sans Thai</option>
-            <option value="'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">Sarabun (Thai)</option>
-            <option value="'Prompt', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">Prompt (Thai)</option>
-            <option value="'Noto Sans Thai', 'Sarabun', system-ui, sans-serif">Noto Sans Thai</option>
-            <option value="'Kanit', 'Sarabun', system-ui, sans-serif">Kanit (Thai)</option>
+            <option value="Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace">System Monospace (recommended)</option>
+            <option value="'Courier New', Courier, monospace">Courier New</option>
+            <option value="Consolas, 'Courier New', monospace">Consolas</option>
+            <option value="Menlo, Monaco, 'Courier New', monospace">Menlo / Monaco</option>
+            <option value="'DejaVu Sans Mono', 'Liberation Mono', monospace">DejaVu Sans Mono</option>
+            <option value="'Fira Code', 'JetBrains Mono', 'Cascadia Code', Consolas, Menlo, Monaco, 'DejaVu Sans Mono', monospace">Fira Code (if installed)</option>
             <option value="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">System sans</option>
-            <option value="monospace">System monospace</option>
             <option value="__custom__">Custom…</option>
           </select>
         </div>
@@ -1145,8 +1151,6 @@
     let currentMode = 'minor';
     let originalText = '';
 
-    const NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-
     const NOTE_MAP = {
       'C': 0, 'B#': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3,
       'E': 4, 'Fb': 4, 'F': 5, 'E#': 5, 'F#': 6, 'Gb': 6, 'G': 7,
@@ -1162,7 +1166,6 @@
       'F#': 'D#m', 'Gb': 'Ebm', 'Db': 'Bbm', 'Ab': 'Fm', 'Eb': 'Cm', 'Bb': 'Gm', 'F': 'Dm'
     };
 
-    // ===== ZOOM: logarithmic mapping so 1.00 sits exactly at slider center =====
     const MS_MIN = 0.1;
     const MS_MAX = 10;
 
@@ -1177,7 +1180,6 @@
       return Math.round(t * 1000) / 10;
     }
 
-    // ===== SETTINGS =====
     const SETTINGS_KEY = 'chordChartSettings';
     const EDITOR_STATE_KEY = 'chordChartEditorHidden';
 
@@ -1185,9 +1187,9 @@
       masterScale: 1,
       uiScale: 1,
       editorScale: 1,
-      chordFont: "'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace",
+      chordFont: "Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace",
       chordFontCustom: '',
-      lyricFont: "'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace",
+      lyricFont: "Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace",
       lyricFontCustom: '',
       chordSizeMult: 1,
       lyricSize: 0.85,
@@ -1312,7 +1314,6 @@
       if (e.target === settingsOverlay) closeSettings();
     });
 
-    // ---- Zoom (master scale) — toolbar ----
     function setMasterScale(v) {
       v = clampNum(v, MS_MIN, MS_MAX);
       v = Math.round(v * 20) / 20;
@@ -1337,7 +1338,6 @@
       setMasterScale(1);
     });
 
-    // ---- UI scale ----
     function setUIScale(v) {
       v = clampNum(v, 0.7, 1.6);
       settings.uiScale = v;
@@ -1357,7 +1357,6 @@
       this.value = settings.uiScale.toFixed(2);
     });
 
-    // ---- Editor scale ----
     function setEditorScale(v) {
       v = clampNum(v, 0.7, 2);
       settings.editorScale = v;
@@ -1377,7 +1376,6 @@
       this.value = settings.editorScale.toFixed(2);
     });
 
-    // Chord font
     chordFontSelect.addEventListener('change', function() {
       if (this.value === '__custom__') {
         chordFontCustomRow.classList.add('show');
@@ -1416,7 +1414,6 @@
       this.value = settings.chordSizeMult.toFixed(2);
     });
 
-    // Lyric font
     lyricFontSelect.addEventListener('change', function() {
       if (this.value === '__custom__') {
         lyricFontCustomRow.classList.add('show');
@@ -1500,8 +1497,6 @@
       syncSettingsUI();
       applySettings();
     });
-
-    // ===== END SETTINGS =====
 
     function updateKeyDisplay() {
       const majorRoot = keySelect.value;
@@ -2078,7 +2073,6 @@
       }
     });
 
-    // ===== EDITOR SHOW/HIDE (advanced mode) =====
     function applyEditorState(hidden) {
       isEditorCollapsed = hidden;
       inputArea.classList.toggle('collapsed', hidden);
@@ -2093,7 +2087,6 @@
       saveEditorHiddenState(newHidden);
     });
 
-    // ===== MODE SWITCH =====
     function applyMode(advanced) {
       isAdvancedMode = advanced;
       if (advanced) {
@@ -2112,8 +2105,6 @@
     toggleModeBtn.addEventListener('click', function() {
       applyMode(!isAdvancedMode);
     });
-
-    // ===== END MODE SWITCH =====
 
     function expandSectionShortcut(name) {
       const trimmed = name.trim();
@@ -2213,9 +2204,6 @@
       return simplified;
     }
 
-    const measureCanvas = document.createElement('canvas');
-    const measureCtx = measureCanvas.getContext('2d');
-
     function getChordFontStackForMeasure() {
       return effectiveFont(settings.chordFont, settings.chordFontCustom);
     }
@@ -2274,7 +2262,7 @@
       const finalSize = bestSize * mult * ms;
 
       chordLines.forEach(row => {
-        row.querySelectorAll('.chord-token').forEach(t => {
+        row.querySelectorAll('.chord-token, .space, .pipe').forEach(t => {
           t.style.fontSize = Math.round(finalSize * 100) / 100 + 'rem';
         });
       });
@@ -2287,7 +2275,9 @@
 
       for (const token of tokens) {
         if (/^\s+$/.test(token)) {
-          html += `<span class="space">${token.replace(/ /g, ' ')}</span>`;
+          for (let i = 0; i < token.length; i++) {
+            html += `<span class="space"></span>`;
+          }
           continue;
         }
 
@@ -2565,7 +2555,7 @@
         e.preventDefault();
         transposeUp();
       }
-      if (e.ctrlKey && e.shiftKey && (e.key === 'ArrowDown' || e.key === '-')) {
+      if (e.ctrlKey && e.shiftKey && (e.key === 'ArrowDown' || e.key === '-' || e.key === '_')) {
         e.preventDefault();
         transposeDown();
       }
@@ -2574,7 +2564,6 @@
       }
     });
 
-    // ===== INIT =====
     loadSettings();
     syncSettingsUI();
     applySettings();
