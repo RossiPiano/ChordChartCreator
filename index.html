@@ -8,9 +8,24 @@
   <style>
     * {
       box-sizing: border-box;
-      font-family: 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace;
+      font-family: var(--font-chord, 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace);
       margin: 0;
       padding: 0;
+    }
+    :root {
+      --font-chord: 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace;
+      --font-lyric: 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace;
+      --chord-size-mult: 1;
+      --lyric-size: 0.85rem;
+      --label-size: 1rem;
+      --label-radius: 4px;
+      --barline-width: 5px;
+      --barline-height-mult: 2;
+      --ui-scale: 1;
+      --editor-scale: 1;
+    }
+    html {
+      font-size: clamp(14px, 1.05vw + 8px, 18px);
     }
     html, body {
       height: 100%;
@@ -18,63 +33,62 @@
     }
     body {
       background: #d4c5a0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 12px;
+      padding: 0;
+      margin: 0;
     }
     .app {
-      max-width: 1200px;
-      width: 100%;
-      height: 100%;
-      max-height: 98vh;
+      max-width: none;
+      width: 100vw;
+      height: 100vh;
       background: #f5ede0;
-      border-radius: 24px;
-      box-shadow: 0 16px 32px -12px rgba(0,0,0,0.3);
+      border-radius: 0;
+      box-shadow: none;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      border: 1px solid #dcc9b0;
+      border: none;
     }
     .toolbar {
       background: #e8dccc;
-      padding: 8px 16px;
+      padding: calc(10px * var(--ui-scale)) calc(18px * var(--ui-scale));
       border-bottom: 2px solid #dcc9b0;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 4px 10px;
+      gap: calc(8px * var(--ui-scale)) calc(12px * var(--ui-scale));
       flex-shrink: 0;
     }
     .toolbar-left {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-right: auto;
+      gap: calc(10px * var(--ui-scale));
       flex-wrap: wrap;
+      width: 100%;
     }
     .toolbar h1 {
-      font-size: 0.9rem;
+      font-size: calc(1.0rem * var(--ui-scale));
       font-weight: 600;
       color: #5c4033;
       letter-spacing: -0.01em;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: calc(6px * var(--ui-scale));
+      margin-right: calc(6px * var(--ui-scale));
     }
     .btn {
       background: #dcc9b0;
       border: 1px solid #c4ad92;
-      padding: 3px 10px;
+      padding: calc(5px * var(--ui-scale)) calc(14px * var(--ui-scale));
       border-radius: 40px;
-      font-size: 0.6rem;
+      font-size: calc(0.85rem * var(--ui-scale));
       font-weight: 500;
       color: #3d2b1f;
       cursor: pointer;
       transition: all 0.15s ease;
       display: inline-flex;
       align-items: center;
-      gap: 2px;
+      gap: calc(4px * var(--ui-scale));
+      white-space: nowrap;
     }
     .btn:hover {
       background: #c4ad92;
@@ -110,16 +124,16 @@
     .btn-toggle {
       background: #dcc9b0;
       border: 1px solid #c4ad92;
-      padding: 3px 10px;
+      padding: calc(5px * var(--ui-scale)) calc(14px * var(--ui-scale));
       border-radius: 40px;
-      font-size: 0.6rem;
+      font-size: calc(0.85rem * var(--ui-scale));
       font-weight: 500;
       color: #3d2b1f;
       cursor: pointer;
       transition: all 0.15s ease;
       display: inline-flex;
       align-items: center;
-      gap: 2px;
+      gap: calc(4px * var(--ui-scale));
       white-space: nowrap;
     }
     .btn-toggle:hover {
@@ -136,22 +150,23 @@
       border-color: #7a5d3f;
       color: white;
       font-weight: 700;
-      min-width: 28px;
+      min-width: calc(34px * var(--ui-scale));
       justify-content: center;
-      padding: 3px 6px;
+      padding: calc(5px * var(--ui-scale)) calc(8px * var(--ui-scale));
+      font-size: calc(0.9rem * var(--ui-scale));
     }
     .btn-transpose:hover {
       background: #7a5d3f;
       border-color: #6b4f35;
     }
     .transpose-info {
-      font-size: 0.55rem;
+      font-size: calc(0.8rem * var(--ui-scale));
       color: #5c4033;
       background: #dcc9b0;
-      padding: 2px 8px;
+      padding: calc(4px * var(--ui-scale)) calc(10px * var(--ui-scale));
       border-radius: 40px;
       font-weight: 500;
-      min-width: 20px;
+      min-width: calc(28px * var(--ui-scale));
       text-align: center;
     }
     .dropdown {
@@ -164,22 +179,25 @@
       top: 100%;
       left: 0;
       background-color: #f5ede0;
-      min-width: 220px;
-      max-height: 350px;
+      min-width: calc(260px * var(--ui-scale));
+      max-width: min(calc(560px * var(--ui-scale)), 90vw);
+      width: max-content;
+      max-height: 400px;
       overflow-y: auto;
+      overflow-x: hidden;
       box-shadow: 0 8px 16px rgba(0,0,0,0.15);
       border-radius: 8px;
       border: 1px solid #dcc9b0;
       z-index: 100;
-      padding: 4px 0;
-      margin-top: 2px;
+      padding: 6px 0;
+      margin-top: 4px;
     }
     .dropdown-content.show {
       display: block;
     }
     .dropdown-content .dropdown-item {
-      padding: 6px 14px;
-      font-size: 0.6rem;
+      padding: calc(8px * var(--ui-scale)) calc(16px * var(--ui-scale));
+      font-size: calc(0.85rem * var(--ui-scale));
       font-weight: 500;
       color: #5c4033;
       cursor: pointer;
@@ -197,15 +215,20 @@
       color: white;
     }
     .dropdown-content .dropdown-item.song-item {
-      padding-left: 8px;
-      font-size: 0.55rem;
+      padding-left: calc(6px * var(--ui-scale));
+      padding-right: calc(12px * var(--ui-scale));
+      font-size: calc(0.8rem * var(--ui-scale));
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: calc(6px * var(--ui-scale));
     }
     .dropdown-content .dropdown-item.song-item .song-name {
-      flex: 1;
-      padding-left: 8px;
+      flex: 1 1 auto;
+      min-width: 0;
+      padding-left: calc(2px * var(--ui-scale));
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .dropdown-content .dropdown-item.song-item .song-name::before {
       content: '🎵 ';
@@ -214,19 +237,20 @@
       background: none;
       border: none;
       color: #c45a4a;
-      font-size: 0.7rem;
+      font-size: calc(0.9rem * var(--ui-scale));
       cursor: pointer;
-      padding: 0 4px;
+      padding: 0 calc(4px * var(--ui-scale));
       font-weight: 600;
       opacity: 0.6;
+      flex: 0 0 auto;
     }
     .dropdown-content .dropdown-item.song-item .remove-btn:hover {
       opacity: 1;
     }
     .dropdown-content .dropdown-item.folder-item {
-      padding-left: 8px;
+      padding-left: calc(10px * var(--ui-scale));
       font-weight: 600;
-      font-size: 0.6rem;
+      font-size: calc(0.85rem * var(--ui-scale));
       color: #8b6b4a;
       cursor: pointer;
       display: flex;
@@ -237,17 +261,17 @@
       content: '📁 ';
     }
     .dropdown-content .dropdown-item.folder-item .folder-arrow {
-      font-size: 0.5rem;
+      font-size: calc(0.7rem * var(--ui-scale));
       color: #b0987a;
-      margin-left: 8px;
+      margin-left: calc(8px * var(--ui-scale));
     }
     .dropdown-divider {
       border-top: 1px solid #dcc9b0;
-      margin: 4px 8px;
+      margin: 6px 8px;
     }
     .dropdown-label {
-      padding: 4px 14px 2px 14px;
-      font-size: 0.5rem;
+      padding: calc(6px * var(--ui-scale)) calc(16px * var(--ui-scale)) calc(3px * var(--ui-scale)) calc(16px * var(--ui-scale));
+      font-size: calc(0.7rem * var(--ui-scale));
       font-weight: 600;
       color: #b0987a;
       text-transform: uppercase;
@@ -259,22 +283,25 @@
       left: 100%;
       top: -4px;
       background-color: #f5ede0;
-      min-width: 180px;
-      max-height: 300px;
+      min-width: calc(200px * var(--ui-scale));
+      max-width: min(calc(520px * var(--ui-scale)), 80vw);
+      width: max-content;
+      max-height: 350px;
       overflow-y: auto;
+      overflow-x: hidden;
       box-shadow: 0 8px 16px rgba(0,0,0,0.15);
       border-radius: 8px;
       border: 1px solid #dcc9b0;
       z-index: 200;
-      padding: 4px 0;
+      padding: 6px 0;
       margin-left: 2px;
     }
     .subfolder-popup.show {
       display: block;
     }
     .subfolder-popup .dropdown-item {
-      padding: 6px 14px;
-      font-size: 0.55rem;
+      padding: calc(8px * var(--ui-scale)) calc(16px * var(--ui-scale));
+      font-size: calc(0.8rem * var(--ui-scale));
       font-weight: 500;
       color: #5c4033;
       cursor: pointer;
@@ -284,20 +311,39 @@
       background: #ece0cf;
     }
     .subfolder-popup .dropdown-item.song-item {
-      padding-left: 8px;
+      padding-left: calc(6px * var(--ui-scale));
+      padding-right: calc(12px * var(--ui-scale));
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: calc(6px * var(--ui-scale));
     }
     .subfolder-popup .dropdown-item.song-item .song-name {
-      flex: 1;
-      padding-left: 8px;
+      flex: 1 1 auto;
+      min-width: 0;
+      padding-left: calc(2px * var(--ui-scale));
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .subfolder-popup .dropdown-item.song-item .song-name::before {
       content: '🎵 ';
     }
+    .subfolder-popup .dropdown-item.song-item .remove-btn {
+      background: none;
+      border: none;
+      color: #c45a4a;
+      font-size: calc(0.9rem * var(--ui-scale));
+      cursor: pointer;
+      padding: 0 calc(4px * var(--ui-scale));
+      font-weight: 600;
+      opacity: 0.6;
+      flex: 0 0 auto;
+    }
+    .subfolder-popup .dropdown-item.song-item .remove-btn:hover {
+      opacity: 1;
+    }
     .subfolder-popup .dropdown-item.folder-item {
-      padding-left: 8px;
+      padding-left: calc(10px * var(--ui-scale));
       font-weight: 600;
       color: #8b6b4a;
       cursor: pointer;
@@ -308,6 +354,77 @@
     .subfolder-popup .dropdown-item.folder-item::before {
       content: '📂 ';
     }
+
+    /* ====== TOOLBAR ZOOM (master scale) ====== */
+    .toolbar-zoom {
+      display: inline-flex;
+      align-items: center;
+      gap: calc(8px * var(--ui-scale));
+      background: #dcc9b0;
+      border: 1px solid #c4ad92;
+      padding: calc(3px * var(--ui-scale)) calc(6px * var(--ui-scale)) calc(3px * var(--ui-scale)) calc(12px * var(--ui-scale));
+      border-radius: 40px;
+      font-size: calc(0.85rem * var(--ui-scale));
+      color: #5c4033;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .toolbar-zoom .toolbar-zoom-label {
+      font-size: calc(0.85rem * var(--ui-scale));
+    }
+    .toolbar-zoom input[type="range"] {
+      width: calc(110px * var(--ui-scale));
+      accent-color: #8b6b4a;
+      cursor: pointer;
+      margin: 0;
+      vertical-align: middle;
+    }
+    .toolbar-zoom input[type="number"] {
+      width: calc(60px * var(--ui-scale));
+      border: 1px solid #c4ad92;
+      border-radius: 6px;
+      padding: calc(3px * var(--ui-scale)) calc(6px * var(--ui-scale));
+      font-size: calc(0.8rem * var(--ui-scale));
+      font-family: inherit;
+      color: #3d2b1f;
+      background: #ffffff;
+      outline: none;
+      text-align: right;
+      -moz-appearance: textfield;
+    }
+    .toolbar-zoom input[type="number"]::-webkit-outer-spin-button,
+    .toolbar-zoom input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .toolbar-zoom input[type="number"]:focus {
+      border-color: #8b6b4a;
+      box-shadow: 0 0 0 2px rgba(139, 107, 74, 0.2);
+    }
+    .toolbar-zoom-reset {
+      background: transparent;
+      border: none;
+      color: #8b6b4a;
+      font-size: calc(1.05rem * var(--ui-scale));
+      line-height: 1;
+      padding: calc(3px * var(--ui-scale)) calc(8px * var(--ui-scale)) calc(3px * var(--ui-scale)) calc(6px * var(--ui-scale));
+      margin-left: 0;
+      cursor: pointer;
+      border-radius: 50%;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: inherit;
+    }
+    .toolbar-zoom-reset:hover {
+      background: #c4ad92;
+      color: #3d2b1f;
+    }
+    .toolbar-zoom-reset:active {
+      background: #b0987a;
+    }
+
     .editor-wrapper {
       display: flex;
       flex-direction: column;
@@ -317,7 +434,7 @@
     .preview-area {
       width: 100%;
       background: #f5ede0;
-      padding: 8px 16px 12px 16px;
+      padding: 12px 20px 16px 20px;
       flex: 1;
       min-height: 0;
       display: flex;
@@ -336,6 +453,7 @@
       height: 200px;
       overflow: hidden;
       position: relative;
+      transition: height 0.2s ease, padding 0.2s ease;
     }
     .input-area.collapsed {
       max-height: 0;
@@ -382,9 +500,9 @@
       border: 1px solid #dcc9b0;
       border-radius: 10px;
       padding: 8px 12px;
-      font-size: 0.7rem;
+      font-size: calc(0.8rem * var(--editor-scale));
       line-height: 1.5;
-      font-family: 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace;
+      font-family: var(--font-chord, 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace);
       resize: none;
       background: #ffffff;
       color: #3d2b1f;
@@ -406,7 +524,7 @@
       border-radius: 12px;
       border: 2px dashed #8b6b4a;
       color: #5c4033;
-      font-size: 0.9rem;
+      font-size: 1.0rem;
       font-weight: 600;
       pointer-events: none;
       z-index: 20;
@@ -417,14 +535,14 @@
     .chord-preview {
       background: #ffffff;
       border-radius: 12px;
-      padding: 10px 16px;
+      padding: 16px 24px;
       flex: 1;
       min-height: 80px;
       overflow-y: auto;
       overflow-x: hidden;
       border: 1px solid #dcc9b0;
       box-shadow: inset 0 2px 4px rgba(0,0,0,0.04);
-      font-family: 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace;
+      font-family: var(--font-chord, 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace);
       line-height: 1.9;
       color: #3d2b1f;
     }
@@ -455,7 +573,7 @@
       padding: 1px 4px;
       font-weight: 700;
       white-space: nowrap;
-      font-family: 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace;
+      font-family: var(--font-chord, 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace);
       font-size: 0.85rem;
       vertical-align: middle;
     }
@@ -464,16 +582,13 @@
     }
     .chord-line .barline {
       display: inline-block;
-      width: 5px;
-      height: 1em; /* overridden dynamically by JS to match the chord font size */
+      width: var(--barline-width, 5px);
+      height: 1em;
       background-color: #c4ad92;
       vertical-align: middle;
       margin: 0 10px 0 6px;
       position: relative;
       top: 0.05em;
-    }
-    .chord-line .barline.barline-end {
-      margin: 0 4px 0 10px;
     }
     .chord-line .space {
       display: inline-block;
@@ -489,10 +604,15 @@
       display: block;
       padding: 1px 2px;
       font-weight: 400;
-      white-space: nowrap;
+      white-space: normal;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
       text-align: left;
       min-height: 18px;
       color: #3d2b1f;
+      font-size: var(--lyric-size, 0.85rem);
+      line-height: 1.5;
+      font-family: var(--font-lyric, 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace);
     }
     .hr-line {
       display: block;
@@ -513,18 +633,18 @@
       height: 24px;
     }
 
-    /* SECTION LABELS - Roboto Mono Bold for name, normal for extra */
+    /* SECTION LABELS */
     .section-block {
       margin: 3px 0 2px 0;
       display: inline-block;
-      border-radius: 4px;
-      padding: 0px 10px;
+      border-radius: var(--label-radius, 4px);
+      padding: 0px 12px;
     }
     .section-block .section {
-      font-family: 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace;
+      font-family: var(--font-chord, 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace);
       color: #FFFFFF;
       display: inline-block;
-      font-size: 2rem;  /* <-- change this value */
+      font-size: var(--label-size, 1rem);
     }
     .section-block .section .section-name {
       font-weight: 700;
@@ -567,20 +687,21 @@
     .key-selector {
       display: flex;
       align-items: center;
-      gap: 4px;
-      font-size: 0.6rem;
+      gap: calc(6px * var(--ui-scale));
+      font-size: calc(0.85rem * var(--ui-scale));
       color: #5c4033;
       font-weight: 500;
       background: #dcc9b0;
-      padding: 2px 8px 2px 10px;
+      padding: calc(3px * var(--ui-scale)) calc(10px * var(--ui-scale)) calc(3px * var(--ui-scale)) calc(12px * var(--ui-scale));
       border-radius: 40px;
+      white-space: nowrap;
     }
     .key-selector select {
       background: #f5ede0;
       border: 1px solid #c4ad92;
       border-radius: 40px;
-      padding: 1px 6px;
-      font-size: 0.55rem;
+      padding: calc(3px * var(--ui-scale)) calc(8px * var(--ui-scale));
+      font-size: calc(0.8rem * var(--ui-scale));
       font-weight: 500;
       color: #3d2b1f;
       outline: none;
@@ -590,23 +711,238 @@
       background: #f5ede0;
       border: 1px solid #c4ad92;
       border-radius: 40px;
-      padding: 1px 6px;
-      font-size: 0.5rem;
+      padding: calc(3px * var(--ui-scale)) calc(8px * var(--ui-scale));
+      font-size: calc(0.75rem * var(--ui-scale));
       font-weight: 500;
       color: #3d2b1f;
       outline: none;
       cursor: pointer;
     }
+
+    /* ====== EASY MODE ====== */
+    body.easy-mode .advanced-only {
+      display: none !important;
+    }
+    body.easy-mode .input-area {
+      max-height: 0;
+      padding: 0;
+      border-top: none;
+      min-height: 0;
+      height: 0 !important;
+    }
+
+    /* ====== SETTINGS MODAL ====== */
+    .settings-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(60, 40, 25, 0.35);
+      z-index: 5000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .settings-overlay.show {
+      display: flex;
+    }
+    .settings-panel {
+      background: #f5ede0;
+      border: 1px solid #dcc9b0;
+      border-radius: 16px;
+      box-shadow: 0 24px 48px -12px rgba(0,0,0,0.35);
+      width: 100%;
+      max-width: 640px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .settings-header {
+      padding: 14px 20px;
+      background: #e8dccc;
+      border-bottom: 2px solid #dcc9b0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .settings-header h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #5c4033;
+    }
+    .settings-close {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      color: #8b6b4a;
+      cursor: pointer;
+      padding: 0 6px;
+      line-height: 1;
+    }
+    .settings-close:hover {
+      color: #5c4033;
+    }
+    .settings-body {
+      padding: 16px 20px;
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+    }
+    .settings-section {
+      margin-bottom: 22px;
+    }
+    .settings-section:last-child {
+      margin-bottom: 4px;
+    }
+    .settings-section h3 {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #b0987a;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #dcc9b0;
+    }
+    .settings-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .settings-row label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #5c4033;
+      flex: 0 0 160px;
+    }
+    .settings-row input[type="range"] {
+      flex: 1;
+      accent-color: #8b6b4a;
+      cursor: pointer;
+      min-width: 0;
+    }
+    .settings-row input[type="text"] {
+      flex: 1;
+      border: 1px solid #c4ad92;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.8rem;
+      font-family: inherit;
+      color: #3d2b1f;
+      background: #ffffff;
+      outline: none;
+      min-width: 0;
+    }
+    .settings-row input[type="text"]:focus {
+      border-color: #8b6b4a;
+      box-shadow: 0 0 0 2px rgba(139, 107, 74, 0.2);
+    }
+    .settings-row input[type="number"].settings-num {
+      flex: 0 0 80px;
+      border: 1px solid #c4ad92;
+      border-radius: 6px;
+      padding: 4px 6px;
+      font-size: 0.8rem;
+      font-family: inherit;
+      color: #3d2b1f;
+      background: #ffffff;
+      outline: none;
+      text-align: right;
+      -moz-appearance: textfield;
+    }
+    .settings-row input[type="number"].settings-num::-webkit-outer-spin-button,
+    .settings-row input[type="number"].settings-num::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .settings-row input[type="number"].settings-num:focus {
+      border-color: #8b6b4a;
+      box-shadow: 0 0 0 2px rgba(139, 107, 74, 0.2);
+    }
+    .settings-row select {
+      flex: 1;
+      border: 1px solid #c4ad92;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.8rem;
+      font-family: inherit;
+      color: #3d2b1f;
+      background: #ffffff;
+      outline: none;
+      cursor: pointer;
+      min-width: 0;
+    }
+    .settings-row select:focus {
+      border-color: #8b6b4a;
+    }
+    .settings-footer {
+      padding: 12px 20px;
+      border-top: 1px solid #dcc9b0;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      background: #f0e5d3;
+      flex-shrink: 0;
+    }
+    .settings-footer .btn {
+      padding: 6px 16px;
+      font-size: 0.85rem;
+    }
+    .custom-font-field {
+      display: none;
+    }
+    .custom-font-field.show {
+      display: flex;
+    }
+
+    @media (max-width: 600px) {
+      .settings-row {
+        flex-wrap: wrap;
+      }
+      .settings-row label {
+        flex: 0 0 100%;
+        margin-bottom: 2px;
+      }
+      .settings-row input[type="number"].settings-num {
+        flex: 0 0 70px;
+      }
+      .toolbar-zoom input[type="range"] {
+        width: calc(80px * var(--ui-scale));
+      }
+    }
   </style>
 </head>
-<body>
+<body class="easy-mode">
 <div class="app">
   <div class="toolbar">
     <div class="toolbar-left">
       <h1>🎸 Chord Chart Creator</h1>
-      <button class="btn-toggle" id="toggleEditor">▲ Hide Editor</button>
-      <div class="key-selector">
-        <span>Key:</span>
+      <button class="btn-toggle" id="toggleMode" title="Switch between Easy and Advanced mode">😵 Switch to ADVANCED MODE</button>
+
+      <div class="dropdown">
+        <button class="btn btn-outline" id="dropdownToggle">📄 Songs ▼</button>
+        <div class="dropdown-content" id="dropdownContent">
+          <div class="dropdown-label" id="songsLabel">📂 LOAD/CLEAR SONGS</div>
+          <div class="dropdown-item" id="selectFolder" style="color: #8b6b4a; font-weight: 600;">📁 Select Song Folder</div>
+          <div class="dropdown-item" id="loadSingleFile" style="color: #8b6b4a; font-weight: 600;">📄 Open 1 Song File</div>
+          <div class="dropdown-item" id="clearStoredSongs" style="color: #5c4033; font-weight: 500;">🗑️ Clear Song List Below</div>
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-label">🎵 SONG LIST</div>
+          <div id="songsList"></div>
+        </div>
+      </div>
+
+      <div class="toolbar-zoom" title="Zoom — scales chords, lyrics, labels and barlines together">
+        <span class="toolbar-zoom-label">🔍 Zoom:</span>
+        <input type="range" id="masterScaleSlider" min="0" max="100" step="0.5" value="50">
+        <input type="number" id="masterScaleNum" min="0.5" max="2" step="0.05" value="1">
+        <button class="toolbar-zoom-reset" id="masterScaleReset" title="Reset zoom to 1.00">↺</button>
+      </div>
+
+      <div class="key-selector advanced-only">
+        <span>🔑 Key:</span>
         <select id="keySelect">
           <option value="C">C</option>
           <option value="G">G</option>
@@ -626,25 +962,18 @@
           <option value="major">Major</option>
           <option value="minor" selected>Minor</option>
         </select>
-        <span style="font-size:0.5rem; opacity:0.7;" id="keyDisplay">(Dm)</span>
+        <span style="font-size:0.8rem; opacity:0.7;" id="keyDisplay">(Dm)</span>
       </div>
-      <button class="btn-transpose" id="transposeDown" title="Transpose down a semitone">♭</button>
-      <span class="transpose-info" id="transposeInfo">0</span>
-      <button class="btn-transpose" id="transposeUp" title="Transpose up a semitone">♯</button>
-      <div class="dropdown">
-        <button class="btn btn-outline" id="dropdownToggle">📄 Songs ▼</button>
-        <div class="dropdown-content" id="dropdownContent">
-          <div class="dropdown-label" id="songsLabel">📂 LOAD/CLEAR SONGS</div>
-          <div class="dropdown-item" id="selectFolder" style="color: #8b6b4a; font-weight: 600;">📁 Select Song Folder</div>
-          <div class="dropdown-item" id="loadSingleFile" style="color: #8b6b4a; font-weight: 600;">📄 Open 1 Song File</div>
-          <div class="dropdown-item" id="clearStoredSongs" style="color: #5c4033; font-weight: 500;">🗑️ Clear Song List Below</div>
-          <div class="dropdown-divider"></div>
-          <div class="dropdown-label">🎵 SONG LIST</div>
-          <div id="songsList"></div>
-        </div>
-      </div>
-      <button class="btn btn-success" id="exportPNG">📷 Export PNG</button>
-      <button class="btn btn-success" id="saveTXT">💾 Save TXT</button>
+
+      <button class="btn-transpose advanced-only" id="transposeDown" title="Transpose down a semitone">♭</button>
+      <span class="transpose-info advanced-only" id="transposeInfo">0</span>
+      <button class="btn-transpose advanced-only" id="transposeUp" title="Transpose up a semitone">♯</button>
+
+      <button class="btn-toggle advanced-only" id="toggleEditor">▲ Hide Editor</button>
+
+      <button class="btn btn-success advanced-only" id="exportPNG">📷 Save Chord Chart as PNG</button>
+      <button class="btn btn-success advanced-only" id="saveTXT">💾 Save Editor's text as TXT</button>
+      <button class="btn btn-outline advanced-only" id="openSettings" title="Open settings">⚙ Settings</button>
     </div>
   </div>
   <div class="editor-wrapper">
@@ -662,6 +991,123 @@
     </div>
   </div>
 </div>
+
+<!-- Settings modal -->
+<div class="settings-overlay" id="settingsOverlay">
+  <div class="settings-panel">
+    <div class="settings-header">
+      <h2>⚙ Settings</h2>
+      <button class="settings-close" id="settingsClose" title="Close">✕</button>
+    </div>
+    <div class="settings-body">
+
+      <div class="settings-section">
+        <h3>Interface</h3>
+        <div class="settings-row">
+          <label for="uiScaleSlider">UI scale</label>
+          <input type="range" id="uiScaleSlider" min="0.7" max="1.6" step="0.05" value="1">
+          <input type="number" class="settings-num" id="uiScaleNum" min="0.7" max="1.6" step="0.05" value="1">
+        </div>
+        <div class="settings-row">
+          <label for="editorScaleSlider">Editor text size</label>
+          <input type="range" id="editorScaleSlider" min="0.7" max="2" step="0.05" value="1">
+          <input type="number" class="settings-num" id="editorScaleNum" min="0.7" max="2" step="0.05" value="1">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Chord Font</h3>
+        <div class="settings-row">
+          <label for="chordFontSelect">Font family</label>
+          <select id="chordFontSelect">
+            <option value="'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace">Fira Code</option>
+            <option value="'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', monospace">JetBrains Mono</option>
+            <option value="'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Menlo', 'Consolas', monospace">Cascadia Code</option>
+            <option value="'Roboto Mono', 'Fira Code', 'JetBrains Mono', 'Menlo', 'Consolas', monospace">Roboto Mono</option>
+            <option value="'IBM Plex Mono', 'Fira Code', 'JetBrains Mono', 'Menlo', 'Consolas', monospace">IBM Plex Mono</option>
+            <option value="'Menlo', 'Consolas', 'Fira Code', monospace">Menlo</option>
+            <option value="'Consolas', 'Menlo', 'Fira Code', monospace">Consolas</option>
+            <option value="monospace">System monospace</option>
+            <option value="__custom__">Custom…</option>
+          </select>
+        </div>
+        <div class="settings-row custom-font-field" id="chordFontCustomRow">
+          <label for="chordFontCustom">Custom name</label>
+          <input type="text" id="chordFontCustom" placeholder="e.g. FC Home, Sarabun">
+        </div>
+        <div class="settings-row">
+          <label for="chordSizeSlider">Chord size</label>
+          <input type="range" id="chordSizeSlider" min="0.5" max="2.5" step="0.05" value="1">
+          <input type="number" class="settings-num" id="chordSizeNum" min="0.5" max="2.5" step="0.05" value="1">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Lyrics Font</h3>
+        <div class="settings-row">
+          <label for="lyricFontSelect">Font family</label>
+          <select id="lyricFontSelect">
+            <option value="'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace">Fira Code</option>
+            <option value="'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', monospace">JetBrains Mono</option>
+            <option value="'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Menlo', 'Consolas', monospace">Cascadia Code</option>
+            <option value="'Roboto Mono', 'Fira Code', 'JetBrains Mono', 'Menlo', 'Consolas', monospace">Roboto Mono</option>
+            <option value="'IBM Plex Mono', 'Fira Code', 'JetBrains Mono', 'Menlo', 'Consolas', monospace">IBM Plex Mono</option>
+            <option value="'IBM Plex Sans Thai', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">IBM Plex Sans Thai</option>
+            <option value="'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">Sarabun (Thai)</option>
+            <option value="'Prompt', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">Prompt (Thai)</option>
+            <option value="'Noto Sans Thai', 'Sarabun', system-ui, sans-serif">Noto Sans Thai</option>
+            <option value="'Kanit', 'Sarabun', system-ui, sans-serif">Kanit (Thai)</option>
+            <option value="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">System sans</option>
+            <option value="monospace">System monospace</option>
+            <option value="__custom__">Custom…</option>
+          </select>
+        </div>
+        <div class="settings-row custom-font-field" id="lyricFontCustomRow">
+          <label for="lyricFontCustom">Custom name</label>
+          <input type="text" id="lyricFontCustom" placeholder="e.g. FC Home, Sarabun">
+        </div>
+        <div class="settings-row">
+          <label for="lyricSizeSlider">Lyric size</label>
+          <input type="range" id="lyricSizeSlider" min="0.5" max="8" step="0.05" value="0.85">
+          <input type="number" class="settings-num" id="lyricSizeNum" min="0.5" max="8" step="0.05" value="0.85">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Section Labels</h3>
+        <div class="settings-row">
+          <label for="labelSizeSlider">Label size</label>
+          <input type="range" id="labelSizeSlider" min="0.6" max="8" step="0.05" value="1">
+          <input type="number" class="settings-num" id="labelSizeNum" min="0.6" max="8" step="0.05" value="1">
+        </div>
+        <div class="settings-row">
+          <label for="labelRadiusSlider">Corner roundness</label>
+          <input type="range" id="labelRadiusSlider" min="0" max="20" step="0.5" value="4">
+          <input type="number" class="settings-num" id="labelRadiusNum" min="0" max="20" step="0.5" value="4">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Barlines</h3>
+        <div class="settings-row">
+          <label for="barlineWidthSlider">Barline width</label>
+          <input type="range" id="barlineWidthSlider" min="1" max="10" step="0.5" value="5">
+          <input type="number" class="settings-num" id="barlineWidthNum" min="1" max="10" step="0.5" value="5">
+        </div>
+        <div class="settings-row">
+          <label for="barlineHeightSlider">Barline height</label>
+          <input type="range" id="barlineHeightSlider" min="1" max="3.5" step="0.05" value="2">
+          <input type="number" class="settings-num" id="barlineHeightNum" min="1" max="3.5" step="0.05" value="2">
+        </div>
+      </div>
+    </div>
+    <div class="settings-footer">
+      <button class="btn btn-outline" id="settingsReset">↺ Reset to defaults</button>
+      <button class="btn btn-success" id="settingsDone">Done</button>
+    </div>
+  </div>
+</div>
+
 <script>
   (function() {
     const inputEl = document.getElementById('chartInput');
@@ -670,6 +1116,12 @@
     const inputArea = document.getElementById('inputArea');
     const previewArea = document.getElementById('previewArea');
     const toggleBtn = document.getElementById('toggleEditor');
+    const toggleModeBtn = document.getElementById('toggleMode');
+    const openSettingsBtn = document.getElementById('openSettings');
+    const settingsOverlay = document.getElementById('settingsOverlay');
+    const settingsClose = document.getElementById('settingsClose');
+    const settingsDone = document.getElementById('settingsDone');
+    const settingsReset = document.getElementById('settingsReset');
     const resizeHandle = document.getElementById('resizeHandle');
     const dropdownToggle = document.getElementById('dropdownToggle');
     const dropdownContent = document.getElementById('dropdownContent');
@@ -682,8 +1134,36 @@
     const keyModeSelect = document.getElementById('keyModeSelect');
     const keyDisplay = document.getElementById('keyDisplay');
 
+    // Settings controls (zoom moved to toolbar)
+    const masterScaleSlider = document.getElementById('masterScaleSlider');
+    const masterScaleNum = document.getElementById('masterScaleNum');
+    const masterScaleReset = document.getElementById('masterScaleReset');
+    const uiScaleSlider = document.getElementById('uiScaleSlider');
+    const uiScaleNum = document.getElementById('uiScaleNum');
+    const editorScaleSlider = document.getElementById('editorScaleSlider');
+    const editorScaleNum = document.getElementById('editorScaleNum');
+    const chordFontSelect = document.getElementById('chordFontSelect');
+    const chordFontCustomRow = document.getElementById('chordFontCustomRow');
+    const chordFontCustom = document.getElementById('chordFontCustom');
+    const chordSizeSlider = document.getElementById('chordSizeSlider');
+    const chordSizeNum = document.getElementById('chordSizeNum');
+    const lyricFontSelect = document.getElementById('lyricFontSelect');
+    const lyricFontCustomRow = document.getElementById('lyricFontCustomRow');
+    const lyricFontCustom = document.getElementById('lyricFontCustom');
+    const lyricSizeSlider = document.getElementById('lyricSizeSlider');
+    const lyricSizeNum = document.getElementById('lyricSizeNum');
+    const labelSizeSlider = document.getElementById('labelSizeSlider');
+    const labelSizeNum = document.getElementById('labelSizeNum');
+    const labelRadiusSlider = document.getElementById('labelRadiusSlider');
+    const labelRadiusNum = document.getElementById('labelRadiusNum');
+    const barlineWidthSlider = document.getElementById('barlineWidthSlider');
+    const barlineWidthNum = document.getElementById('barlineWidthNum');
+    const barlineHeightSlider = document.getElementById('barlineHeightSlider');
+    const barlineHeightNum = document.getElementById('barlineHeightNum');
+
     let currentSection = '';
     let isEditorCollapsed = false;
+    let isAdvancedMode = false;   // default is Easy Mode on every page load
     let isResizing = false;
     let startY = 0;
     let startHeight = 0;
@@ -709,8 +1189,393 @@
       'F#': 'D#m', 'Gb': 'Ebm', 'Db': 'Bbm', 'Ab': 'Fm', 'Eb': 'Cm', 'Bb': 'Gm', 'F': 'Dm'
     };
 
-    // The font stack used for measuring chords on canvas. Keep this in sync with CSS.
-    const FONT_STACK = "'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace";
+    // ===== ZOOM: logarithmic mapping so 1.00 sits exactly at slider center =====
+    const MS_MIN = 0.5;
+    const MS_MAX = 2;
+
+    function sliderPosToScale(pos) {
+      const t = pos / 100;
+      return MS_MIN * Math.pow(MS_MAX / MS_MIN, t);
+    }
+
+    function scaleToSliderPos(v) {
+      v = Math.min(MS_MAX, Math.max(MS_MIN, v));
+      const t = Math.log(v / MS_MIN) / Math.log(MS_MAX / MS_MIN);
+      return Math.round(t * 1000) / 10;
+    }
+
+    // ===== SETTINGS =====
+    const SETTINGS_KEY = 'chordChartSettings';
+    const EDITOR_STATE_KEY = 'chordChartEditorHidden';
+
+    const DEFAULT_SETTINGS = {
+      masterScale: 1,
+      uiScale: 1,
+      editorScale: 1,
+      chordFont: "'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace",
+      chordFontCustom: '',
+      lyricFont: "'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace",
+      lyricFontCustom: '',
+      chordSizeMult: 1,
+      lyricSize: 0.85,
+      labelSize: 1,
+      labelRadius: 4,
+      barlineWidth: 5,
+      barlineHeightMult: 2
+    };
+
+    let settings = Object.assign({}, DEFAULT_SETTINGS);
+
+    function clampNum(v, min, max) {
+      if (isNaN(v)) return min;
+      return Math.min(max, Math.max(min, v));
+    }
+
+    function loadSettings() {
+      try {
+        const stored = localStorage.getItem(SETTINGS_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          settings = Object.assign({}, DEFAULT_SETTINGS, parsed);
+        }
+      } catch (e) {
+        console.log('Could not load settings, using defaults');
+      }
+    }
+
+    function saveSettings() {
+      try {
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+      } catch (e) {
+        console.log('Could not save settings');
+      }
+    }
+
+    function loadEditorHiddenState() {
+      try {
+        return localStorage.getItem(EDITOR_STATE_KEY) === 'true';
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function saveEditorHiddenState(hidden) {
+      try {
+        localStorage.setItem(EDITOR_STATE_KEY, hidden ? 'true' : 'false');
+      } catch (e) {}
+    }
+
+    function effectiveFont(baseFont, customName) {
+      if (customName && customName.trim()) {
+        return `'${customName.trim().replace(/'/g, "\\'")}', ${baseFont}`;
+      }
+      return baseFont;
+    }
+
+    function applySettings() {
+      const root = document.documentElement;
+      const ms = parseFloat(settings.masterScale) || 1;
+      root.style.setProperty('--font-chord', effectiveFont(settings.chordFont, settings.chordFontCustom));
+      root.style.setProperty('--font-lyric', effectiveFont(settings.lyricFont, settings.lyricFontCustom));
+      root.style.setProperty('--chord-size-mult', settings.chordSizeMult * ms);
+      root.style.setProperty('--lyric-size', (settings.lyricSize * ms) + 'rem');
+      root.style.setProperty('--label-size', (settings.labelSize * ms) + 'rem');
+      root.style.setProperty('--label-radius', settings.labelRadius + 'px');
+      root.style.setProperty('--barline-width', (settings.barlineWidth * ms) + 'px');
+      root.style.setProperty('--barline-height-mult', settings.barlineHeightMult);
+      root.style.setProperty('--ui-scale', settings.uiScale);
+      root.style.setProperty('--editor-scale', settings.editorScale);
+      requestAnimationFrame(() => adjustChordSizes());
+    }
+
+    function syncSettingsUI() {
+      masterScaleSlider.value = scaleToSliderPos(settings.masterScale);
+      masterScaleNum.value = Number(settings.masterScale).toFixed(2);
+
+      uiScaleSlider.value = settings.uiScale;
+      uiScaleNum.value = Number(settings.uiScale).toFixed(2);
+
+      editorScaleSlider.value = settings.editorScale;
+      editorScaleNum.value = Number(settings.editorScale).toFixed(2);
+
+      const chordMatch = [...chordFontSelect.options].find(opt => opt.value === settings.chordFont);
+      if (chordMatch) {
+        chordFontSelect.value = settings.chordFont;
+        chordFontCustomRow.classList.remove('show');
+      } else {
+        chordFontSelect.value = '__custom__';
+        chordFontCustomRow.classList.add('show');
+      }
+      chordFontCustom.value = settings.chordFontCustom || '';
+      chordSizeSlider.value = settings.chordSizeMult;
+      chordSizeNum.value = Number(settings.chordSizeMult).toFixed(2);
+
+      const lyricMatch = [...lyricFontSelect.options].find(opt => opt.value === settings.lyricFont);
+      if (lyricMatch) {
+        lyricFontSelect.value = settings.lyricFont;
+        lyricFontCustomRow.classList.remove('show');
+      } else {
+        lyricFontSelect.value = '__custom__';
+        lyricFontCustomRow.classList.add('show');
+      }
+      lyricFontCustom.value = settings.lyricFontCustom || '';
+      lyricSizeSlider.value = settings.lyricSize;
+      lyricSizeNum.value = Number(settings.lyricSize).toFixed(2);
+
+      labelSizeSlider.value = settings.labelSize;
+      labelSizeNum.value = Number(settings.labelSize).toFixed(2);
+      labelRadiusSlider.value = settings.labelRadius;
+      labelRadiusNum.value = Number(settings.labelRadius).toFixed(1);
+
+      barlineWidthSlider.value = settings.barlineWidth;
+      barlineWidthNum.value = settings.barlineWidth;
+      barlineHeightSlider.value = settings.barlineHeightMult;
+      barlineHeightNum.value = Number(settings.barlineHeightMult).toFixed(2);
+    }
+
+    function openSettings() {
+      syncSettingsUI();
+      settingsOverlay.classList.add('show');
+    }
+    function closeSettings() {
+      settingsOverlay.classList.remove('show');
+    }
+
+    openSettingsBtn.addEventListener('click', openSettings);
+    settingsClose.addEventListener('click', closeSettings);
+    settingsDone.addEventListener('click', closeSettings);
+    settingsOverlay.addEventListener('click', function(e) {
+      if (e.target === settingsOverlay) closeSettings();
+    });
+
+    // ---- Zoom (master scale) — toolbar ----
+    function setMasterScale(v) {
+      v = clampNum(v, MS_MIN, MS_MAX);
+      v = Math.round(v * 20) / 20;
+      settings.masterScale = v;
+      masterScaleSlider.value = scaleToSliderPos(v);
+      if (document.activeElement !== masterScaleNum) masterScaleNum.value = v.toFixed(2);
+      saveSettings();
+      applySettings();
+    }
+    masterScaleSlider.addEventListener('input', function() {
+      const v = sliderPosToScale(parseFloat(this.value));
+      setMasterScale(v);
+    });
+    masterScaleNum.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v)) setMasterScale(v);
+    });
+    masterScaleNum.addEventListener('blur', function() {
+      this.value = settings.masterScale.toFixed(2);
+    });
+    masterScaleReset.addEventListener('click', function() {
+      setMasterScale(1);
+    });
+
+    // ---- UI scale ----
+    function setUIScale(v) {
+      v = clampNum(v, 0.7, 1.6);
+      settings.uiScale = v;
+      uiScaleSlider.value = v;
+      if (document.activeElement !== uiScaleNum) uiScaleNum.value = v.toFixed(2);
+      saveSettings();
+      applySettings();
+    }
+    uiScaleSlider.addEventListener('input', function() {
+      setUIScale(parseFloat(this.value));
+    });
+    uiScaleNum.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v)) setUIScale(v);
+    });
+    uiScaleNum.addEventListener('blur', function() {
+      this.value = settings.uiScale.toFixed(2);
+    });
+
+    // ---- Editor scale ----
+    function setEditorScale(v) {
+      v = clampNum(v, 0.7, 2);
+      settings.editorScale = v;
+      editorScaleSlider.value = v;
+      if (document.activeElement !== editorScaleNum) editorScaleNum.value = v.toFixed(2);
+      saveSettings();
+      applySettings();
+    }
+    editorScaleSlider.addEventListener('input', function() {
+      setEditorScale(parseFloat(this.value));
+    });
+    editorScaleNum.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v)) setEditorScale(v);
+    });
+    editorScaleNum.addEventListener('blur', function() {
+      this.value = settings.editorScale.toFixed(2);
+    });
+
+    // Chord font
+    chordFontSelect.addEventListener('change', function() {
+      if (this.value === '__custom__') {
+        chordFontCustomRow.classList.add('show');
+        settings.chordFont = this.value;
+      } else {
+        chordFontCustomRow.classList.remove('show');
+        settings.chordFont = this.value;
+        settings.chordFontCustom = '';
+        chordFontCustom.value = '';
+      }
+      saveSettings();
+      applySettings();
+    });
+    chordFontCustom.addEventListener('input', function() {
+      settings.chordFontCustom = this.value;
+      saveSettings();
+      applySettings();
+    });
+
+    function setChordSize(v) {
+      v = clampNum(v, 0.5, 2.5);
+      settings.chordSizeMult = v;
+      chordSizeSlider.value = v;
+      if (document.activeElement !== chordSizeNum) chordSizeNum.value = v.toFixed(2);
+      saveSettings();
+      applySettings();
+    }
+    chordSizeSlider.addEventListener('input', function() {
+      setChordSize(parseFloat(this.value));
+    });
+    chordSizeNum.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v)) setChordSize(v);
+    });
+    chordSizeNum.addEventListener('blur', function() {
+      this.value = settings.chordSizeMult.toFixed(2);
+    });
+
+    // Lyric font
+    lyricFontSelect.addEventListener('change', function() {
+      if (this.value === '__custom__') {
+        lyricFontCustomRow.classList.add('show');
+        settings.lyricFont = this.value;
+      } else {
+        lyricFontCustomRow.classList.remove('show');
+        settings.lyricFont = this.value;
+        settings.lyricFontCustom = '';
+        lyricFontCustom.value = '';
+      }
+      saveSettings();
+      applySettings();
+    });
+    lyricFontCustom.addEventListener('input', function() {
+      settings.lyricFontCustom = this.value;
+      saveSettings();
+      applySettings();
+    });
+
+    function setLyricSize(v) {
+      v = clampNum(v, 0.5, 8);
+      settings.lyricSize = v;
+      lyricSizeSlider.value = v;
+      if (document.activeElement !== lyricSizeNum) lyricSizeNum.value = v.toFixed(2);
+      saveSettings();
+      applySettings();
+    }
+    lyricSizeSlider.addEventListener('input', function() {
+      setLyricSize(parseFloat(this.value));
+    });
+    lyricSizeNum.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v)) setLyricSize(v);
+    });
+    lyricSizeNum.addEventListener('blur', function() {
+      this.value = settings.lyricSize.toFixed(2);
+    });
+
+    function setLabelSize(v) {
+      v = clampNum(v, 0.6, 8);
+      settings.labelSize = v;
+      labelSizeSlider.value = v;
+      if (document.activeElement !== labelSizeNum) labelSizeNum.value = v.toFixed(2);
+      saveSettings();
+      applySettings();
+    }
+    labelSizeSlider.addEventListener('input', function() {
+      setLabelSize(parseFloat(this.value));
+    });
+    labelSizeNum.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v)) setLabelSize(v);
+    });
+    labelSizeNum.addEventListener('blur', function() {
+      this.value = settings.labelSize.toFixed(2);
+    });
+
+    function setLabelRadius(v) {
+      v = clampNum(v, 0, 20);
+      settings.labelRadius = v;
+      labelRadiusSlider.value = v;
+      if (document.activeElement !== labelRadiusNum) labelRadiusNum.value = v.toFixed(1);
+      saveSettings();
+      applySettings();
+    }
+    labelRadiusSlider.addEventListener('input', function() {
+      setLabelRadius(parseFloat(this.value));
+    });
+    labelRadiusNum.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v)) setLabelRadius(v);
+    });
+    labelRadiusNum.addEventListener('blur', function() {
+      this.value = settings.labelRadius.toFixed(1);
+    });
+
+    function setBarlineWidth(v) {
+      v = clampNum(v, 1, 10);
+      settings.barlineWidth = v;
+      barlineWidthSlider.value = v;
+      if (document.activeElement !== barlineWidthNum) barlineWidthNum.value = v;
+      saveSettings();
+      applySettings();
+    }
+    barlineWidthSlider.addEventListener('input', function() {
+      setBarlineWidth(parseFloat(this.value));
+    });
+    barlineWidthNum.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v)) setBarlineWidth(v);
+    });
+    barlineWidthNum.addEventListener('blur', function() {
+      this.value = settings.barlineWidth;
+    });
+
+    function setBarlineHeight(v) {
+      v = clampNum(v, 1, 3.5);
+      settings.barlineHeightMult = v;
+      barlineHeightSlider.value = v;
+      if (document.activeElement !== barlineHeightNum) barlineHeightNum.value = v.toFixed(2);
+      saveSettings();
+      applySettings();
+    }
+    barlineHeightSlider.addEventListener('input', function() {
+      setBarlineHeight(parseFloat(this.value));
+    });
+    barlineHeightNum.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v)) setBarlineHeight(v);
+    });
+    barlineHeightNum.addEventListener('blur', function() {
+      this.value = settings.barlineHeightMult.toFixed(2);
+    });
+
+    settingsReset.addEventListener('click', function() {
+      if (!confirm('Reset all settings to defaults?')) return;
+      settings = Object.assign({}, DEFAULT_SETTINGS);
+      saveSettings();
+      syncSettingsUI();
+      applySettings();
+    });
+
+    // ===== END SETTINGS =====
 
     function updateKeyDisplay() {
       const majorRoot = keySelect.value;
@@ -856,7 +1721,6 @@
       resetTransposition();
     }
 
-    // Drag and drop
     function handleDragOver(e) {
       e.preventDefault();
       e.stopPropagation();
@@ -1036,7 +1900,7 @@
           }
 
           const subFolderNames = Object.keys(subTree).filter(k => k !== '_songs');
-          subFolderNames.sort((a, b) => a.localeCompare(b, 'th', { sensitivity: 'base' }));
+          subFolderNames.sort((a, b) => a.localeCompare(b.name, 'th', { sensitivity: 'base' }));
 
           subFolderNames.forEach(subFolderName => {
             const subFolderTree = subTree[subFolderName];
@@ -1120,7 +1984,7 @@
       } else {
         const emptyMsg = document.createElement('div');
         emptyMsg.className = 'dropdown-item';
-        emptyMsg.style.cssText = 'color: #b0987a; font-size: 0.55rem; padding: 4px 14px; font-style: italic;';
+        emptyMsg.style.cssText = 'color: #b0987a; font-size: 0.8rem; padding: 6px 16px; font-style: italic;';
         emptyMsg.textContent = 'No songs loaded';
         songsList.appendChild(emptyMsg);
       }
@@ -1151,8 +2015,8 @@
         songItem.classList.add('active');
       });
 
-      songItem.appendChild(nameSpan);
       songItem.appendChild(removeBtn);
+      songItem.appendChild(nameSpan);
       return songItem;
     }
 
@@ -1261,7 +2125,6 @@
       fileInput.click();
     });
 
-    // Resize
     resizeHandle.addEventListener('mousedown', function(e) {
       isResizing = true;
       startY = e.clientY;
@@ -1274,7 +2137,7 @@
       if (!isResizing) return;
       const deltaY = startY - e.clientY;
       let newHeight = startHeight + deltaY;
-      newHeight = Math.max(60, Math.min(window.innerHeight * 0.6, newHeight));
+      newHeight = Math.max(60, Math.min(window.innerHeight * 0.7, newHeight));
       inputArea.style.height = newHeight + 'px';
       inputArea.style.maxHeight = newHeight + 'px';
       clearTimeout(window._resizeTimeout);
@@ -1289,14 +2152,44 @@
       }
     });
 
-    toggleBtn.addEventListener('click', function() {
-      isEditorCollapsed = !isEditorCollapsed;
-      inputArea.classList.toggle('collapsed');
-      previewArea.classList.toggle('expanded');
-      toggleBtn.textContent = isEditorCollapsed ? '▼ Show Editor' : '▲ Hide Editor';
-      toggleBtn.classList.toggle('active', isEditorCollapsed);
+    // ===== EDITOR SHOW/HIDE (advanced mode) =====
+    function applyEditorState(hidden) {
+      isEditorCollapsed = hidden;
+      inputArea.classList.toggle('collapsed', hidden);
+      toggleBtn.textContent = hidden ? '▼ Show Editor' : '▲ Hide Editor';
+      toggleBtn.classList.toggle('active', hidden);
       setTimeout(adjustChordSizes, 350);
+    }
+
+    toggleBtn.addEventListener('click', function() {
+      const newHidden = !isEditorCollapsed;
+      applyEditorState(newHidden);
+      saveEditorHiddenState(newHidden);
     });
+
+    // ===== MODE SWITCH =====
+    function applyMode(advanced) {
+      isAdvancedMode = advanced;
+      if (advanced) {
+        document.body.classList.remove('easy-mode');
+        toggleModeBtn.textContent = '😃 Switch to EASY MODE';
+        // Restore saved editor state
+        const savedHidden = loadEditorHiddenState();
+        applyEditorState(savedHidden);
+      } else {
+        document.body.classList.add('easy-mode');
+        toggleModeBtn.textContent = '😵 Switch to ADVANCED MODE';
+        // Force editor hidden in Easy Mode (CSS handles visual hiding too, but we sync state)
+        isEditorCollapsed = true;
+      }
+      setTimeout(adjustChordSizes, 250);
+    }
+
+    toggleModeBtn.addEventListener('click', function() {
+      applyMode(!isAdvancedMode);
+    });
+
+    // ===== END MODE SWITCH =====
 
     function expandSectionShortcut(name) {
       const trimmed = name.trim();
@@ -1396,20 +2289,13 @@
       return simplified;
     }
 
-    // Detect if a token looks like a chord (for styling purposes).
-    // Accepts things like C, Cm, C#m7, Bb, Dsus4, Am/C, etc.
-    function isChordToken(token) {
-      if (!token) return false;
-      return /^[A-G][#b]?[A-Za-z0-9#b°øΔ+\-()/]*$/.test(token);
-    }
-
-    // A reusable canvas context for precise glyph measurement.
     const measureCanvas = document.createElement('canvas');
     const measureCtx = measureCanvas.getContext('2d');
 
-    // Size chord tokens so that the longest token across all chord lines fits
-    // comfortably in a "slot" width. Because lines are now free-flow (not a grid),
-    // we just pick a size that keeps things readable in the preview width.
+    function getChordFontStackForMeasure() {
+      return effectiveFont(settings.chordFont, settings.chordFontCustom);
+    }
+
     function adjustChordSizes() {
       const content = previewContent;
       if (!content) return;
@@ -1422,7 +2308,6 @@
 
       const maxSize = isEditorCollapsed ? 2.5 : 1.8;
 
-      // Measure the longest single chord token to choose a sensible font size.
       let globalMaxText = '';
       chordLines.forEach(row => {
         const toks = row.querySelectorAll('.chord-token');
@@ -1433,8 +2318,10 @@
       });
       if (!globalMaxText) globalMaxText = 'X';
 
+      const chordFontStack = getChordFontStackForMeasure();
+
       const testSpan = document.createElement('span');
-      testSpan.style.cssText = `position:absolute; visibility:hidden; white-space:nowrap; font-family: ${FONT_STACK}; font-weight: 700;`;
+      testSpan.style.cssText = `position:absolute; visibility:hidden; white-space:nowrap; font-family: ${chordFontStack}; font-weight: 700;`;
       testSpan.textContent = globalMaxText;
       document.body.appendChild(testSpan);
 
@@ -1458,38 +2345,33 @@
 
       document.body.removeChild(testSpan);
 
-      // Apply to all chord tokens
+      const mult = parseFloat(settings.chordSizeMult) || 1;
+      const ms = parseFloat(settings.masterScale) || 1;
+      const finalSize = bestSize * mult * ms;
+
       chordLines.forEach(row => {
         row.querySelectorAll('.chord-token').forEach(t => {
-          t.style.fontSize = Math.round(bestSize * 100) / 100 + 'rem';
+          t.style.fontSize = Math.round(finalSize * 100) / 100 + 'rem';
         });
       });
 
-      // Measure the exact glyph ink height of a representative chord using canvas
-      // measureText(). This ignores line-height padding and gives us the true
-      // visual height of the chord text, so the barline can match it precisely.
       const remInPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-      const pxSize = bestSize * remInPx;
-      measureCtx.font = `700 ${pxSize}px ${FONT_STACK}`;
+      const pxSize = finalSize * remInPx;
+      measureCtx.font = `700 ${pxSize}px ${chordFontStack}`;
 
-      // Sample a string that contains cap-height, x-height and no descenders.
-      // 'C#m7' is representative of the tallest common chord glyphs.
       const metrics = measureCtx.measureText('C#m7');
       const ascent = metrics.actualBoundingBoxAscent || (pxSize * 0.72);
       const descent = metrics.actualBoundingBoxDescent || 0;
       const glyphHeight = ascent + descent;
 
-      // Barline is just a touch taller than the glyphs (8%). Change this single
-      // number to taste: 1.0 = flush with glyph tops/bottoms, 1.15 = noticeably taller.
-      const barlineHeight = glyphHeight * 2;
+      const heightMult = parseFloat(settings.barlineHeightMult) || 2;
+      const barlineHeight = glyphHeight * heightMult;
 
       content.querySelectorAll('.barline').forEach(b => {
         b.style.height = barlineHeight + 'px';
       });
     }
 
-    // Render a chord line as free-flow text: chords + barlines only where typed.
-    // Spaces are preserved so alignment inside a bar mirrors the source text.
     function renderChordLine(line, sectionClass) {
       let html = `<div class="chord-line">`;
 
@@ -1501,7 +2383,6 @@
           continue;
         }
 
-        // A token made of one or more '|' characters -> render each as a barline.
         if (/^\|+$/.test(token)) {
           for (let i = 0; i < token.length; i++) {
             html += `<span class="barline"></span>`;
@@ -1509,7 +2390,6 @@
           continue;
         }
 
-        // Otherwise it's a chord (or '_') token.
         const simplified = simplifyChord(token);
         const isUnderscore = simplified === '_' || simplified === '';
         const displayText = isUnderscore ? '_' : simplified;
@@ -1559,12 +2439,20 @@
         if (sectionNameMatch) {
           const sectionName = sectionNameMatch[1].trim();
           const rest = trimmed.substring(sectionName.length).trim();
+          const restWordCount = rest ? rest.split(/\s+/).filter(w => w).length : 0;
 
           let isLabel = false;
-          if (!rest) isLabel = true;
-          else if (rest.length < 40 && !rest.endsWith('.') && !rest.endsWith('!') && !rest.endsWith('?')) isLabel = true;
-          else if (rest.match(/^[\(\[].*[\)\]]$/)) isLabel = true;
-          else if (rest.match(/^[0-9]/)) isLabel = true;
+          if (!rest) {
+            isLabel = true;
+          } else if (rest.match(/^\d+\s*$/)) {
+            isLabel = true;
+          } else if (rest.match(/^[\(\[].*[\)\]]\s*$/)) {
+            isLabel = true;
+          } else if (rest.match(/^\d+\s*[\(\[].*[\)\]]\s*$/)) {
+            isLabel = true;
+          } else if (restWordCount <= 3 && !rest.match(/[.!?,;:]/)) {
+            isLabel = true;
+          }
 
           if (isLabel) {
             let displayName = sectionName.charAt(0).toUpperCase() + sectionName.slice(1);
@@ -1625,7 +2513,7 @@
             sectionClass = 'section-custom';
           }
           html += renderChordLine(line, sectionClass);
-        } else if (trimmed !== '') {
+        } else {
           html += `<div class="lyrics-line"><span class="lyric-text">${trimmed}</span></div>`;
         }
       }
@@ -1657,7 +2545,7 @@
       link.click();
       URL.revokeObjectURL(url);
       this.textContent = '✅ Saved!';
-      setTimeout(() => { this.textContent = '💾 Save TXT'; }, 2000);
+      setTimeout(() => { this.textContent = "💾 Save Editor's text as TXT"; }, 2000);
     });
 
     document.getElementById('exportPNG').addEventListener('click', async function() {
@@ -1697,7 +2585,7 @@
         preview.style.height = totalHeight + 'px';
 
         const canvas = await html2canvas(preview, {
-          scale: 3,
+          scale: 2,
           backgroundColor: '#ffffff',
           useCORS: true,
           logging: false,
@@ -1741,7 +2629,7 @@
 
         this.textContent = '✅ Exported!';
         setTimeout(() => {
-          this.textContent = '📷 Export PNG';
+          this.textContent = '📷 Save Chord Chart as PNG';
           this.disabled = false;
         }, 2000);
       } catch (err) {
@@ -1757,7 +2645,7 @@
         preview.style.width = '';
         this.textContent = '❌ Export failed';
         setTimeout(() => {
-          this.textContent = '📷 Export PNG';
+          this.textContent = '📷 Save Chord Chart as PNG';
           this.disabled = false;
         }, 2000);
       }
@@ -1775,7 +2663,18 @@
         e.preventDefault();
         transposeDown();
       }
+      if (e.key === 'Escape' && settingsOverlay.classList.contains('show')) {
+        closeSettings();
+      }
     });
+
+    // ===== INIT =====
+    loadSettings();
+    syncSettingsUI();
+    applySettings();
+
+    // Always start in Easy Mode on page load
+    applyMode(false);
 
     displayStoredSongs();
     originalText = inputEl.value;
