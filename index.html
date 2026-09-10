@@ -19,8 +19,6 @@
       --lyric-size: 0.85rem;
       --label-size: 1rem;
       --label-radius: 4px;
-      --barline-width: 5px;
-      --barline-height-mult: 2;
       --ui-scale: 1;
       --editor-scale: 1;
     }
@@ -580,15 +578,9 @@
     .chord-line .chord-token.empty {
       font-weight: 700;
     }
-    .chord-line .barline {
-      display: inline-block;
-      width: var(--barline-width, 5px);
-      height: 1em;
-      background-color: #c4ad92;
-      vertical-align: middle;
-      margin: 0 0.15em 0 0.15em;
-      position: relative;
-      top: 0.05em;
+    .chord-line .pipe {
+      color: #a89078;
+      font-weight: 400;
     }
     .chord-line .space {
       display: inline-block;
@@ -1086,20 +1078,6 @@
           <input type="number" class="settings-num" id="labelRadiusNum" min="0" max="20" step="0.5" value="4">
         </div>
       </div>
-
-      <div class="settings-section">
-        <h3>Barlines</h3>
-        <div class="settings-row">
-          <label for="barlineWidthSlider">Barline width</label>
-          <input type="range" id="barlineWidthSlider" min="1" max="10" step="0.5" value="5">
-          <input type="number" class="settings-num" id="barlineWidthNum" min="1" max="10" step="0.5" value="5">
-        </div>
-        <div class="settings-row">
-          <label for="barlineHeightSlider">Barline height</label>
-          <input type="range" id="barlineHeightSlider" min="1" max="3.5" step="0.05" value="2">
-          <input type="number" class="settings-num" id="barlineHeightNum" min="1" max="3.5" step="0.05" value="2">
-        </div>
-      </div>
     </div>
     <div class="settings-footer">
       <button class="btn btn-outline" id="settingsReset">↺ Reset to defaults</button>
@@ -1155,10 +1133,6 @@
     const labelSizeNum = document.getElementById('labelSizeNum');
     const labelRadiusSlider = document.getElementById('labelRadiusSlider');
     const labelRadiusNum = document.getElementById('labelRadiusNum');
-    const barlineWidthSlider = document.getElementById('barlineWidthSlider');
-    const barlineWidthNum = document.getElementById('barlineWidthNum');
-    const barlineHeightSlider = document.getElementById('barlineHeightSlider');
-    const barlineHeightNum = document.getElementById('barlineHeightNum');
 
     let currentSection = '';
     let isEditorCollapsed = false;
@@ -1218,9 +1192,7 @@
       chordSizeMult: 1,
       lyricSize: 0.85,
       labelSize: 1,
-      labelRadius: 4,
-      barlineWidth: 5,
-      barlineHeightMult: 2
+      labelRadius: 4
     };
 
     let settings = Object.assign({}, DEFAULT_SETTINGS);
@@ -1280,8 +1252,6 @@
       root.style.setProperty('--lyric-size', (settings.lyricSize * ms) + 'rem');
       root.style.setProperty('--label-size', (settings.labelSize * ms) + 'rem');
       root.style.setProperty('--label-radius', settings.labelRadius + 'px');
-      root.style.setProperty('--barline-width', (settings.barlineWidth * ms) + 'px');
-      root.style.setProperty('--barline-height-mult', settings.barlineHeightMult);
       root.style.setProperty('--ui-scale', settings.uiScale);
       root.style.setProperty('--editor-scale', settings.editorScale);
       requestAnimationFrame(() => adjustChordSizes());
@@ -1325,11 +1295,6 @@
       labelSizeNum.value = Number(settings.labelSize).toFixed(2);
       labelRadiusSlider.value = settings.labelRadius;
       labelRadiusNum.value = Number(settings.labelRadius).toFixed(1);
-
-      barlineWidthSlider.value = settings.barlineWidth;
-      barlineWidthNum.value = settings.barlineWidth;
-      barlineHeightSlider.value = settings.barlineHeightMult;
-      barlineHeightNum.value = Number(settings.barlineHeightMult).toFixed(2);
     }
 
     function openSettings() {
@@ -1526,44 +1491,6 @@
     });
     labelRadiusNum.addEventListener('blur', function() {
       this.value = settings.labelRadius.toFixed(1);
-    });
-
-    function setBarlineWidth(v) {
-      v = clampNum(v, 1, 10);
-      settings.barlineWidth = v;
-      barlineWidthSlider.value = v;
-      if (document.activeElement !== barlineWidthNum) barlineWidthNum.value = v;
-      saveSettings();
-      applySettings();
-    }
-    barlineWidthSlider.addEventListener('input', function() {
-      setBarlineWidth(parseFloat(this.value));
-    });
-    barlineWidthNum.addEventListener('input', function() {
-      const v = parseFloat(this.value);
-      if (!isNaN(v)) setBarlineWidth(v);
-    });
-    barlineWidthNum.addEventListener('blur', function() {
-      this.value = settings.barlineWidth;
-    });
-
-    function setBarlineHeight(v) {
-      v = clampNum(v, 1, 3.5);
-      settings.barlineHeightMult = v;
-      barlineHeightSlider.value = v;
-      if (document.activeElement !== barlineHeightNum) barlineHeightNum.value = v.toFixed(2);
-      saveSettings();
-      applySettings();
-    }
-    barlineHeightSlider.addEventListener('input', function() {
-      setBarlineHeight(parseFloat(this.value));
-    });
-    barlineHeightNum.addEventListener('input', function() {
-      const v = parseFloat(this.value);
-      if (!isNaN(v)) setBarlineHeight(v);
-    });
-    barlineHeightNum.addEventListener('blur', function() {
-      this.value = settings.barlineHeightMult.toFixed(2);
     });
 
     settingsReset.addEventListener('click', function() {
@@ -2351,22 +2278,6 @@
           t.style.fontSize = Math.round(finalSize * 100) / 100 + 'rem';
         });
       });
-
-      const remInPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-      const pxSize = finalSize * remInPx;
-      measureCtx.font = `700 ${pxSize}px ${chordFontStack}`;
-
-      const metrics = measureCtx.measureText('C#m7');
-      const ascent = metrics.actualBoundingBoxAscent || (pxSize * 0.72);
-      const descent = metrics.actualBoundingBoxDescent || 0;
-      const glyphHeight = ascent + descent;
-
-      const heightMult = parseFloat(settings.barlineHeightMult) || 2;
-      const barlineHeight = glyphHeight * heightMult;
-
-      content.querySelectorAll('.barline').forEach(b => {
-        b.style.height = barlineHeight + 'px';
-      });
     }
 
     function renderChordLine(line, sectionClass) {
@@ -2381,9 +2292,7 @@
         }
 
         if (/^\|+$/.test(token)) {
-          for (let i = 0; i < token.length; i++) {
-            html += `<span class="barline"></span>`;
-          }
+          html += `<span class="pipe">${token}</span>`;
           continue;
         }
 
@@ -2670,7 +2579,6 @@
     syncSettingsUI();
     applySettings();
 
-    // Always start in Easy Mode on page load
     applyMode(false);
 
     displayStoredSongs();
