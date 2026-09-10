@@ -638,13 +638,13 @@
       margin: 3px 0 2px 0;
       display: inline-block;
       border-radius: var(--label-radius, 4px);
-      padding: 0px 12px;
+      padding: 0.15em 0.75em;
+      font-size: var(--label-size, 1rem);
     }
     .section-block .section {
       font-family: var(--font-chord, 'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Menlo', 'Consolas', 'Roboto Mono', 'DejaVu Sans Mono', monospace);
       color: #FFFFFF;
       display: inline-block;
-      font-size: var(--label-size, 1rem);
     }
     .section-block .section .section-name {
       font-weight: 700;
@@ -937,7 +937,7 @@
       <div class="toolbar-zoom" title="Zoom — scales chords, lyrics, labels and barlines together">
         <span class="toolbar-zoom-label">🔍 Zoom:</span>
         <input type="range" id="masterScaleSlider" min="0" max="100" step="0.5" value="50">
-        <input type="number" id="masterScaleNum" min="0.5" max="2" step="0.05" value="1">
+        <input type="number" id="masterScaleNum" min="0.1" max="10" step="0.05" value="1">
         <button class="toolbar-zoom-reset" id="masterScaleReset" title="Reset zoom to 1.00">↺</button>
       </div>
 
@@ -1134,7 +1134,6 @@
     const keyModeSelect = document.getElementById('keyModeSelect');
     const keyDisplay = document.getElementById('keyDisplay');
 
-    // Settings controls (zoom moved to toolbar)
     const masterScaleSlider = document.getElementById('masterScaleSlider');
     const masterScaleNum = document.getElementById('masterScaleNum');
     const masterScaleReset = document.getElementById('masterScaleReset');
@@ -1163,7 +1162,7 @@
 
     let currentSection = '';
     let isEditorCollapsed = false;
-    let isAdvancedMode = false;   // default is Easy Mode on every page load
+    let isAdvancedMode = false;
     let isResizing = false;
     let startY = 0;
     let startHeight = 0;
@@ -1190,8 +1189,8 @@
     };
 
     // ===== ZOOM: logarithmic mapping so 1.00 sits exactly at slider center =====
-    const MS_MIN = 0.5;
-    const MS_MAX = 2;
+    const MS_MIN = 0.1;
+    const MS_MAX = 10;
 
     function sliderPosToScale(pos) {
       const t = pos / 100;
@@ -2173,13 +2172,11 @@
       if (advanced) {
         document.body.classList.remove('easy-mode');
         toggleModeBtn.textContent = '😃 Switch to EASY MODE';
-        // Restore saved editor state
         const savedHidden = loadEditorHiddenState();
         applyEditorState(savedHidden);
       } else {
         document.body.classList.add('easy-mode');
         toggleModeBtn.textContent = '😵 Switch to ADVANCED MODE';
-        // Force editor hidden in Easy Mode (CSS handles visual hiding too, but we sync state)
         isEditorCollapsed = true;
       }
       setTimeout(adjustChordSizes, 250);
