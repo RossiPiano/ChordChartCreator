@@ -333,6 +333,10 @@
       min-width: calc(28px * var(--ui-scale));
       text-align: center;
     }
+    #langSwitch {
+      margin-left: auto !important;
+      font-weight: 600;
+    }
     .dropdown {
       position: relative;
       display: inline-block;
@@ -1213,7 +1217,7 @@
           <div class="dropdown-item" id="loadSingleFile" style="color: #8b6b4a; font-weight: 600;">📄 Open 1 Song File</div>
           <!-- <div class="dropdown-item" id="clearStoredSongs" style="color: #5c4033; font-weight: 500;">🗑️ Clear Song List Below</div> -->
           <div class="dropdown-divider"></div>
-          <div class="dropdown-label">🎵 SONG LIST</div>
+          <div class="dropdown-label" id="songsListTitle">🎵 SONG LIST</div>
           <div id="songsList"></div>
         </div>
       </div>
@@ -1228,7 +1232,7 @@
       </div>
 
       <div class="key-selector advanced-only">
-        <span>🔑 Key:</span>
+        <span id="keyLabel">🔑 Key:</span>
         <select id="keySelect">
           <option value="C">C</option>
           <option value="G">G</option>
@@ -1261,6 +1265,8 @@
       <button class="btn btn-success advanced-only" id="saveTXT">💾 Save Editor's text as TXT</button>
 
       <button class="btn btn-outline" id="openSettings" title="Open settings">⚙ Settings</button>
+
+      <button class="btn btn-outline" id="langSwitch" title="Switch language" style="margin-left: auto;">🇹🇭 ไทย</button>
     </div>
   </div>
   <div class="editor-wrapper">
@@ -1601,6 +1607,240 @@
     let currentKey = 'Dm';
     let currentMode = 'minor';
     let originalText = '';
+
+    // ===== LANGUAGE =====
+    const LANG_KEY = 'chordChartLanguage';
+    const TRANSLATIONS = {
+      en: {
+        appTitle: '🎸 Chord Chart Creator',
+        switchToAdvanced: '😵 Switch to ADVANCED MODE',
+        switchToEasy: '😃 Switch to EASY MODE',
+        songsButton: '📄 Songs ▼',
+        zoomLabel: '🔍 Zoom:',
+        keyLabel: '🔑 Key:',
+        hideEditor: '▲ Hide Editor',
+        showEditor: '▼ Show Editor',
+        savePng: '📷 Save Chord Chart as PNG',
+        saveTxt: "💾 Save Editor's text as TXT",
+        settingsButton: '⚙ Settings',
+        loadClearSongs: '📂 LOAD/CLEAR SONGS',
+        selectFolder: '📁 Select Song Folder',
+        loadSingleFile: '📄 Open 1 Song File',
+        clearStoredSongs: '🗑️ Clear Song List Below',
+        songList: '🎵 SONG LIST',
+        noSongs: 'No songs loaded',
+        dropMessage: '📂 Drop .txt files here',
+        emptyPreviewMain: 'Type or Paste your chord chart (in the editor area below)',
+        emptyPreviewSub: 'or Drag & Drop a TXT file with a chord chart (into the editor area below)',
+        confirmSure: 'Are you sure?',
+        confirmCancel: 'Cancel',
+        confirmYes: 'Yes',
+        settingsTitle: '⚙ Settings',
+        sectionInterface: 'Interface',
+        sectionLayout: 'Layout',
+        sectionCharSpacing: 'Character Spacing',
+        sectionBarline: 'Barline',
+        sectionChordFont: 'Chord Font',
+        sectionLyricFont: 'Lyrics Font',
+        sectionSectionLabels: 'Section Labels',
+        labelUiScale: 'UI scale',
+        labelEditorScale: 'Editor text size',
+        labelLineSpacing: 'Line spacing',
+        labelBlankLineSize: 'Blank line size',
+        labelChordSpacing: 'Chords & barlines',
+        labelLyricSpacing: 'Lyrics',
+        labelLabelSpacing: 'Section labels',
+        labelPipeHeight: 'Barline height',
+        labelPipeThickness: 'Barline thickness',
+        labelPipeValign: 'Barline vertical position',
+        labelChordFont: 'Font family',
+        labelChordSize: 'Chord size',
+        labelLyricSize: 'Lyric size',
+        labelLabelSize: 'Label size',
+        labelLabelRadius: 'Corner roundness',
+        customFont: 'Custom name',
+        resetDefaults: '↺ Reset to defaults',
+        done: 'Done',
+        resetConfirm: 'Reset all settings to defaults?',
+        clearConfirm: 'Clear all saved songs from memory? (This will not delete your files)',
+        removeConfirmPrefix: 'Are you sure you want to remove ',
+        savePngBusy: '⏳ Exporting...',
+        savePngOk: '✅ Exported!',
+        savePngFail: '❌ Export failed',
+        saveTxtOk: '✅ Saved!',
+        langSwitchToThai: '🇹🇭 ไทย',
+        langSwitchToEnglish: '🇬🇧 English',
+        songsListTitle: '🎵 SONG LIST'
+      },
+      th: {
+        appTitle: '🎸 โปรแกรมสร้างคอร์ดชาร์ท',
+        switchToAdvanced: '😵 ไปโหมด ADVANCED',
+        switchToEasy: '😃 ไปโหมด EASY',
+        songsButton: '📄 เพลง ▼',
+        zoomLabel: '🔍 ซูม:',
+        keyLabel: '🔑 คีย์:',
+        hideEditor: '▲ ซ่อนตัวแก้ไข',
+        showEditor: '▼ แสดงตัวแก้ไข',
+        savePng: '📷 บันทึกเป็นรูป PNG',
+        saveTxt: '💾 บันทึกข้อความเป็น TXT',
+        settingsButton: '⚙ ตั้งค่า',
+        loadClearSongs: '📂 โหลด/ล้างรายชื่อเพลง',
+        selectFolder: '📁 เลือกโฟลเดอร์เพลง',
+        loadSingleFile: '📄 เปิดไฟล์เพลง 1 ไฟล์',
+        clearStoredSongs: '🗑️ ล้างรายชื่อเพลงด้านล่าง',
+        songList: '🎵 รายชื่อเพลง',
+        noSongs: 'ยังไม่มีเพลง',
+        dropMessage: '📂 ลากไฟล์ .txt มาวางที่นี่',
+        emptyPreviewMain: 'พิมพ์หรือวางคอร์ดชาร์ท (ในพื้นที่แก้ไขด้านล่าง)',
+        emptyPreviewSub: 'หรือลากไฟล์ .txt ที่มีคอร์ดชาร์ทมาวาง (ในพื้นที่แก้ไขด้านล่าง)',
+        confirmSure: 'แน่ใจหรือไม่?',
+        confirmCancel: 'ยกเลิก',
+        confirmYes: 'ใช่',
+        settingsTitle: '⚙ ตั้งค่า',
+        sectionInterface: 'อินเทอร์เฟซ',
+        sectionLayout: 'เลย์เอาต์',
+        sectionCharSpacing: 'ระยะห่างตัวอักษร',
+        sectionBarline: 'เส้นกั้นห้อง',
+        sectionChordFont: 'ฟอนต์คอร์ด',
+        sectionLyricFont: 'ฟอนต์เนื้อเพลง',
+        sectionSectionLabels: 'ป้ายชื่อท่อน',
+        labelUiScale: 'ขนาด UI',
+        labelEditorScale: 'ขนาดตัวอักษรในตัวแก้ไข',
+        labelLineSpacing: 'ระยะห่างบรรทัด',
+        labelBlankLineSize: 'ขนาดบรรทัดว่าง',
+        labelChordSpacing: 'คอร์ดและเส้นกั้น',
+        labelLyricSpacing: 'เนื้อเพลง',
+        labelLabelSpacing: 'ป้ายชื่อท่อน',
+        labelPipeHeight: 'ความสูงเส้นกั้น',
+        labelPipeThickness: 'ความหนาเส้นกั้น',
+        labelPipeValign: 'ตำแหน่งแนวตั้งของเส้นกั้น',
+        labelChordFont: 'ฟอนต์',
+        labelChordSize: 'ขนาดคอร์ด',
+        labelLyricSize: 'ขนาดเนื้อเพลง',
+        labelLabelSize: 'ขนาดป้าย',
+        labelLabelRadius: 'ความโค้งมุม',
+        customFont: 'ชื่อฟอนต์กำหนดเอง',
+        resetDefaults: '↺ คืนค่าเริ่มต้น',
+        done: 'เสร็จ',
+        resetConfirm: 'คืนค่าทั้งหมดเป็นค่าเริ่มต้น?',
+        clearConfirm: 'ล้างรายชื่อเพลงที่บันทึกไว้ทั้งหมด? (ไฟล์จริงจะไม่ถูกลบ)',
+        removeConfirmPrefix: 'แน่ใจหรือไม่ว่าต้องการลบ ',
+        savePngBusy: '⏳ กำลังบันทึก...',
+        savePngOk: '✅ บันทึกแล้ว!',
+        savePngFail: '❌ บันทึกไม่สำเร็จ',
+        saveTxtOk: '✅ บันทึกแล้ว!',
+        langSwitchToThai: '🇹🇭 ไทย',
+        langSwitchToEnglish: '🇬🇧 English',
+        songsListTitle: '🎵 รายชื่อเพลง'
+      }
+    };
+
+    let currentLang = 'en';
+
+    function t(key) {
+      return (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key]) || TRANSLATIONS.en[key] || key;
+    }
+
+    function loadLanguage() {
+      try {
+        const stored = localStorage.getItem(LANG_KEY);
+        if (stored === 'en' || stored === 'th') currentLang = stored;
+      } catch (e) {}
+    }
+
+    function saveLanguage() {
+      try {
+        localStorage.setItem(LANG_KEY, currentLang);
+      } catch (e) {}
+    }
+
+    function applyLanguage() {
+      document.documentElement.lang = currentLang;
+      const h1 = document.querySelector('.toolbar h1');
+      if (h1) h1.textContent = t('appTitle');
+      if (toggleModeBtn) toggleModeBtn.textContent = isAdvancedMode ? t('switchToEasy') : t('switchToAdvanced');
+      if (toggleBtn) toggleBtn.textContent = isEditorCollapsed ? t('showEditor') : t('hideEditor');
+      const dropdownBtn = document.getElementById('dropdownToggle');
+      if (dropdownBtn) dropdownBtn.textContent = t('songsButton');
+      const zoomLbl = document.querySelector('.toolbar-zoom-label');
+      if (zoomLbl) zoomLbl.textContent = t('zoomLabel');
+      const keyLbl = document.getElementById('keyLabel');
+      if (keyLbl) keyLbl.textContent = t('keyLabel');
+      const expPng = document.getElementById('exportPNG');
+      if (expPng) expPng.textContent = t('savePng');
+      const saveTxtBtn = document.getElementById('saveTXT');
+      if (saveTxtBtn) saveTxtBtn.textContent = t('saveTxt');
+      const openSet = document.getElementById('openSettings');
+      if (openSet) openSet.textContent = t('settingsButton');
+      const songsLbl = document.getElementById('songsLabel');
+      if (songsLbl) songsLbl.textContent = t('loadClearSongs');
+      const selFolder = document.getElementById('selectFolder');
+      if (selFolder) selFolder.textContent = t('selectFolder');
+      const loadSingle = document.getElementById('loadSingleFile');
+      if (loadSingle) loadSingle.textContent = t('loadSingleFile');
+      const clearStored = document.getElementById('clearStoredSongs');
+      if (clearStored) clearStored.textContent = t('clearStoredSongs');
+      const songsListTitleEl = document.getElementById('songsListTitle');
+      if (songsListTitleEl) songsListTitleEl.textContent = t('songList');
+      const dropMsg = document.querySelector('.drop-message');
+      if (dropMsg) dropMsg.textContent = t('dropMessage');
+      const epMain = document.querySelector('.empty-preview .main-text');
+      const epSub = document.querySelector('.empty-preview .sub-text');
+      if (epMain) epMain.textContent = t('emptyPreviewMain');
+      if (epSub) epSub.textContent = t('emptyPreviewSub');
+      const cNo = document.getElementById('confirmNo');
+      const cYes = document.getElementById('confirmYes');
+      if (cNo) cNo.textContent = t('confirmCancel');
+      if (cYes) cYes.textContent = t('confirmYes');
+      const setTitle = document.querySelector('.settings-header h2');
+      if (setTitle) setTitle.textContent = t('settingsTitle');
+      const secTitles = document.querySelectorAll('.settings-section h3');
+      const secKeys = [
+        'sectionInterface',
+        'sectionLayout',
+        'sectionCharSpacing',
+        'sectionBarline',
+        'sectionChordFont',
+        'sectionLyricFont',
+        'sectionSectionLabels'
+      ];
+      secTitles.forEach(function(h, i) {
+        if (secKeys[i]) h.textContent = t(secKeys[i]);
+      });
+      const labelMap = {
+        uiScaleSlider: 'labelUiScale',
+        editorScaleSlider: 'labelEditorScale',
+        chordLineHeightSlider: 'labelLineSpacing',
+        emptyLineHeightSlider: 'labelBlankLineSize',
+        chordLetterSpacingSlider: 'labelChordSpacing',
+        lyricLetterSpacingSlider: 'labelLyricSpacing',
+        labelLetterSpacingSlider: 'labelLabelSpacing',
+        pipeScaleSlider: 'labelPipeHeight',
+        pipeThicknessSlider: 'labelPipeThickness',
+        pipeValignSlider: 'labelPipeValign',
+        chordFontSelect: 'labelChordFont',
+        chordSizeSlider: 'labelChordSize',
+        lyricFontSelect: 'labelChordFont',
+        lyricSizeSlider: 'labelLyricSize',
+        labelSizeSlider: 'labelLabelSize',
+        labelRadiusSlider: 'labelLabelRadius'
+      };
+      document.querySelectorAll('.settings-row label').forEach(function(lbl) {
+        const forAttr = lbl.getAttribute('for');
+        if (forAttr && labelMap[forAttr]) lbl.textContent = t(labelMap[forAttr]);
+      });
+      const customRows = document.querySelectorAll('.settings-row.custom-font-field label');
+      customRows.forEach(function(lbl) { lbl.textContent = t('customFont'); });
+      const resetBtn = document.getElementById('settingsReset');
+      const doneBtn = document.getElementById('settingsDone');
+      if (resetBtn) resetBtn.textContent = t('resetDefaults');
+      if (doneBtn) doneBtn.textContent = t('done');
+      const langBtn = document.getElementById('langSwitch');
+      if (langBtn) {
+        langBtn.textContent = currentLang === 'en' ? t('langSwitchToThai') : t('langSwitchToEnglish');
+      }
+    }
+    // ===== END LANGUAGE =====
 
     const NOTE_MAP = {
       'C': 0, 'B#': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3,
@@ -2146,7 +2386,7 @@
     });
 
     settingsReset.addEventListener('click', function() {
-      showConfirm('Reset all settings to defaults?', function() {
+      showConfirm(t('resetConfirm'), function() {
         settings = Object.assign({}, DEFAULT_SETTINGS);
         saveSettings();
         syncSettingsUI();
@@ -2404,7 +2644,7 @@
     }
 
     function clearStoredSongs() {
-      showConfirm('Clear all saved songs from memory? (This will not delete your files)', function() {
+      showConfirm(t('clearConfirm'), function() {
         localStorage.removeItem('chordChartSongs');
         displayStoredSongs();
       });
@@ -2414,7 +2654,7 @@
       const storedSongs = loadStoredSongs() || [];
       const index = storedSongs.findIndex(s => s.name === songName && s.folder === (songFolder || ''));
       if (index >= 0) {
-        showConfirm(`Are you sure you want to remove "${songName}"?`, function() {
+        showConfirm(t('removeConfirmPrefix') + '"' + songName + '"?', function() {
           storedSongs.splice(index, 1);
           saveSongsToStorage(storedSongs);
           displayStoredSongs();
@@ -2562,7 +2802,7 @@
         const emptyMsg = document.createElement('div');
         emptyMsg.className = 'dropdown-item';
         emptyMsg.style.cssText = 'color: #b0987a; font-size: 0.8rem; padding: 6px 16px; font-style: italic;';
-        emptyMsg.textContent = 'No songs loaded';
+        emptyMsg.textContent = t('noSongs');
         songsList.appendChild(emptyMsg);
       }
     }
@@ -2735,7 +2975,7 @@
     function applyEditorState(hidden) {
       isEditorCollapsed = hidden;
       inputArea.classList.toggle('collapsed', hidden);
-      toggleBtn.textContent = hidden ? '▼ Show Editor' : '▲ Hide Editor';
+      toggleBtn.textContent = hidden ? t('showEditor') : t('hideEditor');
       toggleBtn.classList.toggle('active', hidden);
       setTimeout(adjustChordSizes, 350);
     }
@@ -2750,12 +2990,12 @@
       isAdvancedMode = advanced;
       if (advanced) {
         document.body.classList.remove('easy-mode');
-        toggleModeBtn.textContent = '😃 Switch to EASY MODE';
+        toggleModeBtn.textContent = t('switchToEasy');
         const savedHidden = loadEditorHiddenState();
         applyEditorState(savedHidden);
       } else {
         document.body.classList.add('easy-mode');
-        toggleModeBtn.textContent = '😵 Switch to ADVANCED MODE';
+        toggleModeBtn.textContent = t('switchToAdvanced');
         isEditorCollapsed = true;
       }
       setTimeout(adjustChordSizes, 250);
@@ -2962,8 +3202,8 @@
       if (!text || text.trim() === '') {
         previewContent.innerHTML = `
           <div class="empty-preview">
-            <div class="main-text">Type or Paste your chord chart (in the editor area below)</div>
-            <div class="sub-text">or Drag &amp; Drop a TXT file with a chord chart (into the editor area below)</div>
+            <div class="main-text">${t('emptyPreviewMain')}</div>
+            <div class="sub-text">${t('emptyPreviewSub')}</div>
           </div>
         `;
         return;
@@ -3099,15 +3339,15 @@
       link.href = url;
       link.click();
       URL.revokeObjectURL(url);
-      this.textContent = '✅ Saved!';
-      setTimeout(() => { this.textContent = "💾 Save Editor's text as TXT"; }, 2000);
+      this.textContent = t('saveTxtOk');
+      setTimeout(() => { this.textContent = t('saveTxt'); }, 2000);
     });
 
     document.getElementById('exportPNG').addEventListener('click', async function() {
       const preview = document.getElementById('previewContainer');
       const contentWrapper = document.getElementById('previewContent');
       const songName = document.querySelector('.dropdown-item.active .song-name')?.textContent || 'chord-chart';
-      this.textContent = '⏳ Exporting...';
+      this.textContent = t('savePngBusy');
       this.disabled = true;
 
       try {
@@ -3182,9 +3422,9 @@
         link.href = canvas.toDataURL('image/png');
         link.click();
 
-        this.textContent = '✅ Exported!';
+        this.textContent = t('savePngOk');
         setTimeout(() => {
-          this.textContent = '📷 Save Chord Chart as PNG';
+          this.textContent = t('savePng');
           this.disabled = false;
         }, 2000);
       } catch (err) {
@@ -3198,9 +3438,9 @@
         preview.style.boxShadow = '';
         preview.style.background = '';
         preview.style.width = '';
-        this.textContent = '❌ Export failed';
+        this.textContent = t('savePngFail');
         setTimeout(() => {
-          this.textContent = '📷 Save Chord Chart as PNG';
+          this.textContent = t('savePng');
           this.disabled = false;
         }, 2000);
       }
@@ -3223,9 +3463,19 @@
       }
     });
 
+    // ===== INIT =====
     loadSettings();
+    loadLanguage();
     syncSettingsUI();
     applySettings();
+    applyLanguage();
+
+    document.getElementById('langSwitch').addEventListener('click', function() {
+      currentLang = (currentLang === 'en') ? 'th' : 'en';
+      saveLanguage();
+      applyLanguage();
+      displayStoredSongs();
+    });
 
     applyMode(false);
 
