@@ -6,6 +6,51 @@
   <title>🎸 Chord Chart Creator</title>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
+    /* ====== FC HOME FONT FACES ====== */
+    /* Font files must be at: fonts/FC Home/*.otf (relative to this HTML file) */
+    @font-face {
+      font-family: 'FC Home';
+      src: url('fonts/FC Home/FC Home Regular ver 1.01.otf') format('opentype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'FC Home';
+      src: url('fonts/FC Home/FC Home Italic ver 1.01.otf') format('opentype');
+      font-weight: 400;
+      font-style: italic;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'FC Home';
+      src: url('fonts/FC Home/FC Home Thin ver 1.01.otf') format('opentype');
+      font-weight: 100;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'FC Home';
+      src: url('fonts/FC Home/FC Home Thin Italic ver 1.01.otf') format('opentype');
+      font-weight: 100;
+      font-style: italic;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'FC Home';
+      src: url('fonts/FC Home/FC Home Black ver 1.01.otf') format('opentype');
+      font-weight: 900;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'FC Home';
+      src: url('fonts/FC Home/FC Home Black Italic ver 1.01.otf') format('opentype');
+      font-weight: 900;
+      font-style: italic;
+      font-display: swap;
+    }
+
     * {
       box-sizing: border-box;
       font-family: Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace;
@@ -21,6 +66,14 @@
       --label-radius: 4px;
       --ui-scale: 1;
       --editor-scale: 1;
+      --chord-line-height: 1.9;
+      --empty-line-height: 24px;
+      --chord-letter-spacing: 0em;
+      --lyric-letter-spacing: 0em;
+      --label-letter-spacing: 0em;
+      --space-width: 0.6em;
+      --pipe-scale: 2.25;
+      --pipe-thickness: 0.03em;
     }
     html {
       font-size: clamp(14px, 1.05vw + 8px, 18px);
@@ -508,7 +561,7 @@
       font-variant-ligatures: none;
       font-feature-settings: "liga" 0, "calt" 0;
       font-kerning: none;
-      letter-spacing: 0;
+      letter-spacing: var(--chord-letter-spacing, 0em);
       word-spacing: 0;
     }
     textarea:focus {
@@ -545,7 +598,7 @@
       border: 1px solid #dcc9b0;
       box-shadow: inset 0 2px 4px rgba(0,0,0,0.04);
       font-family: Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace;
-      line-height: 1.9;
+      line-height: var(--chord-line-height, 1.9);
       color: #3d2b1f;
     }
     .empty-preview {
@@ -568,7 +621,7 @@
       font-variant-ligatures: none;
       font-feature-settings: "liga" 0, "calt" 0;
       font-kerning: none;
-      letter-spacing: 0;
+      letter-spacing: var(--chord-letter-spacing, 0em);
       word-spacing: 0;
       font-family: Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace;
     }
@@ -592,16 +645,18 @@
     .chord-line .pipe {
       color: #c0c0c0;
       font-weight: 700;
-      text-shadow: 0.03em 0 0 currentColor, -0.03em 0 0 currentColor;
+      text-shadow:
+        var(--pipe-thickness, 0.03em) 0 0 currentColor,
+        calc(-1 * var(--pipe-thickness, 0.03em)) 0 0 currentColor;
       display: inline-block;
-      transform: scaleY(2.25);
+      transform: scaleY(var(--pipe-scale, 2.25));
       transform-origin: center;
       vertical-align: 0.2em;
       font-size: 0.85rem;
     }
     .chord-line .space {
       display: inline-block;
-      width: 0.6em;
+      width: var(--space-width, 0.6em);
       height: 1em;
       vertical-align: baseline;
     }
@@ -623,7 +678,12 @@
       color: #3d2b1f;
       font-size: var(--lyric-size, 0.85rem);
       line-height: 1.5;
-      font-family: Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace;
+      font-family: var(--font-lyric, Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace);
+      font-variant-ligatures: none;
+      font-feature-settings: "liga" 0, "calt" 0;
+      font-kerning: none;
+      letter-spacing: var(--lyric-letter-spacing, 0em);
+      word-spacing: 0;
     }
     .hr-line {
       display: block;
@@ -641,7 +701,7 @@
       display: block;
       width: 100%;
       padding: 4px 0;
-      height: 24px;
+      height: var(--empty-line-height, 24px);
     }
 
     .section-block {
@@ -655,6 +715,11 @@
       font-family: Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace;
       color: #FFFFFF;
       display: inline-block;
+      font-variant-ligatures: none;
+      font-feature-settings: "liga" 0, "calt" 0;
+      font-kerning: none;
+      letter-spacing: var(--label-letter-spacing, 0em);
+      word-spacing: 0;
     }
     .section-block .section .section-name {
       font-weight: 700;
@@ -738,7 +803,6 @@
       height: 0 !important;
     }
 
-    /* ====== CONFIRM DIALOG ====== */
     .confirm-overlay {
       display: none;
       position: fixed;
@@ -780,7 +844,6 @@
       font-size: 0.85rem;
     }
 
-    /* ====== SETTINGS MODAL ====== */
     .settings-overlay {
       display: none;
       position: fixed;
@@ -1022,7 +1085,8 @@
 
       <button class="btn btn-success advanced-only" id="exportPNG">📷 Save Chord Chart as PNG</button>
       <button class="btn btn-success advanced-only" id="saveTXT">💾 Save Editor's text as TXT</button>
-      <button class="btn btn-outline advanced-only" id="openSettings" title="Open settings">⚙ Settings</button>
+
+      <button class="btn btn-outline" id="openSettings" title="Open settings">⚙ Settings</button>
     </div>
   </div>
   <div class="editor-wrapper">
@@ -1075,6 +1139,53 @@
       </div>
 
       <div class="settings-section">
+        <h3>Layout</h3>
+        <div class="settings-row">
+          <label for="chordLineHeightSlider">Line spacing</label>
+          <input type="range" id="chordLineHeightSlider" min="1" max="3" step="0.05" value="1.9">
+          <input type="number" class="settings-num" id="chordLineHeightNum" min="1" max="3" step="0.05" value="1.9">
+        </div>
+        <div class="settings-row">
+          <label for="emptyLineHeightSlider">Blank line size</label>
+          <input type="range" id="emptyLineHeightSlider" min="0" max="60" step="1" value="24">
+          <input type="number" class="settings-num" id="emptyLineHeightNum" min="0" max="60" step="1" value="24">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Character Spacing</h3>
+        <div class="settings-row">
+          <label for="chordLetterSpacingSlider">Chords &amp; barlines</label>
+          <input type="range" id="chordLetterSpacingSlider" min="-0.05" max="0.2" step="0.005" value="0">
+          <input type="number" class="settings-num" id="chordLetterSpacingNum" min="-0.05" max="0.2" step="0.005" value="0">
+        </div>
+        <div class="settings-row">
+          <label for="lyricLetterSpacingSlider">Lyrics</label>
+          <input type="range" id="lyricLetterSpacingSlider" min="-0.05" max="0.2" step="0.005" value="0">
+          <input type="number" class="settings-num" id="lyricLetterSpacingNum" min="-0.05" max="0.2" step="0.005" value="0">
+        </div>
+        <div class="settings-row">
+          <label for="labelLetterSpacingSlider">Section labels</label>
+          <input type="range" id="labelLetterSpacingSlider" min="-0.05" max="0.2" step="0.005" value="0">
+          <input type="number" class="settings-num" id="labelLetterSpacingNum" min="-0.05" max="0.2" step="0.005" value="0">
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Barline</h3>
+        <div class="settings-row">
+          <label for="pipeScaleSlider">Barline height</label>
+          <input type="range" id="pipeScaleSlider" min="1" max="5" step="0.05" value="2.25">
+          <input type="number" class="settings-num" id="pipeScaleNum" min="1" max="5" step="0.05" value="2.25">
+        </div>
+        <div class="settings-row">
+          <label for="pipeThicknessSlider">Barline thickness</label>
+          <input type="range" id="pipeThicknessSlider" min="0" max="0.15" step="0.005" value="0.03">
+          <input type="number" class="settings-num" id="pipeThicknessNum" min="0" max="0.15" step="0.005" value="0.03">
+        </div>
+      </div>
+
+      <div class="settings-section">
         <h3>Chord Font</h3>
         <div class="settings-row">
           <label for="chordFontSelect">Font family</label>
@@ -1084,6 +1195,7 @@
             <option value="Consolas, 'Courier New', monospace">Consolas</option>
             <option value="Menlo, Monaco, 'Courier New', monospace">Menlo / Monaco</option>
             <option value="'DejaVu Sans Mono', 'Liberation Mono', monospace">DejaVu Sans Mono</option>
+            <option value="'FC Home', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">FC Home</option>
             <option value="'Fira Code', 'JetBrains Mono', 'Cascadia Code', Consolas, Menlo, Monaco, 'DejaVu Sans Mono', monospace">Fira Code (if installed)</option>
             <option value="__custom__">Custom…</option>
           </select>
@@ -1109,8 +1221,14 @@
             <option value="Consolas, 'Courier New', monospace">Consolas</option>
             <option value="Menlo, Monaco, 'Courier New', monospace">Menlo / Monaco</option>
             <option value="'DejaVu Sans Mono', 'Liberation Mono', monospace">DejaVu Sans Mono</option>
-            <option value="'Fira Code', 'JetBrains Mono', 'Cascadia Code', Consolas, Menlo, Monaco, 'DejaVu Sans Mono', monospace">Fira Code (if installed)</option>
+            <option value="'FC Home', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">FC Home</option>
+            <option value="'IBM Plex Sans Thai', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">IBM Plex Sans Thai</option>
+            <option value="'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">Sarabun (Thai)</option>
+            <option value="'Prompt', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">Prompt (Thai)</option>
+            <option value="'Noto Sans Thai', 'Sarabun', system-ui, sans-serif">Noto Sans Thai</option>
+            <option value="'Kanit', 'Sarabun', system-ui, sans-serif">Kanit (Thai)</option>
             <option value="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">System sans</option>
+            <option value="'Fira Code', 'JetBrains Mono', 'Cascadia Code', Consolas, Menlo, Monaco, 'DejaVu Sans Mono', monospace">Fira Code (if installed)</option>
             <option value="__custom__">Custom…</option>
           </select>
         </div>
@@ -1220,6 +1338,20 @@
     const uiScaleNum = document.getElementById('uiScaleNum');
     const editorScaleSlider = document.getElementById('editorScaleSlider');
     const editorScaleNum = document.getElementById('editorScaleNum');
+    const chordLineHeightSlider = document.getElementById('chordLineHeightSlider');
+    const chordLineHeightNum = document.getElementById('chordLineHeightNum');
+    const emptyLineHeightSlider = document.getElementById('emptyLineHeightSlider');
+    const emptyLineHeightNum = document.getElementById('emptyLineHeightNum');
+    const chordLetterSpacingSlider = document.getElementById('chordLetterSpacingSlider');
+    const chordLetterSpacingNum = document.getElementById('chordLetterSpacingNum');
+    const lyricLetterSpacingSlider = document.getElementById('lyricLetterSpacingSlider');
+    const lyricLetterSpacingNum = document.getElementById('lyricLetterSpacingNum');
+    const labelLetterSpacingSlider = document.getElementById('labelLetterSpacingSlider');
+    const labelLetterSpacingNum = document.getElementById('labelLetterSpacingNum');
+    const pipeScaleSlider = document.getElementById('pipeScaleSlider');
+    const pipeScaleNum = document.getElementById('pipeScaleNum');
+    const pipeThicknessSlider = document.getElementById('pipeThicknessSlider');
+    const pipeThicknessNum = document.getElementById('pipeThicknessNum');
     const chordFontSelect = document.getElementById('chordFontSelect');
     const chordFontCustomRow = document.getElementById('chordFontCustomRow');
     const chordFontCustom = document.getElementById('chordFontCustom');
@@ -1282,6 +1414,13 @@
       masterScale: 1,
       uiScale: 1,
       editorScale: 1,
+      chordLineHeight: 1.9,
+      emptyLineHeight: 24,
+      chordLetterSpacing: 0,
+      lyricLetterSpacing: 0,
+      labelLetterSpacing: 0,
+      pipeScale: 2.25,
+      pipeThickness: 0.03,
       chordFont: "Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace",
       chordFontCustom: '',
       lyricFont: "Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace",
@@ -1343,14 +1482,25 @@
     function applySettings() {
       const root = document.documentElement;
       const ms = parseFloat(settings.masterScale) || 1;
+      const cls = parseFloat(settings.chordLetterSpacing) || 0;
+      const lls = parseFloat(settings.lyricLetterSpacing) || 0;
+      const bls = parseFloat(settings.labelLetterSpacing) || 0;
       root.style.setProperty('--font-chord', effectiveFont(settings.chordFont, settings.chordFontCustom));
-      root.style.setProperty('--font-lyric', effectiveFont(settings.lyricFont, settings.lyricFontCustom));
+      root.style.setProperty('--font-lyric', "'FC Home', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif");
       root.style.setProperty('--chord-size-mult', settings.chordSizeMult * ms);
       root.style.setProperty('--lyric-size', (settings.lyricSize * ms) + 'rem');
       root.style.setProperty('--label-size', (settings.labelSize * ms) + 'rem');
       root.style.setProperty('--label-radius', settings.labelRadius + 'px');
       root.style.setProperty('--ui-scale', settings.uiScale);
       root.style.setProperty('--editor-scale', settings.editorScale);
+      root.style.setProperty('--chord-line-height', settings.chordLineHeight);
+      root.style.setProperty('--empty-line-height', settings.emptyLineHeight + 'px');
+      root.style.setProperty('--chord-letter-spacing', cls + 'em');
+      root.style.setProperty('--lyric-letter-spacing', lls + 'em');
+      root.style.setProperty('--label-letter-spacing', bls + 'em');
+      root.style.setProperty('--space-width', 'calc(0.6em + ' + cls + 'em)');
+      root.style.setProperty('--pipe-scale', settings.pipeScale);
+      root.style.setProperty('--pipe-thickness', settings.pipeThickness + 'em');
       requestAnimationFrame(() => adjustChordSizes());
     }
 
@@ -1363,6 +1513,27 @@
 
       editorScaleSlider.value = settings.editorScale;
       editorScaleNum.value = Number(settings.editorScale).toFixed(2);
+
+      chordLineHeightSlider.value = settings.chordLineHeight;
+      chordLineHeightNum.value = Number(settings.chordLineHeight).toFixed(2);
+
+      emptyLineHeightSlider.value = settings.emptyLineHeight;
+      emptyLineHeightNum.value = Number(settings.emptyLineHeight).toFixed(0);
+
+      chordLetterSpacingSlider.value = settings.chordLetterSpacing;
+      chordLetterSpacingNum.value = Number(settings.chordLetterSpacing).toFixed(3);
+
+      lyricLetterSpacingSlider.value = settings.lyricLetterSpacing;
+      lyricLetterSpacingNum.value = Number(settings.lyricLetterSpacing).toFixed(3);
+
+      labelLetterSpacingSlider.value = settings.labelLetterSpacing;
+      labelLetterSpacingNum.value = Number(settings.labelLetterSpacing).toFixed(3);
+
+      pipeScaleSlider.value = settings.pipeScale;
+      pipeScaleNum.value = Number(settings.pipeScale).toFixed(2);
+
+      pipeThicknessSlider.value = settings.pipeThickness;
+      pipeThicknessNum.value = Number(settings.pipeThickness).toFixed(3);
 
       const chordMatch = [...chordFontSelect.options].find(opt => opt.value === settings.chordFont);
       if (chordMatch) {
@@ -1469,6 +1640,139 @@
     });
     editorScaleNum.addEventListener('blur', function() {
       this.value = settings.editorScale.toFixed(2);
+    });
+
+    function setChordLineHeight(v) {
+      v = clampNum(v, 1, 3);
+      settings.chordLineHeight = v;
+      chordLineHeightSlider.value = v;
+      if (document.activeElement !== chordLineHeightNum) chordLineHeightNum.value = v.toFixed(2);
+      saveSettings();
+      applySettings();
+    }
+    chordLineHeightSlider.addEventListener('input', function() {
+      setChordLineHeight(parseFloat(this.value));
+    });
+    chordLineHeightNum.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v)) setChordLineHeight(v);
+    });
+    chordLineHeightNum.addEventListener('blur', function() {
+      this.value = settings.chordLineHeight.toFixed(2);
+    });
+
+    function setEmptyLineHeight(v) {
+      v = clampNum(v, 0, 60);
+      settings.emptyLineHeight = v;
+      emptyLineHeightSlider.value = v;
+      if (document.activeElement !== emptyLineHeightNum) emptyLineHeightNum.value = v.toFixed(0);
+      saveSettings();
+      applySettings();
+    }
+    emptyLineHeightSlider.addEventListener('input', function() {
+      setEmptyLineHeight(parseFloat(this.value));
+    });
+    emptyLineHeightNum.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v)) setEmptyLineHeight(v);
+    });
+    emptyLineHeightNum.addEventListener('blur', function() {
+      this.value = settings.emptyLineHeight.toFixed(0);
+    });
+
+    function setChordLetterSpacing(v) {
+      v = clampNum(v, -0.05, 0.2);
+      settings.chordLetterSpacing = v;
+      chordLetterSpacingSlider.value = v;
+      if (document.activeElement !== chordLetterSpacingNum) chordLetterSpacingNum.value = v.toFixed(3);
+      saveSettings();
+      applySettings();
+    }
+    chordLetterSpacingSlider.addEventListener('input', function() {
+      setChordLetterSpacing(parseFloat(this.value));
+    });
+    chordLetterSpacingNum.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v)) setChordLetterSpacing(v);
+    });
+    chordLetterSpacingNum.addEventListener('blur', function() {
+      this.value = settings.chordLetterSpacing.toFixed(3);
+    });
+
+    function setLyricLetterSpacing(v) {
+      v = clampNum(v, -0.05, 0.2);
+      settings.lyricLetterSpacing = v;
+      lyricLetterSpacingSlider.value = v;
+      if (document.activeElement !== lyricLetterSpacingNum) lyricLetterSpacingNum.value = v.toFixed(3);
+      saveSettings();
+      applySettings();
+    }
+    lyricLetterSpacingSlider.addEventListener('input', function() {
+      setLyricLetterSpacing(parseFloat(this.value));
+    });
+    lyricLetterSpacingNum.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v)) setLyricLetterSpacing(v);
+    });
+    lyricLetterSpacingNum.addEventListener('blur', function() {
+      this.value = settings.lyricLetterSpacing.toFixed(3);
+    });
+
+    function setLabelLetterSpacing(v) {
+      v = clampNum(v, -0.05, 0.2);
+      settings.labelLetterSpacing = v;
+      labelLetterSpacingSlider.value = v;
+      if (document.activeElement !== labelLetterSpacingNum) labelLetterSpacingNum.value = v.toFixed(3);
+      saveSettings();
+      applySettings();
+    }
+    labelLetterSpacingSlider.addEventListener('input', function() {
+      setLabelLetterSpacing(parseFloat(this.value));
+    });
+    labelLetterSpacingNum.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v)) setLabelLetterSpacing(v);
+    });
+    labelLetterSpacingNum.addEventListener('blur', function() {
+      this.value = settings.labelLetterSpacing.toFixed(3);
+    });
+
+    function setPipeScale(v) {
+      v = clampNum(v, 1, 5);
+      settings.pipeScale = v;
+      pipeScaleSlider.value = v;
+      if (document.activeElement !== pipeScaleNum) pipeScaleNum.value = v.toFixed(2);
+      saveSettings();
+      applySettings();
+    }
+    pipeScaleSlider.addEventListener('input', function() {
+      setPipeScale(parseFloat(this.value));
+    });
+    pipeScaleNum.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v)) setPipeScale(v);
+    });
+    pipeScaleNum.addEventListener('blur', function() {
+      this.value = settings.pipeScale.toFixed(2);
+    });
+
+    function setPipeThickness(v) {
+      v = clampNum(v, 0, 0.15);
+      settings.pipeThickness = v;
+      pipeThicknessSlider.value = v;
+      if (document.activeElement !== pipeThicknessNum) pipeThicknessNum.value = v.toFixed(3);
+      saveSettings();
+      applySettings();
+    }
+    pipeThicknessSlider.addEventListener('input', function() {
+      setPipeThickness(parseFloat(this.value));
+    });
+    pipeThicknessNum.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v)) setPipeThickness(v);
+    });
+    pipeThicknessNum.addEventListener('blur', function() {
+      this.value = settings.pipeThickness.toFixed(3);
     });
 
     chordFontSelect.addEventListener('change', function() {
