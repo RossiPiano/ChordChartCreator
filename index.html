@@ -1557,6 +1557,63 @@
       }
     });
 
+    // ===== FILE SAVING HELPER =====
+    // Works in every browser:
+    //  - Chromium-based: uses showSaveFilePicker (native Save As dialog, editable name + folder picker)
+    //  - Firefox/LibreWolf/Safari: falls back to a classic download with the chosen name
+    async function saveFileWithPicker(finalName, blob, mimeType, description) {
+      // Sanitize in case the user typed something illegal
+      let safeName = (finalName || '').replace(/[<>:"/\\|?*\x00-\x1f]/g, '').trim();
+      if (!safeName) safeName = 'chord-chart';
+
+      // Ensure correct extension
+      let ext = '.txt';
+      if (mimeType === 'image/png') ext = '.png';
+      else if (mimeType === 'text/plain') ext = '.txt';
+
+      const dotIdx = safeName.lastIndexOf('.');
+      if (dotIdx < 0 || safeName.substring(dotIdx).length > 6) {
+        safeName += ext;
+      }
+
+      // Preferred path: native Save As dialog (Chromium-based)
+      if (window.showSaveFilePicker) {
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: safeName,
+            startIn: 'downloads',   // ← Opens in the OS's Downloads folder on Windows, macOS, Linux
+            types: [{
+              description: description || 'File',
+              accept: { [mimeType]: [ext] }
+            }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          return { saved: true, usedPicker: true, name: safeName };
+        } catch (err) {
+          if (err && err.name === 'AbortError') {
+            return { saved: false, cancelled: true, usedPicker: true };
+          }
+          console.warn('Save picker failed, falling back to download:', err);
+          // fall through to legacy download
+        }
+      }
+
+      // Fallback: legacy auto-download with the chosen name
+      // (Firefox, LibreWolf, Safari, or picker failure)
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.download = safeName;
+      link.href = url;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(function() { URL.revokeObjectURL(url); }, 1500);
+      return { saved: true, usedPicker: false, name: safeName };
+    }
+
     const masterScaleSlider = document.getElementById('masterScaleSlider');
     const masterScaleNum = document.getElementById('masterScaleNum');
     const masterScaleReset = document.getElementById('masterScaleReset');
@@ -3322,7 +3379,8 @@
       renderPreview(inputEl.value);
     }
 
-    document.getElementById('saveTXT').addEventListener('click', function() {
+    // ===== SAVE AS TXT =====
+    document.getElementById('saveTXT').addEventListener('click', async function() {
       const content = inputEl.value;
       if (!content || content.trim() === '') {
         alert('Nothing to save. The editor is empty.');
@@ -3330,19 +3388,18 @@
       }
       const songName = document.querySelector('.dropdown-item.active .song-name')?.textContent || 'chord-chart';
       const sanitizedName = songName.replace(/[<>:"/\\|?*\x00-\x1f]/g, '').trim() || 'chord-chart';
-      const timestamp = new Date().toISOString().slice(0,10);
+      const timestamp = new Date().toISOString().slice(0, 10);
       const fileName = `${sanitizedName}_${timestamp}.txt`;
       const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.download = fileName;
-      link.href = url;
-      link.click();
-      URL.revokeObjectURL(url);
+
+      const result = await saveFileWithPicker(fileName, blob, 'text/plain', 'Text file');
+      if (result.cancelled) return;
+
       this.textContent = t('saveTxtOk');
       setTimeout(() => { this.textContent = t('saveTxt'); }, 2000);
     });
 
+    // ===== SAVE AS PNG =====
     document.getElementById('exportPNG').addEventListener('click', async function() {
       const preview = document.getElementById('previewContainer');
       const contentWrapper = document.getElementById('previewContent');
@@ -3414,13 +3471,19 @@
         preview.style.background = originalBackground || '';
         preview.style.width = '';
 
-        const link = document.createElement('a');
+        // Get the PNG as a Blob
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+
         const sanitizedName = songName.replace(/[<>:"/\\|?*\x00-\x1f]/g, '').trim() || 'chord-chart';
-        const timestamp = new Date().toISOString().slice(0,19).replace(/[:-]/g, '');
+        const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
         const fileName = `${sanitizedName}_${timestamp}.png`;
-        link.download = fileName;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
+
+        const result = await saveFileWithPicker(fileName, blob, 'image/png', 'PNG image');
+        if (result.cancelled) {
+          this.textContent = t('savePng');
+          this.disabled = false;
+          return;
+        }
 
         this.textContent = t('savePngOk');
         setTimeout(() => {
