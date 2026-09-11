@@ -178,6 +178,7 @@
       --label-radius: 4px;
       --ui-scale: 1;
       --editor-scale: 1;
+      --current-song-size: 0.8rem;
       --chord-line-height: 1.9;
       --empty-line-height: 24px;
       --chord-letter-spacing: 0em;
@@ -238,6 +239,29 @@
       align-items: center;
       gap: calc(6px * var(--ui-scale));
       margin-right: calc(6px * var(--ui-scale));
+    }
+    .current-song {
+      display: none;
+      align-items: center;
+      background: #dcc9b0;
+      border: 1px solid #c4ad92;
+      padding: calc(3px * var(--ui-scale)) calc(12px * var(--ui-scale));
+      border-radius: 40px;
+      font-size: calc(var(--current-song-size, 0.8rem) * var(--ui-scale));
+      font-weight: 500;
+      color: #5c4033;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: calc(280px * var(--ui-scale));
+      flex-shrink: 0;
+    }
+    .current-song.show {
+      display: inline-flex;
+    }
+    .current-song::before {
+      content: '🎵 ';
+      flex-shrink: 0;
     }
     .btn {
       background: #dcc9b0;
@@ -1207,14 +1231,15 @@
   <div class="toolbar">
     <div class="toolbar-left">
       <h1>🎸 Chord Chart Creator</h1>
+      <span class="current-song" id="currentSongName" title=""></span>
       <button class="btn-toggle" id="toggleMode" title="Switch between Easy and Advanced mode">😵 Switch to ADVANCED MODE</button>
 
       <div class="dropdown">
         <button class="btn btn-outline" id="dropdownToggle">📄 Songs ▼</button>
         <div class="dropdown-content" id="dropdownContent">
           <div class="dropdown-label" id="songsLabel">📂 LOAD/CLEAR SONGS</div>
-          <div class="dropdown-item" id="selectFolder" style="color: #8b6b4a; font-weight: 600;">📁 Select Song Folder</div>
-          <div class="dropdown-item" id="loadSingleFile" style="color: #8b6b4a; font-weight: 600;">📄 Open 1 Song File</div>
+          <!-- <div class="dropdown-item" id="selectFolder" style="color: #8b6b4a; font-weight: 600;">📁 Select Song Folder</div> -->
+          <div class="dropdown-item" id="loadSingleFile" style="color: #8b6b4a; font-weight: 600;">📄 Upload a New Song (.txt chord chart)</div>
           <!-- <div class="dropdown-item" id="clearStoredSongs" style="color: #5c4033; font-weight: 500;">🗑️ Clear Song List Below</div> -->
           <div class="dropdown-divider"></div>
           <div class="dropdown-label" id="songsListTitle">🎵 SONG LIST</div>
@@ -1315,6 +1340,11 @@
           <label for="editorScaleSlider">Editor text size</label>
           <input type="range" id="editorScaleSlider" min="0.7" max="2" step="0.05" value="1">
           <input type="number" class="settings-num" id="editorScaleNum" min="0.7" max="2" step="0.05" value="1">
+        </div>
+        <div class="settings-row">
+          <label for="currentSongSizeSlider">Song name size</label>
+          <input type="range" id="currentSongSizeSlider" min="0.5" max="2" step="0.05" value="0.8">
+          <input type="number" class="settings-num" id="currentSongSizeNum" min="0.5" max="2" step="0.05" value="0.8">
         </div>
       </div>
 
@@ -1515,6 +1545,7 @@
     const keySelect = document.getElementById('keySelect');
     const keyModeSelect = document.getElementById('keyModeSelect');
     const keyDisplay = document.getElementById('keyDisplay');
+    const currentSongNameEl = document.getElementById('currentSongName');
 
     const confirmOverlay = document.getElementById('confirmOverlay');
     const confirmMessage = document.getElementById('confirmMessage');
@@ -1558,15 +1589,10 @@
     });
 
     // ===== FILE SAVING HELPER =====
-    // Works in every browser:
-    //  - Chromium-based: uses showSaveFilePicker (native Save As dialog, editable name + folder picker)
-    //  - Firefox/LibreWolf/Safari: falls back to a classic download with the chosen name
     async function saveFileWithPicker(finalName, blob, mimeType, description) {
-      // Sanitize in case the user typed something illegal
       let safeName = (finalName || '').replace(/[<>:"/\\|?*\x00-\x1f]/g, '').trim();
       if (!safeName) safeName = 'chord-chart';
 
-      // Ensure correct extension
       let ext = '.txt';
       if (mimeType === 'image/png') ext = '.png';
       else if (mimeType === 'text/plain') ext = '.txt';
@@ -1576,12 +1602,11 @@
         safeName += ext;
       }
 
-      // Preferred path: native Save As dialog (Chromium-based)
       if (window.showSaveFilePicker) {
         try {
           const handle = await window.showSaveFilePicker({
             suggestedName: safeName,
-            startIn: 'downloads',   // ← Opens in the OS's Downloads folder on Windows, macOS, Linux
+            startIn: 'downloads',
             types: [{
               description: description || 'File',
               accept: { [mimeType]: [ext] }
@@ -1596,12 +1621,9 @@
             return { saved: false, cancelled: true, usedPicker: true };
           }
           console.warn('Save picker failed, falling back to download:', err);
-          // fall through to legacy download
         }
       }
 
-      // Fallback: legacy auto-download with the chosen name
-      // (Firefox, LibreWolf, Safari, or picker failure)
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.download = safeName;
@@ -1623,6 +1645,8 @@
     const uiScaleNum = document.getElementById('uiScaleNum');
     const editorScaleSlider = document.getElementById('editorScaleSlider');
     const editorScaleNum = document.getElementById('editorScaleNum');
+    const currentSongSizeSlider = document.getElementById('currentSongSizeSlider');
+    const currentSongSizeNum = document.getElementById('currentSongSizeNum');
     const chordLineHeightSlider = document.getElementById('chordLineHeightSlider');
     const chordLineHeightNum = document.getElementById('chordLineHeightNum');
     const emptyLineHeightSlider = document.getElementById('emptyLineHeightSlider');
@@ -1702,6 +1726,7 @@
         sectionSectionLabels: 'Section Labels',
         labelUiScale: 'UI scale',
         labelEditorScale: 'Editor text size',
+        labelCurrentSongSize: 'Song name size',
         labelLineSpacing: 'Line spacing',
         labelBlankLineSize: 'Blank line size',
         labelChordSpacing: 'Chords & barlines',
@@ -1727,7 +1752,8 @@
         saveTxtOk: '✅ Saved!',
         langSwitchToThai: '🇹🇭 ไทย',
         langSwitchToEnglish: '🇬🇧 English',
-        songsListTitle: '🎵 SONG LIST'
+        songsListTitle: '🎵 SONG LIST',
+        currentSongTooltip: 'Currently loaded song:'
       },
       th: {
         appTitle: '🎸 โปรแกรมสร้างคอร์ดชาร์ท',
@@ -1763,6 +1789,7 @@
         sectionSectionLabels: 'ป้ายชื่อท่อน',
         labelUiScale: 'ขนาด UI',
         labelEditorScale: 'ขนาดตัวอักษรในตัวแก้ไข',
+        labelCurrentSongSize: 'ขนาดชื่อเพลง',
         labelLineSpacing: 'ระยะห่างบรรทัด',
         labelBlankLineSize: 'ขนาดบรรทัดว่าง',
         labelChordSpacing: 'คอร์ดและเส้นกั้น',
@@ -1788,7 +1815,8 @@
         saveTxtOk: '✅ บันทึกแล้ว!',
         langSwitchToThai: '🇹🇭 ไทย',
         langSwitchToEnglish: '🇬🇧 English',
-        songsListTitle: '🎵 รายชื่อเพลง'
+        songsListTitle: '🎵 รายชื่อเพลง',
+        currentSongTooltip: 'เพลงที่เปิดอยู่:'
       }
     };
 
@@ -1867,6 +1895,7 @@
       const labelMap = {
         uiScaleSlider: 'labelUiScale',
         editorScaleSlider: 'labelEditorScale',
+        currentSongSizeSlider: 'labelCurrentSongSize',
         chordLineHeightSlider: 'labelLineSpacing',
         emptyLineHeightSlider: 'labelBlankLineSize',
         chordLetterSpacingSlider: 'labelChordSpacing',
@@ -1895,6 +1924,11 @@
       const langBtn = document.getElementById('langSwitch');
       if (langBtn) {
         langBtn.textContent = currentLang === 'en' ? t('langSwitchToThai') : t('langSwitchToEnglish');
+      }
+      // Update current-song tooltip in the active language
+      if (currentSongNameEl && currentSongNameEl.classList.contains('show')) {
+        const songName = currentSongNameEl.textContent || '';
+        currentSongNameEl.title = t('currentSongTooltip') + ' ' + songName;
       }
     }
     // ===== END LANGUAGE =====
@@ -1935,6 +1969,7 @@
       masterScale: 1,
       uiScale: 1,
       editorScale: 1,
+      currentSongSize: 0.8,
       chordLineHeight: 1.9,
       emptyLineHeight: 24,
       chordLetterSpacing: 0,
@@ -2015,6 +2050,7 @@
       root.style.setProperty('--label-radius', settings.labelRadius + 'px');
       root.style.setProperty('--ui-scale', settings.uiScale);
       root.style.setProperty('--editor-scale', settings.editorScale);
+      root.style.setProperty('--current-song-size', settings.currentSongSize + 'rem');
       root.style.setProperty('--chord-line-height', settings.chordLineHeight);
       root.style.setProperty('--empty-line-height', settings.emptyLineHeight + 'px');
       root.style.setProperty('--chord-letter-spacing', cls + 'em');
@@ -2036,6 +2072,9 @@
 
       editorScaleSlider.value = settings.editorScale;
       editorScaleNum.value = Number(settings.editorScale).toFixed(2);
+
+      currentSongSizeSlider.value = settings.currentSongSize;
+      currentSongSizeNum.value = Number(settings.currentSongSize).toFixed(2);
 
       chordLineHeightSlider.value = settings.chordLineHeight;
       chordLineHeightNum.value = Number(settings.chordLineHeight).toFixed(2);
@@ -2174,6 +2213,25 @@
     });
     editorScaleNum.addEventListener('blur', function() {
       this.value = settings.editorScale.toFixed(2);
+    });
+
+    function setCurrentSongSize(v) {
+      v = clampNum(v, 0.5, 2);
+      settings.currentSongSize = v;
+      currentSongSizeSlider.value = v;
+      if (document.activeElement !== currentSongSizeNum) currentSongSizeNum.value = v.toFixed(2);
+      saveSettings();
+      applySettings();
+    }
+    currentSongSizeSlider.addEventListener('input', function() {
+      setCurrentSongSize(parseFloat(this.value));
+    });
+    currentSongSizeNum.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v)) setCurrentSongSize(v);
+    });
+    currentSongSizeNum.addEventListener('blur', function() {
+      this.value = settings.currentSongSize.toFixed(2);
     });
 
     function setChordLineHeight(v) {
@@ -2589,10 +2647,24 @@
       }
     }
 
-    function loadSong(content) {
+    function setCurrentSongName(name) {
+      if (!name || !name.trim()) {
+        currentSongNameEl.classList.remove('show');
+        currentSongNameEl.textContent = '';
+        currentSongNameEl.title = '';
+        return;
+      }
+      const clean = name.trim();
+      currentSongNameEl.textContent = clean;
+      currentSongNameEl.title = t('currentSongTooltip') + ' ' + clean;
+      currentSongNameEl.classList.add('show');
+    }
+
+    function loadSong(content, fileName) {
       originalText = content;
       inputEl.value = content;
       resetTransposition();
+      if (fileName) setCurrentSongName(fileName);
     }
 
     function handleDragOver(e) {
@@ -2639,7 +2711,7 @@
           }
           saveSongsToStorage(storedSongs);
 
-          loadSong(content);
+          loadSong(content, fileName);
           displayStoredSongs();
         };
         reader.readAsText(file);
@@ -2670,7 +2742,7 @@
             const firstFile = txtFiles[0];
             const firstReader = new FileReader();
             firstReader.onload = function(e) {
-              loadSong(e.target.result);
+              loadSong(e.target.result, firstFile.name.replace('.txt', ''));
             };
             firstReader.readAsText(firstFile);
           }
@@ -2883,7 +2955,7 @@
 
       nameSpan.addEventListener('click', function(e) {
         e.stopPropagation();
-        loadSong(song.content);
+        loadSong(song.content, song.name);
         dropdownContent.classList.remove('show');
         document.querySelectorAll('.dropdown-item.song-item').forEach(el => el.classList.remove('active'));
         songItem.classList.add('active');
@@ -2936,7 +3008,7 @@
           if (existingIndex >= 0) storedSongs[existingIndex].content = content;
           else storedSongs.push({ name: fileName, content: content, folder: folder });
           saveSongsToStorage(storedSongs);
-          loadSong(content);
+          loadSong(content, fileName);
           dropdownContent.classList.remove('show');
           displayStoredSongs();
         };
@@ -2945,62 +3017,65 @@
       fileInput.click();
     });
 
-    document.getElementById('selectFolder').addEventListener('click', function(e) {
-      e.stopPropagation();
-      const fileInput = document.createElement('input');
-      fileInput.type = 'file';
-      fileInput.accept = '.txt';
-      fileInput.webkitdirectory = true;
-      fileInput.multiple = true;
+    const selectFolderBtn = document.getElementById('selectFolder');
+    if (selectFolderBtn) {
+      selectFolderBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.txt';
+        fileInput.webkitdirectory = true;
+        fileInput.multiple = true;
 
-      fileInput.onchange = function(e) {
-        const files = e.target.files;
-        const songFiles = [];
-        const storedSongs = loadStoredSongs() || [];
+        fileInput.onchange = function(e) {
+          const files = e.target.files;
+          const songFiles = [];
+          const storedSongs = loadStoredSongs() || [];
 
-        for (let file of files) {
-          if (file.name.endsWith('.txt')) {
-            const fileName = file.name.replace('.txt', '');
-            const fullPath = file.webkitRelativePath || file.name;
-            const parts = fullPath.split(/[\/\\]/);
-            parts.pop();
-            const folder = parts.join('/');
-            songFiles.push({ name: fileName, file: file, folder: folder });
-          }
-        }
-
-        if (songFiles.length === 0) {
-          alert('No .txt files found in the selected folder.');
-          return;
-        }
-
-        songFiles.sort((a, b) => a.name.localeCompare(b.name, 'th', { sensitivity: 'base' }));
-
-        let loadedCount = 0;
-        songFiles.forEach((song) => {
-          const reader = new FileReader();
-          reader.onload = function(event) {
-            const content = event.target.result;
-            const existingIndex = storedSongs.findIndex(s => s.name === song.name && s.folder === song.folder);
-            if (existingIndex >= 0) storedSongs[existingIndex].content = content;
-            else storedSongs.push({ name: song.name, content: content, folder: song.folder });
-            loadedCount++;
-            if (loadedCount === songFiles.length) {
-              saveSongsToStorage(storedSongs);
-              displayStoredSongs();
-              const firstFile = songFiles[0].file;
-              const firstReader = new FileReader();
-              firstReader.onload = function(e) {
-                loadSong(e.target.result);
-              };
-              firstReader.readAsText(firstFile);
+          for (let file of files) {
+            if (file.name.endsWith('.txt')) {
+              const fileName = file.name.replace('.txt', '');
+              const fullPath = file.webkitRelativePath || file.name;
+              const parts = fullPath.split(/[\/\\]/);
+              parts.pop();
+              const folder = parts.join('/');
+              songFiles.push({ name: fileName, file: file, folder: folder });
             }
-          };
-          reader.readAsText(song.file);
-        });
-      };
-      fileInput.click();
-    });
+          }
+
+          if (songFiles.length === 0) {
+            alert('No .txt files found in the selected folder.');
+            return;
+          }
+
+          songFiles.sort((a, b) => a.name.localeCompare(b.name, 'th', { sensitivity: 'base' }));
+
+          let loadedCount = 0;
+          songFiles.forEach((song) => {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+              const content = event.target.result;
+              const existingIndex = storedSongs.findIndex(s => s.name === song.name && s.folder === song.folder);
+              if (existingIndex >= 0) storedSongs[existingIndex].content = content;
+              else storedSongs.push({ name: song.name, content: content, folder: song.folder });
+              loadedCount++;
+              if (loadedCount === songFiles.length) {
+                saveSongsToStorage(storedSongs);
+                displayStoredSongs();
+                const firstFile = songFiles[0].file;
+                const firstReader = new FileReader();
+                firstReader.onload = function(e) {
+                  loadSong(e.target.result, songFiles[0].name);
+                };
+                firstReader.readAsText(firstFile);
+              }
+            };
+            reader.readAsText(song.file);
+          });
+        };
+        fileInput.click();
+      });
+    }
 
     resizeHandle.addEventListener('mousedown', function(e) {
       isResizing = true;
@@ -3386,7 +3461,9 @@
         alert('Nothing to save. The editor is empty.');
         return;
       }
-      const songName = document.querySelector('.dropdown-item.active .song-name')?.textContent || 'chord-chart';
+      const songName = currentSongNameEl && currentSongNameEl.classList.contains('show')
+        ? (currentSongNameEl.textContent || 'chord-chart')
+        : 'chord-chart';
       const sanitizedName = songName.replace(/[<>:"/\\|?*\x00-\x1f]/g, '').trim() || 'chord-chart';
       const timestamp = new Date().toISOString().slice(0, 10);
       const fileName = `${sanitizedName}_${timestamp}.txt`;
@@ -3403,7 +3480,9 @@
     document.getElementById('exportPNG').addEventListener('click', async function() {
       const preview = document.getElementById('previewContainer');
       const contentWrapper = document.getElementById('previewContent');
-      const songName = document.querySelector('.dropdown-item.active .song-name')?.textContent || 'chord-chart';
+      const songName = currentSongNameEl && currentSongNameEl.classList.contains('show')
+        ? (currentSongNameEl.textContent || 'chord-chart')
+        : 'chord-chart';
       this.textContent = t('savePngBusy');
       this.disabled = true;
 
@@ -3471,7 +3550,6 @@
         preview.style.background = originalBackground || '';
         preview.style.width = '';
 
-        // Get the PNG as a Blob
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
 
         const sanitizedName = songName.replace(/[<>:"/\\|?*\x00-\x1f]/g, '').trim() || 'chord-chart';
