@@ -6,8 +6,120 @@
   <title>🎸 Chord Chart Creator</title>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
+    /* ====== SARABUN FONT FACES ====== */
+    @font-face {
+      font-family: 'Sarabun';
+      src: url('fonts/Sarabun/Sarabun-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Sarabun';
+      src: url('fonts/Sarabun/Sarabun-Italic.ttf') format('truetype');
+      font-weight: 400;
+      font-style: italic;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Sarabun';
+      src: url('fonts/Sarabun/Sarabun-Bold.ttf') format('truetype');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Sarabun';
+      src: url('fonts/Sarabun/Sarabun-BoldItalic.ttf') format('truetype');
+      font-weight: 700;
+      font-style: italic;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Sarabun';
+      src: url('fonts/Sarabun/Sarabun-Thin.ttf') format('truetype');
+      font-weight: 100;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Sarabun';
+      src: url('fonts/Sarabun/Sarabun-ThinItalic.ttf') format('truetype');
+      font-weight: 100;
+      font-style: italic;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Sarabun';
+      src: url('fonts/Sarabun/Sarabun-ExtraLight.ttf') format('truetype');
+      font-weight: 200;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Sarabun';
+      src: url('fonts/Sarabun/Sarabun-ExtraLightItalic.ttf') format('truetype');
+      font-weight: 200;
+      font-style: italic;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Sarabun';
+      src: url('fonts/Sarabun/Sarabun-Light.ttf') format('truetype');
+      font-weight: 300;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Sarabun';
+      src: url('fonts/Sarabun/Sarabun-LightItalic.ttf') format('truetype');
+      font-weight: 300;
+      font-style: italic;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Sarabun';
+      src: url('fonts/Sarabun/Sarabun-Medium.ttf') format('truetype');
+      font-weight: 500;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Sarabun';
+      src: url('fonts/Sarabun/Sarabun-MediumItalic.ttf') format('truetype');
+      font-weight: 500;
+      font-style: italic;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Sarabun';
+      src: url('fonts/Sarabun/Sarabun-SemiBold.ttf') format('truetype');
+      font-weight: 600;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Sarabun';
+      src: url('fonts/Sarabun/Sarabun-SemiBoldItalic.ttf') format('truetype');
+      font-weight: 600;
+      font-style: italic;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Sarabun';
+      src: url('fonts/Sarabun/Sarabun-ExtraBold.ttf') format('truetype');
+      font-weight: 800;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Sarabun';
+      src: url('fonts/Sarabun/Sarabun-ExtraBoldItalic.ttf') format('truetype');
+      font-weight: 800;
+      font-style: italic;
+      font-display: swap;
+    }
     /* ====== FC HOME FONT FACES ====== */
-    /* Font files must be at: fonts/FC Home/*.otf (relative to this HTML file) */
     @font-face {
       font-family: 'FC Home';
       src: url('fonts/FC Home/FC Home Regular ver 1.01.otf') format('opentype');
@@ -74,6 +186,7 @@
       --space-width: 0.6em;
       --pipe-scale: 2.25;
       --pipe-thickness: 0.03em;
+      --pipe-vertical-align: 0.2em;
     }
     html {
       font-size: clamp(14px, 1.05vw + 8px, 18px);
@@ -451,6 +564,32 @@
       border-color: #8b6b4a;
       box-shadow: 0 0 0 2px rgba(139, 107, 74, 0.2);
     }
+    .toolbar-zoom-step {
+      background: #f5ede0;
+      border: 1px solid #c4ad92;
+      color: #5c4033;
+      font-size: calc(0.9rem * var(--ui-scale));
+      font-weight: 700;
+      line-height: 1;
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.1s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: inherit;
+      width: calc(20px * var(--ui-scale));
+      height: calc(20px * var(--ui-scale));
+      flex: 0 0 auto;
+    }
+    .toolbar-zoom-step:hover {
+      background: #dcc9b0;
+    }
+    .toolbar-zoom-step:active {
+      background: #c4ad92;
+    }
     .toolbar-zoom-reset {
       background: transparent;
       border: none;
@@ -651,7 +790,7 @@
       display: inline-block;
       transform: scaleY(var(--pipe-scale, 2.25));
       transform-origin: center;
-      vertical-align: 0.2em;
+      vertical-align: var(--pipe-vertical-align, 0.2em);
       font-size: 0.85rem;
     }
     .chord-line .space {
@@ -951,10 +1090,44 @@
       border-color: #8b6b4a;
       box-shadow: 0 0 0 2px rgba(139, 107, 74, 0.2);
     }
-    .settings-row input[type="number"].settings-num {
-      flex: 0 0 80px;
+    .settings-row .settings-num-group {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: stretch;
       border: 1px solid #c4ad92;
       border-radius: 6px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+    .settings-row .settings-num-group .settings-step-btn {
+      background: #e8dccc;
+      border: none;
+      color: #5c4033;
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      padding: 0 8px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.1s ease;
+      min-width: 22px;
+    }
+    .settings-row .settings-num-group .settings-step-btn:hover {
+      background: #dcc9b0;
+    }
+    .settings-row .settings-num-group .settings-step-btn:active {
+      background: #c4ad92;
+    }
+    .settings-row input[type="number"].settings-num {
+      flex: 0 0 auto;
+      width: 62px;
+      border: none;
+      border-left: 1px solid #c4ad92;
+      border-right: 1px solid #c4ad92;
+      border-radius: 0;
       padding: 4px 6px;
       font-size: 0.8rem;
       font-family: inherit;
@@ -970,8 +1143,7 @@
       margin: 0;
     }
     .settings-row input[type="number"].settings-num:focus {
-      border-color: #8b6b4a;
-      box-shadow: 0 0 0 2px rgba(139, 107, 74, 0.2);
+      background: #f5ede0;
     }
     .settings-row select {
       flex: 1;
@@ -1039,7 +1211,7 @@
           <div class="dropdown-label" id="songsLabel">📂 LOAD/CLEAR SONGS</div>
           <div class="dropdown-item" id="selectFolder" style="color: #8b6b4a; font-weight: 600;">📁 Select Song Folder</div>
           <div class="dropdown-item" id="loadSingleFile" style="color: #8b6b4a; font-weight: 600;">📄 Open 1 Song File</div>
-          <div class="dropdown-item" id="clearStoredSongs" style="color: #5c4033; font-weight: 500;">🗑️ Clear Song List Below</div>
+          <!-- <div class="dropdown-item" id="clearStoredSongs" style="color: #5c4033; font-weight: 500;">🗑️ Clear Song List Below</div> -->
           <div class="dropdown-divider"></div>
           <div class="dropdown-label">🎵 SONG LIST</div>
           <div id="songsList"></div>
@@ -1049,7 +1221,9 @@
       <div class="toolbar-zoom" title="Zoom — scales chords, lyrics, labels and barlines together">
         <span class="toolbar-zoom-label">🔍 Zoom:</span>
         <input type="range" id="masterScaleSlider" min="0" max="100" step="0.5" value="50">
+        <button type="button" class="toolbar-zoom-step" id="masterScaleDown" title="Decrease zoom">−</button>
         <input type="number" id="masterScaleNum" min="0.1" max="10" step="0.05" value="1">
+        <button type="button" class="toolbar-zoom-step" id="masterScaleUp" title="Increase zoom">+</button>
         <button class="toolbar-zoom-reset" id="masterScaleReset" title="Reset zoom to 1.00">↺</button>
       </div>
 
@@ -1183,6 +1357,11 @@
           <input type="range" id="pipeThicknessSlider" min="0" max="0.15" step="0.005" value="0.03">
           <input type="number" class="settings-num" id="pipeThicknessNum" min="0" max="0.15" step="0.005" value="0.03">
         </div>
+        <div class="settings-row">
+          <label for="pipeValignSlider">Barline vertical position</label>
+          <input type="range" id="pipeValignSlider" min="-1" max="1" step="0.05" value="0.2">
+          <input type="number" class="settings-num" id="pipeValignNum" min="-1" max="1" step="0.05" value="0.2">
+        </div>
       </div>
 
       <div class="settings-section">
@@ -1216,14 +1395,15 @@
         <div class="settings-row">
           <label for="lyricFontSelect">Font family</label>
           <select id="lyricFontSelect">
-            <option value="Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace">System Monospace (recommended)</option>
+            <option value="'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">Sarabun (Thai)</option>
+            <option value="Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace">System Monospace</option>
             <option value="'Courier New', Courier, monospace">Courier New</option>
             <option value="Consolas, 'Courier New', monospace">Consolas</option>
             <option value="Menlo, Monaco, 'Courier New', monospace">Menlo / Monaco</option>
             <option value="'DejaVu Sans Mono', 'Liberation Mono', monospace">DejaVu Sans Mono</option>
             <option value="'FC Home', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">FC Home</option>
-            <option value="'IBM Plex Sans Thai', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">IBM Plex Sans Thai</option>
             <option value="'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">Sarabun (Thai)</option>
+            <option value="'IBM Plex Sans Thai', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">IBM Plex Sans Thai</option>
             <option value="'Prompt', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">Prompt (Thai)</option>
             <option value="'Noto Sans Thai', 'Sarabun', system-ui, sans-serif">Noto Sans Thai</option>
             <option value="'Kanit', 'Sarabun', system-ui, sans-serif">Kanit (Thai)</option>
@@ -1266,6 +1446,46 @@
 
 <script>
   (function() {
+    // Automatically wrap every .settings-num input with − and + buttons
+    (function wrapNumberInputs() {
+      document.querySelectorAll('.settings-row input[type="number"].settings-num').forEach(function(input) {
+        if (input.parentNode && input.parentNode.classList && input.parentNode.classList.contains('settings-num-group')) return;
+        const group = document.createElement('span');
+        group.className = 'settings-num-group';
+        const minusBtn = document.createElement('button');
+        minusBtn.type = 'button';
+        minusBtn.className = 'settings-step-btn';
+        minusBtn.textContent = '−';
+        minusBtn.title = 'Decrease';
+        const plusBtn = document.createElement('button');
+        plusBtn.type = 'button';
+        plusBtn.className = 'settings-step-btn';
+        plusBtn.textContent = '+';
+        plusBtn.title = 'Increase';
+        input.parentNode.insertBefore(group, input);
+        group.appendChild(minusBtn);
+        group.appendChild(input);
+        group.appendChild(plusBtn);
+
+        function step(direction) {
+          const min = input.min !== '' ? parseFloat(input.min) : -Infinity;
+          const max = input.max !== '' ? parseFloat(input.max) : Infinity;
+          const stepVal = input.step !== '' ? parseFloat(input.step) : 1;
+          let v = parseFloat(input.value);
+          if (isNaN(v)) v = 0;
+          v = v + direction * stepVal;
+          if (v < min) v = min;
+          if (v > max) v = max;
+          const decimals = (String(stepVal).split('.')[1] || '').length;
+          v = parseFloat(v.toFixed(decimals));
+          input.value = v;
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        minusBtn.addEventListener('click', function(e) { e.preventDefault(); step(-1); });
+        plusBtn.addEventListener('click', function(e) { e.preventDefault(); step(1); });
+      });
+    })();
+
     const inputEl = document.getElementById('chartInput');
     const previewContent = document.getElementById('previewContent');
     const previewContainer = document.getElementById('previewContainer');
@@ -1334,6 +1554,8 @@
     const masterScaleSlider = document.getElementById('masterScaleSlider');
     const masterScaleNum = document.getElementById('masterScaleNum');
     const masterScaleReset = document.getElementById('masterScaleReset');
+    const masterScaleUp = document.getElementById('masterScaleUp');
+    const masterScaleDown = document.getElementById('masterScaleDown');
     const uiScaleSlider = document.getElementById('uiScaleSlider');
     const uiScaleNum = document.getElementById('uiScaleNum');
     const editorScaleSlider = document.getElementById('editorScaleSlider');
@@ -1352,6 +1574,8 @@
     const pipeScaleNum = document.getElementById('pipeScaleNum');
     const pipeThicknessSlider = document.getElementById('pipeThicknessSlider');
     const pipeThicknessNum = document.getElementById('pipeThicknessNum');
+    const pipeValignSlider = document.getElementById('pipeValignSlider');
+    const pipeValignNum = document.getElementById('pipeValignNum');
     const chordFontSelect = document.getElementById('chordFontSelect');
     const chordFontCustomRow = document.getElementById('chordFontCustomRow');
     const chordFontCustom = document.getElementById('chordFontCustom');
@@ -1421,6 +1645,7 @@
       labelLetterSpacing: 0,
       pipeScale: 2.25,
       pipeThickness: 0.03,
+      pipeVerticalAlign: 0.2,
       chordFont: "Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace",
       chordFontCustom: '',
       lyricFont: "Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace",
@@ -1486,7 +1711,7 @@
       const lls = parseFloat(settings.lyricLetterSpacing) || 0;
       const bls = parseFloat(settings.labelLetterSpacing) || 0;
       root.style.setProperty('--font-chord', effectiveFont(settings.chordFont, settings.chordFontCustom));
-      root.style.setProperty('--font-lyric', "'FC Home', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif");
+      root.style.setProperty('--font-lyric', "'Sarabun', 'Noto Sans Thai', system-ui, sans-serif");
       root.style.setProperty('--chord-size-mult', settings.chordSizeMult * ms);
       root.style.setProperty('--lyric-size', (settings.lyricSize * ms) + 'rem');
       root.style.setProperty('--label-size', (settings.labelSize * ms) + 'rem');
@@ -1501,6 +1726,7 @@
       root.style.setProperty('--space-width', 'calc(0.6em + ' + cls + 'em)');
       root.style.setProperty('--pipe-scale', settings.pipeScale);
       root.style.setProperty('--pipe-thickness', settings.pipeThickness + 'em');
+      root.style.setProperty('--pipe-vertical-align', settings.pipeVerticalAlign + 'em');
       requestAnimationFrame(() => adjustChordSizes());
     }
 
@@ -1534,6 +1760,9 @@
 
       pipeThicknessSlider.value = settings.pipeThickness;
       pipeThicknessNum.value = Number(settings.pipeThickness).toFixed(3);
+
+      pipeValignSlider.value = settings.pipeVerticalAlign;
+      pipeValignNum.value = Number(settings.pipeVerticalAlign).toFixed(2);
 
       const chordMatch = [...chordFontSelect.options].find(opt => opt.value === settings.chordFont);
       if (chordMatch) {
@@ -1602,6 +1831,14 @@
     });
     masterScaleReset.addEventListener('click', function() {
       setMasterScale(1);
+    });
+    masterScaleUp.addEventListener('click', function() {
+      const stepVal = parseFloat(masterScaleNum.step) || 0.05;
+      setMasterScale(parseFloat(settings.masterScale) + stepVal);
+    });
+    masterScaleDown.addEventListener('click', function() {
+      const stepVal = parseFloat(masterScaleNum.step) || 0.05;
+      setMasterScale(parseFloat(settings.masterScale) - stepVal);
     });
 
     function setUIScale(v) {
@@ -1773,6 +2010,25 @@
     });
     pipeThicknessNum.addEventListener('blur', function() {
       this.value = settings.pipeThickness.toFixed(3);
+    });
+
+    function setPipeValign(v) {
+      v = clampNum(v, -1, 1);
+      settings.pipeVerticalAlign = v;
+      pipeValignSlider.value = v;
+      if (document.activeElement !== pipeValignNum) pipeValignNum.value = v.toFixed(2);
+      saveSettings();
+      applySettings();
+    }
+    pipeValignSlider.addEventListener('input', function() {
+      setPipeValign(parseFloat(this.value));
+    });
+    pipeValignNum.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v)) setPipeValign(v);
+    });
+    pipeValignNum.addEventListener('blur', function() {
+      this.value = settings.pipeVerticalAlign.toFixed(2);
     });
 
     chordFontSelect.addEventListener('change', function() {
@@ -2355,11 +2611,14 @@
       }
     });
 
-    document.getElementById('clearStoredSongs').addEventListener('click', function(e) {
-      e.stopPropagation();
-      clearStoredSongs();
-      dropdownContent.classList.remove('show');
-    });
+    const clearBtn = document.getElementById('clearStoredSongs');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        clearStoredSongs();
+        dropdownContent.classList.remove('show');
+      });
+    }
 
     document.getElementById('loadSingleFile').addEventListener('click', function(e) {
       e.stopPropagation();
@@ -2985,7 +3244,8 @@
 
     updatePreview();
     window.addEventListener('load', function() {
-      setTimeout(adjustChordSizes, 100);
+      setTimeout(adjustChordSizes, 500);
+      setTimeout(adjustChordSizes, 1500);
     });
 
     let resizeTimeout;
