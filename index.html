@@ -738,6 +738,49 @@
       height: 0 !important;
     }
 
+    /* ====== CONFIRM DIALOG ====== */
+    .confirm-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(60, 40, 25, 0.5);
+      z-index: 6000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .confirm-overlay.show {
+      display: flex;
+    }
+    .confirm-panel {
+      background: #f5ede0;
+      border: 1px solid #dcc9b0;
+      border-radius: 16px;
+      box-shadow: 0 24px 48px -12px rgba(0,0,0,0.45);
+      padding: 24px 28px;
+      max-width: 420px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .confirm-message {
+      font-size: 0.95rem;
+      color: #3d2b1f;
+      line-height: 1.5;
+      font-weight: 500;
+    }
+    .confirm-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .confirm-buttons .btn {
+      padding: 6px 18px;
+      font-size: 0.85rem;
+    }
+
+    /* ====== SETTINGS MODAL ====== */
     .settings-overlay {
       display: none;
       position: fixed;
@@ -998,6 +1041,17 @@
   </div>
 </div>
 
+<!-- Confirm dialog (works in fullscreen too) -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-panel">
+    <div class="confirm-message" id="confirmMessage">Are you sure?</div>
+    <div class="confirm-buttons">
+      <button class="btn btn-outline" id="confirmNo">Cancel</button>
+      <button class="btn btn-success" id="confirmYes">Yes</button>
+    </div>
+  </div>
+</div>
+
 <div class="settings-overlay" id="settingsOverlay">
   <div class="settings-panel">
     <div class="settings-header">
@@ -1117,6 +1171,47 @@
     const keySelect = document.getElementById('keySelect');
     const keyModeSelect = document.getElementById('keyModeSelect');
     const keyDisplay = document.getElementById('keyDisplay');
+
+    const confirmOverlay = document.getElementById('confirmOverlay');
+    const confirmMessage = document.getElementById('confirmMessage');
+    const confirmYes = document.getElementById('confirmYes');
+    const confirmNo = document.getElementById('confirmNo');
+
+    let confirmCallback = null;
+
+    function showConfirm(message, onYes) {
+      confirmMessage.textContent = message;
+      confirmCallback = onYes;
+      confirmOverlay.classList.add('show');
+      setTimeout(() => { try { confirmYes.focus(); } catch (e) {} }, 10);
+    }
+
+    function closeConfirm() {
+      confirmOverlay.classList.remove('show');
+      confirmCallback = null;
+    }
+
+    confirmYes.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const cb = confirmCallback;
+      closeConfirm();
+      if (typeof cb === 'function') cb();
+    });
+
+    confirmNo.addEventListener('click', function(e) {
+      e.stopPropagation();
+      closeConfirm();
+    });
+
+    confirmOverlay.addEventListener('click', function(e) {
+      if (e.target === confirmOverlay) closeConfirm();
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && confirmOverlay.classList.contains('show')) {
+        closeConfirm();
+      }
+    });
 
     const masterScaleSlider = document.getElementById('masterScaleSlider');
     const masterScaleNum = document.getElementById('masterScaleNum');
@@ -1491,11 +1586,12 @@
     });
 
     settingsReset.addEventListener('click', function() {
-      if (!confirm('Reset all settings to defaults?')) return;
-      settings = Object.assign({}, DEFAULT_SETTINGS);
-      saveSettings();
-      syncSettingsUI();
-      applySettings();
+      showConfirm('Reset all settings to defaults?', function() {
+        settings = Object.assign({}, DEFAULT_SETTINGS);
+        saveSettings();
+        syncSettingsUI();
+        applySettings();
+      });
     });
 
     function updateKeyDisplay() {
@@ -1748,21 +1844,21 @@
     }
 
     function clearStoredSongs() {
-      if (confirm('Clear all saved songs from memory? (This will not delete your files)')) {
+      showConfirm('Clear all saved songs from memory? (This will not delete your files)', function() {
         localStorage.removeItem('chordChartSongs');
         displayStoredSongs();
-      }
+      });
     }
 
     function removeSong(songName, songFolder) {
       const storedSongs = loadStoredSongs() || [];
       const index = storedSongs.findIndex(s => s.name === songName && s.folder === (songFolder || ''));
       if (index >= 0) {
-        if (confirm(`Are you sure you want to remove "${songName}"?`)) {
+        showConfirm(`Are you sure you want to remove "${songName}"?`, function() {
           storedSongs.splice(index, 1);
           saveSongsToStorage(storedSongs);
           displayStoredSongs();
-        }
+        });
       }
     }
 
