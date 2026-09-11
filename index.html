@@ -215,20 +215,26 @@
     }
     .toolbar {
       background: #e8dccc;
-      padding: calc(10px * var(--ui-scale)) calc(18px * var(--ui-scale));
+      padding: calc(6px * var(--ui-scale)) calc(12px * var(--ui-scale));
       border-bottom: 2px solid #dcc9b0;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: calc(8px * var(--ui-scale)) calc(12px * var(--ui-scale));
+      gap: calc(6px * var(--ui-scale)) calc(10px * var(--ui-scale));
       flex-shrink: 0;
     }
     .toolbar-left {
       display: flex;
-      align-items: center;
-      gap: calc(10px * var(--ui-scale));
-      flex-wrap: wrap;
+      flex-direction: column;
+      align-items: stretch;
+      gap: calc(6px * var(--ui-scale));
       width: 100%;
+    }
+    .toolbar-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: calc(6px * var(--ui-scale)) calc(8px * var(--ui-scale));
     }
     .toolbar h1 {
       font-size: calc(1.0rem * var(--ui-scale));
@@ -281,6 +287,10 @@
     .btn:hover {
       background: #c4ad92;
       border-color: #b0987a;
+    }
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
     }
     .btn-success {
       background: #8b6b4a;
@@ -357,10 +367,6 @@
       min-width: calc(28px * var(--ui-scale));
       text-align: center;
     }
-    #langSwitch {
-      margin-left: auto !important;
-      font-weight: 600;
-    }
     .dropdown {
       position: relative;
       display: inline-block;
@@ -377,7 +383,7 @@
       max-height: 400px;
       overflow-y: auto;
       overflow-x: hidden;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
       border-radius: 8px;
       border: 1px solid #dcc9b0;
       z-index: 100;
@@ -424,6 +430,10 @@
     }
     .dropdown-content .dropdown-item.song-item .song-name::before {
       content: '🎵 ';
+    }
+    .dropdown-content .dropdown-item.song-item.has-settings .song-name::after {
+      content: ' 🎚️';
+      opacity: 0.7;
     }
     .dropdown-content .dropdown-item.song-item .remove-btn {
       background: none;
@@ -481,7 +491,7 @@
       max-height: 350px;
       overflow-y: auto;
       overflow-x: hidden;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
       border-radius: 8px;
       border: 1px solid #dcc9b0;
       z-index: 200;
@@ -520,6 +530,10 @@
     .subfolder-popup .dropdown-item.song-item .song-name::before {
       content: '🎵 ';
     }
+    .subfolder-popup .dropdown-item.song-item.has-settings .song-name::after {
+      content: ' 🎚️';
+      opacity: 0.7;
+    }
     .subfolder-popup .dropdown-item.song-item .remove-btn {
       background: none;
       border: none;
@@ -547,56 +561,90 @@
       content: '📂 ';
     }
 
-    .toolbar-zoom {
-      display: inline-flex;
+    /* Sizes dropdown panel */
+    .sizes-panel {
+      min-width: calc(340px * var(--ui-scale));
+      max-width: min(calc(420px * var(--ui-scale)), 95vw);
+      width: max-content;
+      padding: 8px 0;
+    }
+    .sizes-lock-row {
+      display: flex;
       align-items: center;
       gap: calc(8px * var(--ui-scale));
-      background: #dcc9b0;
-      border: 1px solid #c4ad92;
-      padding: calc(3px * var(--ui-scale)) calc(6px * var(--ui-scale)) calc(3px * var(--ui-scale)) calc(12px * var(--ui-scale));
-      border-radius: 40px;
-      font-size: calc(0.85rem * var(--ui-scale));
+      padding: calc(4px * var(--ui-scale)) calc(12px * var(--ui-scale)) calc(8px * var(--ui-scale)) calc(12px * var(--ui-scale));
+      border-bottom: 1px solid #ece0cf;
+      cursor: pointer;
+      user-select: none;
+    }
+    .sizes-lock-row input[type="checkbox"] {
+      accent-color: #8b6b4a;
+      cursor: pointer;
+      margin: 0;
+      flex: 0 0 auto;
+      width: calc(14px * var(--ui-scale));
+      height: calc(14px * var(--ui-scale));
+    }
+    .sizes-lock-row label {
+      font-size: calc(0.8rem * var(--ui-scale));
+      font-weight: 600;
       color: #5c4033;
-      font-weight: 500;
+      cursor: pointer;
+      flex: 1 1 auto;
+    }
+    .sizes-row {
+      display: flex;
+      align-items: center;
+      gap: calc(8px * var(--ui-scale));
+      padding: calc(6px * var(--ui-scale)) calc(12px * var(--ui-scale));
       white-space: nowrap;
     }
-    .toolbar-zoom .toolbar-zoom-label {
-      font-size: calc(0.85rem * var(--ui-scale));
+    .sizes-row + .sizes-row {
+      border-top: 1px solid #ece0cf;
     }
-    .toolbar-zoom input[type="range"] {
-      width: calc(110px * var(--ui-scale));
+    .sizes-row-label {
+      font-size: calc(0.8rem * var(--ui-scale));
+      font-weight: 600;
+      color: #5c4033;
+      flex: 0 0 calc(85px * var(--ui-scale));
+      white-space: nowrap;
+    }
+    .sizes-row input[type="range"] {
+      flex: 1 1 auto;
+      min-width: calc(80px * var(--ui-scale));
       accent-color: #8b6b4a;
       cursor: pointer;
       margin: 0;
       vertical-align: middle;
     }
-    .toolbar-zoom input[type="number"] {
-      width: calc(60px * var(--ui-scale));
+    .sizes-row input[type="number"] {
+      width: calc(56px * var(--ui-scale));
       border: 1px solid #c4ad92;
       border-radius: 6px;
-      padding: calc(3px * var(--ui-scale)) calc(6px * var(--ui-scale));
-      font-size: calc(0.8rem * var(--ui-scale));
+      padding: calc(3px * var(--ui-scale)) calc(5px * var(--ui-scale));
+      font-size: calc(0.75rem * var(--ui-scale));
       font-family: inherit;
       color: #3d2b1f;
       background: #ffffff;
       outline: none;
       text-align: right;
       -moz-appearance: textfield;
+      flex: 0 0 auto;
     }
-    .toolbar-zoom input[type="number"]::-webkit-outer-spin-button,
-    .toolbar-zoom input[type="number"]::-webkit-inner-spin-button {
+    .sizes-row input[type="number"]::-webkit-outer-spin-button,
+    .sizes-row input[type="number"]::-webkit-inner-spin-button {
       -webkit-appearance: none;
       margin: 0;
     }
-    .toolbar-zoom input[type="number"]:focus {
+    .sizes-row input[type="number"]:focus {
       border-color: #8b6b4a;
       box-shadow: 0 0 0 2px rgba(139, 107, 74, 0.2);
     }
-    .toolbar-zoom-step {
+    .sizes-row-step {
       background: #f5ede0;
       border: 1px solid #c4ad92;
       color: #5c4033;
-      font-size: calc(0.9rem * var(--ui-scale));
+      font-size: calc(0.85rem * var(--ui-scale));
       font-weight: 700;
       line-height: 1;
       padding: 0;
@@ -608,23 +656,23 @@
       align-items: center;
       justify-content: center;
       font-family: inherit;
-      width: calc(20px * var(--ui-scale));
-      height: calc(20px * var(--ui-scale));
+      width: calc(18px * var(--ui-scale));
+      height: calc(18px * var(--ui-scale));
       flex: 0 0 auto;
     }
-    .toolbar-zoom-step:hover {
+    .sizes-row-step:hover {
       background: #dcc9b0;
     }
-    .toolbar-zoom-step:active {
+    .sizes-row-step:active {
       background: #c4ad92;
     }
-    .toolbar-zoom-reset {
+    .sizes-row-reset {
       background: transparent;
       border: none;
       color: #8b6b4a;
-      font-size: calc(1.05rem * var(--ui-scale));
+      font-size: calc(0.95rem * var(--ui-scale));
       line-height: 1;
-      padding: calc(3px * var(--ui-scale)) calc(8px * var(--ui-scale)) calc(3px * var(--ui-scale)) calc(6px * var(--ui-scale));
+      padding: calc(2px * var(--ui-scale)) calc(6px * var(--ui-scale)) calc(2px * var(--ui-scale)) calc(4px * var(--ui-scale));
       margin-left: 0;
       cursor: pointer;
       border-radius: 50%;
@@ -633,13 +681,27 @@
       align-items: center;
       justify-content: center;
       font-family: inherit;
+      flex: 0 0 auto;
     }
-    .toolbar-zoom-reset:hover {
+    .sizes-row-reset:hover {
       background: #c4ad92;
       color: #3d2b1f;
     }
-    .toolbar-zoom-reset:active {
+    .sizes-row-reset:active {
       background: #b0987a;
+    }
+
+    /* Locked state */
+    .sizes-panel.locked .sizes-row input,
+    .sizes-panel.locked .sizes-row button {
+      opacity: 0.45;
+      pointer-events: none;
+    }
+    .settings-panel.locked .settings-row input,
+    .settings-panel.locked .settings-row select,
+    .settings-panel.locked .settings-row button {
+      opacity: 0.45;
+      pointer-events: none;
     }
 
     .editor-wrapper {
@@ -763,7 +825,7 @@
       overflow-y: auto;
       overflow-x: hidden;
       border: 1px solid #dcc9b0;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.04);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.04);
       font-family: Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace;
       line-height: var(--chord-line-height, 1.9);
       color: #3d2b1f;
@@ -781,6 +843,8 @@
     .empty-preview .sub-text {
       font-size: 0.85rem;
       color: #b0987a;
+      margin-top: 6px;
+      line-height: 1.5;
     }
 
     .chord-line,
@@ -962,14 +1026,6 @@
     body.easy-mode .advanced-only {
       display: none !important;
     }
-    body.easy-mode .input-area {
-      max-height: 0;
-      padding: 0;
-      border-top: none;
-      min-height: 0;
-      height: 0 !important;
-    }
-
     .confirm-overlay {
       display: none;
       position: fixed;
@@ -987,7 +1043,7 @@
       background: #f5ede0;
       border: 1px solid #dcc9b0;
       border-radius: 16px;
-      box-shadow: 0 24px 48px -12px rgba(0,0,0,0.45);
+      box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.45);
       padding: 24px 28px;
       max-width: 420px;
       width: 100%;
@@ -1011,6 +1067,30 @@
       font-size: 0.85rem;
     }
 
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #5c4033;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+      font-size: 0.85rem;
+      font-weight: 500;
+      z-index: 7000;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      pointer-events: none;
+      max-width: 320px;
+      line-height: 1.4;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
     .settings-overlay {
       display: none;
       position: fixed;
@@ -1028,7 +1108,7 @@
       background: #f5ede0;
       border: 1px solid #dcc9b0;
       border-radius: 16px;
-      box-shadow: 0 24px 48px -12px rgba(0,0,0,0.35);
+      box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.35);
       width: 100%;
       max-width: 640px;
       max-height: 90vh;
@@ -1049,6 +1129,11 @@
       font-size: 1rem;
       font-weight: 700;
       color: #5c4033;
+    }
+    .settings-header .settings-lock-indicator {
+      font-size: 0.9rem;
+      margin-left: 8px;
+      opacity: 0.75;
     }
     .settings-close {
       background: none;
@@ -1220,8 +1305,8 @@
       .settings-row input[type="number"].settings-num {
         flex: 0 0 70px;
       }
-      .toolbar-zoom input[type="range"] {
-        width: calc(80px * var(--ui-scale));
+      .sizes-panel {
+        min-width: calc(300px * var(--ui-scale));
       }
     }
   </style>
@@ -1230,30 +1315,62 @@
 <div class="app">
   <div class="toolbar">
     <div class="toolbar-left">
+      <div class="toolbar-row">
       <h1>🎸 Chord Chart Creator</h1>
       <span class="current-song" id="currentSongName" title=""></span>
       <button class="btn-toggle" id="toggleMode" title="Switch between Easy and Advanced mode">😵 Switch to ADVANCED MODE</button>
 
       <div class="dropdown">
-        <button class="btn btn-outline" id="dropdownToggle">📄 Songs ▼</button>
+        <button class="btn btn-outline" id="dropdownToggle">🎵 Songs ▼</button>
         <div class="dropdown-content" id="dropdownContent">
-          <div class="dropdown-label" id="songsLabel">📂 LOAD/CLEAR SONGS</div>
-          <!-- <div class="dropdown-item" id="selectFolder" style="color: #8b6b4a; font-weight: 600;">📁 Select Song Folder</div> -->
-          <div class="dropdown-item" id="loadSingleFile" style="color: #8b6b4a; font-weight: 600;">📄 Upload a New Song (.txt chord chart)</div>
-          <!-- <div class="dropdown-item" id="clearStoredSongs" style="color: #5c4033; font-weight: 500;">🗑️ Clear Song List Below</div> -->
+          <div class="dropdown-label">📂 LOAD SONGS</div>
+          <div class="dropdown-item" id="loadSingleFile" style="color: #8b6b4a; font-weight: 600;">🎵 Open 1 Song File</div>
           <div class="dropdown-divider"></div>
-          <div class="dropdown-label" id="songsListTitle">🎵 SONG LIST</div>
+          <div class="dropdown-label">🎵 SONG LIST</div>
           <div id="songsList"></div>
         </div>
       </div>
 
-      <div class="toolbar-zoom" title="Zoom — scales chords, lyrics, labels and barlines together">
-        <span class="toolbar-zoom-label">🔍 Zoom:</span>
-        <input type="range" id="masterScaleSlider" min="0" max="100" step="0.5" value="50">
-        <button type="button" class="toolbar-zoom-step" id="masterScaleDown" title="Decrease zoom">−</button>
-        <input type="number" id="masterScaleNum" min="0.1" max="10" step="0.05" value="1">
-        <button type="button" class="toolbar-zoom-step" id="masterScaleUp" title="Increase zoom">+</button>
-        <button class="toolbar-zoom-reset" id="masterScaleReset" title="Reset zoom to 1.00">↺</button>
+      <div class="dropdown">
+        <button class="btn btn-outline" id="sizesToggle">🎚️ Sizes ▼</button>
+        <div class="dropdown-content sizes-panel" id="sizesContent">
+          <div class="sizes-lock-row" id="lockRow">
+            <input type="checkbox" id="lockCheckbox">
+            <label for="lockCheckbox">🔒 Lock all settings (protects while typing new text)</label>
+          </div>
+          <div class="sizes-row">
+            <span class="sizes-row-label">🔍 EVERYTHING:</span>
+            <input type="range" id="masterScaleSlider" min="0" max="100" step="0.5" value="50">
+            <button type="button" class="sizes-row-step" id="masterScaleDown" title="Decrease">−</button>
+            <input type="number" id="masterScaleNum" min="0.1" max="10" step="0.01" value="1">
+            <button type="button" class="sizes-row-step" id="masterScaleUp" title="Increase">+</button>
+            <button class="sizes-row-reset" id="masterScaleReset" title="Reset to 1.00">↺</button>
+          </div>
+          <div class="sizes-row">
+            <span class="sizes-row-label">🔖 Labels:</span>
+            <input type="range" id="labelSizeToolbarSlider" min="0.6" max="8" step="0.05" value="1">
+            <button type="button" class="sizes-row-step" id="labelSizeToolbarDown" title="Decrease">−</button>
+            <input type="number" id="labelSizeToolbarNum" min="0.6" max="8" step="0.05" value="1">
+            <button type="button" class="sizes-row-step" id="labelSizeToolbarUp" title="Increase">+</button>
+            <button class="sizes-row-reset" id="labelSizeToolbarReset" title="Reset to 1.00">↺</button>
+          </div>
+          <div class="sizes-row">
+            <span class="sizes-row-label">🎼 Chords:</span>
+            <input type="range" id="chordSizeToolbarSlider" min="0.5" max="2.5" step="0.05" value="1">
+            <button type="button" class="sizes-row-step" id="chordSizeToolbarDown" title="Decrease">−</button>
+            <input type="number" id="chordSizeToolbarNum" min="0.5" max="2.5" step="0.05" value="1">
+            <button type="button" class="sizes-row-step" id="chordSizeToolbarUp" title="Increase">+</button>
+            <button class="sizes-row-reset" id="chordSizeToolbarReset" title="Reset to 1.00">↺</button>
+          </div>
+          <div class="sizes-row">
+            <span class="sizes-row-label">🎤 Lyrics:</span>
+            <input type="range" id="lyricSizeToolbarSlider" min="0.5" max="8" step="0.05" value="0.85">
+            <button type="button" class="sizes-row-step" id="lyricSizeToolbarDown" title="Decrease">−</button>
+            <input type="number" id="lyricSizeToolbarNum" min="0.5" max="8" step="0.05" value="0.85">
+            <button type="button" class="sizes-row-step" id="lyricSizeToolbarUp" title="Increase">+</button>
+            <button class="sizes-row-reset" id="lyricSizeToolbarReset" title="Reset to 0.85">↺</button>
+          </div>
+        </div>
       </div>
 
       <div class="key-selector advanced-only">
@@ -1283,15 +1400,16 @@
       <button class="btn-transpose advanced-only" id="transposeDown" title="Transpose down a semitone">♭</button>
       <span class="transpose-info advanced-only" id="transposeInfo">0</span>
       <button class="btn-transpose advanced-only" id="transposeUp" title="Transpose up a semitone">♯</button>
+      </div>
 
-      <button class="btn-toggle advanced-only" id="toggleEditor">▲ Hide Editor</button>
+      <div class="toolbar-row">
+      <button class="btn-toggle" id="toggleEditor">▲ ✏️ Hide Editor</button>
 
-      <button class="btn btn-success advanced-only" id="exportPNG">📷 Save Chord Chart as PNG</button>
-      <button class="btn btn-success advanced-only" id="saveTXT">💾 Save Editor's text as TXT</button>
+      <button class="btn btn-success" id="exportPNG">📷 Export Chord Chart as PNG</button>
+      <button class="btn btn-success" id="saveSong">💾 Save Chord Chart</button>
 
-      <button class="btn btn-outline" id="openSettings" title="Open settings">⚙ Settings</button>
-
-      <button class="btn btn-outline" id="langSwitch" title="Switch language" style="margin-left: auto;">🇹🇭 ไทย</button>
+      <button class="btn btn-outline" id="openSettings" title="Open settings">⚙️ Settings</button>
+      </div>
     </div>
   </div>
   <div class="editor-wrapper">
@@ -1303,14 +1421,13 @@
     <div class="input-area" id="inputArea">
       <div class="resize-handle" id="resizeHandle"></div>
       <div class="drop-zone" id="dropZone">
-        <div class="drop-message">📂 Drop .txt files here</div>
+        <div class="drop-message">📂 Drop a chord chart here</div>
         <textarea id="chartInput" spellcheck="false"></textarea>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Confirm dialog (works in fullscreen too) -->
 <div class="confirm-overlay" id="confirmOverlay">
   <div class="confirm-panel">
     <div class="confirm-message" id="confirmMessage">Are you sure?</div>
@@ -1321,10 +1438,12 @@
   </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <div class="settings-overlay" id="settingsOverlay">
-  <div class="settings-panel">
+  <div class="settings-panel" id="settingsPanel">
     <div class="settings-header">
-      <h2>⚙ Settings</h2>
+      <h2>⚙️ Settings<span class="settings-lock-indicator" id="settingsLockIndicator" style="display: none;">🔒</span></h2>
       <button class="settings-close" id="settingsClose" title="Close">✕</button>
     </div>
     <div class="settings-body">
@@ -1438,7 +1557,6 @@
             <option value="Menlo, Monaco, 'Courier New', monospace">Menlo / Monaco</option>
             <option value="'DejaVu Sans Mono', 'Liberation Mono', monospace">DejaVu Sans Mono</option>
             <option value="'FC Home', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">FC Home</option>
-            <option value="'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">Sarabun (Thai)</option>
             <option value="'IBM Plex Sans Thai', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">IBM Plex Sans Thai</option>
             <option value="'Prompt', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">Prompt (Thai)</option>
             <option value="'Noto Sans Thai', 'Sarabun', system-ui, sans-serif">Noto Sans Thai</option>
@@ -1479,10 +1597,9 @@
     </div>
   </div>
 </div>
-
 <script>
   (function() {
-    // Automatically wrap every .settings-num input with − and + buttons
+    // ===== AUTO-WRAP NUMBER INPUTS WITH ± BUTTONS =====
     (function wrapNumberInputs() {
       document.querySelectorAll('.settings-row input[type="number"].settings-num').forEach(function(input) {
         if (input.parentNode && input.parentNode.classList && input.parentNode.classList.contains('settings-num-group')) return;
@@ -1522,6 +1639,7 @@
       });
     })();
 
+    // ===== DOM REFERENCES =====
     const inputEl = document.getElementById('chartInput');
     const previewContent = document.getElementById('previewContent');
     const previewContainer = document.getElementById('previewContainer');
@@ -1531,9 +1649,11 @@
     const toggleModeBtn = document.getElementById('toggleMode');
     const openSettingsBtn = document.getElementById('openSettings');
     const settingsOverlay = document.getElementById('settingsOverlay');
+    const settingsPanel = document.getElementById('settingsPanel');
     const settingsClose = document.getElementById('settingsClose');
     const settingsDone = document.getElementById('settingsDone');
     const settingsReset = document.getElementById('settingsReset');
+    const settingsLockIndicator = document.getElementById('settingsLockIndicator');
     const resizeHandle = document.getElementById('resizeHandle');
     const dropdownToggle = document.getElementById('dropdownToggle');
     const dropdownContent = document.getElementById('dropdownContent');
@@ -1546,6 +1666,12 @@
     const keyModeSelect = document.getElementById('keyModeSelect');
     const keyDisplay = document.getElementById('keyDisplay');
     const currentSongNameEl = document.getElementById('currentSongName');
+    const toastEl = document.getElementById('toast');
+
+    const sizesToggle = document.getElementById('sizesToggle');
+    const sizesContent = document.getElementById('sizesContent');
+    const lockRow = document.getElementById('lockRow');
+    const lockCheckbox = document.getElementById('lockCheckbox');
 
     const confirmOverlay = document.getElementById('confirmOverlay');
     const confirmMessage = document.getElementById('confirmMessage');
@@ -1558,7 +1684,7 @@
       confirmMessage.textContent = message;
       confirmCallback = onYes;
       confirmOverlay.classList.add('show');
-      setTimeout(() => { try { confirmYes.focus(); } catch (e) {} }, 10);
+      setTimeout(function() { try { confirmYes.focus(); } catch (e) {} }, 10);
     }
 
     function closeConfirm() {
@@ -1588,6 +1714,19 @@
       }
     });
 
+    // ===== TOAST =====
+    let toastTimer = null;
+    function showToast(message, duration) {
+      if (!toastEl) return;
+      toastEl.textContent = message;
+      toastEl.classList.add('show');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(function() {
+        toastEl.classList.remove('show');
+        toastTimer = null;
+      }, duration || 2200);
+    }
+
     // ===== FILE SAVING HELPER =====
     async function saveFileWithPicker(finalName, blob, mimeType, description) {
       let safeName = (finalName || '').replace(/[<>:"/\\|?*\x00-\x1f]/g, '').trim();
@@ -1596,9 +1735,10 @@
       let ext = '.txt';
       if (mimeType === 'image/png') ext = '.png';
       else if (mimeType === 'text/plain') ext = '.txt';
+      else if (mimeType === 'application/json') ext = '.chordchart';
 
       const dotIdx = safeName.lastIndexOf('.');
-      if (dotIdx < 0 || safeName.substring(dotIdx).length > 6) {
+      if (dotIdx < 0 || safeName.substring(dotIdx).length > 12) {
         safeName += ext;
       }
 
@@ -1636,6 +1776,7 @@
       return { saved: true, usedPicker: false, name: safeName };
     }
 
+    // ===== SETTINGS ELEMENT REFERENCES =====
     const masterScaleSlider = document.getElementById('masterScaleSlider');
     const masterScaleNum = document.getElementById('masterScaleNum');
     const masterScaleReset = document.getElementById('masterScaleReset');
@@ -1678,260 +1819,33 @@
     const labelRadiusSlider = document.getElementById('labelRadiusSlider');
     const labelRadiusNum = document.getElementById('labelRadiusNum');
 
+    const lyricSizeToolbarSlider = document.getElementById('lyricSizeToolbarSlider');
+    const lyricSizeToolbarNum = document.getElementById('lyricSizeToolbarNum');
+    const lyricSizeToolbarUp = document.getElementById('lyricSizeToolbarUp');
+    const lyricSizeToolbarDown = document.getElementById('lyricSizeToolbarDown');
+    const lyricSizeToolbarReset = document.getElementById('lyricSizeToolbarReset');
+    const chordSizeToolbarSlider = document.getElementById('chordSizeToolbarSlider');
+    const chordSizeToolbarNum = document.getElementById('chordSizeToolbarNum');
+    const chordSizeToolbarUp = document.getElementById('chordSizeToolbarUp');
+    const chordSizeToolbarDown = document.getElementById('chordSizeToolbarDown');
+    const chordSizeToolbarReset = document.getElementById('chordSizeToolbarReset');
+    const labelSizeToolbarSlider = document.getElementById('labelSizeToolbarSlider');
+    const labelSizeToolbarNum = document.getElementById('labelSizeToolbarNum');
+    const labelSizeToolbarUp = document.getElementById('labelSizeToolbarUp');
+    const labelSizeToolbarDown = document.getElementById('labelSizeToolbarDown');
+    const labelSizeToolbarReset = document.getElementById('labelSizeToolbarReset');
+
     let currentSection = '';
     let isEditorCollapsed = false;
     let isAdvancedMode = false;
     let isResizing = false;
+    let isLocked = false;
     let startY = 0;
     let startHeight = 0;
     let transposeSemitones = 0;
     let currentKey = 'Dm';
     let currentMode = 'minor';
     let originalText = '';
-
-    // ===== LANGUAGE =====
-    const LANG_KEY = 'chordChartLanguage';
-    const TRANSLATIONS = {
-      en: {
-        appTitle: '🎸 Chord Chart Creator',
-        switchToAdvanced: '😵 Switch to ADVANCED MODE',
-        switchToEasy: '😃 Switch to EASY MODE',
-        songsButton: '📄 Songs ▼',
-        zoomLabel: '🔍 Zoom:',
-        keyLabel: '🔑 Key:',
-        hideEditor: '▲ Hide Editor',
-        showEditor: '▼ Show Editor',
-        savePng: '📷 Save Chord Chart as PNG',
-        saveTxt: "💾 Save Editor's text as TXT",
-        settingsButton: '⚙ Settings',
-        loadClearSongs: '📂 LOAD/CLEAR SONGS',
-        selectFolder: '📁 Select Song Folder',
-        loadSingleFile: '📄 Open 1 Song File',
-        clearStoredSongs: '🗑️ Clear Song List Below',
-        songList: '🎵 SONG LIST',
-        noSongs: 'No songs loaded',
-        dropMessage: '📂 Drop .txt files here',
-        emptyPreviewMain: 'Type or Paste your chord chart (in the editor area below)',
-        emptyPreviewSub: 'or Drag & Drop a TXT file with a chord chart (into the editor area below)',
-        confirmSure: 'Are you sure?',
-        confirmCancel: 'Cancel',
-        confirmYes: 'Yes',
-        settingsTitle: '⚙ Settings',
-        sectionInterface: 'Interface',
-        sectionLayout: 'Layout',
-        sectionCharSpacing: 'Character Spacing',
-        sectionBarline: 'Barline',
-        sectionChordFont: 'Chord Font',
-        sectionLyricFont: 'Lyrics Font',
-        sectionSectionLabels: 'Section Labels',
-        labelUiScale: 'UI scale',
-        labelEditorScale: 'Editor text size',
-        labelCurrentSongSize: 'Song name size',
-        labelLineSpacing: 'Line spacing',
-        labelBlankLineSize: 'Blank line size',
-        labelChordSpacing: 'Chords & barlines',
-        labelLyricSpacing: 'Lyrics',
-        labelLabelSpacing: 'Section labels',
-        labelPipeHeight: 'Barline height',
-        labelPipeThickness: 'Barline thickness',
-        labelPipeValign: 'Barline vertical position',
-        labelChordFont: 'Font family',
-        labelChordSize: 'Chord size',
-        labelLyricSize: 'Lyric size',
-        labelLabelSize: 'Label size',
-        labelLabelRadius: 'Corner roundness',
-        customFont: 'Custom name',
-        resetDefaults: '↺ Reset to defaults',
-        done: 'Done',
-        resetConfirm: 'Reset all settings to defaults?',
-        clearConfirm: 'Clear all saved songs from memory? (This will not delete your files)',
-        removeConfirmPrefix: 'Are you sure you want to remove ',
-        savePngBusy: '⏳ Exporting...',
-        savePngOk: '✅ Exported!',
-        savePngFail: '❌ Export failed',
-        saveTxtOk: '✅ Saved!',
-        langSwitchToThai: '🇹🇭 ไทย',
-        langSwitchToEnglish: '🇬🇧 English',
-        songsListTitle: '🎵 SONG LIST',
-        currentSongTooltip: 'Currently loaded song:'
-      },
-      th: {
-        appTitle: '🎸 โปรแกรมสร้างคอร์ดชาร์ท',
-        switchToAdvanced: '😵 ไปโหมด ADVANCED',
-        switchToEasy: '😃 ไปโหมด EASY',
-        songsButton: '📄 เพลง ▼',
-        zoomLabel: '🔍 ซูม:',
-        keyLabel: '🔑 คีย์:',
-        hideEditor: '▲ ซ่อนตัวแก้ไข',
-        showEditor: '▼ แสดงตัวแก้ไข',
-        savePng: '📷 บันทึกเป็นรูป PNG',
-        saveTxt: '💾 บันทึกข้อความเป็น TXT',
-        settingsButton: '⚙ ตั้งค่า',
-        loadClearSongs: '📂 โหลด/ล้างรายชื่อเพลง',
-        selectFolder: '📁 เลือกโฟลเดอร์เพลง',
-        loadSingleFile: '📄 เปิดไฟล์เพลง 1 ไฟล์',
-        clearStoredSongs: '🗑️ ล้างรายชื่อเพลงด้านล่าง',
-        songList: '🎵 รายชื่อเพลง',
-        noSongs: 'ยังไม่มีเพลง',
-        dropMessage: '📂 ลากไฟล์ .txt มาวางที่นี่',
-        emptyPreviewMain: 'พิมพ์หรือวางคอร์ดชาร์ท (ในพื้นที่แก้ไขด้านล่าง)',
-        emptyPreviewSub: 'หรือลากไฟล์ .txt ที่มีคอร์ดชาร์ทมาวาง (ในพื้นที่แก้ไขด้านล่าง)',
-        confirmSure: 'แน่ใจหรือไม่?',
-        confirmCancel: 'ยกเลิก',
-        confirmYes: 'ใช่',
-        settingsTitle: '⚙ ตั้งค่า',
-        sectionInterface: 'อินเทอร์เฟซ',
-        sectionLayout: 'เลย์เอาต์',
-        sectionCharSpacing: 'ระยะห่างตัวอักษร',
-        sectionBarline: 'เส้นกั้นห้อง',
-        sectionChordFont: 'ฟอนต์คอร์ด',
-        sectionLyricFont: 'ฟอนต์เนื้อเพลง',
-        sectionSectionLabels: 'ป้ายชื่อท่อน',
-        labelUiScale: 'ขนาด UI',
-        labelEditorScale: 'ขนาดตัวอักษรในตัวแก้ไข',
-        labelCurrentSongSize: 'ขนาดชื่อเพลง',
-        labelLineSpacing: 'ระยะห่างบรรทัด',
-        labelBlankLineSize: 'ขนาดบรรทัดว่าง',
-        labelChordSpacing: 'คอร์ดและเส้นกั้น',
-        labelLyricSpacing: 'เนื้อเพลง',
-        labelLabelSpacing: 'ป้ายชื่อท่อน',
-        labelPipeHeight: 'ความสูงเส้นกั้น',
-        labelPipeThickness: 'ความหนาเส้นกั้น',
-        labelPipeValign: 'ตำแหน่งแนวตั้งของเส้นกั้น',
-        labelChordFont: 'ฟอนต์',
-        labelChordSize: 'ขนาดคอร์ด',
-        labelLyricSize: 'ขนาดเนื้อเพลง',
-        labelLabelSize: 'ขนาดป้าย',
-        labelLabelRadius: 'ความโค้งมุม',
-        customFont: 'ชื่อฟอนต์กำหนดเอง',
-        resetDefaults: '↺ คืนค่าเริ่มต้น',
-        done: 'เสร็จ',
-        resetConfirm: 'คืนค่าทั้งหมดเป็นค่าเริ่มต้น?',
-        clearConfirm: 'ล้างรายชื่อเพลงที่บันทึกไว้ทั้งหมด? (ไฟล์จริงจะไม่ถูกลบ)',
-        removeConfirmPrefix: 'แน่ใจหรือไม่ว่าต้องการลบ ',
-        savePngBusy: '⏳ กำลังบันทึก...',
-        savePngOk: '✅ บันทึกแล้ว!',
-        savePngFail: '❌ บันทึกไม่สำเร็จ',
-        saveTxtOk: '✅ บันทึกแล้ว!',
-        langSwitchToThai: '🇹🇭 ไทย',
-        langSwitchToEnglish: '🇬🇧 English',
-        songsListTitle: '🎵 รายชื่อเพลง',
-        currentSongTooltip: 'เพลงที่เปิดอยู่:'
-      }
-    };
-
-    let currentLang = 'en';
-
-    function t(key) {
-      return (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key]) || TRANSLATIONS.en[key] || key;
-    }
-
-    function loadLanguage() {
-      try {
-        const stored = localStorage.getItem(LANG_KEY);
-        if (stored === 'en' || stored === 'th') currentLang = stored;
-      } catch (e) {}
-    }
-
-    function saveLanguage() {
-      try {
-        localStorage.setItem(LANG_KEY, currentLang);
-      } catch (e) {}
-    }
-
-    function applyLanguage() {
-      document.documentElement.lang = currentLang;
-      const h1 = document.querySelector('.toolbar h1');
-      if (h1) h1.textContent = t('appTitle');
-      if (toggleModeBtn) toggleModeBtn.textContent = isAdvancedMode ? t('switchToEasy') : t('switchToAdvanced');
-      if (toggleBtn) toggleBtn.textContent = isEditorCollapsed ? t('showEditor') : t('hideEditor');
-      const dropdownBtn = document.getElementById('dropdownToggle');
-      if (dropdownBtn) dropdownBtn.textContent = t('songsButton');
-      const zoomLbl = document.querySelector('.toolbar-zoom-label');
-      if (zoomLbl) zoomLbl.textContent = t('zoomLabel');
-      const keyLbl = document.getElementById('keyLabel');
-      if (keyLbl) keyLbl.textContent = t('keyLabel');
-      const expPng = document.getElementById('exportPNG');
-      if (expPng) expPng.textContent = t('savePng');
-      const saveTxtBtn = document.getElementById('saveTXT');
-      if (saveTxtBtn) saveTxtBtn.textContent = t('saveTxt');
-      const openSet = document.getElementById('openSettings');
-      if (openSet) openSet.textContent = t('settingsButton');
-      const songsLbl = document.getElementById('songsLabel');
-      if (songsLbl) songsLbl.textContent = t('loadClearSongs');
-      const selFolder = document.getElementById('selectFolder');
-      if (selFolder) selFolder.textContent = t('selectFolder');
-      const loadSingle = document.getElementById('loadSingleFile');
-      if (loadSingle) loadSingle.textContent = t('loadSingleFile');
-      const clearStored = document.getElementById('clearStoredSongs');
-      if (clearStored) clearStored.textContent = t('clearStoredSongs');
-      const songsListTitleEl = document.getElementById('songsListTitle');
-      if (songsListTitleEl) songsListTitleEl.textContent = t('songList');
-      const dropMsg = document.querySelector('.drop-message');
-      if (dropMsg) dropMsg.textContent = t('dropMessage');
-      const epMain = document.querySelector('.empty-preview .main-text');
-      const epSub = document.querySelector('.empty-preview .sub-text');
-      if (epMain) epMain.textContent = t('emptyPreviewMain');
-      if (epSub) epSub.textContent = t('emptyPreviewSub');
-      const cNo = document.getElementById('confirmNo');
-      const cYes = document.getElementById('confirmYes');
-      if (cNo) cNo.textContent = t('confirmCancel');
-      if (cYes) cYes.textContent = t('confirmYes');
-      const setTitle = document.querySelector('.settings-header h2');
-      if (setTitle) setTitle.textContent = t('settingsTitle');
-      const secTitles = document.querySelectorAll('.settings-section h3');
-      const secKeys = [
-        'sectionInterface',
-        'sectionLayout',
-        'sectionCharSpacing',
-        'sectionBarline',
-        'sectionChordFont',
-        'sectionLyricFont',
-        'sectionSectionLabels'
-      ];
-      secTitles.forEach(function(h, i) {
-        if (secKeys[i]) h.textContent = t(secKeys[i]);
-      });
-      const labelMap = {
-        uiScaleSlider: 'labelUiScale',
-        editorScaleSlider: 'labelEditorScale',
-        currentSongSizeSlider: 'labelCurrentSongSize',
-        chordLineHeightSlider: 'labelLineSpacing',
-        emptyLineHeightSlider: 'labelBlankLineSize',
-        chordLetterSpacingSlider: 'labelChordSpacing',
-        lyricLetterSpacingSlider: 'labelLyricSpacing',
-        labelLetterSpacingSlider: 'labelLabelSpacing',
-        pipeScaleSlider: 'labelPipeHeight',
-        pipeThicknessSlider: 'labelPipeThickness',
-        pipeValignSlider: 'labelPipeValign',
-        chordFontSelect: 'labelChordFont',
-        chordSizeSlider: 'labelChordSize',
-        lyricFontSelect: 'labelChordFont',
-        lyricSizeSlider: 'labelLyricSize',
-        labelSizeSlider: 'labelLabelSize',
-        labelRadiusSlider: 'labelLabelRadius'
-      };
-      document.querySelectorAll('.settings-row label').forEach(function(lbl) {
-        const forAttr = lbl.getAttribute('for');
-        if (forAttr && labelMap[forAttr]) lbl.textContent = t(labelMap[forAttr]);
-      });
-      const customRows = document.querySelectorAll('.settings-row.custom-font-field label');
-      customRows.forEach(function(lbl) { lbl.textContent = t('customFont'); });
-      const resetBtn = document.getElementById('settingsReset');
-      const doneBtn = document.getElementById('settingsDone');
-      if (resetBtn) resetBtn.textContent = t('resetDefaults');
-      if (doneBtn) doneBtn.textContent = t('done');
-      const langBtn = document.getElementById('langSwitch');
-      if (langBtn) {
-        langBtn.textContent = currentLang === 'en' ? t('langSwitchToThai') : t('langSwitchToEnglish');
-      }
-      // Update current-song tooltip in the active language
-      if (currentSongNameEl && currentSongNameEl.classList.contains('show')) {
-        const songName = currentSongNameEl.textContent || '';
-        currentSongNameEl.title = t('currentSongTooltip') + ' ' + songName;
-      }
-    }
-    // ===== END LANGUAGE =====
 
     const NOTE_MAP = {
       'C': 0, 'B#': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3,
@@ -2067,6 +1981,19 @@
       masterScaleSlider.value = scaleToSliderPos(settings.masterScale);
       masterScaleNum.value = Number(settings.masterScale).toFixed(2);
 
+      labelSizeToolbarSlider.value = settings.labelSize;
+      if (document.activeElement !== labelSizeToolbarNum) {
+        labelSizeToolbarNum.value = Number(settings.labelSize).toFixed(2);
+      }
+      chordSizeToolbarSlider.value = settings.chordSizeMult;
+      if (document.activeElement !== chordSizeToolbarNum) {
+        chordSizeToolbarNum.value = Number(settings.chordSizeMult).toFixed(2);
+      }
+      lyricSizeToolbarSlider.value = settings.lyricSize;
+      if (document.activeElement !== lyricSizeToolbarNum) {
+        lyricSizeToolbarNum.value = Number(settings.lyricSize).toFixed(2);
+      }
+
       uiScaleSlider.value = settings.uiScale;
       uiScaleNum.value = Number(settings.uiScale).toFixed(2);
 
@@ -2145,9 +2072,42 @@
       if (e.target === settingsOverlay) closeSettings();
     });
 
+    // ===== LOCK SYSTEM =====
+    function applyLockState() {
+      lockCheckbox.checked = isLocked;
+      sizesContent.classList.toggle('locked', isLocked);
+      settingsPanel.classList.toggle('locked', isLocked);
+      settingsLockIndicator.style.display = isLocked ? 'inline' : 'none';
+      sizesToggle.textContent = isLocked ? '🎚️ Sizes 🔒 ▼' : '🎚️ Sizes ▼';
+    }
+
+    lockCheckbox.addEventListener('change', function() {
+      isLocked = this.checked;
+      applyLockState();
+    });
+
+    lockRow.addEventListener('click', function(e) {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL') return;
+      lockCheckbox.checked = !lockCheckbox.checked;
+      isLocked = lockCheckbox.checked;
+      applyLockState();
+    });
+
+    // ===== SIZES DROPDOWN TOGGLE =====
+    sizesToggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      dropdownContent.classList.remove('show');
+      document.querySelectorAll('.subfolder-popup.show').forEach(p => p.classList.remove('show'));
+      sizesContent.classList.toggle('show');
+    });
+
+    sizesContent.addEventListener('click', function(e) {
+      e.stopPropagation();
+    });
+        // ===== SETTERS =====
     function setMasterScale(v) {
       v = clampNum(v, MS_MIN, MS_MAX);
-      v = Math.round(v * 20) / 20;
+      v = Math.round(v * 100) / 100;
       settings.masterScale = v;
       masterScaleSlider.value = scaleToSliderPos(v);
       if (document.activeElement !== masterScaleNum) masterScaleNum.value = v.toFixed(2);
@@ -2166,7 +2126,7 @@
       this.value = settings.masterScale.toFixed(2);
     });
     masterScaleReset.addEventListener('click', function() {
-      setMasterScale(1);
+      setMasterScale(DEFAULT_SETTINGS.masterScale);
     });
     masterScaleUp.addEventListener('click', function() {
       const stepVal = parseFloat(masterScaleNum.step) || 0.05;
@@ -2410,6 +2370,10 @@
       settings.chordSizeMult = v;
       chordSizeSlider.value = v;
       if (document.activeElement !== chordSizeNum) chordSizeNum.value = v.toFixed(2);
+      chordSizeToolbarSlider.value = v;
+      if (document.activeElement !== chordSizeToolbarNum) {
+        chordSizeToolbarNum.value = v.toFixed(2);
+      }
       saveSettings();
       applySettings();
     }
@@ -2448,6 +2412,10 @@
       settings.lyricSize = v;
       lyricSizeSlider.value = v;
       if (document.activeElement !== lyricSizeNum) lyricSizeNum.value = v.toFixed(2);
+      lyricSizeToolbarSlider.value = v;
+      if (document.activeElement !== lyricSizeToolbarNum) {
+        lyricSizeToolbarNum.value = v.toFixed(2);
+      }
       saveSettings();
       applySettings();
     }
@@ -2467,6 +2435,10 @@
       settings.labelSize = v;
       labelSizeSlider.value = v;
       if (document.activeElement !== labelSizeNum) labelSizeNum.value = v.toFixed(2);
+      labelSizeToolbarSlider.value = v;
+      if (document.activeElement !== labelSizeToolbarNum) {
+        labelSizeToolbarNum.value = v.toFixed(2);
+      }
       saveSettings();
       applySettings();
     }
@@ -2500,8 +2472,74 @@
       this.value = settings.labelRadius.toFixed(1);
     });
 
+    lyricSizeToolbarSlider.addEventListener('input', function() {
+      setLyricSize(parseFloat(this.value));
+    });
+    lyricSizeToolbarNum.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v)) setLyricSize(v);
+    });
+    lyricSizeToolbarNum.addEventListener('blur', function() {
+      this.value = settings.lyricSize.toFixed(2);
+    });
+    lyricSizeToolbarUp.addEventListener('click', function() {
+      const stepVal = parseFloat(lyricSizeToolbarNum.step) || 0.05;
+      setLyricSize(parseFloat(settings.lyricSize) + stepVal);
+    });
+    lyricSizeToolbarDown.addEventListener('click', function() {
+      const stepVal = parseFloat(lyricSizeToolbarNum.step) || 0.05;
+      setLyricSize(parseFloat(settings.lyricSize) - stepVal);
+    });
+    lyricSizeToolbarReset.addEventListener('click', function() {
+      setLyricSize(DEFAULT_SETTINGS.lyricSize);
+    });
+
+    chordSizeToolbarSlider.addEventListener('input', function() {
+      setChordSize(parseFloat(this.value));
+    });
+    chordSizeToolbarNum.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v)) setChordSize(v);
+    });
+    chordSizeToolbarNum.addEventListener('blur', function() {
+      this.value = settings.chordSizeMult.toFixed(2);
+    });
+    chordSizeToolbarUp.addEventListener('click', function() {
+      const stepVal = parseFloat(chordSizeToolbarNum.step) || 0.05;
+      setChordSize(parseFloat(settings.chordSizeMult) + stepVal);
+    });
+    chordSizeToolbarDown.addEventListener('click', function() {
+      const stepVal = parseFloat(chordSizeToolbarNum.step) || 0.05;
+      setChordSize(parseFloat(settings.chordSizeMult) - stepVal);
+    });
+    chordSizeToolbarReset.addEventListener('click', function() {
+      setChordSize(DEFAULT_SETTINGS.chordSizeMult);
+    });
+
+    labelSizeToolbarSlider.addEventListener('input', function() {
+      setLabelSize(parseFloat(this.value));
+    });
+    labelSizeToolbarNum.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      if (!isNaN(v)) setLabelSize(v);
+    });
+    labelSizeToolbarNum.addEventListener('blur', function() {
+      this.value = settings.labelSize.toFixed(2);
+    });
+    labelSizeToolbarUp.addEventListener('click', function() {
+      const stepVal = parseFloat(labelSizeToolbarNum.step) || 0.05;
+      setLabelSize(parseFloat(settings.labelSize) + stepVal);
+    });
+    labelSizeToolbarDown.addEventListener('click', function() {
+      const stepVal = parseFloat(labelSizeToolbarNum.step) || 0.05;
+      setLabelSize(parseFloat(settings.labelSize) - stepVal);
+    });
+    labelSizeToolbarReset.addEventListener('click', function() {
+      setLabelSize(DEFAULT_SETTINGS.labelSize);
+    });
+
     settingsReset.addEventListener('click', function() {
-      showConfirm(t('resetConfirm'), function() {
+      showConfirm('Reset all settings to defaults?', function() {
         settings = Object.assign({}, DEFAULT_SETTINGS);
         saveSettings();
         syncSettingsUI();
@@ -2509,6 +2547,7 @@
       });
     });
 
+    // ===== KEY / TRANSPOSE =====
     function updateKeyDisplay() {
       const majorRoot = keySelect.value;
       const minorRoot = MINOR_KEY_MAP[majorRoot] || 'Am';
@@ -2647,6 +2686,7 @@
       }
     }
 
+    // ===== SONG NAME =====
     function setCurrentSongName(name) {
       if (!name || !name.trim()) {
         currentSongNameEl.classList.remove('show');
@@ -2656,17 +2696,24 @@
       }
       const clean = name.trim();
       currentSongNameEl.textContent = clean;
-      currentSongNameEl.title = t('currentSongTooltip') + ' ' + clean;
+      currentSongNameEl.title = 'Currently loaded song: ' + clean;
       currentSongNameEl.classList.add('show');
     }
 
-    function loadSong(content, fileName) {
+    function loadSong(content, fileName, settingsSnapshot) {
       originalText = content;
       inputEl.value = content;
+      if (settingsSnapshot && typeof settingsSnapshot === 'object') {
+        settings = Object.assign({}, DEFAULT_SETTINGS, settingsSnapshot);
+        saveSettings();
+        syncSettingsUI();
+        applySettings();
+      }
       resetTransposition();
       if (fileName) setCurrentSongName(fileName);
     }
 
+    // ===== DRAG & DROP =====
     function handleDragOver(e) {
       e.preventDefault();
       e.stopPropagation();
@@ -2687,31 +2734,40 @@
       const files = e.dataTransfer.files;
       if (files.length === 0) return;
 
-      const txtFiles = Array.from(files).filter(file => file.name.endsWith('.txt'));
+      const accepted = Array.from(files).filter(file => {
+        const n = file.name.toLowerCase();
+        return n.endsWith('.txt') || n.endsWith('.chordchart') || n.endsWith('.json');
+      });
 
-      if (txtFiles.length === 0) {
-        alert('Please drop .txt files only.');
+      if (accepted.length === 0) {
+        alert('Please drop .txt or .chordchart files only.');
         return;
       }
 
-      if (txtFiles.length === 1) {
-        const file = txtFiles[0];
+      if (accepted.length === 1) {
+        const file = accepted[0];
         const reader = new FileReader();
         reader.onload = function(event) {
-          const content = event.target.result;
-          const fileName = file.name.replace('.txt', '');
+          const raw = event.target.result;
+          const parsed = parseChordChartFile(raw, file.name);
+          const fileName = stripExtension(file.name);
           const folder = file.webkitRelativePath ? getFolderPath(file.webkitRelativePath) : '';
 
           const storedSongs = loadStoredSongs() || [];
           const existingIndex = storedSongs.findIndex(s => s.name === fileName && s.folder === folder);
+          const entry = { name: fileName, content: parsed.text, folder: folder };
+          if (parsed.settings) entry.settings = parsed.settings;
           if (existingIndex >= 0) {
-            storedSongs[existingIndex].content = content;
+            storedSongs[existingIndex] = Object.assign({}, storedSongs[existingIndex], entry);
           } else {
-            storedSongs.push({ name: fileName, content: content, folder: folder });
+            storedSongs.push(entry);
           }
           saveSongsToStorage(storedSongs);
 
-          loadSong(content, fileName);
+          loadSong(parsed.text, fileName, parsed.settings);
+          if (parsed.settings) {
+            showToast('Applied settings from "' + fileName + '"');
+          }
           displayStoredSongs();
         };
         reader.readAsText(file);
@@ -2720,31 +2776,40 @@
 
       const storedSongs = loadStoredSongs() || [];
       let loadedCount = 0;
+      let firstParsed = null;
+      let firstFileName = '';
 
-      txtFiles.forEach((file) => {
+      accepted.forEach((file) => {
         const reader = new FileReader();
         reader.onload = function(event) {
-          const content = event.target.result;
-          const fileName = file.name.replace('.txt', '');
+          const raw = event.target.result;
+          const parsed = parseChordChartFile(raw, file.name);
+          const fileName = stripExtension(file.name);
           const folder = file.webkitRelativePath ? getFolderPath(file.webkitRelativePath) : '';
 
           const existingIndex = storedSongs.findIndex(s => s.name === fileName && s.folder === folder);
+          const entry = { name: fileName, content: parsed.text, folder: folder };
+          if (parsed.settings) entry.settings = parsed.settings;
           if (existingIndex >= 0) {
-            storedSongs[existingIndex].content = content;
+            storedSongs[existingIndex] = Object.assign({}, storedSongs[existingIndex], entry);
           } else {
-            storedSongs.push({ name: fileName, content: content, folder: folder });
+            storedSongs.push(entry);
           }
 
+          if (loadedCount === 0) {
+            firstParsed = parsed;
+            firstFileName = fileName;
+          }
           loadedCount++;
-          if (loadedCount === txtFiles.length) {
+          if (loadedCount === accepted.length) {
             saveSongsToStorage(storedSongs);
             displayStoredSongs();
-            const firstFile = txtFiles[0];
-            const firstReader = new FileReader();
-            firstReader.onload = function(e) {
-              loadSong(e.target.result, firstFile.name.replace('.txt', ''));
-            };
-            firstReader.readAsText(firstFile);
+            if (firstParsed) {
+              loadSong(firstParsed.text, firstFileName, firstParsed.settings);
+              if (firstParsed.settings) {
+                showToast('Applied settings from "' + firstFileName + '"');
+              }
+            }
           }
         };
         reader.readAsText(file);
@@ -2758,6 +2823,31 @@
     dropZone.addEventListener('dragleave', handleDragLeave);
     dropZone.addEventListener('drop', handleDrop);
 
+    // ===== FILE PARSER =====
+    function stripExtension(filename) {
+      return filename.replace(/\.(txt|chordchart|json)$/i, '');
+    }
+
+    function parseChordChartFile(raw, filename) {
+      let parsed = null;
+      const trimmed = (raw || '').trim();
+      if (trimmed.startsWith('{')) {
+        try {
+          parsed = JSON.parse(trimmed);
+        } catch (e) {
+          parsed = null;
+        }
+      }
+      if (parsed && parsed.app === 'chord-chart-creator' && parsed.type === 'song' && typeof parsed.songText === 'string') {
+        return {
+          text: parsed.songText,
+          settings: (parsed.settings && typeof parsed.settings === 'object') ? parsed.settings : null
+        };
+      }
+      return { text: raw, settings: null };
+    }
+
+    // ===== STORED SONGS =====
     function loadStoredSongs() {
       try {
         const stored = localStorage.getItem('chordChartSongs');
@@ -2772,18 +2862,11 @@
       } catch (e) { console.log('Could not save songs'); }
     }
 
-    function clearStoredSongs() {
-      showConfirm(t('clearConfirm'), function() {
-        localStorage.removeItem('chordChartSongs');
-        displayStoredSongs();
-      });
-    }
-
     function removeSong(songName, songFolder) {
       const storedSongs = loadStoredSongs() || [];
       const index = storedSongs.findIndex(s => s.name === songName && s.folder === (songFolder || ''));
       if (index >= 0) {
-        showConfirm(t('removeConfirmPrefix') + '"' + songName + '"?', function() {
+        showConfirm('Are you sure you want to remove "' + songName + '"?', function() {
           storedSongs.splice(index, 1);
           saveSongsToStorage(storedSongs);
           displayStoredSongs();
@@ -2931,7 +3014,7 @@
         const emptyMsg = document.createElement('div');
         emptyMsg.className = 'dropdown-item';
         emptyMsg.style.cssText = 'color: #b0987a; font-size: 0.8rem; padding: 6px 16px; font-style: italic;';
-        emptyMsg.textContent = t('noSongs');
+        emptyMsg.textContent = 'No songs loaded';
         songsList.appendChild(emptyMsg);
       }
     }
@@ -2939,6 +3022,9 @@
     function createSongItem(song) {
       const songItem = document.createElement('div');
       songItem.className = 'dropdown-item song-item';
+      if (song.settings && typeof song.settings === 'object') {
+        songItem.classList.add('has-settings');
+      }
 
       const nameSpan = document.createElement('span');
       nameSpan.className = 'song-name';
@@ -2955,7 +3041,10 @@
 
       nameSpan.addEventListener('click', function(e) {
         e.stopPropagation();
-        loadSong(song.content, song.name);
+        loadSong(song.content, song.name, song.settings || null);
+        if (song.settings && typeof song.settings === 'object') {
+          showToast('Applied settings from "' + song.name + '"');
+        }
         dropdownContent.classList.remove('show');
         document.querySelectorAll('.dropdown-item.song-item').forEach(el => el.classList.remove('active'));
         songItem.classList.add('active');
@@ -2968,6 +3057,7 @@
 
     dropdownToggle.addEventListener('click', function(e) {
       e.stopPropagation();
+      sizesContent.classList.remove('show');
       dropdownContent.classList.toggle('show');
       document.querySelectorAll('.subfolder-popup.show').forEach(p => p.classList.remove('show'));
       displayStoredSongs();
@@ -2978,37 +3068,48 @@
         dropdownContent.classList.remove('show');
         document.querySelectorAll('.subfolder-popup.show').forEach(p => p.classList.remove('show'));
       }
+      if (!sizesToggle.contains(e.target) && !sizesContent.contains(e.target)) {
+        sizesContent.classList.remove('show');
+      }
     });
 
-    const clearBtn = document.getElementById('clearStoredSongs');
-    if (clearBtn) {
-      clearBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        clearStoredSongs();
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
         dropdownContent.classList.remove('show');
-      });
-    }
+        document.querySelectorAll('.subfolder-popup.show').forEach(p => p.classList.remove('show'));
+        sizesContent.classList.remove('show');
+      }
+    });
 
     document.getElementById('loadSingleFile').addEventListener('click', function(e) {
       e.stopPropagation();
       const fileInput = document.createElement('input');
       fileInput.type = 'file';
-      fileInput.accept = '.txt';
+      fileInput.accept = '.txt,.chordchart,.json';
 
       fileInput.onchange = function(e) {
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = function(event) {
-          const content = event.target.result;
-          const fileName = file.name.replace('.txt', '');
+          const raw = event.target.result;
+          const parsed = parseChordChartFile(raw, file.name);
+          const fileName = stripExtension(file.name);
           const folder = file.webkitRelativePath ? getFolderPath(file.webkitRelativePath) : '';
           const storedSongs = loadStoredSongs() || [];
           const existingIndex = storedSongs.findIndex(s => s.name === fileName && s.folder === folder);
-          if (existingIndex >= 0) storedSongs[existingIndex].content = content;
-          else storedSongs.push({ name: fileName, content: content, folder: folder });
+          const entry = { name: fileName, content: parsed.text, folder: folder };
+          if (parsed.settings) entry.settings = parsed.settings;
+          if (existingIndex >= 0) {
+            storedSongs[existingIndex] = Object.assign({}, storedSongs[existingIndex], entry);
+          } else {
+            storedSongs.push(entry);
+          }
           saveSongsToStorage(storedSongs);
-          loadSong(content, fileName);
+          loadSong(parsed.text, fileName, parsed.settings);
+          if (parsed.settings) {
+            showToast('Applied settings from "' + fileName + '"');
+          }
           dropdownContent.classList.remove('show');
           displayStoredSongs();
         };
@@ -3017,66 +3118,7 @@
       fileInput.click();
     });
 
-    const selectFolderBtn = document.getElementById('selectFolder');
-    if (selectFolderBtn) {
-      selectFolderBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = '.txt';
-        fileInput.webkitdirectory = true;
-        fileInput.multiple = true;
-
-        fileInput.onchange = function(e) {
-          const files = e.target.files;
-          const songFiles = [];
-          const storedSongs = loadStoredSongs() || [];
-
-          for (let file of files) {
-            if (file.name.endsWith('.txt')) {
-              const fileName = file.name.replace('.txt', '');
-              const fullPath = file.webkitRelativePath || file.name;
-              const parts = fullPath.split(/[\/\\]/);
-              parts.pop();
-              const folder = parts.join('/');
-              songFiles.push({ name: fileName, file: file, folder: folder });
-            }
-          }
-
-          if (songFiles.length === 0) {
-            alert('No .txt files found in the selected folder.');
-            return;
-          }
-
-          songFiles.sort((a, b) => a.name.localeCompare(b.name, 'th', { sensitivity: 'base' }));
-
-          let loadedCount = 0;
-          songFiles.forEach((song) => {
-            const reader = new FileReader();
-            reader.onload = function(event) {
-              const content = event.target.result;
-              const existingIndex = storedSongs.findIndex(s => s.name === song.name && s.folder === song.folder);
-              if (existingIndex >= 0) storedSongs[existingIndex].content = content;
-              else storedSongs.push({ name: song.name, content: content, folder: song.folder });
-              loadedCount++;
-              if (loadedCount === songFiles.length) {
-                saveSongsToStorage(storedSongs);
-                displayStoredSongs();
-                const firstFile = songFiles[0].file;
-                const firstReader = new FileReader();
-                firstReader.onload = function(e) {
-                  loadSong(e.target.result, songFiles[0].name);
-                };
-                firstReader.readAsText(firstFile);
-              }
-            };
-            reader.readAsText(song.file);
-          });
-        };
-        fileInput.click();
-      });
-    }
-
+    // ===== RESIZE HANDLE =====
     resizeHandle.addEventListener('mousedown', function(e) {
       isResizing = true;
       startY = e.clientY;
@@ -3104,10 +3146,11 @@
       }
     });
 
+    // ===== EDITOR / MODE TOGGLES =====
     function applyEditorState(hidden) {
       isEditorCollapsed = hidden;
       inputArea.classList.toggle('collapsed', hidden);
-      toggleBtn.textContent = hidden ? t('showEditor') : t('hideEditor');
+      toggleBtn.textContent = hidden ? '▼ ✏️ Show Editor' : '▲ ✏️ Hide Editor';
       toggleBtn.classList.toggle('active', hidden);
       setTimeout(adjustChordSizes, 350);
     }
@@ -3122,13 +3165,13 @@
       isAdvancedMode = advanced;
       if (advanced) {
         document.body.classList.remove('easy-mode');
-        toggleModeBtn.textContent = t('switchToEasy');
+        toggleModeBtn.textContent = '😃 Switch to EASY MODE';
         const savedHidden = loadEditorHiddenState();
         applyEditorState(savedHidden);
       } else {
         document.body.classList.add('easy-mode');
-        toggleModeBtn.textContent = t('switchToAdvanced');
-        isEditorCollapsed = true;
+        toggleModeBtn.textContent = '😵 Switch to ADVANCED MODE';
+        applyEditorState(false);
       }
       setTimeout(adjustChordSizes, 250);
     }
@@ -3137,6 +3180,7 @@
       applyMode(!isAdvancedMode);
     });
 
+    // ===== SECTION LABEL SYSTEM =====
     function expandSectionShortcut(name) {
       const trimmed = name.trim();
       const lower = trimmed.toLowerCase();
@@ -3183,8 +3227,7 @@
         const fullName = fullMatch[1];
         const number = fullMatch[2] || '';
         const capitalized = fullName.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-        const finalName = capitalized.replace(/Pre-Chorus/, 'Pre-Chorus').replace(/Post-Chorus/, 'Post-Chorus');
-        return number ? `${finalName} ${number}` : finalName;
+        return number ? `${capitalized} ${number}` : capitalized;
       }
       return name;
     }
@@ -3202,6 +3245,7 @@
       return '';
     }
 
+    // ===== CHORD SIMPLIFICATION =====
     function normalizeChord(chord) {
       if (!chord || chord === '_' || chord === '') return chord;
       const match = chord.match(/^([a-gA-G])([#b]?)(.*)$/);
@@ -3239,6 +3283,7 @@
       return effectiveFont(settings.chordFont, settings.chordFontCustom);
     }
 
+    // ===== CHORD AUTO-SIZING =====
     function adjustChordSizes() {
       const content = previewContent;
       if (!content) return;
@@ -3249,7 +3294,7 @@
       const previewWidth = previewContent.clientWidth || 0;
       if (previewWidth < 50) return;
 
-      const maxSize = isEditorCollapsed ? 2.5 : 1.8;
+      const maxSize = 2.5;
 
       let globalMaxText = '';
       chordLines.forEach(row => {
@@ -3299,6 +3344,7 @@
       });
     }
 
+    // ===== RENDER =====
     function renderChordLine(line, sectionClass) {
       let html = `<div class="chord-line">`;
 
@@ -3334,8 +3380,8 @@
       if (!text || text.trim() === '') {
         previewContent.innerHTML = `
           <div class="empty-preview">
-            <div class="main-text">${t('emptyPreviewMain')}</div>
-            <div class="sub-text">${t('emptyPreviewSub')}</div>
+            <div class="main-text">Type or Paste your chord chart (in the editor area below)</div>
+            <div class="sub-text">or Drag &amp; Drop a chord chart (.txt or .chordchart)<br>Tip: to reuse the current look for a new song, clear the text and type the new one — settings stay.</div>
           </div>
         `;
         return;
@@ -3454,8 +3500,8 @@
       renderPreview(inputEl.value);
     }
 
-    // ===== SAVE AS TXT =====
-    document.getElementById('saveTXT').addEventListener('click', async function() {
+    // ===== SAVE CHORD CHART =====
+    document.getElementById('saveSong').addEventListener('click', async function() {
       const content = inputEl.value;
       if (!content || content.trim() === '') {
         alert('Nothing to save. The editor is empty.');
@@ -3466,14 +3512,24 @@
         : 'chord-chart';
       const sanitizedName = songName.replace(/[<>:"/\\|?*\x00-\x1f]/g, '').trim() || 'chord-chart';
       const timestamp = new Date().toISOString().slice(0, 10);
-      const fileName = `${sanitizedName}_${timestamp}.txt`;
-      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const fileName = `${sanitizedName}_${timestamp}.chordchart`;
 
-      const result = await saveFileWithPicker(fileName, blob, 'text/plain', 'Text file');
+      const payload = {
+        app: 'chord-chart-creator',
+        version: 1,
+        type: 'song',
+        savedAt: new Date().toISOString(),
+        settings: Object.assign({}, settings),
+        songText: content
+      };
+
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const result = await saveFileWithPicker(fileName, blob, 'application/json', 'Chord chart');
       if (result.cancelled) return;
 
-      this.textContent = t('saveTxtOk');
-      setTimeout(() => { this.textContent = t('saveTxt'); }, 2000);
+      const originalLabel = this.textContent;
+      this.textContent = '✅ Saved!';
+      setTimeout(() => { this.textContent = originalLabel; }, 2000);
     });
 
     // ===== SAVE AS PNG =====
@@ -3483,7 +3539,8 @@
       const songName = currentSongNameEl && currentSongNameEl.classList.contains('show')
         ? (currentSongNameEl.textContent || 'chord-chart')
         : 'chord-chart';
-      this.textContent = t('savePngBusy');
+      const originalLabel = this.textContent;
+      this.textContent = '⏳ Exporting...';
       this.disabled = true;
 
       try {
@@ -3558,14 +3615,14 @@
 
         const result = await saveFileWithPicker(fileName, blob, 'image/png', 'PNG image');
         if (result.cancelled) {
-          this.textContent = t('savePng');
+          this.textContent = originalLabel;
           this.disabled = false;
           return;
         }
 
-        this.textContent = t('savePngOk');
+        this.textContent = '✅ Exported!';
         setTimeout(() => {
-          this.textContent = t('savePng');
+          this.textContent = originalLabel;
           this.disabled = false;
         }, 2000);
       } catch (err) {
@@ -3579,14 +3636,15 @@
         preview.style.boxShadow = '';
         preview.style.background = '';
         preview.style.width = '';
-        this.textContent = t('savePngFail');
+        this.textContent = '❌ Export failed';
         setTimeout(() => {
-          this.textContent = t('savePng');
+          this.textContent = originalLabel;
           this.disabled = false;
         }, 2000);
       }
     });
 
+    // ===== TRANSPOSE BUTTONS =====
     transposeUpBtn.addEventListener('click', transposeUp);
     transposeDownBtn.addEventListener('click', transposeDown);
 
@@ -3606,17 +3664,9 @@
 
     // ===== INIT =====
     loadSettings();
-    loadLanguage();
     syncSettingsUI();
     applySettings();
-    applyLanguage();
-
-    document.getElementById('langSwitch').addEventListener('click', function() {
-      currentLang = (currentLang === 'en') ? 'th' : 'en';
-      saveLanguage();
-      applyLanguage();
-      displayStoredSongs();
-    });
+    applyLockState();
 
     applyMode(false);
 
