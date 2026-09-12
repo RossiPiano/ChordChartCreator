@@ -1075,7 +1075,12 @@
       background: rgba(196, 173, 146, 0.95);
       transform: scale(1.05);
     }
-    .layout-float-toggle.active {
+    /* The pressed-in (active) state MUST override the base styles AND the
+       hover state, since Phone View is now the default and the button
+       starts pressed. Order matters: `:hover.active` and `.active`
+       come after the plain `.layout-float-toggle` rules so they win. */
+    .layout-float-toggle.active,
+    .layout-float-toggle.active:hover {
       background: #5c4033;
       color: #ffffff;
       border-color: #4a3328;
@@ -1473,12 +1478,35 @@
       cursor: pointer;
       margin: 0;
     }
+    /* The readout is now a real number input so users can type a value
+       directly. Styled like the Old Settings number inputs (white bg,
+       rounded border, right-aligned numbers), but sized to fit the
+       compact perf-row grid. */
     .perf-row .perf-readout {
       font-family: Consolas, Menlo, Monaco, monospace;
       font-size: 0.72rem;
       font-weight: 700;
       color: #3d2b1f;
       text-align: right;
+      width: 100%;
+      min-width: 0;
+      padding: 2px 4px;
+      border: 1px solid #c4ad92;
+      border-radius: 5px;
+      background: #ffffff;
+      outline: none;
+      -moz-appearance: textfield;
+      box-sizing: border-box;
+    }
+    .perf-row .perf-readout::-webkit-outer-spin-button,
+    .perf-row .perf-readout::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .perf-row .perf-readout:focus {
+      border-color: #8b6b4a;
+      box-shadow: 0 0 0 2px rgba(139, 107, 74, 0.2);
+      background: #f5ede0;
     }
 
     /* When chrome is collapsed, hide the toolbar.
@@ -1606,6 +1634,53 @@
       padding-bottom: 4px;
       border-bottom: 1px solid #dcc9b0;
     }
+    /* Lock row inside the floating settings panel — styled to match the
+       lock row in the toolbar's Sizes dropdown so the two controls feel
+       like the same feature, just accessible from two places. */
+    .settings-lock-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: #ece0cf;
+      border: 1px solid #dcc9b0;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .settings-lock-row input[type="checkbox"] {
+      accent-color: #8b6b4a;
+      cursor: pointer;
+      margin: 0;
+      flex: 0 0 auto;
+      width: 15px;
+      height: 15px;
+    }
+    .settings-lock-row label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #5c4033;
+      cursor: pointer;
+      flex: 1 1 auto;
+    }
+    .settings-lock-row:hover { background: #e3d3bb; }
+
+    /* Lock row inside the floating ⚙️ Performance panel — reuse the same
+       visual style as the Settings modal's lock row, but sized down a bit
+       so it fits the compact perf-panel layout. */
+    .perf-panel .settings-lock-row {
+      padding: 6px 8px;
+      gap: 8px;
+      margin: 0 2px 6px 2px;
+    }
+    .perf-panel .settings-lock-row input[type="checkbox"] {
+      width: 13px;
+      height: 13px;
+    }
+    .perf-panel .settings-lock-row label {
+      font-size: 0.72rem;
+    }
+
     .settings-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
     .settings-row label { font-size: 0.8rem; font-weight: 500; color: #5c4033; flex: 0 0 160px; }
     .settings-row input[type="range"] { flex: 1; accent-color: #8b6b4a; cursor: pointer; min-width: 0; }
@@ -1799,16 +1874,11 @@
       <button class="btn btn-success" id="exportPNG">📷 Export Chord Chart as PNG</button>
       <button class="btn btn-success" id="saveSong">💾 Save Chord Chart</button>
 
-      <button class="btn btn-outline" id="openSettings" title="Open settings">⚙️ Settings</button>
+      <button class="btn btn-outline" id="openSettings" title="Open old settings">⚙️ Old Settings</button>
       </div>
     </div>
   </div>
-  <div class="editor-wrapper layout-desktop" id="editorWrapper">
-    <div class="preview-area" id="previewArea">
-      <div id="previewContainer" class="chord-preview">
-        <div class="content-wrapper" id="previewContent"></div>
-      </div>
-    </div>
+  <div class="editor-wrapper layout-phone" id="editorWrapper">
     <div class="input-area" id="inputArea">
       <div class="resize-handle" id="resizeHandle"></div>
       <div class="drop-zone" id="dropZone">
@@ -1816,13 +1886,18 @@
         <textarea id="chartInput" spellcheck="false"></textarea>
       </div>
     </div>
+    <div class="preview-area" id="previewArea">
+      <div id="previewContainer" class="chord-preview">
+        <div class="content-wrapper" id="previewContent"></div>
+      </div>
+    </div>
   </div>
 </div>
 
 <button class="chrome-toggle" id="chromeToggle" title="Collapse toolbar & editor (focus mode)" aria-label="Collapse toolbar and editor">☰</button>
 <button class="chrome-toggle-2" id="chromeToggle2" title="Collapse toolbar & editor (focus mode)" aria-label="Collapse toolbar and editor">⋯</button>
-<button class="perf-toggle" id="perfToggle" title="Open performance controls" aria-label="Open performance controls">⚙️</button>
-<button class="layout-float-toggle" id="layoutFloatToggle" title="Toggle Phone View" aria-label="Toggle Phone View">📱</button>
+<button class="perf-toggle" id="perfToggle" title="Open settings" aria-label="Open settings">⚙️</button>
+<button class="layout-float-toggle active" id="layoutFloatToggle" title="Phone View: ON (click to turn off)" aria-label="Phone View: ON (click to turn off)">📱</button>
 <button class="key-float-toggle" id="keyFloatToggle" title="Key &amp; transpose" aria-label="Key and transpose">🔑</button>
 <button class="png-float-toggle" id="pngFloatToggle" title="Export Chord Chart as PNG" aria-label="Export Chord Chart as PNG">📷</button>
 <button class="save-float-toggle" id="saveFloatToggle" title="Save Chord Chart" aria-label="Save Chord Chart">💾</button>
@@ -1872,12 +1947,18 @@
     </div>
   </div>
 </div>
-<div class="perf-panel" id="perfPanel" role="dialog" aria-label="Performance controls">
+<div class="perf-panel" id="perfPanel" role="dialog" aria-label="Settings">
   <div class="perf-panel-header">
-    <span>⚙️ Performance</span>
+    <span>⚙️ Settings</span>
     <button class="perf-close" id="perfClose" title="Close">✕</button>
   </div>
   <div class="perf-panel-body">
+
+    <div class="perf-section-label">LOCK</div>
+    <div class="settings-lock-row" id="perfLockRow">
+      <input type="checkbox" id="perfLockCheckbox">
+      <label for="perfLockCheckbox">🔒 Lock all settings (protects while typing new text)</label>
+    </div>
 
     <div class="perf-section-label">SIZES</div>
 
@@ -1886,7 +1967,7 @@
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfMaster" title="Decrease">−</button>
       <input type="range" id="perfMaster" min="0" max="100" step="0.5" value="50">
       <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfMaster" title="Increase">+</button>
-      <span class="perf-readout" id="perfMasterReadout">1.00</span>
+      <input type="number" class="perf-readout" id="perfMasterReadout" min="0.10" max="10" step="0.01" value="1.00">
     </div>
 
     <div class="perf-subhead">🎼 Chords &amp; Barlines</div>
@@ -1896,28 +1977,28 @@
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfChordSize" title="Decrease">−</button>
       <input type="range" id="perfChordSize" min="0" max="100" step="0.5" value="50">
       <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfChordSize" title="Increase">+</button>
-      <span class="perf-readout" id="perfChordSizeReadout">1.00</span>
+      <input type="number" class="perf-readout" id="perfChordSizeReadout" min="0.25" max="4" step="0.01" value="1.00">
     </div>
     <div class="perf-row">
       <label for="perfPipeScale">Barline height</label>
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfPipeScale" title="Decrease">−</button>
       <input type="range" id="perfPipeScale" min="1" max="5" step="0.05" value="2.25">
       <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfPipeScale" title="Increase">+</button>
-      <span class="perf-readout" id="perfPipeScaleReadout">2.25</span>
+      <input type="number" class="perf-readout" id="perfPipeScaleReadout" min="1" max="5" step="0.05" value="2.25">
     </div>
     <div class="perf-row">
       <label for="perfPipeThickness">Barline thickness</label>
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfPipeThickness" title="Decrease">−</button>
       <input type="range" id="perfPipeThickness" min="0" max="0.15" step="0.005" value="0.03">
       <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfPipeThickness" title="Increase">+</button>
-      <span class="perf-readout" id="perfPipeThicknessReadout">0.030</span>
+      <input type="number" class="perf-readout" id="perfPipeThicknessReadout" min="0" max="0.15" step="0.005" value="0.030">
     </div>
     <div class="perf-row">
       <label for="perfPipeValign">Barline nudge ↕</label>
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfPipeValign" title="Decrease">−</button>
       <input type="range" id="perfPipeValign" min="-1" max="1" step="0.05" value="0.2">
       <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfPipeValign" title="Increase">+</button>
-      <span class="perf-readout" id="perfPipeValignReadout">0.20</span>
+      <input type="number" class="perf-readout" id="perfPipeValignReadout" min="-1" max="1" step="0.05" value="0.20">
     </div>
 
     <div class="perf-subhead">🎤 Lyrics</div>
@@ -1926,7 +2007,7 @@
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfLyricSize" title="Decrease">−</button>
       <input type="range" id="perfLyricSize" min="0" max="100" step="0.5" value="50">
       <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfLyricSize" title="Increase">+</button>
-      <span class="perf-readout" id="perfLyricSizeReadout">1.00</span>
+      <input type="number" class="perf-readout" id="perfLyricSizeReadout" min="0.25" max="4" step="0.01" value="1.00">
     </div>
 
     <div class="perf-subhead">🔖 Labels</div>
@@ -1935,7 +2016,7 @@
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfLabelSize" title="Decrease">−</button>
       <input type="range" id="perfLabelSize" min="0" max="100" step="0.5" value="50">
       <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfLabelSize" title="Increase">+</button>
-      <span class="perf-readout" id="perfLabelSizeReadout">1.00</span>
+      <input type="number" class="perf-readout" id="perfLabelSizeReadout" min="0.25" max="4" step="0.01" value="1.00">
     </div>
 
     <div class="perf-section-label">SPACING</div>
@@ -1945,21 +2026,21 @@
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfLyricSpacing" title="Decrease">−</button>
       <input type="range" id="perfLyricSpacing" min="-0.05" max="0.2" step="0.005" value="0">
       <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfLyricSpacing" title="Increase">+</button>
-      <span class="perf-readout" id="perfLyricSpacingReadout">0.000</span>
+      <input type="number" class="perf-readout" id="perfLyricSpacingReadout" min="-0.05" max="0.2" step="0.005" value="0.000">
     </div>
     <div class="perf-row">
       <label for="perfChordSpacing">🎼 Chords &amp; Barlines</label>
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfChordSpacing" title="Decrease">−</button>
       <input type="range" id="perfChordSpacing" min="-0.05" max="0.2" step="0.005" value="0">
       <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfChordSpacing" title="Increase">+</button>
-      <span class="perf-readout" id="perfChordSpacingReadout">0.000</span>
+      <input type="number" class="perf-readout" id="perfChordSpacingReadout" min="-0.05" max="0.2" step="0.005" value="0.000">
     </div>
     <div class="perf-row">
       <label for="perfLabelSpacing">🔖 Labels</label>
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfLabelSpacing" title="Decrease">−</button>
       <input type="range" id="perfLabelSpacing" min="-0.05" max="0.2" step="0.005" value="0">
       <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfLabelSpacing" title="Increase">+</button>
-      <span class="perf-readout" id="perfLabelSpacingReadout">0.000</span>
+      <input type="number" class="perf-readout" id="perfLabelSpacingReadout" min="-0.05" max="0.2" step="0.005" value="0.000">
     </div>
 
     <div class="perf-section-label">LAYOUT</div>
@@ -1969,14 +2050,14 @@
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfMarginH" title="Decrease">−</button>
       <input type="range" id="perfMarginH" min="0" max="40" step="1" value="8">
       <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfMarginH" title="Increase">+</button>
-      <span class="perf-readout" id="perfMarginHReadout">8</span>
+      <input type="number" class="perf-readout" id="perfMarginHReadout" min="0" max="40" step="1" value="8">
     </div>
     <div class="perf-row">
       <label for="perfMarginV">↕️ Vertical margin</label>
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfMarginV" title="Decrease">−</button>
       <input type="range" id="perfMarginV" min="0" max="40" step="1" value="8">
       <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfMarginV" title="Increase">+</button>
-      <span class="perf-readout" id="perfMarginVReadout">8</span>
+      <input type="number" class="perf-readout" id="perfMarginVReadout" min="0" max="40" step="1" value="8">
     </div>
 
   </div>
@@ -1997,10 +2078,18 @@
 <div class="settings-overlay" id="settingsOverlay">
   <div class="settings-panel" id="settingsPanel">
     <div class="settings-header">
-      <h2>⚙️ Settings<span class="settings-lock-indicator" id="settingsLockIndicator" style="display: none;">🔒</span></h2>
+      <h2>⚙️ Old Settings<span class="settings-lock-indicator" id="settingsLockIndicator" style="display: none;">🔒</span></h2>
       <button class="settings-close" id="settingsClose" title="Close">✕</button>
     </div>
     <div class="settings-body">
+
+      <div class="settings-section">
+        <h3>Lock</h3>
+        <div class="settings-lock-row" id="settingsLockRow">
+          <input type="checkbox" id="settingsLockCheckbox">
+          <label for="settingsLockCheckbox">🔒 Lock all settings (protects while typing new text)</label>
+        </div>
+      </div>
 
       <div class="settings-section">
         <h3>Interface</h3>
@@ -2216,6 +2305,10 @@
     const settingsDone = document.getElementById('settingsDone');
     const settingsReset = document.getElementById('settingsReset');
     const settingsLockIndicator = document.getElementById('settingsLockIndicator');
+    const settingsLockRow = document.getElementById('settingsLockRow');
+    const settingsLockCheckbox = document.getElementById('settingsLockCheckbox');
+    const perfLockRow = document.getElementById('perfLockRow');
+    const perfLockCheckbox = document.getElementById('perfLockCheckbox');
     const editorWrapper = document.getElementById('editorWrapper');
     const toggleLayoutBtn = document.getElementById('toggleLayout');
     const resizeHandle = document.getElementById('resizeHandle');
@@ -2254,7 +2347,7 @@
     let currentSection = '';
     let isEditorCollapsed = false;
     let isAdvancedMode = false;
-    let currentLayout = 'desktop';        // ✅ FIX: default is now Desktop
+    let currentLayout = 'phone';          // ✅ default is now Phone
     let isResizing = false;
     let startY = 0;
     let startX = 0;
@@ -2548,12 +2641,16 @@
       catch (e) {}
     }
 
-    // ✅ FIX: persist layout
+    // ✅ FIX: persist layout.
+    // Default is PHONE view for new users (or users whose saved layout
+    // value is somehow missing / invalid). Existing users who have
+    // already picked Desktop will keep Desktop, because their saved
+    // value will be 'desktop' and is honored here.
     function loadLayoutState() {
       try {
         const v = localStorage.getItem(LAYOUT_KEY);
-        return (v === 'phone' || v === 'desktop') ? v : 'desktop';
-      } catch (e) { return 'desktop'; }
+        return (v === 'phone' || v === 'desktop') ? v : 'phone';
+      } catch (e) { return 'phone'; }
     }
     function saveLayoutState(layout) {
       try { localStorage.setItem(LAYOUT_KEY, layout); } catch (e) {}
@@ -2743,23 +2840,68 @@
     });
 
     // ===== LOCK SYSTEM =====
+    // There are two lock checkboxes on the page:
+    //   1. #lockCheckbox       → inside the toolbar's Sizes dropdown
+    //   2. #settingsLockCheckbox → inside the floating Settings panel
+    // Both are kept in sync via applyLockState(), so toggling either one
+    // updates the other and the entire app's locked/editable state.
+    // There are now THREE lock checkboxes on the page:
+    //   1. #lockCheckbox          → toolbar's Sizes dropdown
+    //   2. #settingsLockCheckbox  → toolbar's ⚙️ Settings modal
+    //   3. #perfLockCheckbox      → floating ⚙️ Performance panel
+    // All three are kept in sync via applyLockState().
     function applyLockState() {
       lockCheckbox.checked = isLocked;
+      if (settingsLockCheckbox) settingsLockCheckbox.checked = isLocked;
+      if (perfLockCheckbox) perfLockCheckbox.checked = isLocked;
       sizesContent.classList.toggle('locked', isLocked);
       settingsPanel.classList.toggle('locked', isLocked);
       settingsLockIndicator.style.display = isLocked ? 'inline' : 'none';
       sizesToggle.textContent = isLocked ? '🎚️ Sizes 🔒 ▼' : '🎚️ Sizes ▼';
     }
+
+    // --- Toolbar Sizes dropdown lock ---
     lockCheckbox.addEventListener('change', function() {
       isLocked = this.checked;
       applyLockState();
     });
     lockRow.addEventListener('click', function(e) {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL') return;
-      lockCheckbox.checked = !lockCheckbox.checked;
-      isLocked = lockCheckbox.checked;
+      isLocked = !isLocked;
       applyLockState();
     });
+
+    // --- Toolbar Settings modal lock ---
+    if (settingsLockCheckbox) {
+      settingsLockCheckbox.addEventListener('change', function() {
+        isLocked = this.checked;
+        applyLockState();
+      });
+    }
+    if (settingsLockRow) {
+      settingsLockRow.addEventListener('click', function(e) {
+        // Let the checkbox handle its own click (so the label/input work natively);
+        // only intercept clicks on the surrounding row background.
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL') return;
+        isLocked = !isLocked;
+        applyLockState();
+      });
+    }
+
+    // --- Floating ⚙️ Performance panel lock ---
+    if (perfLockCheckbox) {
+      perfLockCheckbox.addEventListener('change', function() {
+        isLocked = this.checked;
+        applyLockState();
+      });
+    }
+    if (perfLockRow) {
+      perfLockRow.addEventListener('click', function(e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL') return;
+        isLocked = !isLocked;
+        applyLockState();
+      });
+    }
 
     // ===== SIZES DROPDOWN =====
     sizesToggle.addEventListener('click', function(e) {
@@ -3764,6 +3906,8 @@
     //    We reorder the DOM (editor first) so flex-direction: row puts them
     //    in that order without needing row-reverse or CSS gymnastics.
     //    Desktop view = normal stacked layout: preview on top, editor below.
+    //
+    //    Default is now PHONE view (see loadLayoutState() below).
     function applyLayout(layout) {
       currentLayout = (layout === 'phone') ? 'phone' : 'desktop';
       editorWrapper.classList.remove('layout-phone', 'layout-desktop');
@@ -3785,6 +3929,9 @@
       // The icon is ALWAYS 📱. Only the pressed state changes:
       //   Phone View ON  → pressed-in (dark, .active)
       //   Phone View OFF → unpressed (cream base)
+      //
+      // ✅ Default is Phone view, so on first load this button
+      //    starts in the pressed-in state.
       if (typeof layoutFloatToggle !== 'undefined' && layoutFloatToggle) {
         layoutFloatToggle.textContent = '📱';
         layoutFloatToggle.title = currentLayout === 'phone'
@@ -3792,6 +3939,18 @@
           : 'Phone View: OFF (click to turn on)';
         layoutFloatToggle.setAttribute('aria-label', layoutFloatToggle.title);
         layoutFloatToggle.classList.toggle('active', currentLayout === 'phone');
+      } else {
+        // Fallback for the very first paint if the DOM ref isn't
+        // available yet: look the button up directly.
+        const btn = document.getElementById('layoutFloatToggle');
+        if (btn) {
+          btn.textContent = '📱';
+          btn.title = currentLayout === 'phone'
+            ? 'Phone View: ON (click to turn off)'
+            : 'Phone View: OFF (click to turn on)';
+          btn.setAttribute('aria-label', btn.title);
+          btn.classList.toggle('active', currentLayout === 'phone');
+        }
       }
 
       // Re-apply collapsed state so the correct hide animation runs in the new orientation
@@ -4397,7 +4556,7 @@
       const next = (typeof open === 'boolean') ? open : !perfPanel.classList.contains('show');
       perfPanel.classList.toggle('show', next);
       perfToggle.classList.toggle('active', next);
-      perfToggle.title = next ? 'Close performance controls' : 'Open performance controls';
+      perfToggle.title = next ? 'Close settings' : 'Open settings';
       if (next) {
         syncPerfPanel();
         // Mutually close the other float panels so they don't overlap.
@@ -4701,12 +4860,23 @@
     // whose localStorage still says "collapsed" don't boot into a stuck
     // state with no way back.
     applyChromeCollapsed(false);
-    // ✅ Default startup state:
+    // ✅ Default startup state (Option C):
     //   • ☰ "hamburger" toggle → OFF (1st-row floating buttons visible)
-    //   • ⋯ "twin" toggle       → ON  (toolbar hidden on load)
-    // Clicking either button toggles its respective target.
+    //   • ⋯ "twin" toggle       → UNPRESSED (cream), even though the
+    //                              toolbar itself IS hidden on load.
+    // Clicking ⋯ reveals the toolbar; clicking again hides it (and only
+    // from the 2nd click onward does the button look pressed).
     applyFirstRowHidden(false);
-    applyToolbarHidden(true);
+    // ✅ Option C: toolbar HIDDEN on load, but the ⋯ button stays UNPRESSED.
+    // We set the body class directly (instead of calling applyToolbarHidden(true))
+    // so the ⋯ button never receives the .active (pressed/brown) styling.
+    isToolbarHidden = true;
+    document.body.classList.add('toolbar-hidden');
+    if (chromeToggle2) {
+      chromeToggle2.classList.remove('active');
+      chromeToggle2.title = 'Show top panel';
+      chromeToggle2.setAttribute('aria-label', 'Show top panel');
+    }
     if (typeof syncPerfPanel === 'function') syncPerfPanel();
 
     displayStoredSongs();
