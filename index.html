@@ -438,8 +438,12 @@
 
     .preview-area {
       width: 100%;
-      background: #f5ede0;
-      padding: 12px 20px 16px 20px;
+      /* Same white as the chord-preview so the margin area is invisible
+         and the whole preview region reads as one seamless white panel. */
+      background: #ffffff;
+      /* Padding is now driven by --preview-pad-v / --preview-pad-h,
+         which the performance panel's two margin sliders control. */
+      padding: var(--preview-pad-v, 8px) var(--preview-pad-h, 8px);
       flex: 1;
       min-height: 0;
       display: flex;
@@ -575,14 +579,16 @@
 
     .chord-preview {
       background: #ffffff;
-      border-radius: 12px;
-      padding: 16px 24px;
+      /* Frameless: no border, no radius, no shadow, no inner padding.
+         All spacing comes from .preview-area's padding variables. */
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      box-shadow: none;
       flex: 1;
       min-height: 80px;
       overflow-y: auto;
       overflow-x: hidden;
-      border: 1px solid #dcc9b0;
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.04);
       line-height: var(--chord-line-height, 1.9);
       color: #3d2b1f;
     }
@@ -601,7 +607,7 @@
       font-family: var(--font-chord, Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace);
     }
     .chord-line { display: block; width: 100%; padding: 2px 0; white-space: nowrap; }
-    .chord-line .chord-token { display: inline; padding: 0; font-weight: 700; white-space: pre; font-size: 0.85rem; vertical-align: baseline; }
+    .chord-line .chord-token { display: inline; padding: 0; font-weight: 700; white-space: pre; font-size: var(--chord-base-size, 0.85rem); vertical-align: baseline; }
     .chord-line .chord-token.empty { font-weight: 700; }
     .chord-line .pipe {
       color: #c0c0c0;
@@ -613,7 +619,7 @@
       transform: scaleY(var(--pipe-scale, 2.25));
       transform-origin: center;
       vertical-align: var(--pipe-vertical-align, 0.2em);
-      font-size: 0.85rem;
+      font-size: var(--chord-base-size, 0.85rem);
     }
     .chord-line .space { display: inline-block; width: var(--space-width, 0.6em); height: 1em; vertical-align: baseline; }
 
@@ -725,6 +731,198 @@
     }
 
     body.easy-mode .advanced-only { display: none !important; }
+
+    /* ===== CHROME COLLAPSE (focus mode) ===== */
+    .chrome-toggle {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 8000;
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border-radius: 10px;
+      border: 1px solid #c4ad92;
+      background: rgba(232, 220, 204, 0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: #3d2b1f;
+      font-size: 1.2rem;
+      line-height: 1;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      font-family: inherit;
+    }
+    .chrome-toggle:hover {
+      background: rgba(196, 173, 146, 0.95);
+      transform: scale(1.05);
+    }
+    .chrome-toggle.active {
+      background: #5c4033;
+      color: #ffffff;
+      border-color: #4a3328;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    /* ===== FLOATING PERFORMANCE CONTROLS ===== */
+    .perf-toggle {
+      position: fixed;
+      top: 10px;
+      right: 58px; /* sits just left of the ☰ hamburger, same height */
+      z-index: 8000;
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border-radius: 10px;
+      border: 1px solid #c4ad92;
+      background: rgba(232, 220, 204, 0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: #3d2b1f;
+      font-size: 1.1rem;
+      line-height: 1;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      font-family: inherit;
+    }
+    .perf-toggle:hover {
+      background: rgba(196, 173, 146, 0.95);
+      transform: scale(1.05);
+    }
+    .perf-toggle.active {
+      background: #5c4033;
+      color: #ffffff;
+      border-color: #4a3328;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .perf-panel {
+      position: fixed;
+      top: 58px; /* just below the two floating buttons */
+      right: 10px;
+      z-index: 7999;
+      width: 320px;
+      max-height: calc(100vh - 72px);
+      overflow-y: auto;
+      background: #f5ede0;
+      border: 1px solid #c4ad92;
+      border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+      display: none;
+      flex-direction: column;
+      font-family: inherit;
+      color: #3d2b1f;
+    }
+    .perf-panel.show { display: flex; }
+    .perf-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: #e8dccc;
+      border-bottom: 2px solid #dcc9b0;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #5c4033;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    .perf-close {
+      background: none;
+      border: none;
+      color: #8b6b4a;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 0 4px;
+      line-height: 1;
+    }
+    .perf-close:hover { color: #5c4033; }
+    .perf-panel-body {
+      padding: 8px 12px 12px 12px;
+    }
+    .perf-section-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #b0987a;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 10px 2px 4px 2px;
+      border-bottom: 1px solid #ece0cf;
+      margin-bottom: 4px;
+    }
+    .perf-subhead {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #8b6b4a;
+      padding: 6px 2px 2px 2px;
+    }
+    .perf-row {
+      display: grid;
+      /* label | − | slider | + | readout */
+      grid-template-columns: 110px 22px 1fr 22px 44px;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 2px;
+    }
+    /* Step buttons inside the floating panel reuse the .sizes-row-step look
+       but are auto-sized to the new grid. */
+    .perf-row .sizes-row-step {
+      width: 22px;
+      height: 22px;
+      font-size: 0.9rem;
+    }
+    .perf-row label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #5c4033;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .perf-row input[type="range"] {
+      width: 100%;
+      accent-color: #8b6b4a;
+      cursor: pointer;
+      margin: 0;
+    }
+    .perf-row .perf-readout {
+      font-family: Consolas, Menlo, Monaco, monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #3d2b1f;
+      text-align: right;
+    }
+
+    /* When chrome is collapsed, hide the toolbar and the editor.
+       The floating ☰ button and the preview stay visible. */
+    body.chrome-collapsed .toolbar {
+      display: none !important;
+    }
+    body.chrome-collapsed .input-area {
+      display: none !important;
+    }
+    /* Preview area reclaims the full space in both layouts */
+    body.chrome-collapsed .editor-wrapper.layout-desktop,
+    body.chrome-collapsed .editor-wrapper.layout-phone {
+      flex-direction: column;
+    }
+    body.chrome-collapsed .preview-area {
+      width: 100% !important;
+      flex: 1 1 auto !important;
+    }
 
     .confirm-overlay {
       display: none;
@@ -957,27 +1155,27 @@
           </div>
           <div class="sizes-row">
             <span class="sizes-row-label">🔖 Labels:</span>
-            <input type="range" id="labelSizeToolbarSlider" min="0.6" max="8" step="0.05" value="1">
+            <input type="range" id="labelSizeToolbarSlider" min="0" max="100" step="0.5" value="50">
             <button type="button" class="sizes-row-step" id="labelSizeToolbarDown" title="Decrease">−</button>
-            <input type="number" id="labelSizeToolbarNum" min="0.6" max="8" step="0.05" value="1">
+            <input type="number" id="labelSizeToolbarNum" min="0.25" max="4" step="0.01" value="1">
             <button type="button" class="sizes-row-step" id="labelSizeToolbarUp" title="Increase">+</button>
             <button class="sizes-row-reset" id="labelSizeToolbarReset" title="Reset to 1.00">↺</button>
           </div>
           <div class="sizes-row">
             <span class="sizes-row-label">🎼 Chords:</span>
-            <input type="range" id="chordSizeToolbarSlider" min="0.5" max="2.5" step="0.05" value="1">
+            <input type="range" id="chordSizeToolbarSlider" min="0" max="100" step="0.5" value="50">
             <button type="button" class="sizes-row-step" id="chordSizeToolbarDown" title="Decrease">−</button>
-            <input type="number" id="chordSizeToolbarNum" min="0.5" max="2.5" step="0.05" value="1">
+            <input type="number" id="chordSizeToolbarNum" min="0.25" max="4" step="0.01" value="1">
             <button type="button" class="sizes-row-step" id="chordSizeToolbarUp" title="Increase">+</button>
             <button class="sizes-row-reset" id="chordSizeToolbarReset" title="Reset to 1.00">↺</button>
           </div>
           <div class="sizes-row">
             <span class="sizes-row-label">🎤 Lyrics:</span>
-            <input type="range" id="lyricSizeToolbarSlider" min="0.5" max="8" step="0.05" value="0.85">
+            <input type="range" id="lyricSizeToolbarSlider" min="0" max="100" step="0.5" value="50">
             <button type="button" class="sizes-row-step" id="lyricSizeToolbarDown" title="Decrease">−</button>
-            <input type="number" id="lyricSizeToolbarNum" min="0.5" max="8" step="0.05" value="0.85">
+            <input type="number" id="lyricSizeToolbarNum" min="0.25" max="4" step="0.01" value="1">
             <button type="button" class="sizes-row-step" id="lyricSizeToolbarUp" title="Increase">+</button>
-            <button class="sizes-row-reset" id="lyricSizeToolbarReset" title="Reset to 0.85">↺</button>
+            <button class="sizes-row-reset" id="lyricSizeToolbarReset" title="Reset to 1.00">↺</button>
           </div>
         </div>
       </div>
@@ -1036,6 +1234,118 @@
         <textarea id="chartInput" spellcheck="false"></textarea>
       </div>
     </div>
+  </div>
+</div>
+
+<button class="chrome-toggle" id="chromeToggle" title="Collapse toolbar & editor (focus mode)" aria-label="Collapse toolbar and editor">☰</button>
+<button class="perf-toggle" id="perfToggle" title="Open performance controls" aria-label="Open performance controls">🎚️</button>
+<div class="perf-panel" id="perfPanel" role="dialog" aria-label="Performance controls">
+  <div class="perf-panel-header">
+    <span>🎚️ Performance</span>
+    <button class="perf-close" id="perfClose" title="Close">✕</button>
+  </div>
+  <div class="perf-panel-body">
+
+    <div class="perf-section-label">SIZES</div>
+
+    <div class="perf-row">
+      <label for="perfMaster">🔍 EVERYTHING</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfMaster" title="Decrease">−</button>
+      <input type="range" id="perfMaster" min="0" max="100" step="0.5" value="50">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfMaster" title="Increase">+</button>
+      <span class="perf-readout" id="perfMasterReadout">1.00</span>
+    </div>
+
+    <div class="perf-subhead">🎼 Chords &amp; Barlines</div>
+
+    <div class="perf-row">
+      <label for="perfChordSize">Chord size</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfChordSize" title="Decrease">−</button>
+      <input type="range" id="perfChordSize" min="0" max="100" step="0.5" value="50">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfChordSize" title="Increase">+</button>
+      <span class="perf-readout" id="perfChordSizeReadout">1.00</span>
+    </div>
+    <div class="perf-row">
+      <label for="perfPipeScale">Barline height</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfPipeScale" title="Decrease">−</button>
+      <input type="range" id="perfPipeScale" min="1" max="5" step="0.05" value="2.25">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfPipeScale" title="Increase">+</button>
+      <span class="perf-readout" id="perfPipeScaleReadout">2.25</span>
+    </div>
+    <div class="perf-row">
+      <label for="perfPipeThickness">Barline thickness</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfPipeThickness" title="Decrease">−</button>
+      <input type="range" id="perfPipeThickness" min="0" max="0.15" step="0.005" value="0.03">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfPipeThickness" title="Increase">+</button>
+      <span class="perf-readout" id="perfPipeThicknessReadout">0.030</span>
+    </div>
+    <div class="perf-row">
+      <label for="perfPipeValign">Barline nudge ↕</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfPipeValign" title="Decrease">−</button>
+      <input type="range" id="perfPipeValign" min="-1" max="1" step="0.05" value="0.2">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfPipeValign" title="Increase">+</button>
+      <span class="perf-readout" id="perfPipeValignReadout">0.20</span>
+    </div>
+
+    <div class="perf-subhead">🎤 Lyrics</div>
+    <div class="perf-row">
+      <label for="perfLyricSize">Lyric size</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfLyricSize" title="Decrease">−</button>
+      <input type="range" id="perfLyricSize" min="0" max="100" step="0.5" value="50">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfLyricSize" title="Increase">+</button>
+      <span class="perf-readout" id="perfLyricSizeReadout">1.00</span>
+    </div>
+
+    <div class="perf-subhead">🔖 Labels</div>
+    <div class="perf-row">
+      <label for="perfLabelSize">Label size</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfLabelSize" title="Decrease">−</button>
+      <input type="range" id="perfLabelSize" min="0" max="100" step="0.5" value="50">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfLabelSize" title="Increase">+</button>
+      <span class="perf-readout" id="perfLabelSizeReadout">1.00</span>
+    </div>
+
+    <div class="perf-section-label">SPACING</div>
+
+    <div class="perf-row">
+      <label for="perfLyricSpacing">🎤 Lyrics</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfLyricSpacing" title="Decrease">−</button>
+      <input type="range" id="perfLyricSpacing" min="-0.05" max="0.2" step="0.005" value="0">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfLyricSpacing" title="Increase">+</button>
+      <span class="perf-readout" id="perfLyricSpacingReadout">0.000</span>
+    </div>
+    <div class="perf-row">
+      <label for="perfChordSpacing">🎼 Chords &amp; Barlines</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfChordSpacing" title="Decrease">−</button>
+      <input type="range" id="perfChordSpacing" min="-0.05" max="0.2" step="0.005" value="0">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfChordSpacing" title="Increase">+</button>
+      <span class="perf-readout" id="perfChordSpacingReadout">0.000</span>
+    </div>
+    <div class="perf-row">
+      <label for="perfLabelSpacing">🔖 Labels</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfLabelSpacing" title="Decrease">−</button>
+      <input type="range" id="perfLabelSpacing" min="-0.05" max="0.2" step="0.005" value="0">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfLabelSpacing" title="Increase">+</button>
+      <span class="perf-readout" id="perfLabelSpacingReadout">0.000</span>
+    </div>
+
+    <div class="perf-section-label">LAYOUT</div>
+
+    <div class="perf-row">
+      <label for="perfMarginH">↔️ Horizontal margin</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfMarginH" title="Decrease">−</button>
+      <input type="range" id="perfMarginH" min="0" max="40" step="1" value="8">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfMarginH" title="Increase">+</button>
+      <span class="perf-readout" id="perfMarginHReadout">8</span>
+    </div>
+    <div class="perf-row">
+      <label for="perfMarginV">↕️ Vertical margin</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfMarginV" title="Decrease">−</button>
+      <input type="range" id="perfMarginV" min="0" max="40" step="1" value="8">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfMarginV" title="Increase">+</button>
+      <span class="perf-readout" id="perfMarginVReadout">8</span>
+    </div>
+
   </div>
 </div>
 
@@ -1156,8 +1466,8 @@
         </div>
         <div class="settings-row">
           <label for="chordSizeSlider">Chord size</label>
-          <input type="range" id="chordSizeSlider" min="0.5" max="2.5" step="0.05" value="1">
-          <input type="number" class="settings-num" id="chordSizeNum" min="0.5" max="2.5" step="0.05" value="1">
+          <input type="range" id="chordSizeSlider" min="0" max="100" step="0.5" value="50">
+          <input type="number" class="settings-num" id="chordSizeNum" min="0.25" max="4" step="0.01" value="1">
         </div>
       </div>
 
@@ -1188,8 +1498,8 @@
         </div>
         <div class="settings-row">
           <label for="lyricSizeSlider">Lyric size</label>
-          <input type="range" id="lyricSizeSlider" min="0.5" max="8" step="0.05" value="0.85">
-          <input type="number" class="settings-num" id="lyricSizeNum" min="0.5" max="8" step="0.05" value="0.85">
+          <input type="range" id="lyricSizeSlider" min="0" max="100" step="0.5" value="50">
+          <input type="number" class="settings-num" id="lyricSizeNum" min="0.25" max="4" step="0.01" value="1">
         </div>
       </div>
 
@@ -1197,8 +1507,8 @@
         <h3>Section Labels</h3>
         <div class="settings-row">
           <label for="labelSizeSlider">Label size</label>
-          <input type="range" id="labelSizeSlider" min="0.6" max="8" step="0.05" value="1">
-          <input type="number" class="settings-num" id="labelSizeNum" min="0.6" max="8" step="0.05" value="1">
+          <input type="range" id="labelSizeSlider" min="0" max="100" step="0.5" value="50">
+          <input type="number" class="settings-num" id="labelSizeNum" min="0.25" max="4" step="0.01" value="1">
         </div>
         <div class="settings-row">
           <label for="labelRadiusSlider">Corner roundness</label>
@@ -1298,6 +1608,8 @@
     const confirmMessage = document.getElementById('confirmMessage');
     const confirmYes = document.getElementById('confirmYes');
     const confirmNo = document.getElementById('confirmNo');
+
+    const chromeToggle = document.getElementById('chromeToggle');
 
     // ===== STATE =====
     let isLocked = false;                 // ✅ FIX: was undeclared
@@ -1499,6 +1811,34 @@
       return Math.round(t * 1000) / 10;
     }
 
+    // ===== PER-CATEGORY SIZE RATIO MAPPING =====
+    // Internally we still store absolute values (labelSize=1.71, etc.), but
+    // the UI now presents them as RATIOS where 1.00 = the "sweet spot" look
+    // the user chose. Range 0.25 → 4.00 with 1.00 at the exact middle,
+    // log-mapped so a given % drag feels the same everywhere.
+    const RATIO_MIN = 0.25;
+    const RATIO_MAX = 4.0;
+    // Base values that correspond to "ratio = 1.00":
+    const BASE_LABEL_SIZE = 1.71;
+    const BASE_CHORD_MULT = 2.01;
+    const BASE_LYRIC_SIZE = 1.71;
+
+    function ratioToSliderPos(ratio) {
+      ratio = Math.min(RATIO_MAX, Math.max(RATIO_MIN, ratio));
+      const t = Math.log(ratio / RATIO_MIN) / Math.log(RATIO_MAX / RATIO_MIN);
+      return Math.round(t * 1000) / 10;
+    }
+    function sliderPosToRatio(pos) {
+      const t = pos / 100;
+      return RATIO_MIN * Math.pow(RATIO_MAX / RATIO_MIN, t);
+    }
+    function internalToRatio(internal, base) {
+      return internal / base;
+    }
+    function ratioToInternal(ratio, base) {
+      return ratio * base;
+    }
+
     const SETTINGS_KEY = 'chordChartSettings';
     const EDITOR_STATE_KEY = 'chordChartEditorHidden';
     const LAYOUT_KEY = 'chordChartLayout';           // ✅ FIX: persist layout choice
@@ -1521,10 +1861,17 @@
       chordFontCustom: '',
       lyricFont: "'Sarabun', 'Noto Sans Thai', system-ui, sans-serif",
       lyricFontCustom: '',
-      chordSizeMult: 1,
-      lyricSize: 0.85,
-      labelSize: 1,
-      labelRadius: 4
+      // "Shared size" the user picked via the temporary experiment:
+      //   lyrics = 1.71rem
+      //   labels = 1.71rem
+      //   chords/pipes = 0.85 × chordSizeMult  →  chordSizeMult = 1.71 / 0.85 ≈ 2.01
+      chordSizeMult: 2.01,
+      lyricSize: 1.71,
+      labelSize: 1.71,
+      labelRadius: 4,
+      // Preview margins (px). Horizontal = left + right, Vertical = top + bottom.
+      previewPaddingH: 8,
+      previewPaddingV: 8
     };
 
     let settings = Object.assign({}, DEFAULT_SETTINGS);
@@ -1605,6 +1952,13 @@
       root.style.setProperty('--pipe-thickness', settings.pipeThickness + 'em');
       root.style.setProperty('--pipe-vertical-align', settings.pipeVerticalAlign + 'em');
       root.style.setProperty('--editor-width', settings.editorWidth + '%');
+      root.style.setProperty('--chord-base-size', '0.85rem');
+      root.style.setProperty('--preview-pad-h', (settings.previewPaddingH != null ? settings.previewPaddingH : 8) + 'px');
+      root.style.setProperty('--preview-pad-v', (settings.previewPaddingV != null ? settings.previewPaddingV : 8) + 'px');
+      // Keep the floating performance panel readouts current if it exists.
+      if (typeof syncPerfPanel === 'function' && document.getElementById('perfPanel')) {
+        syncPerfPanel();
+      }
       requestAnimationFrame(() => adjustChordSizes());
     }
 
@@ -1612,12 +1966,17 @@
       masterScaleSlider.value = scaleToSliderPos(settings.masterScale);
       masterScaleNum.value = Number(settings.masterScale).toFixed(2);
 
-      labelSizeToolbarSlider.value = settings.labelSize;
-      if (document.activeElement !== labelSizeToolbarNum) labelSizeToolbarNum.value = Number(settings.labelSize).toFixed(2);
-      chordSizeToolbarSlider.value = settings.chordSizeMult;
-      if (document.activeElement !== chordSizeToolbarNum) chordSizeToolbarNum.value = Number(settings.chordSizeMult).toFixed(2);
-      lyricSizeToolbarSlider.value = settings.lyricSize;
-      if (document.activeElement !== lyricSizeToolbarNum) lyricSizeToolbarNum.value = Number(settings.lyricSize).toFixed(2);
+      const labelRatio = internalToRatio(settings.labelSize, BASE_LABEL_SIZE);
+      labelSizeToolbarSlider.value = ratioToSliderPos(labelRatio);
+      if (document.activeElement !== labelSizeToolbarNum) labelSizeToolbarNum.value = labelRatio.toFixed(2);
+
+      const chordRatio = internalToRatio(settings.chordSizeMult, BASE_CHORD_MULT);
+      chordSizeToolbarSlider.value = ratioToSliderPos(chordRatio);
+      if (document.activeElement !== chordSizeToolbarNum) chordSizeToolbarNum.value = chordRatio.toFixed(2);
+
+      const lyricRatio = internalToRatio(settings.lyricSize, BASE_LYRIC_SIZE);
+      lyricSizeToolbarSlider.value = ratioToSliderPos(lyricRatio);
+      if (document.activeElement !== lyricSizeToolbarNum) lyricSizeToolbarNum.value = lyricRatio.toFixed(2);
 
       uiScaleSlider.value = settings.uiScale;
       uiScaleNum.value = Number(settings.uiScale).toFixed(2);
@@ -1664,8 +2023,8 @@
         chordFontCustomRow.classList.add('show');
       }
       chordFontCustom.value = settings.chordFontCustom || '';
-      chordSizeSlider.value = settings.chordSizeMult;
-      chordSizeNum.value = Number(settings.chordSizeMult).toFixed(2);
+      chordSizeSlider.value = ratioToSliderPos(internalToRatio(settings.chordSizeMult, BASE_CHORD_MULT));
+      chordSizeNum.value = internalToRatio(settings.chordSizeMult, BASE_CHORD_MULT).toFixed(2);
 
       const lyricMatch = [...lyricFontSelect.options].find(opt => opt.value === settings.lyricFont);
       if (lyricMatch) {
@@ -1676,13 +2035,34 @@
         lyricFontCustomRow.classList.add('show');
       }
       lyricFontCustom.value = settings.lyricFontCustom || '';
-      lyricSizeSlider.value = settings.lyricSize;
-      lyricSizeNum.value = Number(settings.lyricSize).toFixed(2);
+      lyricSizeSlider.value = ratioToSliderPos(internalToRatio(settings.lyricSize, BASE_LYRIC_SIZE));
+      lyricSizeNum.value = internalToRatio(settings.lyricSize, BASE_LYRIC_SIZE).toFixed(2);
 
-      labelSizeSlider.value = settings.labelSize;
-      labelSizeNum.value = Number(settings.labelSize).toFixed(2);
+      labelSizeSlider.value = ratioToSliderPos(internalToRatio(settings.labelSize, BASE_LABEL_SIZE));
+      labelSizeNum.value = internalToRatio(settings.labelSize, BASE_LABEL_SIZE).toFixed(2);
       labelRadiusSlider.value = settings.labelRadius;
       labelRadiusNum.value = Number(settings.labelRadius).toFixed(1);
+    }
+
+    function setPreviewPaddingH(v) {
+      v = clampNum(v, 0, 40);
+      settings.previewPaddingH = v;
+      if (typeof perfMarginH !== 'undefined' && perfMarginH) {
+        perfMarginH.value = v;
+        if (typeof perfMarginHReadout !== 'undefined' && perfMarginHReadout) perfMarginHReadout.textContent = v.toFixed(0);
+      }
+      saveSettings();
+      applySettings();
+    }
+    function setPreviewPaddingV(v) {
+      v = clampNum(v, 0, 40);
+      settings.previewPaddingV = v;
+      if (typeof perfMarginV !== 'undefined' && perfMarginV) {
+        perfMarginV.value = v;
+        if (typeof perfMarginVReadout !== 'undefined' && perfMarginVReadout) perfMarginVReadout.textContent = v.toFixed(0);
+      }
+      saveSettings();
+      applySettings();
     }
 
     function setEditorWidth(v) {
@@ -1948,22 +2328,25 @@
       applySettings();
     });
 
-    function setChordSize(v) {
-      v = clampNum(v, 0.5, 2.5);
-      settings.chordSizeMult = v;
-      chordSizeSlider.value = v;
-      if (document.activeElement !== chordSizeNum) chordSizeNum.value = v.toFixed(2);
-      chordSizeToolbarSlider.value = v;
-      if (document.activeElement !== chordSizeToolbarNum) chordSizeToolbarNum.value = v.toFixed(2);
+    function setChordSize(ratio) {
+      ratio = clampNum(ratio, RATIO_MIN, RATIO_MAX);
+      const internal = ratioToInternal(ratio, BASE_CHORD_MULT);
+      settings.chordSizeMult = internal;
+      chordSizeSlider.value = ratioToSliderPos(ratio);
+      if (document.activeElement !== chordSizeNum) chordSizeNum.value = ratio.toFixed(2);
+      chordSizeToolbarSlider.value = ratioToSliderPos(ratio);
+      if (document.activeElement !== chordSizeToolbarNum) chordSizeToolbarNum.value = ratio.toFixed(2);
       saveSettings();
       applySettings();
     }
-    chordSizeSlider.addEventListener('input', function() { setChordSize(parseFloat(this.value)); });
+    chordSizeSlider.addEventListener('input', function() { setChordSize(sliderPosToRatio(parseFloat(this.value))); });
     chordSizeNum.addEventListener('input', function() {
       const v = parseFloat(this.value);
       if (!isNaN(v)) setChordSize(v);
     });
-    chordSizeNum.addEventListener('blur', function() { this.value = settings.chordSizeMult.toFixed(2); });
+    chordSizeNum.addEventListener('blur', function() {
+      this.value = internalToRatio(settings.chordSizeMult, BASE_CHORD_MULT).toFixed(2);
+    });
 
     lyricFontSelect.addEventListener('change', function() {
       if (this.value === '__custom__') {
@@ -1984,39 +2367,45 @@
       applySettings();
     });
 
-    function setLyricSize(v) {
-      v = clampNum(v, 0.5, 8);
-      settings.lyricSize = v;
-      lyricSizeSlider.value = v;
-      if (document.activeElement !== lyricSizeNum) lyricSizeNum.value = v.toFixed(2);
-      lyricSizeToolbarSlider.value = v;
-      if (document.activeElement !== lyricSizeToolbarNum) lyricSizeToolbarNum.value = v.toFixed(2);
+    function setLyricSize(ratio) {
+      ratio = clampNum(ratio, RATIO_MIN, RATIO_MAX);
+      const internal = ratioToInternal(ratio, BASE_LYRIC_SIZE);
+      settings.lyricSize = internal;
+      lyricSizeSlider.value = ratioToSliderPos(ratio);
+      if (document.activeElement !== lyricSizeNum) lyricSizeNum.value = ratio.toFixed(2);
+      lyricSizeToolbarSlider.value = ratioToSliderPos(ratio);
+      if (document.activeElement !== lyricSizeToolbarNum) lyricSizeToolbarNum.value = ratio.toFixed(2);
       saveSettings();
       applySettings();
     }
-    lyricSizeSlider.addEventListener('input', function() { setLyricSize(parseFloat(this.value)); });
+    lyricSizeSlider.addEventListener('input', function() { setLyricSize(sliderPosToRatio(parseFloat(this.value))); });
     lyricSizeNum.addEventListener('input', function() {
       const v = parseFloat(this.value);
       if (!isNaN(v)) setLyricSize(v);
     });
-    lyricSizeNum.addEventListener('blur', function() { this.value = settings.lyricSize.toFixed(2); });
+    lyricSizeNum.addEventListener('blur', function() {
+      this.value = internalToRatio(settings.lyricSize, BASE_LYRIC_SIZE).toFixed(2);
+    });
 
-    function setLabelSize(v) {
-      v = clampNum(v, 0.6, 8);
-      settings.labelSize = v;
-      labelSizeSlider.value = v;
-      if (document.activeElement !== labelSizeNum) labelSizeNum.value = v.toFixed(2);
-      labelSizeToolbarSlider.value = v;
-      if (document.activeElement !== labelSizeToolbarNum) labelSizeToolbarNum.value = v.toFixed(2);
+    function setLabelSize(ratio) {
+      ratio = clampNum(ratio, RATIO_MIN, RATIO_MAX);
+      const internal = ratioToInternal(ratio, BASE_LABEL_SIZE);
+      settings.labelSize = internal;
+      labelSizeSlider.value = ratioToSliderPos(ratio);
+      if (document.activeElement !== labelSizeNum) labelSizeNum.value = ratio.toFixed(2);
+      labelSizeToolbarSlider.value = ratioToSliderPos(ratio);
+      if (document.activeElement !== labelSizeToolbarNum) labelSizeToolbarNum.value = ratio.toFixed(2);
       saveSettings();
       applySettings();
     }
-    labelSizeSlider.addEventListener('input', function() { setLabelSize(parseFloat(this.value)); });
+    labelSizeSlider.addEventListener('input', function() { setLabelSize(sliderPosToRatio(parseFloat(this.value))); });
     labelSizeNum.addEventListener('input', function() {
       const v = parseFloat(this.value);
       if (!isNaN(v)) setLabelSize(v);
     });
-    labelSizeNum.addEventListener('blur', function() { this.value = settings.labelSize.toFixed(2); });
+    labelSizeNum.addEventListener('blur', function() {
+      this.value = internalToRatio(settings.labelSize, BASE_LABEL_SIZE).toFixed(2);
+    });
 
     function setLabelRadius(v) {
       v = clampNum(v, 0, 20);
@@ -2034,53 +2423,63 @@
     labelRadiusNum.addEventListener('blur', function() { this.value = settings.labelRadius.toFixed(1); });
 
     // Toolbar mirrored setters
-    lyricSizeToolbarSlider.addEventListener('input', function() { setLyricSize(parseFloat(this.value)); });
+    // ± buttons step MULTIPLICATIVELY by ×1.05 / ÷1.05 in ratio space,
+    // so a single click feels the same near any ratio value.
+    const MULT_STEP = 1.05;
+
+    lyricSizeToolbarSlider.addEventListener('input', function() { setLyricSize(sliderPosToRatio(parseFloat(this.value))); });
     lyricSizeToolbarNum.addEventListener('input', function() {
       const v = parseFloat(this.value);
       if (!isNaN(v)) setLyricSize(v);
     });
-    lyricSizeToolbarNum.addEventListener('blur', function() { this.value = settings.lyricSize.toFixed(2); });
+    lyricSizeToolbarNum.addEventListener('blur', function() {
+      this.value = internalToRatio(settings.lyricSize, BASE_LYRIC_SIZE).toFixed(2);
+    });
     lyricSizeToolbarUp.addEventListener('click', function() {
-      const stepVal = parseFloat(lyricSizeToolbarNum.step) || 0.05;
-      setLyricSize(parseFloat(settings.lyricSize) + stepVal);
+      const cur = internalToRatio(settings.lyricSize, BASE_LYRIC_SIZE);
+      setLyricSize(cur * MULT_STEP);
     });
     lyricSizeToolbarDown.addEventListener('click', function() {
-      const stepVal = parseFloat(lyricSizeToolbarNum.step) || 0.05;
-      setLyricSize(parseFloat(settings.lyricSize) - stepVal);
+      const cur = internalToRatio(settings.lyricSize, BASE_LYRIC_SIZE);
+      setLyricSize(cur / MULT_STEP);
     });
-    lyricSizeToolbarReset.addEventListener('click', function() { setLyricSize(DEFAULT_SETTINGS.lyricSize); });
+    lyricSizeToolbarReset.addEventListener('click', function() { setLyricSize(1); });
 
-    chordSizeToolbarSlider.addEventListener('input', function() { setChordSize(parseFloat(this.value)); });
+    chordSizeToolbarSlider.addEventListener('input', function() { setChordSize(sliderPosToRatio(parseFloat(this.value))); });
     chordSizeToolbarNum.addEventListener('input', function() {
       const v = parseFloat(this.value);
       if (!isNaN(v)) setChordSize(v);
     });
-    chordSizeToolbarNum.addEventListener('blur', function() { this.value = settings.chordSizeMult.toFixed(2); });
+    chordSizeToolbarNum.addEventListener('blur', function() {
+      this.value = internalToRatio(settings.chordSizeMult, BASE_CHORD_MULT).toFixed(2);
+    });
     chordSizeToolbarUp.addEventListener('click', function() {
-      const stepVal = parseFloat(chordSizeToolbarNum.step) || 0.05;
-      setChordSize(parseFloat(settings.chordSizeMult) + stepVal);
+      const cur = internalToRatio(settings.chordSizeMult, BASE_CHORD_MULT);
+      setChordSize(cur * MULT_STEP);
     });
     chordSizeToolbarDown.addEventListener('click', function() {
-      const stepVal = parseFloat(chordSizeToolbarNum.step) || 0.05;
-      setChordSize(parseFloat(settings.chordSizeMult) - stepVal);
+      const cur = internalToRatio(settings.chordSizeMult, BASE_CHORD_MULT);
+      setChordSize(cur / MULT_STEP);
     });
-    chordSizeToolbarReset.addEventListener('click', function() { setChordSize(DEFAULT_SETTINGS.chordSizeMult); });
+    chordSizeToolbarReset.addEventListener('click', function() { setChordSize(1); });
 
-    labelSizeToolbarSlider.addEventListener('input', function() { setLabelSize(parseFloat(this.value)); });
+    labelSizeToolbarSlider.addEventListener('input', function() { setLabelSize(sliderPosToRatio(parseFloat(this.value))); });
     labelSizeToolbarNum.addEventListener('input', function() {
       const v = parseFloat(this.value);
       if (!isNaN(v)) setLabelSize(v);
     });
-    labelSizeToolbarNum.addEventListener('blur', function() { this.value = settings.labelSize.toFixed(2); });
+    labelSizeToolbarNum.addEventListener('blur', function() {
+      this.value = internalToRatio(settings.labelSize, BASE_LABEL_SIZE).toFixed(2);
+    });
     labelSizeToolbarUp.addEventListener('click', function() {
-      const stepVal = parseFloat(labelSizeToolbarNum.step) || 0.05;
-      setLabelSize(parseFloat(settings.labelSize) + stepVal);
+      const cur = internalToRatio(settings.labelSize, BASE_LABEL_SIZE);
+      setLabelSize(cur * MULT_STEP);
     });
     labelSizeToolbarDown.addEventListener('click', function() {
-      const stepVal = parseFloat(labelSizeToolbarNum.step) || 0.05;
-      setLabelSize(parseFloat(settings.labelSize) - stepVal);
+      const cur = internalToRatio(settings.labelSize, BASE_LABEL_SIZE);
+      setLabelSize(cur / MULT_STEP);
     });
-    labelSizeToolbarReset.addEventListener('click', function() { setLabelSize(DEFAULT_SETTINGS.labelSize); });
+    labelSizeToolbarReset.addEventListener('click', function() { setLabelSize(1); });
 
     settingsReset.addEventListener('click', function() {
       showConfirm('Reset all settings to defaults?', function() {
@@ -2823,67 +3222,21 @@
       return simplified;
     }
 
-    function getChordFontStackForMeasure() {
-      return effectiveFont(settings.chordFont, settings.chordFontCustom);
-    }
-
-    // ===== CHORD AUTO-SIZING =====
+    // ===== CHORD SIZING (fixed, no auto-fit) =====
+    // Chords and pipes now use a fixed size derived from user settings:
+    //   base 0.85rem × chordSizeMult × masterScale
+    // No measurement of the preview width is performed, so the chord size
+    // stays constant regardless of window size, layout, or editor split.
     function adjustChordSizes() {
       const content = previewContent;
       if (!content) return;
 
-      const chordLines = content.querySelectorAll('.chord-line');
-      if (chordLines.length === 0) return;
-
-      const previewWidth = previewContent.clientWidth || 0;
-      if (previewWidth < 50) return;
-
-      const maxSize = 2.5;
-
-      let globalMaxText = '';
-      chordLines.forEach(row => {
-        const toks = row.querySelectorAll('.chord-token');
-        toks.forEach(t => {
-          const text = t.textContent || '';
-          if (text.length > globalMaxText.length) globalMaxText = text;
-        });
-      });
-      if (!globalMaxText) globalMaxText = 'X';
-
-      const chordFontStack = getChordFontStackForMeasure();
-
-      const testSpan = document.createElement('span');
-      testSpan.style.cssText = `position:absolute; visibility:hidden; white-space:nowrap; font-family: ${chordFontStack}; font-weight: 700;`;
-      testSpan.textContent = globalMaxText;
-      document.body.appendChild(testSpan);
-
-      let low = 0.3;
-      let high = maxSize * 2;
-      let bestSize = maxSize * 0.5;
-      const iterations = 30;
-      const targetTokenWidth = Math.max(40, previewWidth * 0.20);
-
-      for (let i = 0; i < iterations; i++) {
-        const mid = (low + high) / 2;
-        testSpan.style.fontSize = mid + 'rem';
-        const w = testSpan.offsetWidth;
-        if (w <= targetTokenWidth) {
-          bestSize = mid;
-          low = mid;
-        } else {
-          high = mid;
-        }
-      }
-      document.body.removeChild(testSpan);
-
       const mult = parseFloat(settings.chordSizeMult) || 1;
       const ms = parseFloat(settings.masterScale) || 1;
-      const finalSize = bestSize * mult * ms;
+      const finalSize = 0.85 * mult * ms;
 
-      chordLines.forEach(row => {
-        row.querySelectorAll('.chord-token, .space, .pipe').forEach(t => {
-          t.style.fontSize = Math.round(finalSize * 100) / 100 + 'rem';
-        });
+      content.querySelectorAll('.chord-token, .space, .pipe').forEach(t => {
+        t.style.fontSize = Math.round(finalSize * 1000) / 1000 + 'rem';
       });
     }
 
@@ -3176,6 +3529,254 @@
       }
     });
 
+    // ===== FLOATING PERFORMANCE PANEL =====
+    const perfToggle = document.getElementById('perfToggle');
+    const perfPanel = document.getElementById('perfPanel');
+    const perfClose = document.getElementById('perfClose');
+
+    const perfMaster = document.getElementById('perfMaster');
+    const perfMasterReadout = document.getElementById('perfMasterReadout');
+    const perfChordSize = document.getElementById('perfChordSize');
+    const perfChordSizeReadout = document.getElementById('perfChordSizeReadout');
+    const perfPipeScale = document.getElementById('perfPipeScale');
+    const perfPipeScaleReadout = document.getElementById('perfPipeScaleReadout');
+    const perfPipeThickness = document.getElementById('perfPipeThickness');
+    const perfPipeThicknessReadout = document.getElementById('perfPipeThicknessReadout');
+    const perfPipeValign = document.getElementById('perfPipeValign');
+    const perfPipeValignReadout = document.getElementById('perfPipeValignReadout');
+    const perfLyricSize = document.getElementById('perfLyricSize');
+    const perfLyricSizeReadout = document.getElementById('perfLyricSizeReadout');
+    const perfLabelSize = document.getElementById('perfLabelSize');
+    const perfLabelSizeReadout = document.getElementById('perfLabelSizeReadout');
+    const perfLyricSpacing = document.getElementById('perfLyricSpacing');
+    const perfLyricSpacingReadout = document.getElementById('perfLyricSpacingReadout');
+    const perfChordSpacing = document.getElementById('perfChordSpacing');
+    const perfChordSpacingReadout = document.getElementById('perfChordSpacingReadout');
+    const perfLabelSpacing = document.getElementById('perfLabelSpacing');
+    const perfLabelSpacingReadout = document.getElementById('perfLabelSpacingReadout');
+    const perfMarginH = document.getElementById('perfMarginH');
+    const perfMarginHReadout = document.getElementById('perfMarginHReadout');
+    const perfMarginV = document.getElementById('perfMarginV');
+    const perfMarginVReadout = document.getElementById('perfMarginVReadout');
+
+    function togglePerfPanel(open) {
+      const next = (typeof open === 'boolean') ? open : !perfPanel.classList.contains('show');
+      perfPanel.classList.toggle('show', next);
+      perfToggle.classList.toggle('active', next);
+      perfToggle.title = next ? 'Close performance controls' : 'Open performance controls';
+      if (next) syncPerfPanel();
+    }
+    perfToggle.addEventListener('click', function(e) { e.stopPropagation(); togglePerfPanel(); });
+    perfClose.addEventListener('click', function(e) { e.stopPropagation(); togglePerfPanel(false); });
+
+    // Sync all panel sliders from the current settings.
+    function syncPerfPanel() {
+      // SIZES
+      perfMaster.value = scaleToSliderPos(settings.masterScale);
+      perfMasterReadout.textContent = Number(settings.masterScale).toFixed(2);
+
+      const chR = internalToRatio(settings.chordSizeMult, BASE_CHORD_MULT);
+      perfChordSize.value = ratioToSliderPos(chR);
+      perfChordSizeReadout.textContent = chR.toFixed(2);
+
+      perfPipeScale.value = settings.pipeScale;
+      perfPipeScaleReadout.textContent = Number(settings.pipeScale).toFixed(2);
+
+      perfPipeThickness.value = settings.pipeThickness;
+      perfPipeThicknessReadout.textContent = Number(settings.pipeThickness).toFixed(3);
+
+      perfPipeValign.value = settings.pipeVerticalAlign;
+      perfPipeValignReadout.textContent = Number(settings.pipeVerticalAlign).toFixed(2);
+
+      const lyR = internalToRatio(settings.lyricSize, BASE_LYRIC_SIZE);
+      perfLyricSize.value = ratioToSliderPos(lyR);
+      perfLyricSizeReadout.textContent = lyR.toFixed(2);
+
+      const lbR = internalToRatio(settings.labelSize, BASE_LABEL_SIZE);
+      perfLabelSize.value = ratioToSliderPos(lbR);
+      perfLabelSizeReadout.textContent = lbR.toFixed(2);
+
+      // SPACING
+      perfLyricSpacing.value = settings.lyricLetterSpacing;
+      perfLyricSpacingReadout.textContent = Number(settings.lyricLetterSpacing).toFixed(3);
+
+      perfChordSpacing.value = settings.chordLetterSpacing;
+      perfChordSpacingReadout.textContent = Number(settings.chordLetterSpacing).toFixed(3);
+
+      perfLabelSpacing.value = settings.labelLetterSpacing;
+      perfLabelSpacingReadout.textContent = Number(settings.labelLetterSpacing).toFixed(3);
+
+      // LAYOUT
+      perfMarginH.value = (settings.previewPaddingH != null ? settings.previewPaddingH : 8);
+      perfMarginHReadout.textContent = Number(perfMarginH.value).toFixed(0);
+
+      perfMarginV.value = (settings.previewPaddingV != null ? settings.previewPaddingV : 8);
+      perfMarginVReadout.textContent = Number(perfMarginV.value).toFixed(0);
+    }
+
+    // Panel slider → existing setters (keeps everything in sync).
+    perfMaster.addEventListener('input', function() {
+      const v = sliderPosToScale(parseFloat(this.value));
+      perfMasterReadout.textContent = v.toFixed(2);
+      setMasterScale(v);
+    });
+    perfChordSize.addEventListener('input', function() {
+      const ratio = sliderPosToRatio(parseFloat(this.value));
+      perfChordSizeReadout.textContent = ratio.toFixed(2);
+      setChordSize(ratio);
+    });
+    perfPipeScale.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      perfPipeScaleReadout.textContent = v.toFixed(2);
+      setPipeScale(v);
+    });
+    perfPipeThickness.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      perfPipeThicknessReadout.textContent = v.toFixed(3);
+      setPipeThickness(v);
+    });
+    perfPipeValign.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      perfPipeValignReadout.textContent = v.toFixed(2);
+      setPipeValign(v);
+    });
+    perfLyricSize.addEventListener('input', function() {
+      const ratio = sliderPosToRatio(parseFloat(this.value));
+      perfLyricSizeReadout.textContent = ratio.toFixed(2);
+      setLyricSize(ratio);
+    });
+    perfLabelSize.addEventListener('input', function() {
+      const ratio = sliderPosToRatio(parseFloat(this.value));
+      perfLabelSizeReadout.textContent = ratio.toFixed(2);
+      setLabelSize(ratio);
+    });
+
+    perfLyricSpacing.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      perfLyricSpacingReadout.textContent = v.toFixed(3);
+      setLyricLetterSpacing(v);
+    });
+    perfChordSpacing.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      perfChordSpacingReadout.textContent = v.toFixed(3);
+      setChordLetterSpacing(v);
+    });
+    perfLabelSpacing.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      perfLabelSpacingReadout.textContent = v.toFixed(3);
+      setLabelLetterSpacing(v);
+    });
+
+    perfMarginH.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      perfMarginHReadout.textContent = v.toFixed(0);
+      setPreviewPaddingH(v);
+    });
+    perfMarginV.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      perfMarginVReadout.textContent = v.toFixed(0);
+      setPreviewPaddingV(v);
+    });
+
+    // ===== PERFORMANCE PANEL STEP BUTTONS =====
+    // Each ± button nudges its sibling slider by one step (or by a
+    // multiplicative factor for the ratio-based sliders, matching the
+    // behaviour of the toolbar's own ± buttons).
+    // Ratio sliders are identified by the readout IDs, since their
+    // numeric values are ratios not raw slider positions.
+    const PERF_MULT_TARGETS = {
+      perfChordSize: true,
+      perfLyricSize: true,
+      perfLabelSize: true
+    };
+    const PERF_MULT_STEP = 1.05;
+
+    function wirePerfStepButtons() {
+      perfPanel.querySelectorAll('button[data-perf-target]').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          const dir = parseFloat(this.dataset.perfStep);
+          const targetId = this.dataset.perfTarget;
+          const slider = document.getElementById(targetId);
+          if (!slider) return;
+
+          // Master scale: additive step in slider-position space (matches toolbar).
+          if (targetId === 'perfMaster') {
+            const stepVal = parseFloat(slider.step) || 0.5;
+            const min = parseFloat(slider.min) || 0;
+            const max = parseFloat(slider.max) || 100;
+            let v = parseFloat(slider.value) + dir * stepVal;
+            v = Math.min(max, Math.max(min, v));
+            slider.value = v;
+            slider.dispatchEvent(new Event('input', { bubbles: true }));
+            return;
+          }
+
+          // Ratio sliders (chord / lyric / label size): multiply / divide in ratio space.
+          if (PERF_MULT_TARGETS[targetId]) {
+            // Slider position → ratio, apply factor, → slider position.
+            const pos = parseFloat(slider.value);
+            const ratio = sliderPosToRatio(pos);
+            const newRatio = dir > 0 ? ratio * PERF_MULT_STEP : ratio / PERF_MULT_STEP;
+            const newPos = ratioToSliderPos(newRatio);
+            slider.value = newPos;
+            slider.dispatchEvent(new Event('input', { bubbles: true }));
+            return;
+          }
+
+          // Everything else: additive in slider units, matching the slider's own step.
+          const stepVal = parseFloat(slider.step) || 1;
+          const min = parseFloat(slider.min);
+          const max = parseFloat(slider.max);
+          let v = parseFloat(slider.value) + dir * stepVal;
+          if (!isNaN(min)) v = Math.max(min, v);
+          if (!isNaN(max)) v = Math.min(max, v);
+          // Round to the slider's precision to avoid floating-point dust.
+          const decimals = (String(stepVal).split('.')[1] || '').length;
+          slider.value = parseFloat(v.toFixed(decimals));
+          slider.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+      });
+    }
+    wirePerfStepButtons();
+
+    // Clicking outside the panel closes it.
+    document.addEventListener('click', function(e) {
+      if (!perfPanel.classList.contains('show')) return;
+      if (perfPanel.contains(e.target)) return;
+      if (perfToggle.contains(e.target)) return;
+      togglePerfPanel(false);
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && perfPanel.classList.contains('show')) {
+        togglePerfPanel(false);
+      }
+    });
+
+    // ===== CHROME COLLAPSE (focus mode) =====
+    // Hides the toolbar and the editor so the preview fills the screen.
+    // Always starts expanded on page load (no persistence).
+    let isChromeCollapsed = false;
+
+    function applyChromeCollapsed(collapsed) {
+      isChromeCollapsed = !!collapsed;
+      document.body.classList.toggle('chrome-collapsed', isChromeCollapsed);
+      chromeToggle.classList.toggle('active', isChromeCollapsed);
+      chromeToggle.title = isChromeCollapsed
+        ? 'Expand toolbar & editor'
+        : 'Collapse toolbar & editor (focus mode)';
+      chromeToggle.setAttribute('aria-label', chromeToggle.title);
+      // Recompute chord sizes because the preview width changes
+      setTimeout(adjustChordSizes, 200);
+      setTimeout(adjustChordSizes, 400);
+    }
+
+    chromeToggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      applyChromeCollapsed(!isChromeCollapsed);
+    });
+
     // ===== INIT =====
     loadSettings();
     syncSettingsUI();
@@ -3184,6 +3785,8 @@
     applyLayout(loadLayoutState());   // ✅ FIX: restore saved layout
 
     applyMode(false);
+    applyChromeCollapsed(false);
+    if (typeof syncPerfPanel === 'function') syncPerfPanel();
 
     displayStoredSongs();
     originalText = inputEl.value;
