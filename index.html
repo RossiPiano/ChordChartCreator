@@ -56,6 +56,7 @@
       --pipe-thickness: 0.03em;
       --pipe-vertical-align: 0.2em;
       --editor-width: 50%;
+      --chord-base-size: 0.85rem;
     }
     html { font-size: clamp(14px, 1.05vw + 8px, 18px); }
     html, body { height: 100%; overflow: hidden; }
@@ -425,6 +426,9 @@
       flex: 1;
       min-height: 0;
       overflow: hidden;
+      /* White behind everything so the editor's open/close animation
+         never flashes the parent's cream/tan background through. */
+      background: #ffffff;
     }
     .editor-wrapper.layout-phone {
       flex-direction: row;
@@ -458,8 +462,9 @@
     .input-area {
       width: 100%;
       padding: 8px 14px 10px 14px;
-      background: #f5ede0;
-      border-top: 2px solid #dcc9b0;
+      /* Frameless: same white as preview so the whole app reads as one canvas. */
+      background: #ffffff;
+      border-top: none;
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
@@ -484,9 +489,8 @@
       max-height: 100%;
       min-height: 0;
       border-top: none;
-      /* Editor is now the FIRST child (left side) in Phone View,
-         so the divider between editor and preview is on its RIGHT edge. */
-      border-right: 2px solid #dcc9b0;
+      /* Frameless: no divider on the right edge either. */
+      border-right: none;
       flex-shrink: 0;
     }
     .editor-wrapper.layout-phone .input-area.collapsed {
@@ -501,54 +505,93 @@
     .editor-wrapper.layout-phone .input-area.collapsed .drop-zone,
     .editor-wrapper.layout-phone .input-area.collapsed textarea { visibility: hidden; }
 
+    /* The resize handle IS the wall: a full-length visible strip along
+       one edge of the editor. Desktop View → horizontal strip on the
+       top edge. Phone View → vertical strip on the right edge.
+       The strip's background is the visible "wall"; there is no
+       separate ::before element anymore.
+       NOTE: offsets must stay INSIDE .input-area because it has
+       overflow: hidden, which clips anything outside its box. */
+    /* The resize handle IS the wall: a full-length visible strip along
+       one edge of the editor. The strip stays vertically/horizontally
+       centered on the edge while its thickness changes, so the hover
+       animation grows symmetrically and never looks off-center.
+       An invisible ::before layer expands the grab zone beyond the
+       visible strip so you don't have to be pixel-precise. */
     .resize-handle {
       position: absolute;
-      top: -4px;
+      /* Desktop View: centered on the top edge. */
+      top: 0;
       left: 0;
       right: 0;
-      height: 8px;
+      height: 8px;                 /* visible thickness of the wall (idle) */
+      transform: translateY(-50%);
       cursor: ns-resize;
-      z-index: 10;
+      z-index: 100;
+      background: #dcc9b0;         /* same as the top panel's border */
+      pointer-events: auto;
+      transition: background 0.15s ease, height 0.15s ease;
     }
-    .editor-wrapper.layout-phone .resize-handle {
-      top: 0;
-      bottom: 0;
-      /* Editor is now the FIRST child (left side) in Phone View,
-         so the grab handle must sit on its RIGHT edge (between editor
-         and preview) to be reachable from the middle of the window. */
-      left: auto;
-      right: -4px;
-      width: 8px;
-      height: auto;
-      cursor: ew-resize;
-    }
-    .resize-handle::after {
+    /* Invisible hit-zone: extends ~12px above and below the strip
+       (Desktop) so the cursor doesn't have to land exactly on it. */
+    .resize-handle::before {
       content: '';
       position: absolute;
       top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 40px;
-      height: 3px;
-      background: #c4ad92;
-      border-radius: 2px;
-      opacity: 0.5;
+      left: 0;
+      right: 0;
+      height: 32px;                /* total grab height */
+      transform: translateY(-50%);
+      background: transparent;
+      pointer-events: auto;
     }
-    .editor-wrapper.layout-phone .resize-handle::after { width: 3px; height: 40px; }
-    .resize-handle:hover::after { opacity: 1; background: #8b6b4a; }
+    .editor-wrapper.layout-phone .resize-handle {
+      /* Phone View: centered on the right edge. */
+      top: 0;
+      bottom: 0;
+      left: auto;
+      right: 0;
+      width: 8px;                  /* visible thickness of the wall (idle) */
+      height: auto;
+      transform: translateX(50%);
+      cursor: ew-resize;
+    }
+    .editor-wrapper.layout-phone .resize-handle::before {
+      /* Vertical hit-zone: swap the axes. */
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      right: auto;
+      width: 32px;                 /* total grab width */
+      height: auto;
+      transform: translateX(-50%);
+    }
+
+    /* Hover / active = the wall thickens and darkens, growing symmetrically
+       from its center so it stays exactly on the edge. */
+    .resize-handle:hover,
+    .resize-handle:active {
+      background: #8b6b4a;
+      height: 12px;
+    }
+    .editor-wrapper.layout-phone .resize-handle:hover,
+    .editor-wrapper.layout-phone .resize-handle:active {
+      width: 12px;
+    }
 
     .drop-zone { flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative; }
     textarea {
       width: 100%;
       flex: 1;
-      border: 1px solid #dcc9b0;
-      border-radius: 10px;
+      /* Frameless: no border, no radius, no focus ring. */
+      border: none;
+      border-radius: 0;
       padding: 8px 12px;
       font-size: calc(0.8rem * var(--editor-scale));
       line-height: 1.5;
       font-family: Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace;
       resize: none;
-      background: #ffffff;
+      background: transparent;
       color: #3d2b1f;
       outline: none;
       min-height: 50px;
@@ -558,7 +601,7 @@
       letter-spacing: var(--chord-letter-spacing, 0em);
       word-spacing: 0;
     }
-    textarea:focus { border-color: #8b6b4a; box-shadow: 0 0 0 3px rgba(139, 107, 74, 0.15); }
+    textarea:focus { border: none; box-shadow: none; outline: none; }
     .drop-zone .drop-message {
       display: none;
       position: absolute;
@@ -806,6 +849,281 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
 
+    .songs-float-toggle {
+      position: fixed;
+      top: 10px;
+      right: 154px; /* shifted left to make room for the 🔑 key button */
+      z-index: 8000;
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border-radius: 10px;
+      border: 1px solid #c4ad92;
+      background: rgba(232, 220, 204, 0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: #3d2b1f;
+      font-size: 1.1rem;
+      line-height: 1;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      font-family: inherit;
+    }
+    .songs-float-toggle:hover {
+      background: rgba(196, 173, 146, 0.95);
+      transform: scale(1.05);
+    }
+    .songs-float-toggle.active {
+      background: #5c4033;
+      color: #ffffff;
+      border-color: #4a3328;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .editor-float-toggle {
+      position: fixed;
+      top: 10px;
+      right: 202px; /* shifted left to make room for the 🔑 key button */
+      z-index: 8000;
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border-radius: 10px;
+      border: 1px solid #c4ad92;
+      background: rgba(232, 220, 204, 0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: #3d2b1f;
+      font-size: 1.1rem;
+      line-height: 1;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      font-family: inherit;
+    }
+    .editor-float-toggle:hover {
+      background: rgba(196, 173, 146, 0.95);
+      transform: scale(1.05);
+    }
+    .editor-float-toggle.active {
+      background: #5c4033;
+      color: #ffffff;
+      border-color: #4a3328;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    /* ===== FLOATING KEY BUTTON ===== */
+    .key-float-toggle {
+      position: fixed;
+      top: 10px;
+      right: 106px; /* between ⚙️ perf and 🎵 songs */
+      z-index: 8000;
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border-radius: 10px;
+      border: 1px solid #c4ad92;
+      background: rgba(232, 220, 204, 0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: #3d2b1f;
+      font-size: 1.1rem;
+      line-height: 1;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      font-family: inherit;
+    }
+    .key-float-toggle:hover {
+      background: rgba(196, 173, 146, 0.95);
+      transform: scale(1.05);
+    }
+    .key-float-toggle.active {
+      background: #5c4033;
+      color: #ffffff;
+      border-color: #4a3328;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .key-float-panel {
+      position: fixed;
+      top: 58px;
+      right: 106px; /* aligned under the 🔑 button */
+      z-index: 7999;
+      width: 260px;
+      background: #f5ede0;
+      border: 1px solid #c4ad92;
+      border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+      display: none;
+      flex-direction: column;
+      font-family: inherit;
+      color: #3d2b1f;
+    }
+    .key-float-panel.show { display: flex; }
+    .key-float-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: #e8dccc;
+      border-bottom: 2px solid #dcc9b0;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #5c4033;
+    }
+    .key-float-body {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .key-float-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .key-float-row label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #5c4033;
+      flex: 0 0 60px;
+    }
+    .key-float-row select {
+      flex: 1;
+      background: #f5ede0;
+      border: 1px solid #c4ad92;
+      border-radius: 40px;
+      padding: 5px 10px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #3d2b1f;
+      outline: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .key-float-row select:focus { border-color: #8b6b4a; }
+
+    .songs-float-panel {
+      position: fixed;
+      top: 58px;
+      right: 154px; /* aligned under the 🎵 button */
+      z-index: 7999;
+      width: 320px;
+      max-height: calc(100vh - 72px);
+      overflow-y: auto;
+      background: #f5ede0;
+      border: 1px solid #c4ad92;
+      border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+      display: none;
+      flex-direction: column;
+      font-family: inherit;
+      color: #3d2b1f;
+    }
+    .songs-float-panel.show { display: flex; }
+    .songs-float-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: #e8dccc;
+      border-bottom: 2px solid #dcc9b0;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #5c4033;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    .songs-float-body {
+      padding: 6px 0 8px 0;
+    }
+    /* The floating songs panel reuses the toolbar dropdown's item styling.
+       We extend the .dropdown-content selectors so hover, cursor, emoji
+       prefixes, folder arrows, and remove buttons all render identically. */
+    .songs-float-panel .dropdown-item { padding: calc(8px * var(--ui-scale)) calc(16px * var(--ui-scale)); }
+    .songs-float-panel .dropdown-item.song-item { padding: calc(8px * var(--ui-scale)) calc(12px * var(--ui-scale)) calc(8px * var(--ui-scale)) calc(6px * var(--ui-scale)); }
+    .songs-float-panel .dropdown-item.folder-item { padding: calc(8px * var(--ui-scale)) calc(16px * var(--ui-scale)) calc(8px * var(--ui-scale)) calc(10px * var(--ui-scale)); }
+
+    /* ----- Extended styles so the floating panel matches the toolbar dropdown ----- */
+    .songs-float-panel .dropdown-item {
+      font-size: calc(0.85rem * var(--ui-scale));
+      font-weight: 500;
+      color: #5c4033;
+      cursor: pointer;
+      transition: background 0.1s ease;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      position: relative;
+    }
+    .songs-float-panel .dropdown-item:hover { background: #ece0cf; }
+    .songs-float-panel .dropdown-item.active { background: #5c4033; color: white; }
+
+    .songs-float-panel .dropdown-item.song-item {
+      padding-right: calc(12px * var(--ui-scale));
+      font-size: calc(0.8rem * var(--ui-scale));
+      display: flex;
+      align-items: center;
+      gap: calc(6px * var(--ui-scale));
+    }
+    .songs-float-panel .dropdown-item.song-item .song-name {
+      flex: 1 1 auto;
+      min-width: 0;
+      padding-left: calc(2px * var(--ui-scale));
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .songs-float-panel .dropdown-item.song-item .song-name::before { content: '🎵 '; }
+    .songs-float-panel .dropdown-item.song-item.has-settings .song-name::after { content: ' 🎚️'; opacity: 0.7; }
+    .songs-float-panel .dropdown-item.song-item .remove-btn {
+      background: none;
+      border: none;
+      color: #c45a4a;
+      font-size: calc(0.9rem * var(--ui-scale));
+      cursor: pointer;
+      padding: 0 calc(4px * var(--ui-scale));
+      font-weight: 600;
+      opacity: 0.6;
+      flex: 0 0 auto;
+    }
+    .songs-float-panel .dropdown-item.song-item .remove-btn:hover { opacity: 1; }
+
+    .songs-float-panel .dropdown-item.folder-item {
+      font-weight: 600;
+      font-size: calc(0.85rem * var(--ui-scale));
+      color: #8b6b4a;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .songs-float-panel .dropdown-item.folder-item::before { content: '📁 '; }
+    .songs-float-panel .dropdown-item.folder-item .folder-arrow {
+      font-size: calc(0.7rem * var(--ui-scale));
+      color: #b0987a;
+      margin-left: calc(8px * var(--ui-scale));
+    }
+
     .perf-panel {
       position: fixed;
       top: 58px; /* just below the two floating buttons */
@@ -906,21 +1224,31 @@
       text-align: right;
     }
 
-    /* When chrome is collapsed, hide the toolbar and the editor.
+    /* When chrome is collapsed, hide the toolbar.
        The floating ☰ button and the preview stay visible. */
     body.chrome-collapsed .toolbar {
       display: none !important;
     }
-    body.chrome-collapsed .input-area {
+
+    /* Editor is hidden in focus mode ONLY when the user hasn't explicitly
+       brought it back with the ✏️ button. The `.collapsed` class is the
+       single source of truth; focus mode just forces it when the user
+       hasn't asked otherwise. */
+    body.chrome-collapsed .input-area:not(.focus-visible) {
       display: none !important;
     }
-    /* Preview area reclaims the full space in both layouts */
-    body.chrome-collapsed .editor-wrapper.layout-desktop,
-    body.chrome-collapsed .editor-wrapper.layout-phone {
+
+    /* Preview area reclaims the full space when the editor is truly hidden. */
+    body.chrome-collapsed .editor-wrapper.layout-desktop:not(.editor-shown),
+    body.chrome-collapsed .editor-wrapper.layout-phone:not(.editor-shown) {
       flex-direction: column;
     }
     body.chrome-collapsed .preview-area {
       width: 100% !important;
+      flex: 1 1 auto !important;
+    }
+    body.chrome-collapsed .editor-wrapper.editor-shown .preview-area {
+      width: auto !important;
       flex: 1 1 auto !important;
     }
 
@@ -1130,8 +1458,7 @@
       <div class="dropdown">
         <button class="btn btn-outline" id="dropdownToggle">🎵 Songs ▼</button>
         <div class="dropdown-content" id="dropdownContent">
-          <div class="dropdown-label">📂 LOAD SONGS</div>
-          <div class="dropdown-item" id="loadSingleFile" style="color: #8b6b4a; font-weight: 600;">🎵 Open 1 Song File</div>
+          <div class="dropdown-item" id="loadSingleFile" style="color: #8b6b4a; font-weight: 600;">⬆️ Upload a Song</div>
           <div class="dropdown-divider"></div>
           <div class="dropdown-label">🎵 SONG LIST</div>
           <div id="songsList"></div>
@@ -1212,8 +1539,6 @@
       <div class="toolbar-row">
       <button class="btn-toggle" id="toggleLayout" title="Switch between Desktop and Phone view">📱 Phone View</button>
 
-      <button class="btn-toggle" id="toggleEditor">▲ ✏️ Hide Editor</button>
-
       <button class="btn btn-success" id="exportPNG">📷 Export Chord Chart as PNG</button>
       <button class="btn btn-success" id="saveSong">💾 Save Chord Chart</button>
 
@@ -1238,10 +1563,57 @@
 </div>
 
 <button class="chrome-toggle" id="chromeToggle" title="Collapse toolbar & editor (focus mode)" aria-label="Collapse toolbar and editor">☰</button>
-<button class="perf-toggle" id="perfToggle" title="Open performance controls" aria-label="Open performance controls">🎚️</button>
+<button class="perf-toggle" id="perfToggle" title="Open performance controls" aria-label="Open performance controls">⚙️</button>
+<button class="key-float-toggle" id="keyFloatToggle" title="Key &amp; transpose" aria-label="Key and transpose">🔑</button>
+<button class="songs-float-toggle" id="songsFloatToggle" title="Songs" aria-label="Songs">🎵</button>
+<button class="editor-float-toggle" id="editorFloatToggle" title="Hide editor" aria-label="Hide editor">✏️</button>
+<div class="songs-float-panel" id="songsFloatPanel" role="dialog" aria-label="Songs">
+  <div class="songs-float-header">
+    <span>🎵 Songs</span>
+    <button class="perf-close" id="songsFloatClose" title="Close">✕</button>
+  </div>
+  <div class="songs-float-body">
+    <div class="dropdown-item" id="songsFloatOpenFile" style="color: #8b6b4a; font-weight: 600;">⬆️ Upload a Song</div>
+    <div class="dropdown-divider"></div>
+    <div id="songsFloatList"></div>
+  </div>
+</div>
+<div class="key-float-panel" id="keyFloatPanel" role="dialog" aria-label="Key">
+  <div class="key-float-header">
+    <span>🔑 Key</span>
+    <button class="perf-close" id="keyFloatClose" title="Close">✕</button>
+  </div>
+  <div class="key-float-body">
+    <div class="key-float-row">
+      <label for="keySelectFloat">Key</label>
+      <select id="keySelectFloat">
+        <option value="C">C</option>
+        <option value="G">G</option>
+        <option value="D">D</option>
+        <option value="A">A</option>
+        <option value="E">E</option>
+        <option value="B">B</option>
+        <option value="F#">F#</option>
+        <option value="Gb">Gb</option>
+        <option value="Db">Db</option>
+        <option value="Ab">Ab</option>
+        <option value="Eb">Eb</option>
+        <option value="Bb">Bb</option>
+        <option value="F">F</option>
+      </select>
+    </div>
+    <div class="key-float-row">
+      <label for="keyModeSelectFloat">Mode</label>
+      <select id="keyModeSelectFloat">
+        <option value="major">Major</option>
+        <option value="minor">Minor</option>
+      </select>
+    </div>
+  </div>
+</div>
 <div class="perf-panel" id="perfPanel" role="dialog" aria-label="Performance controls">
   <div class="perf-panel-header">
-    <span>🎚️ Performance</span>
+    <span>⚙️ Performance</span>
     <button class="perf-close" id="perfClose" title="Close">✕</button>
   </div>
   <div class="perf-panel-body">
@@ -1574,7 +1946,7 @@
     const previewContainer = document.getElementById('previewContainer');
     const inputArea = document.getElementById('inputArea');
     const previewArea = document.getElementById('previewArea');
-    const toggleBtn = document.getElementById('toggleEditor');
+    // (removed: toggleBtn — replaced by floating ✏️ button)
     const toggleModeBtn = document.getElementById('toggleMode');
     const openSettingsBtn = document.getElementById('openSettings');
     const settingsOverlay = document.getElementById('settingsOverlay');
@@ -1610,6 +1982,7 @@
     const confirmNo = document.getElementById('confirmNo');
 
     const chromeToggle = document.getElementById('chromeToggle');
+    const editorFloatToggle = document.getElementById('editorFloatToggle');
 
     // ===== STATE =====
     let isLocked = false;                 // ✅ FIX: was undeclared
@@ -1626,6 +1999,9 @@
     let currentKey = 'C';                 // ✅ FIX: default is now C major
     let currentMode = 'major';            // ✅ FIX: default is now major
     let originalText = '';
+    // ✅ FIX: declared here so syncFocusModeEditorVisibility() can never
+    // hit a temporal-dead-zone error if called during init.
+    let isChromeCollapsed = false;
 
     let confirmCallback = null;
 
@@ -2807,9 +3183,12 @@
       return parts.join('/');
     }
 
-    function displayStoredSongs() {
+    // Render the stored songs into ANY container (toolbar dropdown OR floating panel).
+    // Shared by displayStoredSongs() and the floating songs panel.
+    function renderSongsInto(container) {
+      if (!container) return;
       const storedSongs = loadStoredSongs();
-      songsList.innerHTML = '';
+      container.innerHTML = '';
 
       if (storedSongs && storedSongs.length > 0) {
         const tree = {};
@@ -2906,19 +3285,28 @@
             setTimeout(() => { if (!folderItem.matches(':hover')) popup.classList.remove('show'); }, 300);
           });
 
-          songsList.appendChild(folderItem);
+          container.appendChild(folderItem);
         });
 
         if (tree._root) {
           tree._root.sort((a, b) => a.name.localeCompare(b.name, 'th', { sensitivity: 'base' }));
-          tree._root.forEach(song => songsList.appendChild(createSongItem(song)));
+          tree._root.forEach(song => container.appendChild(createSongItem(song)));
         }
       } else {
         const emptyMsg = document.createElement('div');
         emptyMsg.className = 'dropdown-item';
         emptyMsg.style.cssText = 'color: #b0987a; font-size: 0.8rem; padding: 6px 16px; font-style: italic;';
         emptyMsg.textContent = 'No songs loaded';
-        songsList.appendChild(emptyMsg);
+        container.appendChild(emptyMsg);
+      }
+    }
+
+    // Backward-compatible wrapper: fills the toolbar dropdown's list.
+    function displayStoredSongs() {
+      renderSongsInto(songsList);
+      // Keep the floating panel in sync if it happens to be open.
+      if (songsFloatPanel && songsFloatPanel.classList.contains('show')) {
+        renderSongsInto(songsFloatList);
       }
     }
 
@@ -2944,7 +3332,12 @@
         e.stopPropagation();
         loadSong(song.content, song.name, song.settings || null);
         if (song.settings && typeof song.settings === 'object') showToast('Applied settings from "' + song.name + '"');
+        // Close whichever panel this item lives in (toolbar dropdown or floating panel).
         dropdownContent.classList.remove('show');
+        if (typeof songsFloatPanel !== 'undefined' && songsFloatPanel) {
+          songsFloatPanel.classList.remove('show');
+          if (typeof songsFloatToggle !== 'undefined' && songsFloatToggle) songsFloatToggle.classList.remove('active');
+        }
         document.querySelectorAll('.dropdown-item.song-item').forEach(el => el.classList.remove('active'));
         songItem.classList.add('active');
       });
@@ -3069,9 +3462,26 @@
     function applyEditorState(hidden) {
       isEditorCollapsed = hidden;
       inputArea.classList.toggle('collapsed', hidden);
-      toggleBtn.textContent = hidden ? '▼ ✏️ Show Editor' : '▲ ✏️ Hide Editor';
-      toggleBtn.classList.toggle('active', hidden);
+      // Update the floating pencil button to reflect the current state.
+      // Pencil gets an active (dark) style while the editor is hidden.
+      editorFloatToggle.classList.toggle('active', hidden);
+      editorFloatToggle.title = hidden ? 'Show editor' : 'Hide editor';
+      editorFloatToggle.setAttribute('aria-label', editorFloatToggle.title);
       setTimeout(adjustChordSizes, 350);
+    }
+
+    // In focus (hamburger) mode, the editor is hidden by default unless the
+    // user has explicitly brought it back with the ✏️ button. This function
+    // keeps the CSS class hooks in sync with the current state.
+    function syncFocusModeEditorVisibility() {
+      // The editor should be visible in focus mode only when:
+      //   1. Focus mode is active, AND
+      //   2. The user has NOT collapsed the editor.
+      const visibleInFocusMode = isChromeCollapsed && !isEditorCollapsed;
+
+      inputArea.classList.toggle('focus-visible', visibleInFocusMode);
+      editorWrapper.classList.toggle('editor-shown', visibleInFocusMode);
+      setTimeout(adjustChordSizes, 200);
     }
 
     // ✅ Phone view = vertical split: editor on LEFT, preview on RIGHT.
@@ -3104,10 +3514,14 @@
       applyLayout(currentLayout === 'phone' ? 'desktop' : 'phone');
     });
 
-    toggleBtn.addEventListener('click', function() {
+    editorFloatToggle.addEventListener('click', function(e) {
+      e.stopPropagation();
       const newHidden = !isEditorCollapsed;
       applyEditorState(newHidden);
       saveEditorHiddenState(newHidden);
+      // If we're in focus (hamburger) mode, tell the wrapper whether the
+      // editor is meant to be visible. This drives the CSS override above.
+      syncFocusModeEditorVisibility();
     });
 
     function applyMode(advanced) {
@@ -3267,12 +3681,7 @@
 
     function renderPreview(text) {
       if (!text || text.trim() === '') {
-        previewContent.innerHTML = `
-          <div class="empty-preview">
-            <div class="main-text">Type or Paste your chord chart (in the editor area below)</div>
-            <div class="sub-text">or Drag &amp; Drop a chord chart (.txt or .chordchart)<br>Tip: to reuse the current look for a new song, clear the text and type the new one — settings stay.</div>
-          </div>
-        `;
+        previewContent.innerHTML = '';
         return;
       }
       let html = '';
@@ -3559,12 +3968,124 @@
     const perfMarginV = document.getElementById('perfMarginV');
     const perfMarginVReadout = document.getElementById('perfMarginVReadout');
 
+    // ===== FLOATING KEY PANEL =====
+    const keyFloatToggle = document.getElementById('keyFloatToggle');
+    const keyFloatPanel = document.getElementById('keyFloatPanel');
+    const keyFloatClose = document.getElementById('keyFloatClose');
+    const keySelectFloat = document.getElementById('keySelectFloat');
+    const keyModeSelectFloat = document.getElementById('keyModeSelectFloat');
+
+    function toggleKeyFloatPanel(open) {
+      const next = (typeof open === 'boolean') ? open : !keyFloatPanel.classList.contains('show');
+      keyFloatPanel.classList.toggle('show', next);
+      keyFloatToggle.classList.toggle('active', next);
+      keyFloatToggle.title = next ? 'Close key' : 'Key & transpose';
+      if (next) {
+        // Sync both selects to the current toolbar state before showing.
+        keySelectFloat.value = keySelect.value;
+        keyModeSelectFloat.value = keyModeSelect.value;
+        // Mutually close the other float panels so they don't overlap.
+        if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
+        if (typeof toggleSongsFloatPanel === 'function') toggleSongsFloatPanel(false);
+      }
+    }
+    keyFloatToggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      toggleKeyFloatPanel();
+    });
+    keyFloatClose.addEventListener('click', function(e) {
+      e.stopPropagation();
+      toggleKeyFloatPanel(false);
+    });
+
+    // Mirror changes made in the floating panel back into the toolbar's
+    // selects, then fire the change event so the existing logic runs.
+    keySelectFloat.addEventListener('change', function() {
+      keySelect.value = this.value;
+      keySelect.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    keyModeSelectFloat.addEventListener('change', function() {
+      keyModeSelect.value = this.value;
+      keyModeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    // ===== FLOATING SONGS PANEL =====
+    const songsFloatToggle = document.getElementById('songsFloatToggle');
+    const songsFloatPanel = document.getElementById('songsFloatPanel');
+    const songsFloatClose = document.getElementById('songsFloatClose');
+    const songsFloatList = document.getElementById('songsFloatList');
+    const songsFloatOpenFile = document.getElementById('songsFloatOpenFile');
+
+    function toggleSongsFloatPanel(open) {
+      const next = (typeof open === 'boolean') ? open : !songsFloatPanel.classList.contains('show');
+      songsFloatPanel.classList.toggle('show', next);
+      songsFloatToggle.classList.toggle('active', next);
+      songsFloatToggle.title = next ? 'Close songs' : 'Songs';
+      if (next) {
+        renderSongsInto(songsFloatList);
+        // Mutually close the other float panels so they don't overlap.
+        if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
+        if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
+      }
+    }
+    songsFloatToggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      toggleSongsFloatPanel();
+    });
+    songsFloatClose.addEventListener('click', function(e) {
+      e.stopPropagation();
+      toggleSongsFloatPanel(false);
+    });
+
+    // Same behaviour as the toolbar's "Open 1 Song File", wired to the floating panel entry.
+    // Moved here (after the FLOATING SONGS PANEL const declarations) to avoid a
+    // temporal-dead-zone ReferenceError on load.
+    songsFloatOpenFile.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.txt,.chordchart,.json';
+      fileInput.onchange = function(ev) {
+        const file = ev.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const raw = event.target.result;
+          const parsed = parseChordChartFile(raw, file.name);
+          const fileName = stripExtension(file.name);
+          const folder = file.webkitRelativePath ? getFolderPath(file.webkitRelativePath) : '';
+          const storedSongs = loadStoredSongs() || [];
+          const existingIndex = storedSongs.findIndex(s => s.name === fileName && s.folder === folder);
+          const entry = { name: fileName, content: parsed.text, folder: folder };
+          if (parsed.settings) entry.settings = parsed.settings;
+          if (existingIndex >= 0) {
+            storedSongs[existingIndex] = Object.assign({}, storedSongs[existingIndex], entry);
+          } else {
+            storedSongs.push(entry);
+          }
+          saveSongsToStorage(storedSongs);
+          loadSong(parsed.text, fileName, parsed.settings);
+          if (parsed.settings) showToast('Applied settings from "' + fileName + '"');
+          songsFloatPanel.classList.remove('show');
+          songsFloatToggle.classList.remove('active');
+          displayStoredSongs();
+        };
+        reader.readAsText(file);
+      };
+      fileInput.click();
+    });
+
     function togglePerfPanel(open) {
       const next = (typeof open === 'boolean') ? open : !perfPanel.classList.contains('show');
       perfPanel.classList.toggle('show', next);
       perfToggle.classList.toggle('active', next);
       perfToggle.title = next ? 'Close performance controls' : 'Open performance controls';
-      if (next) syncPerfPanel();
+      if (next) {
+        syncPerfPanel();
+        // Mutually close the other float panels so they don't overlap.
+        if (typeof toggleSongsFloatPanel === 'function') toggleSongsFloatPanel(false);
+        if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
+      }
     }
     perfToggle.addEventListener('click', function(e) { e.stopPropagation(); togglePerfPanel(); });
     perfClose.addEventListener('click', function(e) { e.stopPropagation(); togglePerfPanel(false); });
@@ -3741,23 +4262,42 @@
     }
     wirePerfStepButtons();
 
-    // Clicking outside the panel closes it.
+    // Clicking outside the panels closes them.
     document.addEventListener('click', function(e) {
-      if (!perfPanel.classList.contains('show')) return;
-      if (perfPanel.contains(e.target)) return;
-      if (perfToggle.contains(e.target)) return;
-      togglePerfPanel(false);
+      // Perf panel
+      if (perfPanel.classList.contains('show') &&
+          !perfPanel.contains(e.target) &&
+          !perfToggle.contains(e.target)) {
+        togglePerfPanel(false);
+      }
+      // Songs float panel
+      if (songsFloatPanel.classList.contains('show') &&
+          !songsFloatPanel.contains(e.target) &&
+          !songsFloatToggle.contains(e.target)) {
+        toggleSongsFloatPanel(false);
+      }
+      // Key float panel
+      if (keyFloatPanel.classList.contains('show') &&
+          !keyFloatPanel.contains(e.target) &&
+          !keyFloatToggle.contains(e.target)) {
+        toggleKeyFloatPanel(false);
+      }
     });
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && perfPanel.classList.contains('show')) {
         togglePerfPanel(false);
+      }
+      if (e.key === 'Escape' && songsFloatPanel.classList.contains('show')) {
+        toggleSongsFloatPanel(false);
+      }
+      if (e.key === 'Escape' && keyFloatPanel.classList.contains('show')) {
+        toggleKeyFloatPanel(false);
       }
     });
 
     // ===== CHROME COLLAPSE (focus mode) =====
     // Hides the toolbar and the editor so the preview fills the screen.
     // Always starts expanded on page load (no persistence).
-    let isChromeCollapsed = false;
 
     function applyChromeCollapsed(collapsed) {
       isChromeCollapsed = !!collapsed;
@@ -3767,6 +4307,8 @@
         ? 'Expand toolbar & editor'
         : 'Collapse toolbar & editor (focus mode)';
       chromeToggle.setAttribute('aria-label', chromeToggle.title);
+      // Sync whether the editor should be visible in the new focus state.
+      syncFocusModeEditorVisibility();
       // Recompute chord sizes because the preview width changes
       setTimeout(adjustChordSizes, 200);
       setTimeout(adjustChordSizes, 400);
@@ -3785,7 +4327,9 @@
     applyLayout(loadLayoutState());   // ✅ FIX: restore saved layout
 
     applyMode(false);
-    applyChromeCollapsed(false);
+    // Start in focus (hamburger) mode: toolbar + editor hidden, preview fills
+    // the screen. Click ☰ to expand, or ✏️ to bring the editor back.
+    applyChromeCollapsed(true);
     if (typeof syncPerfPanel === 'function') syncPerfPanel();
 
     displayStoredSongs();
