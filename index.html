@@ -852,7 +852,7 @@
     .songs-float-toggle {
       position: fixed;
       top: 10px;
-      right: 154px; /* shifted left to make room for the 🔑 key button */
+      right: 202px; /* sits just left of the ✏️ editor button */
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -888,7 +888,7 @@
     .editor-float-toggle {
       position: fixed;
       top: 10px;
-      right: 202px; /* shifted left to make room for the 🔑 key button */
+      right: 250px; /* leftmost of the floating cluster */
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -921,11 +921,42 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
 
+    /* ===== FLOATING LAYOUT BUTTON ===== */
+    .layout-float-toggle {
+      position: fixed;
+      top: 10px;
+      right: 106px; /* between ⚙️ perf and 🔑 key */
+      z-index: 8000;
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border-radius: 10px;
+      border: 1px solid #c4ad92;
+      background: rgba(232, 220, 204, 0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: #3d2b1f;
+      font-size: 1.1rem;
+      line-height: 1;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      font-family: inherit;
+    }
+    .layout-float-toggle:hover {
+      background: rgba(196, 173, 146, 0.95);
+      transform: scale(1.05);
+    }
+
     /* ===== FLOATING KEY BUTTON ===== */
     .key-float-toggle {
       position: fixed;
       top: 10px;
-      right: 106px; /* between ⚙️ perf and 🎵 songs */
+      right: 154px; /* between 📱 layout and 🎵 songs */
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -961,7 +992,7 @@
     .key-float-panel {
       position: fixed;
       top: 58px;
-      right: 106px; /* aligned under the 🔑 button */
+      right: 154px; /* aligned under the 🔑 button */
       z-index: 7999;
       width: 260px;
       background: #f5ede0;
@@ -1022,7 +1053,7 @@
     .songs-float-panel {
       position: fixed;
       top: 58px;
-      right: 154px; /* aligned under the 🎵 button */
+      right: 202px; /* aligned under the 🎵 button */
       z-index: 7999;
       width: 320px;
       max-height: calc(100vh - 72px);
@@ -1564,6 +1595,7 @@
 
 <button class="chrome-toggle" id="chromeToggle" title="Collapse toolbar & editor (focus mode)" aria-label="Collapse toolbar and editor">☰</button>
 <button class="perf-toggle" id="perfToggle" title="Open performance controls" aria-label="Open performance controls">⚙️</button>
+<button class="layout-float-toggle" id="layoutFloatToggle" title="Switch to Phone View" aria-label="Switch layout">📱</button>
 <button class="key-float-toggle" id="keyFloatToggle" title="Key &amp; transpose" aria-label="Key and transpose">🔑</button>
 <button class="songs-float-toggle" id="songsFloatToggle" title="Songs" aria-label="Songs">🎵</button>
 <button class="editor-float-toggle" id="editorFloatToggle" title="Hide editor" aria-label="Hide editor">✏️</button>
@@ -1983,6 +2015,7 @@
 
     const chromeToggle = document.getElementById('chromeToggle');
     const editorFloatToggle = document.getElementById('editorFloatToggle');
+    const layoutFloatToggle = document.getElementById('layoutFloatToggle');
 
     // ===== STATE =====
     let isLocked = false;                 // ✅ FIX: was undeclared
@@ -3504,6 +3537,18 @@
       // Button text shows the view you'd switch TO
       toggleLayoutBtn.textContent = currentLayout === 'phone' ? '🖥️ Desktop View' : '📱 Phone View';
       toggleLayoutBtn.classList.toggle('active', currentLayout === 'phone');
+
+      // Floating layout button: icon shows the view you'd switch TO.
+      // The button keeps its base (idle) color at all times — no .active
+      // styling is applied, so it always looks the same in both layouts.
+      if (typeof layoutFloatToggle !== 'undefined' && layoutFloatToggle) {
+        layoutFloatToggle.textContent = currentLayout === 'phone' ? '🖥️' : '📱';
+        layoutFloatToggle.title = currentLayout === 'phone'
+          ? 'Switch to Desktop View'
+          : 'Switch to Phone View';
+        layoutFloatToggle.setAttribute('aria-label', layoutFloatToggle.title);
+      }
+
       // Re-apply collapsed state so the correct hide animation runs in the new orientation
       applyEditorState(isEditorCollapsed);
       saveLayoutState(currentLayout);
@@ -3511,6 +3556,12 @@
     }
 
     toggleLayoutBtn.addEventListener('click', function() {
+      applyLayout(currentLayout === 'phone' ? 'desktop' : 'phone');
+    });
+
+    // Floating layout toggle: same behavior as the toolbar button.
+    layoutFloatToggle.addEventListener('click', function(e) {
+      e.stopPropagation();
       applyLayout(currentLayout === 'phone' ? 'desktop' : 'phone');
     });
 
