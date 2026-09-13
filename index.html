@@ -1666,6 +1666,15 @@
       background: #f5ede0;
     }
 
+    /* When the user is actively dragging a slider inside the panel,
+       fade the whole panel so the preview behind it stays visible. */
+    .perf-panel {
+      transition: opacity 0.15s ease;
+    }
+    .perf-panel.dragging {
+      opacity: 0.35;
+    }
+
     /* When chrome is collapsed, hide the toolbar.
        The floating ☰ button and the preview stay visible. */
     body.chrome-collapsed .toolbar {
@@ -2142,97 +2151,86 @@
     <div class="perf-section-label">SIZES</div>
 
     <div class="perf-row">
-      <label for="perfMaster">🔍 EVERYTHING</label>
-      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfMaster" title="Decrease">−</button>
-      <input type="range" id="perfMaster" min="0" max="100" step="0.5" value="50">
-      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfMaster" title="Increase">+</button>
-      <input type="number" class="perf-readout" id="perfMasterReadout" min="0.10" max="10" step="0.01" value="1.00">
+      <label for="perfLabelSize">Labels</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfLabelSize" title="Decrease">−</button>
+      <input type="range" id="perfLabelSize" min="0" max="100" step="0.5" value="50">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfLabelSize" title="Increase">+</button>
+      <input type="number" class="perf-readout" id="perfLabelSizeReadout" min="0.25" max="4" step="0.01" value="1.00">
     </div>
-
-    <div class="perf-subhead">🎼 Chords &amp; Barlines</div>
-
     <div class="perf-row">
-      <label for="perfChordSize">Chord size</label>
+      <label for="perfChordSize">Chords</label>
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfChordSize" title="Decrease">−</button>
       <input type="range" id="perfChordSize" min="0" max="100" step="0.5" value="50">
       <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfChordSize" title="Increase">+</button>
       <input type="number" class="perf-readout" id="perfChordSizeReadout" min="0.25" max="4" step="0.01" value="1.00">
     </div>
     <div class="perf-row">
-      <label for="perfPipeScale">Barline height</label>
-      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfPipeScale" title="Decrease">−</button>
-      <input type="range" id="perfPipeScale" min="1" max="5" step="0.05" value="2.25">
-      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfPipeScale" title="Increase">+</button>
-      <input type="number" class="perf-readout" id="perfPipeScaleReadout" min="1" max="5" step="0.05" value="2.25">
-    </div>
-    <div class="perf-row">
-      <label for="perfPipeThickness">Barline thickness</label>
-      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfPipeThickness" title="Decrease">−</button>
-      <input type="range" id="perfPipeThickness" min="0" max="0.15" step="0.005" value="0.03">
-      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfPipeThickness" title="Increase">+</button>
-      <input type="number" class="perf-readout" id="perfPipeThicknessReadout" min="0" max="0.15" step="0.005" value="0.030">
-    </div>
-    <div class="perf-row">
-      <label for="perfPipeValign">Barline nudge ↕</label>
-      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfPipeValign" title="Decrease">−</button>
-      <input type="range" id="perfPipeValign" min="-1" max="1" step="0.05" value="0.2">
-      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfPipeValign" title="Increase">+</button>
-      <input type="number" class="perf-readout" id="perfPipeValignReadout" min="-1" max="1" step="0.05" value="0.20">
-    </div>
-
-    <div class="perf-subhead">🎤 Lyrics</div>
-    <div class="perf-row">
-      <label for="perfLyricSize">Lyric size</label>
+      <label for="perfLyricSize">Lyrics</label>
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfLyricSize" title="Decrease">−</button>
       <input type="range" id="perfLyricSize" min="0" max="100" step="0.5" value="50">
       <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfLyricSize" title="Increase">+</button>
       <input type="number" class="perf-readout" id="perfLyricSizeReadout" min="0.25" max="4" step="0.01" value="1.00">
     </div>
 
-    <div class="perf-subhead">🔖 Labels</div>
-    <div class="perf-row">
-      <label for="perfLabelSize">Label size</label>
-      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfLabelSize" title="Decrease">−</button>
-      <input type="range" id="perfLabelSize" min="0" max="100" step="0.5" value="50">
-      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfLabelSize" title="Increase">+</button>
-      <input type="number" class="perf-readout" id="perfLabelSizeReadout" min="0.25" max="4" step="0.01" value="1.00">
-    </div>
-
     <div class="perf-section-label">SPACING</div>
 
     <div class="perf-row">
-      <label for="perfLyricSpacing">🎤 Lyrics</label>
-      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfLyricSpacing" title="Decrease">−</button>
-      <input type="range" id="perfLyricSpacing" min="-0.05" max="0.2" step="0.005" value="0">
-      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfLyricSpacing" title="Increase">+</button>
-      <input type="number" class="perf-readout" id="perfLyricSpacingReadout" min="-0.05" max="0.2" step="0.005" value="0.000">
+      <label for="perfLabelSpacing">Labels</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfLabelSpacing" title="Decrease">−</button>
+      <input type="range" id="perfLabelSpacing" min="-0.05" max="0.2" step="0.005" value="0">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfLabelSpacing" title="Increase">+</button>
+      <input type="number" class="perf-readout" id="perfLabelSpacingReadout" min="-0.05" max="0.2" step="0.005" value="0.000">
     </div>
     <div class="perf-row">
-      <label for="perfChordSpacing">🎼 Chords &amp; Barlines</label>
+      <label for="perfChordSpacing">Chords</label>
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfChordSpacing" title="Decrease">−</button>
       <input type="range" id="perfChordSpacing" min="-0.05" max="0.2" step="0.005" value="0">
       <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfChordSpacing" title="Increase">+</button>
       <input type="number" class="perf-readout" id="perfChordSpacingReadout" min="-0.05" max="0.2" step="0.005" value="0.000">
     </div>
     <div class="perf-row">
-      <label for="perfLabelSpacing">🔖 Labels</label>
-      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfLabelSpacing" title="Decrease">−</button>
-      <input type="range" id="perfLabelSpacing" min="-0.05" max="0.2" step="0.005" value="0">
-      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfLabelSpacing" title="Increase">+</button>
-      <input type="number" class="perf-readout" id="perfLabelSpacingReadout" min="-0.05" max="0.2" step="0.005" value="0.000">
+      <label for="perfLyricSpacing">Lyrics</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfLyricSpacing" title="Decrease">−</button>
+      <input type="range" id="perfLyricSpacing" min="-0.05" max="0.2" step="0.005" value="0">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfLyricSpacing" title="Increase">+</button>
+      <input type="number" class="perf-readout" id="perfLyricSpacingReadout" min="-0.05" max="0.2" step="0.005" value="0.000">
     </div>
 
-    <div class="perf-section-label">LAYOUT</div>
+    <div class="perf-section-label">BARLINES</div>
 
     <div class="perf-row">
-      <label for="perfMarginH">↔️ Horizontal margin</label>
+      <label for="perfPipeScale">Height</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfPipeScale" title="Decrease">−</button>
+      <input type="range" id="perfPipeScale" min="1" max="5" step="0.05" value="2.25">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfPipeScale" title="Increase">+</button>
+      <input type="number" class="perf-readout" id="perfPipeScaleReadout" min="1" max="5" step="0.05" value="2.25">
+    </div>
+    <div class="perf-row">
+      <label for="perfPipeThickness">Thickness</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfPipeThickness" title="Decrease">−</button>
+      <input type="range" id="perfPipeThickness" min="0" max="0.15" step="0.005" value="0.03">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfPipeThickness" title="Increase">+</button>
+      <input type="number" class="perf-readout" id="perfPipeThicknessReadout" min="0" max="0.15" step="0.005" value="0.030">
+    </div>
+    <div class="perf-row">
+      <label for="perfPipeValign">Nudge ↕</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfPipeValign" title="Decrease">−</button>
+      <input type="range" id="perfPipeValign" min="-1" max="1" step="0.05" value="0.2">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfPipeValign" title="Increase">+</button>
+      <input type="number" class="perf-readout" id="perfPipeValignReadout" min="-1" max="1" step="0.05" value="0.20">
+    </div>
+
+    <div class="perf-section-label">MARGINS</div>
+
+    <div class="perf-row">
+      <label for="perfMarginH">Horizontal</label>
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfMarginH" title="Decrease">−</button>
       <input type="range" id="perfMarginH" min="0" max="40" step="1" value="8">
       <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfMarginH" title="Increase">+</button>
       <input type="number" class="perf-readout" id="perfMarginHReadout" min="0" max="40" step="1" value="8">
     </div>
     <div class="perf-row">
-      <label for="perfMarginV">↕️ Vertical margin</label>
+      <label for="perfMarginV">Vertical</label>
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfMarginV" title="Decrease">−</button>
       <input type="range" id="perfMarginV" min="0" max="40" step="1" value="8">
       <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfMarginV" title="Increase">+</button>
@@ -3557,6 +3555,10 @@
 
     // ✅ FIX: only transpose lines that look like chord lines (contain '|'),
     //          and use a stricter chord regex so plain lyric words like "A" aren't moved.
+    // Note: this regex accepts plain letters A–G (with optional #/b) followed by
+    // only chord-quality suffixes. Words like "Amazing" won't match because
+    // "azing" isn't a valid suffix. But "A" alone WILL match — which is why
+    // transposeText() guards on `line.includes('|')` first.
     const CHORD_TOKEN_RE = /^[A-G][#b]?(?:maj|min|m|dim|aug|sus|add|°|ø|Δ|\d|[#b]\d|\/[A-G][#b]?)*$/;
 
     function transposeText(text, semitones, key) {
@@ -4002,6 +4004,8 @@
       const fileInput = document.createElement('input');
       fileInput.type = 'file';
       fileInput.accept = '.txt,.chordchart,.json';
+      // Uncomment the next line to allow selecting a whole folder at once:
+      // fileInput.webkitdirectory = true;
 
       fileInput.onchange = function(e) {
         const file = e.target.files[0];
@@ -4033,20 +4037,28 @@
     });
 
     // ===== RESIZE HANDLE =====
-    resizeHandle.addEventListener('mousedown', function(e) {
+    function startResize(clientX, clientY) {
       isResizing = true;
-      startY = e.clientY;
-      startX = e.clientX;
+      startY = clientY;
+      startX = clientX;
       startHeight = inputArea.offsetHeight;
       startWidth = inputArea.offsetWidth;
       document.body.style.cursor = currentLayout === 'phone' ? 'ew-resize' : 'ns-resize';
       document.body.style.userSelect = 'none';
+    }
+    resizeHandle.addEventListener('mousedown', function(e) {
+      startResize(e.clientX, e.clientY);
       e.preventDefault();
     });
-    document.addEventListener('mousemove', function(e) {
+    resizeHandle.addEventListener('touchstart', function(e) {
+      if (e.touches.length !== 1) return;
+      startResize(e.touches[0].clientX, e.touches[0].clientY);
+      e.preventDefault();
+    }, { passive: false });
+    function doResize(clientX, clientY) {
       if (!isResizing) return;
       if (currentLayout === 'phone') {
-        const deltaX = e.clientX - startX;
+        const deltaX = clientX - startX;
         let newWidth = startWidth + deltaX;
         const wrapperWidth = editorWrapper.offsetWidth || 1;
         let newPercent = (newWidth / wrapperWidth) * 100;
@@ -4060,7 +4072,7 @@
         clearTimeout(window._resizeTimeout);
         window._resizeTimeout = setTimeout(adjustChordSizes, 100);
       } else {
-        const deltaY = startY - e.clientY;
+        const deltaY = startY - clientY;
         let newHeight = startHeight + deltaY;
         newHeight = Math.max(60, Math.min(window.innerHeight * 0.7, newHeight));
         inputArea.style.height = newHeight + 'px';
@@ -4068,19 +4080,28 @@
         clearTimeout(window._resizeTimeout);
         window._resizeTimeout = setTimeout(adjustChordSizes, 100);
       }
-    });
-    document.addEventListener('mouseup', function() {
-      if (isResizing) {
-        isResizing = false;
-        document.body.style.cursor = '';
-        document.body.style.userSelect = '';
-        if (currentLayout === 'phone') {
-          editorWidthSlider.value = settings.editorWidth;
-          if (document.activeElement !== editorWidthNum) editorWidthNum.value = settings.editorWidth.toFixed(0);
-        }
-        setTimeout(adjustChordSizes, 150);
+    }
+    function endResize() {
+      if (!isResizing) return;
+      isResizing = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      if (currentLayout === 'phone') {
+        editorWidthSlider.value = settings.editorWidth;
+        if (document.activeElement !== editorWidthNum) editorWidthNum.value = settings.editorWidth.toFixed(0);
       }
-    });
+      setTimeout(adjustChordSizes, 150);
+    }
+    document.addEventListener('mousemove', function(e) { doResize(e.clientX, e.clientY); });
+    document.addEventListener('mouseup', endResize);
+    document.addEventListener('touchmove', function(e) {
+      if (!isResizing) return;
+      if (e.touches.length !== 1) return;
+      doResize(e.touches[0].clientX, e.touches[0].clientY);
+      e.preventDefault();
+    }, { passive: false });
+    document.addEventListener('touchend', endResize);
+    document.addEventListener('touchcancel', endResize);
 
     // ===== EDITOR / MODE / LAYOUT TOGGLES =====
     function applyEditorState(hidden) {
@@ -4626,8 +4647,7 @@
     const perfPanel = document.getElementById('perfPanel');
     const perfClose = document.getElementById('perfClose');
 
-    const perfMaster = document.getElementById('perfMaster');
-    const perfMasterReadout = document.getElementById('perfMasterReadout');
+    // perfMaster / perfMasterReadout removed — no master slider in the panel
     const perfChordSize = document.getElementById('perfChordSize');
     const perfChordSizeReadout = document.getElementById('perfChordSizeReadout');
     const perfPipeScale = document.getElementById('perfPipeScale');
@@ -5011,9 +5031,6 @@
     // Sync all panel sliders from the current settings.
     function syncPerfPanel() {
       // SIZES
-      perfMaster.value = scaleToSliderPos(settings.masterScale);
-      perfMasterReadout.value = Number(settings.masterScale).toFixed(2);
-
       const chR = internalToRatio(settings.chordSizeMult, BASE_CHORD_MULT);
       perfChordSize.value = ratioToSliderPos(chR);
       perfChordSizeReadout.value = chR.toFixed(2);
@@ -5054,11 +5071,6 @@
     }
 
     // Panel slider → existing setters (keeps everything in sync).
-    perfMaster.addEventListener('input', function() {
-      const v = sliderPosToScale(parseFloat(this.value));
-      perfMasterReadout.value = v.toFixed(2);
-      setMasterScale(v);
-    });
     perfChordSize.addEventListener('input', function() {
       const ratio = sliderPosToRatio(parseFloat(this.value));
       perfChordSizeReadout.value = ratio.toFixed(2);
@@ -5140,18 +5152,6 @@
           const slider = document.getElementById(targetId);
           if (!slider) return;
 
-          // Master scale: additive step in slider-position space (matches toolbar).
-          if (targetId === 'perfMaster') {
-            const stepVal = parseFloat(slider.step) || 0.5;
-            const min = parseFloat(slider.min) || 0;
-            const max = parseFloat(slider.max) || 100;
-            let v = parseFloat(slider.value) + dir * stepVal;
-            v = Math.min(max, Math.max(min, v));
-            slider.value = v;
-            slider.dispatchEvent(new Event('input', { bubbles: true }));
-            return;
-          }
-
           // Ratio sliders (chord / lyric / label size): multiply / divide in ratio space.
           if (PERF_MULT_TARGETS[targetId]) {
             // Slider position → ratio, apply factor, → slider position.
@@ -5179,6 +5179,56 @@
       });
     }
     wirePerfStepButtons();
+
+    // ===== FADE PANEL WHILE DRAGGING A SLIDER OR TAPPING ± BUTTONS =====
+    // Two ways the panel becomes faded:
+    //   1. Dragging a slider  → fades while held, snaps back on release.
+    //   2. Tapping a ± button → fades and STAYS faded.
+    // To unfade after a ± tap, the user clicks anywhere on the panel
+    // background that isn't an interactive control. That click is caught
+    // by the panel-wide listener below.
+    (function wirePerfPanelDragFade() {
+      function fade() {
+        perfPanel.classList.add('dragging');
+      }
+      function unfade() {
+        perfPanel.classList.remove('dragging');
+      }
+
+      // Sliders: fade on grab, unfade on release (unchanged behavior).
+      perfPanel.querySelectorAll('input[type="range"]').forEach(function (slider) {
+        slider.addEventListener('pointerdown', fade);
+        slider.addEventListener('pointerup', unfade);
+        slider.addEventListener('pointercancel', unfade);
+        slider.addEventListener('blur', unfade);
+      });
+
+      // ± step buttons: fade on tap and leave the panel faded. No timer.
+      perfPanel.querySelectorAll('button[data-perf-target]').forEach(function (btn) {
+        btn.addEventListener('pointerdown', function (e) {
+          if (e.button !== undefined && e.button !== 0) return;
+          fade();
+        });
+      });
+
+      // Clicking on the panel's "background" (anywhere that isn't an
+      // interactive control) unfades it. We check the click target:
+      //   - If it's inside a slider, a ± button, a reset button, a label,
+      //     or a readout input, we ignore it (those have their own rules).
+      //   - Otherwise — panel padding, header area, section labels,
+      //     divider lines, etc. — it's a deliberate "I'm done" click.
+      perfPanel.addEventListener('click', function (e) {
+        const t = e.target;
+        // Ignore clicks on interactive elements.
+        if (t.closest('input, button, select, textarea, label')) return;
+        unfade();
+      });
+
+      // Escape hatch: if the panel gets closed while faded, clear too.
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') unfade();
+      });
+    })();
 
     // Clicking outside the panels closes them.
     document.addEventListener('click', function(e) {
@@ -5224,7 +5274,7 @@
 
     // ===== CHROME COLLAPSE (focus mode) =====
     // Hides the toolbar and the editor so the preview fills the screen.
-    // Always starts expanded on page load (no persistence).
+    // Starts expanded on every load (see applyChromeCollapsed(false) in INIT).
 
     function applyChromeCollapsed(collapsed) {
       isChromeCollapsed = !!collapsed;
@@ -5242,7 +5292,9 @@
       }
       // Sync whether the editor should be visible in the new focus state.
       syncFocusModeEditorVisibility();
-      // ✅ FIX: remember this choice across reloads
+      // (Focus-mode state is saved here but intentionally NOT restored
+      //  on boot — see INIT. Kept so the state is available if we
+      //  re-enable focus mode persistence later.)
       saveChromeCollapsedState(isChromeCollapsed);
       // Recompute chord sizes because the preview width changes
       setTimeout(adjustChordSizes, 200);
@@ -5324,6 +5376,8 @@
     // whose localStorage still says "collapsed" don't boot into a stuck
     // state with no way back.
     applyChromeCollapsed(false);
+    // NOTE: loadChromeCollapsedState() / saveChromeCollapsedState() are
+    // intentionally unused — focus mode is always off on load.
     // ✅ Default startup state (Option C):
     //   • ☰ "hamburger" toggle → OFF (1st-row floating buttons visible)
     //   • ⋯ "twin" toggle       → UNPRESSED (cream), even though the
