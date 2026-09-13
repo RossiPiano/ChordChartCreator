@@ -4521,6 +4521,51 @@
     }
 
     // ===== RENDER =====
+    // Normalize bracket-wrapped section labels so that ALL THREE of
+    // these forms render identically:
+    //   Intro (extra info)
+    //   [Intro (extra info)]
+    //   [Intro] (extra info)
+    // We strip the wrapping brackets when the content looks like a
+    // section label, then let the bare-label branch further down handle
+    // the bold-name / thin-extra split. Non-label bracketed lines like
+    // `[My Custom Tag]` are left alone for the existing custom-label
+    // branch to catch.
+    const SECTION_NAMES_RE = /^(Intro|Verse|Pre-Chorus|Chorus|Post-Chorus|Bridge|Outro|Instrumental|Tag|Ending|Coda)/i;
+
+    function normalizeBracketLabel(trimmedLine) {
+      if (!trimmedLine || trimmedLine.charAt(0) !== '[') return trimmedLine;
+
+      // Case A: whole line is `[...]` — e.g. `[Intro]` or `[Intro (extra)]`
+      const fullBracket = trimmedLine.match(/^\[(.*?)\]\s*(.*)$/);
+      if (fullBracket) {
+        const inside = fullBracket[1].trim();
+        const trailing = fullBracket[2].trim();
+        // If what's inside starts with a known section name, unwrap it
+        // so the bare-label branch can parse name + extra.
+        if (SECTION_NAMES_RE.test(inside)) {
+          return trailing ? (inside + ' ' + trailing) : inside;
+        }
+        return trimmedLine;   // let the custom-label branch handle it
+      }
+      return trimmedLine;
+    }
+
+    // Detect a "silent section marker": a line that is ENTIRELY
+    //   ((some text))
+    // The renderer will consume it, update currentSection for coloring
+    // purposes, but emit no HTML. Use this to color upcoming lyrics
+    // without showing a visible label pill.
+    const SILENT_MARKER_RE = /^\(\((.*)\)\)$/;
+
+    function parseSilentMarker(trimmedLine) {
+      const m = trimmedLine.match(SILENT_MARKER_RE);
+      if (!m) return null;
+      const inner = m[1].trim();
+      if (!inner) return null;
+      return inner;
+    }
+
     function renderChordLine(line, sectionClass) {
       let html = `<div class="chord-line">`;
       const tokens = line.match(/(\s+|\S+)/g) || [];
@@ -4555,7 +4600,8 @@
       currentSection = '';
 
       for (let line of lines) {
-        const trimmed = line.trim();
+        const rawTrimmed = line.trim();
+        const trimmed = normalizeBracketLabel(rawTrimmed);
         if (trimmed === '---' || trimmed === '___' || trimmed === '***') {
           html += `<div class="hr-line"><span class="hr"></span></div>`;
           continue;
@@ -4564,6 +4610,15 @@
           html += `<div class="empty-line"></div>`;
           continue;
         }
+
+        // ((hidden)) → update currentSection for color, emit no HTML.
+        const silentMarker = parseSilentMarker(trimmed);
+        if (silentMarker !== null) {
+          const expanded = expandSectionShortcut(silentMarker);
+          currentSection = expanded;
+          continue;
+        }
+
         const customLabelMatch = trimmed.match(/^\[(.*?)\]$/);
         if (customLabelMatch) {
           const labelText = customLabelMatch[1].trim();
@@ -4666,7 +4721,8 @@
       currentSection = '';
 
       for (let line of lines) {
-        const trimmed = line.trim();
+        const rawTrimmed = line.trim();
+        const trimmed = normalizeBracketLabel(rawTrimmed);
         if (trimmed === '---' || trimmed === '___' || trimmed === '***') {
           html += `<div class="hr-line"><span class="hr"></span></div>`;
           continue;
@@ -4675,6 +4731,15 @@
           html += `<div class="empty-line"></div>`;
           continue;
         }
+
+        // ((hidden)) → update currentSection for color, emit no HTML.
+        const silentMarker = parseSilentMarker(trimmed);
+        if (silentMarker !== null) {
+          const expanded = expandSectionShortcut(silentMarker);
+          currentSection = expanded;
+          continue;
+        }
+
         const customLabelMatch = trimmed.match(/^\[(.*?)\]$/);
         if (customLabelMatch) {
           const labelText = customLabelMatch[1].trim();
