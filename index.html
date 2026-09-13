@@ -401,10 +401,6 @@
 
     /* ===== CHROME COLLAPSE (focus mode) ===== */
     .chrome-toggle {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      z-index: 8100 !important;
       width: 38px;
       height: 38px;
       padding: 0;
@@ -437,6 +433,43 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
     }
 
+    /* ===== FLOATING BUTTON LAYER (auto-arranging) ===== */
+    .float-layer {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      z-index: 8000;
+      display: flex;
+      flex-direction: row-reverse;
+      align-items: flex-start;
+      gap: 10px;
+      pointer-events: none;
+      max-width: calc(100vw - 20px);
+      width: max-content;
+    }
+    .float-layer > * {
+      pointer-events: auto;
+    }
+    /* Fixed column: ☰ on top, ⛔ right below it. Right edge stays aligned. */
+    .float-fixed-col {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 0 0 auto;
+    }
+    /* Auto column: fills from the right, wraps to a new row when it hits
+       the left edge of the viewport. row-reverse puts the FIRST HTML child
+       on the RIGHTMOST position, so the visual order matches the DOM order. */
+    .float-auto-col {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: 10px;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
     .old-settings-toggle,
     .perf-toggle,
     .layout-float-toggle,
@@ -462,18 +495,14 @@
     body.first-row-hidden .songs-float-toggle,
     body.first-row-hidden .template-float-toggle,
     body.first-row-hidden .editor-float-toggle {
-      transform: translateX(360px);
       opacity: 0;
+      pointer-events: none;
     }
 
     /* (.chrome-toggle-2 rule removed with the ⋯ button.) */
 
-    /* ===== FLOATING "OLD SETTINGS" TOGGLE (sits between ☰ and ⚙️) ===== */
+    /* ===== FLOATING "OLD SETTINGS" TOGGLE (2nd row, below ☰) ===== */
     .old-settings-toggle {
-      position: fixed;
-      top: 10px;
-      right: 58px;
-      z-index: 8000;
       width: 38px;
       height: 38px;
       padding: 0;
@@ -509,10 +538,6 @@
 
     /* ===== FLOATING PERFORMANCE BUTTON ===== */
     .perf-toggle {
-      position: fixed;
-      top: 10px;
-      right: 106px;
-      z-index: 8000;
       width: 38px;
       height: 38px;
       padding: 0;
@@ -545,10 +570,6 @@
     }
 
     .songs-float-toggle {
-      position: fixed;
-      top: 10px;
-      right: 394px;
-      z-index: 8000;
       width: 38px;
       height: 38px;
       padding: 0;
@@ -581,10 +602,6 @@
     }
 
     .editor-float-toggle {
-      position: fixed;
-      top: 10px;
-      right: 298px;
-      z-index: 8000;
       width: 38px;
       height: 38px;
       padding: 0;
@@ -617,10 +634,6 @@
     }
 
     .save-float-toggle {
-      position: fixed;
-      top: 10px;
-      right: 202px;
-      z-index: 8000;
       width: 38px;
       height: 38px;
       padding: 0;
@@ -653,10 +666,6 @@
     }
 
     .png-float-toggle {
-      position: fixed;
-      top: 10px;
-      right: 154px;
-      z-index: 8000;
       width: 38px;
       height: 38px;
       padding: 0;
@@ -689,19 +698,15 @@
     }
 
     .key-float-toggle {
-      position: fixed;
-      top: 10px;
-      right: 346px;
-      z-index: 8000;
       width: 38px;
       height: 38px;
       padding: 0;
       border-radius: 10px;
-      border: 1px solid #c4ad92;
-      background: rgba(232, 220, 204, 0.85);
+      border: 1px solid #c47a1a;
+      background: rgba(240, 150, 40, 0.9);
       backdrop-filter: blur(6px);
       -webkit-backdrop-filter: blur(6px);
-      color: #3d2b1f;
+      color: #ffffff;
       font-size: 1.1rem;
       line-height: 1;
       font-weight: 700;
@@ -710,18 +715,20 @@
       align-items: center;
       justify-content: center;
       transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 2px 6px rgba(200, 110, 20, 0.35);
       font-family: inherit;
     }
     .key-float-toggle:hover {
-      background: rgba(196, 173, 146, 0.95);
+      background: rgba(220, 130, 30, 0.98);
+      border-color: #a8620e;
       transform: scale(1.05);
+      box-shadow: 0 3px 10px rgba(200, 110, 20, 0.5);
     }
     .key-float-toggle.active {
-      background: #5c4033;
+      background: #a8620e;
       color: #ffffff;
-      border-color: #4a3328;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      border-color: #8a4f0a;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
 
     .key-float-panel {
@@ -833,10 +840,6 @@
 
     /* ===== FLOATING TEMPLATE ===== */
     .template-float-toggle {
-      position: fixed;
-      top: 10px;
-      right: 250px;
-      z-index: 8000;
       width: 38px;
       height: 38px;
       padding: 0;
@@ -1577,16 +1580,21 @@
   </div>
 </div>
 
-<button class="chrome-toggle" id="chromeToggle" title="Collapse editor (focus mode)" aria-label="Collapse editor">☰</button>
-<button class="old-settings-toggle" id="oldSettingsToggle" title="Old Settings" aria-label="Old Settings">⛔</button>
-<!-- ⋯ button removed — toolbar is gone, so it has nothing to toggle -->
-<button class="perf-toggle" id="perfToggle" title="Open settings" aria-label="Open settings">⚙️</button>
-<button class="songs-float-toggle" id="songsFloatToggle" title="Songs" aria-label="Songs">🎵</button>
-<button class="key-float-toggle" id="keyFloatToggle" title="Key &amp; transpose" aria-label="Key and transpose">🔑</button>
-<button class="editor-float-toggle" id="editorFloatToggle" title="Hide both editors" aria-label="Hide both editors">✏️</button>
-<button class="png-float-toggle" id="pngFloatToggle" title="Export Chord Chart as PNG" aria-label="Export Chord Chart as PNG">📷</button>
-<button class="save-float-toggle" id="saveFloatToggle" title="Save Chord Chart" aria-label="Save Chord Chart">💾</button>
-<button class="template-float-toggle" id="templateFloatToggle" title="Templates (look &amp; feel presets)" aria-label="Templates">🎨</button>
+<div class="float-layer" id="floatLayer">
+  <div class="float-fixed-col">
+    <button class="chrome-toggle" id="chromeToggle" title="Collapse editor (focus mode)" aria-label="Collapse editor">☰</button>
+    <button class="old-settings-toggle" id="oldSettingsToggle" title="Old Settings" aria-label="Old Settings">⛔</button>
+  </div>
+  <div class="float-auto-col">
+    <button class="songs-float-toggle" id="songsFloatToggle" title="Songs" aria-label="Songs">🎵</button>
+    <button class="key-float-toggle" id="keyFloatToggle" title="Key &amp; transpose" aria-label="Key and transpose">🔑</button>
+    <button class="editor-float-toggle" id="editorFloatToggle" title="Hide both editors" aria-label="Hide both editors">✏️</button>
+    <button class="template-float-toggle" id="templateFloatToggle" title="Templates (look &amp; feel presets)" aria-label="Templates">🎨</button>
+    <button class="save-float-toggle" id="saveFloatToggle" title="Save Chord Chart" aria-label="Save Chord Chart">💾</button>
+    <button class="png-float-toggle" id="pngFloatToggle" title="Export Chord Chart as PNG" aria-label="Export Chord Chart as PNG">📷</button>
+    <button class="perf-toggle" id="perfToggle" title="Open settings" aria-label="Open settings">⚙️</button>
+  </div>
+</div>
 
 <div class="template-float-panel" id="templateFloatPanel" role="dialog" aria-label="Templates">
   <div class="template-float-header">
@@ -1962,6 +1970,7 @@
           v = parseFloat(v.toFixed(decimals));
           input.value = v;
           input.dispatchEvent(new Event('input', { bubbles: true }));
+          input.dispatchEvent(new Event('change', { bubbles: true }));
         }
         minusBtn.addEventListener('click', function(e) { e.preventDefault(); step(-1); });
         plusBtn.addEventListener('click', function(e) { e.preventDefault(); step(1); });
@@ -2744,6 +2753,9 @@
       return useFlats ? DIATONIC_FLATS[pitch] : DIATONIC_SHARPS[pitch];
     }
 
+    const ALLOWED_ROOTS_SHARP = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const ALLOWED_ROOTS_FLAT  = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+
     function transposeChordWithKey(chord, semitones, key) {
       if (!chord || chord === '_' || chord === '') return chord;
       if (semitones === 0) return chord;
@@ -2761,36 +2773,17 @@
       if (rootIndex === undefined) return chord;
 
       const newRootIndex = (rootIndex + semitones + 12) % 12;
-      const LETTERS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-      const LETTER_PITCH = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 
-      const originalLetter = root.charAt(0).toUpperCase();
-      const originalLetterIndex = LETTERS.indexOf(originalLetter);
-      const diatonicSteps = Math.round((semitones * 7) / 12);
+      const useFlats = preferFlats || /[b]/.test(root);
+      const newRoot = useFlats
+        ? ALLOWED_ROOTS_FLAT[newRootIndex]
+        : ALLOWED_ROOTS_SHARP[newRootIndex];
 
-      let targetLetterIndex = (originalLetterIndex + diatonicSteps) % 7;
-      if (targetLetterIndex < 0) targetLetterIndex += 7;
-      const targetLetter = LETTERS[targetLetterIndex];
-
-      const naturalPitch = LETTER_PITCH[targetLetter];
-      let accOffset = (newRootIndex - naturalPitch + 12) % 12;
-      if (accOffset > 6) accOffset -= 12;
-
-      let accidental = '';
-      if (accOffset === 1) accidental = '#';
-      else if (accOffset === 2) accidental = '##';
-      else if (accOffset === -1) accidental = 'b';
-      else if (accOffset === -2) accidental = 'bb';
-
-      const newRoot = targetLetter + accidental;
-      const check = NOTE_MAP[newRoot];
-      if (check !== newRootIndex) {
-        return spellPitch(newRootIndex, preferFlats) + rest;
-      }
       return newRoot + rest;
     }
 
     const CHORD_TOKEN_RE = /^[A-Ga-g][#b]?(?:maj|min|m|dim|aug|sus|add|°|ø|Δ|\d|[#b]\d|\/[A-Ga-g][#b]?)*$/;
+    const CHORD_TOKEN_STRICT_RE = /^[A-Ga-g][#b]?(?:maj7?|min7?|m7?|dim7?|aug|sus[24]?|add\d+|\d+|[#b]\d+|\/[A-Ga-g][#b]?|[°øΔ])*$/;
 
     function transposeText(text, semitones, key) {
       if (semitones === 0) return text;
@@ -2800,7 +2793,7 @@
         const tokens = line.split(/(\s+|\|)/);
         return tokens.map(token => {
           if (/^[|\s]+$/.test(token)) return token;
-          if (CHORD_TOKEN_RE.test(token)) {
+          if (CHORD_TOKEN_STRICT_RE.test(token)) {
             if (token.includes('/')) {
               const parts = token.split('/');
               return parts.map(p => transposeChordWithKey(p, semitones, key)).join('/');
@@ -2826,6 +2819,19 @@
       updatePreview();
       updatePreview2();
     }
+
+    function applyTranspositionToBoth() {
+      const semis = ((transposeSemitones % 12) + 12) % 12;
+      if (semis === 0) {
+        inputEl2.value = originalText;
+        inputEl.value = originalTextLeft;
+      } else {
+        inputEl2.value = transposeText(originalText, semis, getCurrentKey());
+        inputEl.value = transposeText(originalTextLeft, semis, getCurrentKey());
+      }
+      updatePreview();
+      updatePreview2();
+    }
     const TRANSPOSE_MIN = 0;
     const TRANSPOSE_MAX = 11;
 
@@ -2833,13 +2839,13 @@
       preferFlats = false;
       transposeSemitones++;
       if (transposeSemitones > TRANSPOSE_MAX) transposeSemitones = TRANSPOSE_MIN;
-      applyTransposition();
+      applyTranspositionToBoth();
     }
     function transposeDown() {
       preferFlats = true;
       transposeSemitones--;
       if (transposeSemitones < TRANSPOSE_MIN) transposeSemitones = TRANSPOSE_MAX;
-      applyTransposition();
+      applyTranspositionToBoth();
     }
     function resetTransposition() {
       transposeSemitones = 0;
@@ -2871,7 +2877,10 @@
         applySettings();
       }
 
-      resetTransposition();
+      transposeSemitones = 0;
+      preferFlats = false;
+      updatePreview();
+      updatePreview2();
     }
 
     // ===== DRAG & DROP =====
@@ -3898,6 +3907,10 @@
       }
     });
 
+    window.addEventListener('beforeunload', function() {
+      saveSettings();
+    });
+
     // ===== FLOATING PERFORMANCE PANEL =====
     const perfToggle = document.getElementById('perfToggle');
     const perfPanel = document.getElementById('perfPanel');
@@ -4361,6 +4374,7 @@
             const newPos = ratioToSliderPos(newRatio);
             slider.value = newPos;
             slider.dispatchEvent(new Event('input', { bubbles: true }));
+            slider.dispatchEvent(new Event('change', { bubbles: true }));
             return;
           }
 
@@ -4373,6 +4387,7 @@
           const decimals = (String(stepVal).split('.')[1] || '').length;
           slider.value = parseFloat(v.toFixed(decimals));
           slider.dispatchEvent(new Event('input', { bubbles: true }));
+          slider.dispatchEvent(new Event('change', { bubbles: true }));
         });
       });
     }
@@ -4410,7 +4425,8 @@
     document.addEventListener('click', function(e) {
       if (perfPanel.classList.contains('show') &&
           !perfPanel.contains(e.target) &&
-          !perfToggle.contains(e.target)) {
+          !perfToggle.contains(e.target) &&
+          !e.target.closest('.perf-panel')) {
         togglePerfPanel(false);
       }
       if (songsFloatPanel.classList.contains('show') &&
@@ -4512,13 +4528,17 @@
 
     inputEl.addEventListener('input', function() {
       originalTextLeft = inputEl.value;
-      transposeSemitones = 0;
+      if (transposeSemitones % 12 === 0) {
+        transposeSemitones = 0;
+      }
       updatePreview();
     });
 
     inputEl2.addEventListener('input', function() {
       originalText = inputEl2.value;
-      transposeSemitones = 0;
+      if (transposeSemitones % 12 === 0) {
+        transposeSemitones = 0;
+      }
       updatePreview2();
     });
 
