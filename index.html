@@ -1968,6 +1968,13 @@
 
     <div class="perf-section-label">SIZES</div>
     <div class="perf-row">
+      <label for="perfEverythingSize">EVERYTHING</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfEverythingSize" title="Decrease">−</button>
+      <input type="range" id="perfEverythingSize" min="0" max="100" step="0.5" value="50">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfEverythingSize" title="Increase">+</button>
+      <input type="number" class="perf-readout" id="perfEverythingSizeReadout" min="0.25" max="4" step="0.01" value="1.00">
+    </div>
+    <div class="perf-row">
       <label for="perfLabelSize">Labels</label>
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfLabelSize" title="Decrease">−</button>
       <input type="range" id="perfLabelSize" min="0" max="100" step="0.5" value="50">
@@ -2010,6 +2017,13 @@
       <input type="range" id="perfLyricSpacing" min="-0.05" max="0.2" step="0.005" value="0">
       <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfLyricSpacing" title="Increase">+</button>
       <input type="number" class="perf-readout" id="perfLyricSpacingReadout" min="-0.05" max="0.2" step="0.005" value="0.000">
+    </div>
+    <div class="perf-row">
+      <label for="perfEmptyLine">Empty Line</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfEmptyLine" title="Decrease">−</button>
+      <input type="range" id="perfEmptyLine" min="0" max="60" step="1" value="24">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfEmptyLine" title="Increase">+</button>
+      <input type="number" class="perf-readout" id="perfEmptyLineReadout" min="0" max="60" step="1" value="24">
     </div>
 
     <div class="perf-section-label">BARLINES</div>
@@ -2107,11 +2121,6 @@
           <label for="chordLineHeightSlider">Line spacing</label>
           <input type="range" id="chordLineHeightSlider" min="1" max="3" step="0.05" value="1.9">
           <input type="number" class="settings-num" id="chordLineHeightNum" min="1" max="3" step="0.05" value="1.9">
-        </div>
-        <div class="settings-row">
-          <label for="emptyLineHeightSlider">Blank line size</label>
-          <input type="range" id="emptyLineHeightSlider" min="0" max="60" step="1" value="24">
-          <input type="number" class="settings-num" id="emptyLineHeightNum" min="0" max="60" step="1" value="24">
         </div>
         <div class="settings-row">
           <label for="editorWidthSlider">Editor width</label>
@@ -2459,8 +2468,7 @@
     const currentSongSizeNum = document.getElementById('currentSongSizeNum');
     const chordLineHeightSlider = document.getElementById('chordLineHeightSlider');
     const chordLineHeightNum = document.getElementById('chordLineHeightNum');
-    const emptyLineHeightSlider = document.getElementById('emptyLineHeightSlider');
-    const emptyLineHeightNum = document.getElementById('emptyLineHeightNum');
+    // emptyLineHeight controls now live in the ⚙️ perf panel as perfEmptyLine.
     const editorWidthSlider = document.getElementById('editorWidthSlider');
     const editorWidthNum = document.getElementById('editorWidthNum');
     const chordLetterSpacingSlider = document.getElementById('chordLetterSpacingSlider');
@@ -2650,8 +2658,7 @@
       currentSongSizeNum.value = Number(settings.currentSongSize).toFixed(2);
       chordLineHeightSlider.value = settings.chordLineHeight;
       chordLineHeightNum.value = Number(settings.chordLineHeight).toFixed(2);
-      emptyLineHeightSlider.value = settings.emptyLineHeight;
-      emptyLineHeightNum.value = Number(settings.emptyLineHeight).toFixed(0);
+      // emptyLineHeight is exposed via the perf panel's perfEmptyLine slider.
       editorWidthSlider.value = settings.editorWidth;
       editorWidthNum.value = Number(settings.editorWidth).toFixed(0);
       chordLetterSpacingSlider.value = settings.chordLetterSpacing;
@@ -2841,17 +2848,9 @@
     function setEmptyLineHeight(v) {
       v = clampNum(v, 0, 60);
       settings.emptyLineHeight = v;
-      emptyLineHeightSlider.value = v;
-      if (document.activeElement !== emptyLineHeightNum) emptyLineHeightNum.value = v.toFixed(0);
       saveSettings();
       applySettings();
     }
-    emptyLineHeightSlider.addEventListener('input', function() { setEmptyLineHeight(parseFloat(this.value)); });
-    emptyLineHeightNum.addEventListener('input', function() {
-      const v = parseFloat(this.value);
-      if (!isNaN(v)) setEmptyLineHeight(v);
-    });
-    emptyLineHeightNum.addEventListener('blur', function() { this.value = settings.emptyLineHeight.toFixed(0); });
 
     function setChordLetterSpacing(v) {
       v = clampNum(v, -0.05, 0.2);
@@ -2961,6 +2960,13 @@
       saveSettings();
       applySettings();
     });
+
+    function setMasterScale(v) {
+      v = clampNum(v, RATIO_MIN, RATIO_MAX);
+      settings.masterScale = v;
+      saveSettings();
+      applySettings();
+    }
 
     function setChordSize(ratio) {
       ratio = clampNum(ratio, RATIO_MIN, RATIO_MAX);
@@ -4628,6 +4634,8 @@
     const perfPanel = document.getElementById('perfPanel');
     const perfClose = document.getElementById('perfClose');
 
+    const perfEverythingSize = document.getElementById('perfEverythingSize');
+    const perfEverythingSizeReadout = document.getElementById('perfEverythingSizeReadout');
     const perfChordSize = document.getElementById('perfChordSize');
     const perfChordSizeReadout = document.getElementById('perfChordSizeReadout');
     const perfPipeScale = document.getElementById('perfPipeScale');
@@ -4646,6 +4654,8 @@
     const perfChordSpacingReadout = document.getElementById('perfChordSpacingReadout');
     const perfLabelSpacing = document.getElementById('perfLabelSpacing');
     const perfLabelSpacingReadout = document.getElementById('perfLabelSpacingReadout');
+    const perfEmptyLine = document.getElementById('perfEmptyLine');
+    const perfEmptyLineReadout = document.getElementById('perfEmptyLineReadout');
     const perfMarginH = document.getElementById('perfMarginH');
     const perfMarginHReadout = document.getElementById('perfMarginHReadout');
     const perfMarginV = document.getElementById('perfMarginV');
@@ -5041,6 +5051,10 @@
     perfClose.addEventListener('click', function(e) { e.stopPropagation(); togglePerfPanel(false); });
 
     function syncPerfPanel() {
+      const msR = parseFloat(settings.masterScale) || 1;
+      perfEverythingSize.value = ratioToSliderPos(msR);
+      perfEverythingSizeReadout.value = msR.toFixed(2);
+
       const chR = internalToRatio(settings.chordSizeMult, BASE_CHORD_MULT);
       perfChordSize.value = ratioToSliderPos(chR);
       perfChordSizeReadout.value = chR.toFixed(2);
@@ -5071,6 +5085,9 @@
       perfLabelSpacing.value = settings.labelLetterSpacing;
       perfLabelSpacingReadout.value = Number(settings.labelLetterSpacing).toFixed(3);
 
+      perfEmptyLine.value = (settings.emptyLineHeight != null ? settings.emptyLineHeight : 24);
+      perfEmptyLineReadout.value = Number(perfEmptyLine.value).toFixed(0);
+
       perfMarginH.value = (settings.previewPaddingH != null ? settings.previewPaddingH : 8);
       perfMarginHReadout.value = Number(perfMarginH.value).toFixed(0);
 
@@ -5078,6 +5095,11 @@
       perfMarginVReadout.value = Number(perfMarginV.value).toFixed(0);
     }
 
+    perfEverythingSize.addEventListener('input', function() {
+      const ratio = sliderPosToRatio(parseFloat(this.value));
+      perfEverythingSizeReadout.value = ratio.toFixed(2);
+      setMasterScale(ratio);
+    });
     perfChordSize.addEventListener('input', function() {
       const ratio = sliderPosToRatio(parseFloat(this.value));
       perfChordSizeReadout.value = ratio.toFixed(2);
@@ -5124,6 +5146,11 @@
       perfLabelSpacingReadout.value = v.toFixed(3);
       setLabelLetterSpacing(v);
     });
+    perfEmptyLine.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      perfEmptyLineReadout.value = v.toFixed(0);
+      setEmptyLineHeight(v);
+    });
 
     perfMarginH.addEventListener('input', function() {
       const v = parseFloat(this.value);
@@ -5137,6 +5164,7 @@
     });
 
     const PERF_MULT_TARGETS = {
+      perfEverythingSize: true,
       perfChordSize: true,
       perfLyricSize: true,
       perfLabelSize: true
