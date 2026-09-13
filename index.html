@@ -474,6 +474,7 @@
     .perf-toggle,
     .layout-float-toggle,
     .key-float-toggle,
+    .split-float-toggle,
     .png-float-toggle,
     .save-float-toggle,
     .songs-float-toggle,
@@ -490,6 +491,7 @@
     body.first-row-hidden .perf-toggle,
     body.first-row-hidden .layout-float-toggle,
     body.first-row-hidden .key-float-toggle,
+    body.first-row-hidden .split-float-toggle,
     body.first-row-hidden .png-float-toggle,
     body.first-row-hidden .save-float-toggle,
     body.first-row-hidden .songs-float-toggle,
@@ -595,6 +597,38 @@
       transform: scale(1.05);
     }
     .songs-float-toggle.active {
+      background: #5c4033;
+      color: #ffffff;
+      border-color: #4a3328;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .split-float-toggle {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border-radius: 10px;
+      border: 1px solid #c4ad92;
+      background: rgba(232, 220, 204, 0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: #3d2b1f;
+      font-size: 1.1rem;
+      line-height: 1;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      font-family: inherit;
+    }
+    .split-float-toggle:hover {
+      background: rgba(196, 173, 146, 0.95);
+      transform: scale(1.05);
+    }
+    .split-float-toggle.active {
       background: #5c4033;
       color: #ffffff;
       border-color: #4a3328;
@@ -1588,6 +1622,7 @@
   <div class="float-auto-col">
     <button class="songs-float-toggle" id="songsFloatToggle" title="Songs" aria-label="Songs">🎵</button>
     <button class="key-float-toggle" id="keyFloatToggle" title="Key &amp; transpose" aria-label="Key and transpose">🔑</button>
+    <button class="split-float-toggle" id="splitFloatToggle" title="Split view (left / center / right)" aria-label="Split view">⬛</button>
     <button class="editor-float-toggle" id="editorFloatToggle" title="Hide both editors" aria-label="Hide both editors">✏️</button>
     <button class="template-float-toggle" id="templateFloatToggle" title="Templates (look &amp; feel presets)" aria-label="Templates">🎨</button>
     <button class="save-float-toggle" id="saveFloatToggle" title="Save Chord Chart" aria-label="Save Chord Chart">💾</button>
@@ -2008,6 +2043,7 @@
     const chromeToggle = document.getElementById('chromeToggle');
     const oldSettingsToggle = document.getElementById('oldSettingsToggle');
     const editorFloatToggle = document.getElementById('editorFloatToggle');
+    const splitFloatToggle = document.getElementById('splitFloatToggle');
     const saveFloatToggle = document.getElementById('saveFloatToggle');
     const pngFloatToggle = document.getElementById('pngFloatToggle');
 
@@ -3316,6 +3352,62 @@
       endWallResize();
     });
 
+    // ===== SPLIT VIEW TOGGLE (left / center / right) =====
+    const SPLIT_STATE_KEY = 'chordChartSplitState';
+    const SPLIT_ICONS = { center: '⬛', left: '⬅️', right: '➡️' };
+    const SPLIT_TITLES = {
+      center: 'Split view: center (tap for left)',
+      left: 'Split view: left (tap for right)',
+      right: 'Split view: right (tap for center)'
+    };
+    let splitState = 'center';
+
+    function applySplitState(state) {
+      if (state !== 'left' && state !== 'center' && state !== 'right') state = 'center';
+      splitState = state;
+
+      if (state === 'left') {
+        editorWrapper.style.gridTemplateColumns = '0% 1fr';
+        panelWall.style.left = '0%';
+        editorWrapper.classList.add('split-left');
+        editorWrapper.classList.remove('split-right');
+      } else if (state === 'right') {
+        editorWrapper.style.gridTemplateColumns = '1fr 0%';
+        panelWall.style.left = '100%';
+        editorWrapper.classList.add('split-right');
+        editorWrapper.classList.remove('split-left');
+      } else {
+        editorWrapper.style.gridTemplateColumns = '50% 1fr';
+        panelWall.style.left = '50%';
+        editorWrapper.classList.remove('split-left', 'split-right');
+      }
+
+      if (splitFloatToggle) {
+        splitFloatToggle.textContent = SPLIT_ICONS[state];
+        splitFloatToggle.title = SPLIT_TITLES[state];
+        splitFloatToggle.setAttribute('aria-label', SPLIT_TITLES[state]);
+        splitFloatToggle.classList.toggle('active', state !== 'center');
+      }
+
+      try { localStorage.setItem(SPLIT_STATE_KEY, state); } catch (e) {}
+
+      setTimeout(adjustChordSizes, 200);
+      setTimeout(adjustChordSizes, 400);
+    }
+
+    function cycleSplitState() {
+      if (splitState === 'center') applySplitState('left');
+      else if (splitState === 'left') applySplitState('right');
+      else applySplitState('center');
+    }
+
+    if (splitFloatToggle) {
+      splitFloatToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        cycleSplitState();
+      });
+    }
+
     // ===== EDITOR TOGGLE =====
     function applyEditorState(hidden) {
       isEditorCollapsed = hidden;
@@ -4493,6 +4585,13 @@
     // ===== INIT =====
     loadSettings();
 
+    try {
+      const storedSplit = localStorage.getItem(SPLIT_STATE_KEY);
+      if (storedSplit === 'left' || storedSplit === 'center' || storedSplit === 'right') {
+        splitState = storedSplit;
+      }
+    } catch (e) {}
+
     const bootDefault = loadStoredDefaultTemplate();
     if (bootDefault) {
       TEMPLATE_SETTING_KEYS.forEach(k => {
@@ -4508,6 +4607,7 @@
     applySettings();
     applyLockState();
     applyLayout();
+    applySplitState(splitState);
 
     const titleInput = document.getElementById('titleInput');
     if (titleInput) {
