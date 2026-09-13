@@ -75,361 +75,7 @@
       border: none;
     }
 
-    .toolbar {
-      background: #e8dccc;
-      padding: calc(6px * var(--ui-scale)) calc(12px * var(--ui-scale));
-      border-bottom: 2px solid #dcc9b0;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: calc(6px * var(--ui-scale)) calc(10px * var(--ui-scale));
-      flex-shrink: 0;
-    }
-    .toolbar-left { display: flex; flex-direction: column; align-items: stretch; gap: calc(6px * var(--ui-scale)); width: 100%; }
-    .toolbar-row { display: flex; flex-wrap: wrap; align-items: center; gap: calc(6px * var(--ui-scale)) calc(8px * var(--ui-scale)); }
-    .toolbar h1 { font-size: calc(1.0rem * var(--ui-scale)); font-weight: 600; color: #5c4033; letter-spacing: -0.01em; display: flex; align-items: center; gap: calc(6px * var(--ui-scale)); margin-right: calc(6px * var(--ui-scale)); }
-
-    .current-song {
-      display: none;
-      align-items: center;
-      background: #dcc9b0;
-      border: 1px solid #c4ad92;
-      padding: calc(3px * var(--ui-scale)) calc(12px * var(--ui-scale));
-      border-radius: 40px;
-      font-size: calc(var(--current-song-size, 0.8rem) * var(--ui-scale));
-      font-weight: 500;
-      color: #5c4033;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: calc(280px * var(--ui-scale));
-      flex-shrink: 0;
-    }
-    .current-song.show { display: inline-flex; }
-    .current-song::before { content: '🎵 '; flex-shrink: 0; }
-
-    .btn {
-      background: #dcc9b0;
-      border: 1px solid #c4ad92;
-      padding: calc(5px * var(--ui-scale)) calc(14px * var(--ui-scale));
-      border-radius: 40px;
-      font-size: calc(0.85rem * var(--ui-scale));
-      font-weight: 500;
-      color: #3d2b1f;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: calc(4px * var(--ui-scale));
-      white-space: nowrap;
-    }
-    .btn:hover { background: #c4ad92; border-color: #b0987a; }
-    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
-    .btn-success { background: #8b6b4a; border-color: #7a5d3f; color: white; }
-    .btn-success:hover { background: #7a5d3f; border-color: #6b4f35; }
-    .btn-success:disabled { opacity: 0.6; cursor: not-allowed; }
-    .btn-outline { background: transparent; border: 1px solid #c4ad92; color: #5c4033; }
-    .btn-outline:hover { background: #dcc9b0; border-color: #b0987a; }
-    .btn.active { background: #5c4033; border-color: #4a3328; color: white; }
-
-    .btn-toggle {
-      background: #dcc9b0;
-      border: 1px solid #c4ad92;
-      padding: calc(5px * var(--ui-scale)) calc(14px * var(--ui-scale));
-      border-radius: 40px;
-      font-size: calc(0.85rem * var(--ui-scale));
-      font-weight: 500;
-      color: #3d2b1f;
-      cursor: pointer;
-      transition: all 0.15s ease;
-      display: inline-flex;
-      align-items: center;
-      gap: calc(4px * var(--ui-scale));
-      white-space: nowrap;
-    }
-    .btn-toggle:hover { background: #c4ad92; border-color: #b0987a; }
-    .btn-toggle.active { background: #5c4033; border-color: #4a3328; color: white; }
-
-    .btn-transpose {
-      background: #8b6b4a;
-      border-color: #7a5d3f;
-      color: white;
-      font-weight: 700;
-      min-width: calc(34px * var(--ui-scale));
-      justify-content: center;
-      padding: calc(5px * var(--ui-scale)) calc(8px * var(--ui-scale));
-      font-size: calc(0.9rem * var(--ui-scale));
-    }
-    .btn-transpose:hover { background: #7a5d3f; border-color: #6b4f35; }
-
-    .transpose-info {
-      font-size: calc(0.8rem * var(--ui-scale));
-      color: #5c4033;
-      background: #dcc9b0;
-      padding: calc(4px * var(--ui-scale)) calc(10px * var(--ui-scale));
-      border-radius: 40px;
-      font-weight: 500;
-      min-width: calc(28px * var(--ui-scale));
-      text-align: center;
-      /* Hidden by FIX 32 — the numeric semitone value is no longer
-         shown to the user. The element stays in the DOM so existing
-         JS (.textContent = ...) keeps working without errors. */
-      display: none !important;
-    }
-
-    .dropdown { position: relative; display: inline-block; }
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      background-color: #f5ede0;
-      min-width: calc(260px * var(--ui-scale));
-      max-width: min(calc(560px * var(--ui-scale)), 90vw);
-      width: max-content;
-      max-height: 400px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-      border-radius: 8px;
-      border: 1px solid #dcc9b0;
-      z-index: 100;
-      padding: 6px 0;
-      margin-top: 4px;
-    }
-    .dropdown-content.show { display: block; }
-    .dropdown-content .dropdown-item {
-      padding: calc(8px * var(--ui-scale)) calc(16px * var(--ui-scale));
-      font-size: calc(0.85rem * var(--ui-scale));
-      font-weight: 500;
-      color: #5c4033;
-      cursor: pointer;
-      transition: background 0.1s ease;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      position: relative;
-    }
-    .dropdown-content .dropdown-item:hover { background: #ece0cf; }
-    .dropdown-content .dropdown-item.active { background: #5c4033; color: white; }
-    .dropdown-content .dropdown-item.song-item {
-      padding-left: calc(6px * var(--ui-scale));
-      padding-right: calc(12px * var(--ui-scale));
-      font-size: calc(0.8rem * var(--ui-scale));
-      display: flex;
-      align-items: center;
-      gap: calc(6px * var(--ui-scale));
-    }
-    .dropdown-content .dropdown-item.song-item .song-name {
-      flex: 1 1 auto;
-      min-width: 0;
-      padding-left: calc(2px * var(--ui-scale));
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .dropdown-content .dropdown-item.song-item .song-name::before { content: '🎵 '; }
-    .dropdown-content .dropdown-item.song-item.has-settings .song-name::after { content: ' 🎚️'; opacity: 0.7; }
-    .dropdown-content .dropdown-item.song-item .remove-btn {
-      background: none;
-      border: none;
-      color: #c45a4a;
-      font-size: calc(0.9rem * var(--ui-scale));
-      cursor: pointer;
-      padding: 0 calc(4px * var(--ui-scale));
-      font-weight: 600;
-      opacity: 0.6;
-      flex: 0 0 auto;
-    }
-    .dropdown-content .dropdown-item.song-item .remove-btn:hover { opacity: 1; }
-    .dropdown-content .dropdown-item.folder-item {
-      padding-left: calc(10px * var(--ui-scale));
-      font-weight: 600;
-      font-size: calc(0.85rem * var(--ui-scale));
-      color: #8b6b4a;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .dropdown-content .dropdown-item.folder-item::before { content: '📁 '; }
-    .dropdown-content .dropdown-item.folder-item .folder-arrow { font-size: calc(0.7rem * var(--ui-scale)); color: #b0987a; margin-left: calc(8px * var(--ui-scale)); }
-    .dropdown-divider { border-top: 1px solid #dcc9b0; margin: 6px 8px; }
-    .dropdown-label {
-      padding: calc(6px * var(--ui-scale)) calc(16px * var(--ui-scale)) calc(3px * var(--ui-scale)) calc(16px * var(--ui-scale));
-      font-size: calc(0.7rem * var(--ui-scale));
-      font-weight: 600;
-      color: #b0987a;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .subfolder-popup {
-      display: none;
-      position: absolute;
-      left: 100%;
-      top: -4px;
-      background-color: #f5ede0;
-      min-width: calc(200px * var(--ui-scale));
-      max-width: min(calc(520px * var(--ui-scale)), 80vw);
-      width: max-content;
-      max-height: 350px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-      border-radius: 8px;
-      border: 1px solid #dcc9b0;
-      z-index: 200;
-      padding: 6px 0;
-      margin-left: 2px;
-    }
-    .subfolder-popup.show { display: block; }
-    .subfolder-popup .dropdown-item {
-      padding: calc(8px * var(--ui-scale)) calc(16px * var(--ui-scale));
-      font-size: calc(0.8rem * var(--ui-scale));
-      font-weight: 500;
-      color: #5c4033;
-      cursor: pointer;
-      position: relative;
-    }
-    .subfolder-popup .dropdown-item:hover { background: #ece0cf; }
-    .subfolder-popup .dropdown-item.song-item {
-      padding-left: calc(6px * var(--ui-scale));
-      padding-right: calc(12px * var(--ui-scale));
-      display: flex;
-      align-items: center;
-      gap: calc(6px * var(--ui-scale));
-    }
-    .subfolder-popup .dropdown-item.song-item .song-name {
-      flex: 1 1 auto;
-      min-width: 0;
-      padding-left: calc(2px * var(--ui-scale));
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .subfolder-popup .dropdown-item.song-item .song-name::before { content: '🎵 '; }
-    .subfolder-popup .dropdown-item.song-item.has-settings .song-name::after { content: ' 🎚️'; opacity: 0.7; }
-    .subfolder-popup .dropdown-item.song-item .remove-btn {
-      background: none;
-      border: none;
-      color: #c45a4a;
-      font-size: calc(0.9rem * var(--ui-scale));
-      cursor: pointer;
-      padding: 0 calc(4px * var(--ui-scale));
-      font-weight: 600;
-      opacity: 0.6;
-      flex: 0 0 auto;
-    }
-    .subfolder-popup .dropdown-item.song-item .remove-btn:hover { opacity: 1; }
-    .subfolder-popup .dropdown-item.folder-item {
-      padding-left: calc(10px * var(--ui-scale));
-      font-weight: 600;
-      color: #8b6b4a;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .subfolder-popup .dropdown-item.folder-item::before { content: '📂 '; }
-
-    .sizes-panel {
-      min-width: calc(340px * var(--ui-scale));
-      max-width: min(calc(420px * var(--ui-scale)), 95vw);
-      width: max-content;
-      padding: 8px 0;
-    }
-    .sizes-lock-row {
-      display: flex;
-      align-items: center;
-      gap: calc(8px * var(--ui-scale));
-      padding: calc(4px * var(--ui-scale)) calc(12px * var(--ui-scale)) calc(8px * var(--ui-scale)) calc(12px * var(--ui-scale));
-      border-bottom: 1px solid #ece0cf;
-      cursor: pointer;
-      user-select: none;
-    }
-    .sizes-lock-row input[type="checkbox"] { accent-color: #8b6b4a; cursor: pointer; margin: 0; flex: 0 0 auto; width: calc(14px * var(--ui-scale)); height: calc(14px * var(--ui-scale)); }
-    .sizes-lock-row label { font-size: calc(0.8rem * var(--ui-scale)); font-weight: 600; color: #5c4033; cursor: pointer; flex: 1 1 auto; }
-    .sizes-row {
-      display: flex;
-      align-items: center;
-      gap: calc(8px * var(--ui-scale));
-      padding: calc(6px * var(--ui-scale)) calc(12px * var(--ui-scale));
-      white-space: nowrap;
-    }
-    .sizes-row + .sizes-row { border-top: 1px solid #ece0cf; }
-    .sizes-row-label { font-size: calc(0.8rem * var(--ui-scale)); font-weight: 600; color: #5c4033; flex: 0 0 calc(85px * var(--ui-scale)); white-space: nowrap; }
-    .sizes-row input[type="range"] { flex: 1 1 auto; min-width: calc(80px * var(--ui-scale)); accent-color: #8b6b4a; cursor: pointer; margin: 0; vertical-align: middle; }
-    .sizes-row input[type="number"] {
-      width: calc(56px * var(--ui-scale));
-      border: 1px solid #c4ad92;
-      border-radius: 6px;
-      padding: calc(3px * var(--ui-scale)) calc(5px * var(--ui-scale));
-      font-size: calc(0.75rem * var(--ui-scale));
-      font-family: inherit;
-      color: #3d2b1f;
-      background: #ffffff;
-      outline: none;
-      text-align: right;
-      -moz-appearance: textfield;
-      flex: 0 0 auto;
-    }
-    .sizes-row input[type="number"]::-webkit-outer-spin-button,
-    .sizes-row input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    .sizes-row input[type="number"]:focus { border-color: #8b6b4a; box-shadow: 0 0 0 2px rgba(139, 107, 74, 0.2); }
-    .sizes-row-step {
-      background: #f5ede0;
-      border: 1px solid #c4ad92;
-      color: #5c4033;
-      font-size: calc(0.85rem * var(--ui-scale));
-      font-weight: 700;
-      line-height: 1;
-      padding: 0;
-      margin: 0;
-      cursor: pointer;
-      border-radius: 4px;
-      transition: background 0.1s ease;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-family: inherit;
-      width: calc(18px * var(--ui-scale));
-      height: calc(18px * var(--ui-scale));
-      flex: 0 0 auto;
-    }
-    .sizes-row-step:hover { background: #dcc9b0; }
-    .sizes-row-step:active { background: #c4ad92; }
-    .sizes-row-reset {
-      background: transparent;
-      border: none;
-      color: #8b6b4a;
-      font-size: calc(0.95rem * var(--ui-scale));
-      line-height: 1;
-      padding: calc(2px * var(--ui-scale)) calc(6px * var(--ui-scale)) calc(2px * var(--ui-scale)) calc(4px * var(--ui-scale));
-      margin-left: 0;
-      cursor: pointer;
-      border-radius: 50%;
-      transition: all 0.15s ease;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-family: inherit;
-      flex: 0 0 auto;
-    }
-    .sizes-row-reset:hover { background: #c4ad92; color: #3d2b1f; }
-    .sizes-row-reset:active { background: #b0987a; }
-
-    .sizes-panel.locked .sizes-row input,
-    .sizes-panel.locked .sizes-row button { opacity: 0.45; pointer-events: none; }
-    .settings-panel.locked .settings-row input,
-    .settings-panel.locked .settings-row select,
-    .settings-panel.locked .settings-row button { opacity: 0.45; pointer-events: none; }
-
-    /* ===== TITLE BAR =====
-       A thin, full-width, sticky title strip that sits between the
-       toolbar (or top of viewport, when the toolbar is hidden) and the
-       two editor panels. Fixed height so it never competes with the
-       previews for vertical space. Centered text, borderless input,
-       matches the panel background so it reads as part of the canvas. */
+    /* ===== TITLE BAR ===== */
     .title-bar {
       flex-shrink: 0;
       width: 100%;
@@ -464,34 +110,19 @@
       font-weight: 400;
       font-style: italic;
     }
-    /* When the toolbar is hidden the title bar remains visible — it
-       doesn't need any special positioning because it's inside the
-       normal flex column of .app. If the user wants it truly
-       "sticky-on-scroll", it already is: the app never scrolls
-       (html, body { overflow: hidden }) and each preview scrolls
-       internally. */
 
+    /* ===== EDITOR WRAPPER ===== */
     .editor-wrapper {
       display: grid;
       grid-template-columns: 1fr 1fr;
       grid-template-rows: 1fr;
       gap: 0;
-      /* The visible vertical wall between the two panels is drawn by
-         the ::after pseudo-element below, NOT by the grid gap. We zero
-         out the gap and paint a real 2px column down the middle so the
-         wall reads like the horizontal wall above the editor (which is
-         the .resize-handle's 8px strip). */
       background: transparent;
       flex: 1;
       min-height: 0;
       overflow: hidden;
       position: relative;
     }
-    /* Vertical wall between panel 1 and panel 2. Visually IDENTICAL to
-       the .resize-handle above each editor: a 2px colored line that
-       thickens to 12px (and darkens to #8b6b4a) on hover / active.
-       The 2px idle thickness matches the toolbar's bottom border and
-       the editor's top border so the whole app reads as one grid. */
     .panel-wall {
       position: absolute;
       top: 0;
@@ -505,7 +136,6 @@
       pointer-events: auto;
       transition: background 0.15s ease, width 0.15s ease;
     }
-    /* Invisible hit-zone so the cursor doesn't have to be pixel-perfect. */
     .panel-wall::before {
       content: '';
       position: absolute;
@@ -523,7 +153,6 @@
       background: #8b6b4a;
       width: 6px;
     }
-    /* Each panel = its own vertical stack: preview on top, editor on bottom. */
     .editor-wrapper .panel {
       display: flex;
       flex-direction: column;
@@ -532,7 +161,6 @@
       overflow: hidden;
       background: #ffffff;
     }
-    /* Keep the panel1/panel2 preview area behaving like the old one. */
     .editor-wrapper .panel .preview-area {
       flex: 1 1 auto;
       min-height: 0;
@@ -540,39 +168,23 @@
     .editor-wrapper .panel .input-area {
       flex: 0 0 auto;
     }
-    .editor-wrapper.layout-phone {
-      flex-direction: row;
-    }
-    /* Phone View: editor is placed BEFORE preview in the DOM (see applyLayout),
-       so with flex-direction: row the editor renders on the LEFT and preview on
-       the RIGHT. The input-area's right border now sits between them. */
     .editor-wrapper.layout-desktop {
       flex-direction: column;
     }
 
     .preview-area {
       width: 100%;
-      /* Same white as the chord-preview so the margin area is invisible
-         and the whole preview region reads as one seamless white panel. */
       background: #ffffff;
-      /* Padding is now driven by --preview-pad-v / --preview-pad-h,
-         which the performance panel's two margin sliders control. */
       padding: var(--preview-pad-v, 8px) var(--preview-pad-h, 8px);
       flex: 1;
       min-height: 0;
       display: flex;
       flex-direction: column;
     }
-    .editor-wrapper.layout-phone .preview-area {
-      width: auto;
-      flex: 1 1 auto;
-      min-width: 0;
-    }
 
     .input-area {
       width: 100%;
       padding: 8px 14px 10px 14px;
-      /* Frameless: same white as preview so the whole app reads as one canvas. */
       background: #ffffff;
       border-top: none;
       flex-shrink: 0;
@@ -592,108 +204,41 @@
       min-height: 0;
       height: 0;
     }
-    .editor-wrapper.layout-phone .input-area {
-      width: var(--editor-width, 50%);
-      max-width: var(--editor-width, 50%);
-      height: 100%;
-      max-height: 100%;
-      min-height: 0;
-      border-top: none;
-      /* Frameless: no divider on the right edge either. */
-      border-right: none;
-      flex-shrink: 0;
-    }
-    .editor-wrapper.layout-phone .input-area.collapsed {
-      width: 0;
-      max-width: 0;
-      padding: 0;
-      border-right: none;
-      /* Slide out to the left when collapsed. */
-      transform: translateX(-100%);
-      overflow: hidden;
-    }
-    .editor-wrapper.layout-phone .input-area.collapsed .drop-zone,
-    .editor-wrapper.layout-phone .input-area.collapsed textarea { visibility: hidden; }
 
-    /* The resize handle IS the wall: a full-length visible strip along
-       one edge of the editor. Desktop View → horizontal strip on the
-       top edge. Phone View → vertical strip on the right edge.
-       The strip's background is the visible "wall"; there is no
-       separate ::before element anymore.
-       NOTE: offsets must stay INSIDE .input-area because it has
-       overflow: hidden, which clips anything outside its box. */
-    /* The resize handle IS the wall: a full-length visible strip along
-       one edge of the editor. The strip stays vertically/horizontally
-       centered on the edge while its thickness changes, so the hover
-       animation grows symmetrically and never looks off-center.
-       An invisible ::before layer expands the grab zone beyond the
-       visible strip so you don't have to be pixel-precise. */
     .resize-handle {
       position: absolute;
-      /* Desktop View: centered on the top edge. */
       top: 0;
       left: 0;
       right: 0;
-      height: 8px;                 /* visible thickness of the wall (idle) */
+      height: 8px;
       transform: translateY(-50%);
       cursor: ns-resize;
       z-index: 100;
-      background: #dcc9b0;         /* same as the top panel's border */
+      background: #dcc9b0;
       pointer-events: auto;
       transition: background 0.15s ease, height 0.15s ease;
     }
-    /* Invisible hit-zone: extends ~12px above and below the strip
-       (Desktop) so the cursor doesn't have to land exactly on it. */
     .resize-handle::before {
       content: '';
       position: absolute;
       top: 50%;
       left: 0;
       right: 0;
-      height: 32px;                /* total grab height */
+      height: 32px;
       transform: translateY(-50%);
       background: transparent;
       pointer-events: auto;
     }
-    .editor-wrapper.layout-phone .resize-handle {
-      /* Phone View: centered on the right edge. */
-      top: 0;
-      bottom: 0;
-      left: auto;
-      right: 0;
-      width: 8px;                  /* visible thickness of the wall (idle) */
-      height: auto;
-      transform: translateX(50%);
-      cursor: ew-resize;
-    }
-    .editor-wrapper.layout-phone .resize-handle::before {
-      /* Vertical hit-zone: swap the axes. */
-      top: 0;
-      bottom: 0;
-      left: 50%;
-      right: auto;
-      width: 32px;                 /* total grab width */
-      height: auto;
-      transform: translateX(-50%);
-    }
-
-    /* Hover / active = the wall thickens and darkens, growing symmetrically
-       from its center so it stays exactly on the edge. */
     .resize-handle:hover,
     .resize-handle:active {
       background: #8b6b4a;
       height: 12px;
-    }
-    .editor-wrapper.layout-phone .resize-handle:hover,
-    .editor-wrapper.layout-phone .resize-handle:active {
-      width: 12px;
     }
 
     .drop-zone { flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative; }
     textarea {
       width: 100%;
       flex: 1;
-      /* Frameless: no border, no radius, no focus ring. */
       border: none;
       border-radius: 0;
       padding: 8px 12px;
@@ -732,8 +277,6 @@
 
     .chord-preview {
       background: #ffffff;
-      /* Frameless: no border, no radius, no shadow, no inner padding.
-         All spacing comes from .preview-area's padding variables. */
       border: none;
       border-radius: 0;
       padding: 0;
@@ -745,11 +288,7 @@
       line-height: var(--chord-line-height, 1.9);
       color: #3d2b1f;
     }
-    .empty-preview { color: #b0987a; font-style: italic; text-align: center; padding: 20px 0; }
-    .empty-preview .main-text { font-size: 1rem; color: #5c4033; }
-    .empty-preview .sub-text { font-size: 0.85rem; color: #b0987a; margin-top: 6px; line-height: 1.5; }
 
-    /* CHORD LINES — now use the CSS variable so the font setting works */
     .chord-line,
     .chord-line * {
       font-variant-ligatures: none;
@@ -848,7 +387,6 @@
     .chord-token.empty.section-outro { color: #6a8caf; }
     .chord-token.empty.section-custom { color: #888888; }
 
-    /* Lyrics use the same section colors as their chords. */
     .lyrics-line.section-intro .lyric-text { color: #6a8caf; }
     .lyrics-line.section-verse .lyric-text { color: #5a8a5a; }
     .lyrics-line.section-pre-chorus .lyric-text { color: #d4953a; }
@@ -859,41 +397,6 @@
     .lyrics-line.section-outro .lyric-text { color: #6a8caf; }
     .lyrics-line.section-custom .lyric-text { color: #888888; }
 
-    .key-selector {
-      display: flex;
-      align-items: center;
-      gap: calc(6px * var(--ui-scale));
-      font-size: calc(0.85rem * var(--ui-scale));
-      color: #5c4033;
-      font-weight: 500;
-      background: #dcc9b0;
-      padding: calc(3px * var(--ui-scale)) calc(10px * var(--ui-scale)) calc(3px * var(--ui-scale)) calc(12px * var(--ui-scale));
-      border-radius: 40px;
-      white-space: nowrap;
-    }
-    .key-selector select {
-      background: #f5ede0;
-      border: 1px solid #c4ad92;
-      border-radius: 40px;
-      padding: calc(3px * var(--ui-scale)) calc(8px * var(--ui-scale));
-      font-size: calc(0.8rem * var(--ui-scale));
-      font-weight: 500;
-      color: #3d2b1f;
-      outline: none;
-      cursor: pointer;
-    }
-    .key-mode-select {
-      background: #f5ede0;
-      border: 1px solid #c4ad92;
-      border-radius: 40px;
-      padding: calc(3px * var(--ui-scale)) calc(8px * var(--ui-scale));
-      font-size: calc(0.75rem * var(--ui-scale));
-      font-weight: 500;
-      color: #3d2b1f;
-      outline: none;
-      cursor: pointer;
-    }
-
     body.easy-mode .advanced-only { display: none !important; }
 
     /* ===== CHROME COLLAPSE (focus mode) ===== */
@@ -901,16 +404,16 @@
       position: fixed;
       top: 10px;
       right: 10px;
-      z-index: 8000;
+      z-index: 8100 !important;
       width: 38px;
       height: 38px;
       padding: 0;
       border-radius: 10px;
-      border: 1px solid #c4ad92;
-      background: rgba(232, 220, 204, 0.85);
+      border: 1px solid #4a3328;
+      background: #5c4033;
       backdrop-filter: blur(6px);
       -webkit-backdrop-filter: blur(6px);
-      color: #3d2b1f;
+      color: #ffffff;
       font-size: 1.2rem;
       line-height: 1;
       font-weight: 700;
@@ -919,35 +422,22 @@
       align-items: center;
       justify-content: center;
       transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
       font-family: inherit;
     }
     .chrome-toggle:hover {
-      background: rgba(196, 173, 146, 0.95);
+      background: #6b4f3f;
+      border-color: #3d2b1f;
       transform: scale(1.05);
     }
     .chrome-toggle.active {
-      background: #5c4033;
-      color: #ffffff;
-      border-color: #4a3328;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      background: rgba(232, 220, 204, 0.85);
+      color: #3d2b1f;
+      border-color: #c4ad92;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
     }
 
-    /* When the ☰ hamburger is toggled ON, the entire 1st row of floating
-       buttons slides horizontally to the RIGHT (toward the ☰ button in
-       the top-right corner) and disappears behind it. The ☰ button
-       itself sits on the topmost layer, so the other buttons visually
-       "tuck into" it as they slide in.
-
-       Instead of `display: none`, we use opacity + transform so the
-       motion can be animated. A short visibility delay at the end of
-       the transition keeps the collapsed buttons from being clickable
-       while they're invisible. */
-
-    /* Every 1st-row floater is a sibling of ☰ and shares its top/right
-       cluster. We give each one a smooth transition on transform + opacity.
-       The buttons also get a higher z-index than they normally would,
-       BUT still lower than ☰ itself (z-index 8000). */
+    .old-settings-toggle,
     .perf-toggle,
     .layout-float-toggle,
     .key-float-toggle,
@@ -963,20 +453,7 @@
                   box-shadow 0.15s ease;
     }
 
-    /* Collapsed state: each button slides toward the ☰ hamburger
-       (top-right corner) and fades out. `translateX` moves them right
-       toward the corner; the large value guarantees they all reach the
-       ☰ area regardless of their individual `right` offsets.
-
-       NOTE: We deliberately do NOT set `pointer-events: none` here, and
-       we do NOT use `scale()`. Both of those caused the closing
-       animation to short-circuit on some browsers, making the buttons
-       "snap" behind the ☰ instead of smoothly sliding in. Instead we
-       keep `pointer-events: auto` and rely solely on the transform +
-       opacity transition, which now plays symmetrically on open AND
-       close. Once opacity reaches 0, the buttons are visually gone and
-       can't be clicked anyway because their bounding box has moved
-       fully behind the ☰ button (z-index 8100 vs 8000). */
+    body.first-row-hidden .old-settings-toggle,
     body.first-row-hidden .perf-toggle,
     body.first-row-hidden .layout-float-toggle,
     body.first-row-hidden .key-float-toggle,
@@ -989,55 +466,24 @@
       opacity: 0;
     }
 
-    /* ☰ must sit on top of the sliding cluster so buttons disappear
-       "behind" it instead of over it. Its z-index is already 8000,
-       but we make that explicit and bump it a touch higher for safety. */
-    .chrome-toggle {
-      z-index: 8100 !important;
-    }
-    .chrome-toggle-2 {
-      z-index: 8100 !important;
-    }
+    /* (.chrome-toggle-2 rule removed with the ⋯ button.) */
 
-    /* When the ⋯ twin is toggled ON, the top panel (toolbar) hides.
-       Instead of `display: none`, we animate its height + padding to 0
-       so it slides up out of view (mirroring the editor, which slides
-       down when it collapses). The floating buttons and the ☰/⋯ pair
-       stay visible. The toolbar also needs `overflow: hidden` so its
-       contents don't spill out mid-transition. */
-    .toolbar {
-      overflow: hidden;
-      transition: height 0.8s ease,
-                  padding-top 0.8s ease,
-                  padding-bottom 0.8s ease,
-                  border-bottom-width 0.8s ease,
-                  opacity 0.7s ease;
-    }
-    body.toolbar-hidden .toolbar {
-      height: 0 !important;
-      padding-top: 0 !important;
-      padding-bottom: 0 !important;
-      border-bottom-width: 0 !important;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    /* ===== SECOND-ROW FLOATING TOGGLE (mirrors ☰, sits below it) ===== */
-    .chrome-toggle-2 {
+    /* ===== FLOATING "OLD SETTINGS" TOGGLE (sits between ☰ and ⚙️) ===== */
+    .old-settings-toggle {
       position: fixed;
-      top: 58px;              /* one row below the first row of floaters */
-      right: 10px;            /* directly below the ☰ hamburger */
+      top: 10px;
+      right: 58px;
       z-index: 8000;
       width: 38px;
       height: 38px;
       padding: 0;
       border-radius: 10px;
-      border: 1px solid #c4ad92;
-      background: rgba(232, 220, 204, 0.85);
+      border: 1px solid #b35c52;
+      background: rgba(200, 105, 95, 0.9);
       backdrop-filter: blur(6px);
       -webkit-backdrop-filter: blur(6px);
-      color: #3d2b1f;
-      font-size: 1.2rem;
+      color: #ffffff;
+      font-size: 1.1rem;
       line-height: 1;
       font-weight: 700;
       cursor: pointer;
@@ -1045,25 +491,27 @@
       align-items: center;
       justify-content: center;
       transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 2px 6px rgba(160, 60, 50, 0.25);
       font-family: inherit;
     }
-    .chrome-toggle-2:hover {
-      background: rgba(196, 173, 146, 0.95);
+    .old-settings-toggle:hover {
+      background: rgba(180, 85, 75, 0.98);
+      border-color: #a04a40;
       transform: scale(1.05);
+      box-shadow: 0 3px 10px rgba(160, 60, 50, 0.4);
     }
-    .chrome-toggle-2.active {
-      background: #5c4033;
+    .old-settings-toggle.active {
+      background: #8b3a30;
       color: #ffffff;
-      border-color: #4a3328;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      border-color: #6b2a22;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
     }
 
-    /* ===== FLOATING PERFORMANCE CONTROLS ===== */
+    /* ===== FLOATING PERFORMANCE BUTTON ===== */
     .perf-toggle {
       position: fixed;
       top: 10px;
-      right: 58px;
+      right: 106px;
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -1099,7 +547,7 @@
     .songs-float-toggle {
       position: fixed;
       top: 10px;
-      right: 346px;
+      right: 394px;
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -1135,7 +583,7 @@
     .editor-float-toggle {
       position: fixed;
       top: 10px;
-      right: 250px;
+      right: 298px;
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -1168,12 +616,10 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
 
-
-    /* ===== FLOATING SAVE BUTTON ===== */
     .save-float-toggle {
       position: fixed;
       top: 10px;
-      right: 154px;
+      right: 202px;
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -1206,11 +652,10 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
 
-    /* ===== FLOATING PNG EXPORT BUTTON ===== */
     .png-float-toggle {
       position: fixed;
       top: 10px;
-      right: 106px;
+      right: 154px;
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -1243,11 +688,10 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
 
-    /* ===== FLOATING KEY BUTTON ===== */
     .key-float-toggle {
       position: fixed;
       top: 10px;
-      right: 298px;
+      right: 346px;
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -1283,14 +727,8 @@
     .key-float-panel {
       position: fixed;
       top: 58px;
-      /* Align with the right edge of the floating-button stack (☰ / ⋯)
-         instead of under the 🔑 button. Keeps the panel fully on-screen
-         on narrow phone viewports where a wider `right` value would push
-         it off the left edge. */
       right: 10px;
       left: auto;
-      /* Above the ☰ / ⋯ buttons (z-index 8100) so the panel is never
-         covered by them. Same for all other floating panels below. */
       z-index: 8200;
       width: 260px;
       max-width: calc(100vw - 20px);
@@ -1334,44 +772,70 @@
       color: #5c4033;
       flex: 0 0 60px;
     }
-    .key-float-row select {
-      flex: 1;
-      background: #f5ede0;
-      border: 1px solid #c4ad92;
-      border-radius: 40px;
-      padding: 5px 10px;
-      font-size: 0.8rem;
-      font-weight: 500;
-      color: #3d2b1f;
-      outline: none;
-      cursor: pointer;
-      font-family: inherit;
-    }
-    .key-float-row select:focus { border-color: #8b6b4a; }
-
-    /* Transpose row inside the floating 🔑 Key panel. Uses the same
-       .btn-transpose and .transpose-info classes as the toolbar so the
-       look is consistent, but the row is centered because the label
-       column is narrower here. */
     .key-float-row.key-float-transpose-row {
       gap: 8px;
     }
     .key-float-row.key-float-transpose-row .btn-transpose {
-      min-width: 30px;
-      padding: 4px 8px;
-      font-size: 0.95rem;
+      min-width: 0;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      color: #3d2b1f;
+      font-size: 1.15rem;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background 0.15s ease, transform 0.1s ease;
+      cursor: pointer;
+      font-family: inherit;
     }
-    .key-float-row.key-float-transpose-row .transpose-info {
-      flex: 1;
-      font-size: 0.8rem;
-      padding: 4px 8px;
+    .key-float-row.key-float-transpose-row .btn-transpose:hover {
+      background: rgba(139, 107, 74, 0.15);
+      border: none;
+    }
+    .key-float-row.key-float-transpose-row .btn-transpose:active {
+      background: rgba(139, 107, 74, 0.3);
+      transform: scale(0.9);
     }
 
-    /* ===== FLOATING TEMPLATE PANEL ===== */
+    .btn-transpose {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      color: #3d2b1f;
+      font-weight: 700;
+      min-width: 0;
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      justify-content: center;
+      align-items: center;
+      display: inline-flex;
+      border-radius: 50%;
+      font-size: 1.15rem;
+      line-height: 1;
+      transition: background 0.15s ease, transform 0.1s ease;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-transpose:hover {
+      background: rgba(139, 107, 74, 0.15);
+    }
+    .btn-transpose:active {
+      background: rgba(139, 107, 74, 0.3);
+      transform: scale(0.9);
+    }
+
+    /* ===== FLOATING TEMPLATE ===== */
     .template-float-toggle {
       position: fixed;
       top: 10px;
-      right: 202px;
+      right: 250px;
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -1487,15 +951,8 @@
       font-weight: 500;
       opacity: 0.75;
     }
-    .template-float-current strong {
-      font-weight: 700;
-      color: #5c4033;
-      opacity: 1;
-    }
-    .template-float-divider {
-      border-top: 1px solid #dcc9b0;
-      margin: 4px 0 2px 0;
-    }
+    .template-float-current strong { font-weight: 700; color: #5c4033; opacity: 1; }
+    .template-float-divider { border-top: 1px solid #dcc9b0; margin: 4px 0 2px 0; }
     .template-float-subhead {
       font-size: 0.68rem;
       font-weight: 700;
@@ -1512,27 +969,16 @@
       font-weight: 500;
       opacity: 0.8;
     }
-    .template-float-default-label strong {
-      font-weight: 700;
-      color: #5c4033;
-      opacity: 1;
-    }
-    .template-float-btn.danger {
-      color: #a1402f;
-    }
+    .template-float-default-label strong { font-weight: 700; color: #5c4033; opacity: 1; }
+    .template-float-btn.danger { color: #a1402f; }
     .template-float-btn.danger:hover { background: #e8cfc9; border-color: #c45a4a; }
 
+    /* ===== FLOATING SONGS PANEL ===== */
     .songs-float-panel {
       position: fixed;
       top: 58px;
-      /* Align with the right edge of the floating-button stack (☰ / ⋯)
-         instead of under the 🎵 button. Keeps the panel fully on-screen
-         on narrow phone viewports where a wider `right` value would push
-         it off the left edge. */
       right: 10px;
       left: auto;
-      /* Above the ☰ / ⋯ buttons (z-index 8100) so the panel is never
-         covered by them. */
       z-index: 8200;
       width: 320px;
       max-width: calc(100vw - 20px);
@@ -1564,19 +1010,11 @@
       top: 0;
       z-index: 1;
     }
-    .songs-float-body {
-      padding: 6px 0 8px 0;
-    }
-    /* The floating songs panel reuses the toolbar dropdown's item styling.
-       We extend the .dropdown-content selectors so hover, cursor, emoji
-       prefixes, folder arrows, and remove buttons all render identically. */
-    .songs-float-panel .dropdown-item { padding: calc(8px * var(--ui-scale)) calc(16px * var(--ui-scale)); }
-    .songs-float-panel .dropdown-item.song-item { padding: calc(8px * var(--ui-scale)) calc(12px * var(--ui-scale)) calc(8px * var(--ui-scale)) calc(6px * var(--ui-scale)); }
-    .songs-float-panel .dropdown-item.folder-item { padding: calc(8px * var(--ui-scale)) calc(16px * var(--ui-scale)) calc(8px * var(--ui-scale)) calc(10px * var(--ui-scale)); }
+    .songs-float-body { padding: 6px 0 8px 0; }
 
-    /* ----- Extended styles so the floating panel matches the toolbar dropdown ----- */
-    .songs-float-panel .dropdown-item {
-      font-size: calc(0.85rem * var(--ui-scale));
+    .dropdown-item {
+      padding: 8px 16px;
+      font-size: 0.85rem;
       font-weight: 500;
       color: #5c4033;
       cursor: pointer;
@@ -1586,66 +1024,130 @@
       text-overflow: ellipsis;
       position: relative;
     }
-    .songs-float-panel .dropdown-item:hover { background: #ece0cf; }
-    .songs-float-panel .dropdown-item.active { background: #5c4033; color: white; }
-
-    .songs-float-panel .dropdown-item.song-item {
-      padding-right: calc(12px * var(--ui-scale));
-      font-size: calc(0.8rem * var(--ui-scale));
+    .dropdown-item:hover { background: #ece0cf; }
+    .dropdown-item.active { background: #5c4033; color: white; }
+    .dropdown-item.song-item {
+      padding-left: 6px;
+      padding-right: 12px;
+      font-size: 0.8rem;
       display: flex;
       align-items: center;
-      gap: calc(6px * var(--ui-scale));
+      gap: 6px;
     }
-    .songs-float-panel .dropdown-item.song-item .song-name {
+    .dropdown-item.song-item .song-name {
       flex: 1 1 auto;
       min-width: 0;
-      padding-left: calc(2px * var(--ui-scale));
+      padding-left: 2px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .songs-float-panel .dropdown-item.song-item .song-name::before { content: '🎵 '; }
-    .songs-float-panel .dropdown-item.song-item.has-settings .song-name::after { content: ' 🎚️'; opacity: 0.7; }
-    .songs-float-panel .dropdown-item.song-item .remove-btn {
+    .dropdown-item.song-item .song-name::before { content: '🎵 '; }
+    .dropdown-item.song-item.has-settings .song-name::after { content: ' 🎚️'; opacity: 0.7; }
+    .dropdown-item.song-item .remove-btn {
       background: none;
       border: none;
       color: #c45a4a;
-      font-size: calc(0.9rem * var(--ui-scale));
+      font-size: 0.9rem;
       cursor: pointer;
-      padding: 0 calc(4px * var(--ui-scale));
+      padding: 0 4px;
       font-weight: 600;
       opacity: 0.6;
       flex: 0 0 auto;
     }
-    .songs-float-panel .dropdown-item.song-item .remove-btn:hover { opacity: 1; }
-
-    .songs-float-panel .dropdown-item.folder-item {
+    .dropdown-item.song-item .remove-btn:hover { opacity: 1; }
+    .dropdown-item.folder-item {
+      padding-left: 10px;
       font-weight: 600;
-      font-size: calc(0.85rem * var(--ui-scale));
+      font-size: 0.85rem;
       color: #8b6b4a;
       cursor: pointer;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .songs-float-panel .dropdown-item.folder-item::before { content: '📁 '; }
-    .songs-float-panel .dropdown-item.folder-item .folder-arrow {
-      font-size: calc(0.7rem * var(--ui-scale));
-      color: #b0987a;
-      margin-left: calc(8px * var(--ui-scale));
-    }
+    .dropdown-item.folder-item::before { content: '📁 '; }
+    .dropdown-item.folder-item .folder-arrow { font-size: 0.7rem; color: #b0987a; margin-left: 8px; }
 
+    .subfolder-popup {
+      display: none;
+      position: absolute;
+      left: 100%;
+      top: -4px;
+      background-color: #f5ede0;
+      min-width: 200px;
+      max-width: min(520px, 80vw);
+      width: max-content;
+      max-height: 350px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+      border-radius: 8px;
+      border: 1px solid #dcc9b0;
+      z-index: 200;
+      padding: 6px 0;
+      margin-left: 2px;
+    }
+    .subfolder-popup.show { display: block; }
+    .subfolder-popup .dropdown-item {
+      padding: 8px 16px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #5c4033;
+      cursor: pointer;
+      position: relative;
+    }
+    .subfolder-popup .dropdown-item:hover { background: #ece0cf; }
+    .subfolder-popup .dropdown-item.song-item {
+      padding-left: 6px;
+      padding-right: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .subfolder-popup .dropdown-item.song-item .song-name {
+      flex: 1 1 auto;
+      min-width: 0;
+      padding-left: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .subfolder-popup .dropdown-item.song-item .song-name::before { content: '🎵 '; }
+    .subfolder-popup .dropdown-item.song-item.has-settings .song-name::after { content: ' 🎚️'; opacity: 0.7; }
+    .subfolder-popup .dropdown-item.song-item .remove-btn {
+      background: none;
+      border: none;
+      color: #c45a4a;
+      font-size: 0.9rem;
+      cursor: pointer;
+      padding: 0 4px;
+      font-weight: 600;
+      opacity: 0.6;
+      flex: 0 0 auto;
+    }
+    .subfolder-popup .dropdown-item.song-item .remove-btn:hover { opacity: 1; }
+    .subfolder-popup .dropdown-item.folder-item {
+      padding-left: 10px;
+      font-weight: 600;
+      color: #8b6b4a;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .subfolder-popup .dropdown-item.folder-item::before { content: '📂 '; }
+
+    .dropdown-divider { border-top: 1px solid #dcc9b0; margin: 6px 8px; }
+
+    /* ===== PERF PANEL ===== */
     .perf-panel {
       position: fixed;
-      top: 58px; /* just below the two floating buttons */
+      top: 58px;
       right: 10px;
       left: auto;
-      /* Above the ☰ / ⋯ buttons (z-index 8100) so the panel is never
-         covered by them. */
       z-index: 8200;
       width: 320px;
-      /* Never overflow a narrow phone viewport: cap width at viewport
-         minus a small right + left gutter (10px each side). */
       max-width: calc(100vw - 20px);
       max-height: calc(100vh - 72px);
       overflow-y: auto;
@@ -1657,8 +1159,10 @@
       flex-direction: column;
       font-family: inherit;
       color: #3d2b1f;
+      transition: opacity 0.15s ease;
     }
     .perf-panel.show { display: flex; }
+    .perf-panel.dragging { opacity: 0.35; }
     .perf-panel-header {
       display: flex;
       align-items: center;
@@ -1685,9 +1189,7 @@
       line-height: 1;
     }
     .perf-close:hover { color: #5c4033; }
-    .perf-panel-body {
-      padding: 8px 12px 12px 12px;
-    }
+    .perf-panel-body { padding: 8px 12px 12px 12px; }
     .perf-section-label {
       font-size: 0.65rem;
       font-weight: 700;
@@ -1698,22 +1200,13 @@
       border-bottom: 1px solid #ece0cf;
       margin-bottom: 4px;
     }
-    .perf-subhead {
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: #8b6b4a;
-      padding: 6px 2px 2px 2px;
-    }
     .perf-row {
       display: grid;
-      /* label | − | slider | + | readout */
       grid-template-columns: 110px 22px 1fr 22px 44px;
       align-items: center;
       gap: 6px;
       padding: 4px 2px;
     }
-    /* Step buttons inside the floating panel reuse the .sizes-row-step look
-       but are auto-sized to the new grid. */
     .perf-row .sizes-row-step {
       width: 22px;
       height: 22px;
@@ -1733,10 +1226,6 @@
       cursor: pointer;
       margin: 0;
     }
-    /* The readout is now a real number input so users can type a value
-       directly. Styled like the Old Settings number inputs (white bg,
-       rounded border, right-aligned numbers), but sized to fit the
-       compact perf-row grid. */
     .perf-row .perf-readout {
       font-family: Consolas, Menlo, Monaco, monospace;
       font-size: 0.72rem;
@@ -1754,45 +1243,38 @@
       box-sizing: border-box;
     }
     .perf-row .perf-readout::-webkit-outer-spin-button,
-    .perf-row .perf-readout::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
+    .perf-row .perf-readout::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .perf-row .perf-readout:focus {
       border-color: #8b6b4a;
       box-shadow: 0 0 0 2px rgba(139, 107, 74, 0.2);
       background: #f5ede0;
     }
 
-    /* When the user is actively dragging a slider inside the panel,
-       fade the whole panel so the preview behind it stays visible. */
-    .perf-panel {
-      transition: opacity 0.15s ease;
+    .sizes-row-step {
+      background: #f5ede0;
+      border: 1px solid #c4ad92;
+      color: #5c4033;
+      font-size: 0.85rem;
+      font-weight: 700;
+      line-height: 1;
+      padding: 0;
+      margin: 0;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.1s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: inherit;
+      width: 18px;
+      height: 18px;
+      flex: 0 0 auto;
     }
-    .perf-panel.dragging {
-      opacity: 0.35;
-    }
+    .sizes-row-step:hover { background: #dcc9b0; }
+    .sizes-row-step:active { background: #c4ad92; }
 
-    /* When chrome is collapsed, hide the toolbar.
-       The floating ☰ button and the preview stay visible. */
-    body.chrome-collapsed .toolbar {
-      display: none !important;
-    }
-
-    /* Editor is hidden in focus mode ONLY when the user hasn't explicitly
-       brought it back with the ✏️ button. The `.collapsed` class is the
-       single source of truth; focus mode just forces it when the user
-       hasn't asked otherwise. This selector already targets BOTH
-       .input-area and .input-area2 because both use the .input-area
-       class in their markup. */
     body.chrome-collapsed .input-area:not(.focus-visible) {
       display: none !important;
-    }
-
-    /* Preview area reclaims the full space when the editor is truly hidden. */
-    body.chrome-collapsed .editor-wrapper.layout-desktop:not(.editor-shown),
-    body.chrome-collapsed .editor-wrapper.layout-phone:not(.editor-shown) {
-      flex-direction: column;
     }
     body.chrome-collapsed .preview-area {
       width: 100% !important;
@@ -1803,6 +1285,7 @@
       flex: 1 1 auto !important;
     }
 
+    /* ===== CONFIRM DIALOG ===== */
     .confirm-overlay {
       display: none;
       position: fixed;
@@ -1830,6 +1313,29 @@
     .confirm-buttons { display: flex; gap: 10px; justify-content: flex-end; }
     .confirm-buttons .btn { padding: 6px 18px; font-size: 0.85rem; }
 
+    .btn {
+      background: #dcc9b0;
+      border: 1px solid #c4ad92;
+      padding: 5px 14px;
+      border-radius: 40px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #3d2b1f;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+    .btn:hover { background: #c4ad92; border-color: #b0987a; }
+    .btn-outline { background: transparent; border: 1px solid #c4ad92; color: #5c4033; }
+    .btn-outline:hover { background: #dcc9b0; border-color: #b0987a; }
+    .btn-success { background: #8b6b4a; border-color: #7a5d3f; color: white; }
+    .btn-success:hover { background: #7a5d3f; border-color: #6b4f35; }
+
+    /* ===== TOAST ===== */
     .toast {
       position: fixed;
       bottom: 24px;
@@ -1851,6 +1357,7 @@
     }
     .toast.show { opacity: 1; transform: translateY(0); }
 
+    /* ===== OLD SETTINGS MODAL ===== */
     .settings-overlay {
       display: none;
       position: fixed;
@@ -1900,9 +1407,6 @@
       padding-bottom: 4px;
       border-bottom: 1px solid #dcc9b0;
     }
-    /* Lock row inside the floating settings panel — styled to match the
-       lock row in the toolbar's Sizes dropdown so the two controls feel
-       like the same feature, just accessible from two places. */
     .settings-lock-row {
       display: flex;
       align-items: center;
@@ -1931,21 +1435,13 @@
     }
     .settings-lock-row:hover { background: #e3d3bb; }
 
-    /* Lock row inside the floating ⚙️ Performance panel — reuse the same
-       visual style as the Settings modal's lock row, but sized down a bit
-       so it fits the compact perf-panel layout. */
     .perf-panel .settings-lock-row {
       padding: 6px 8px;
       gap: 8px;
       margin: 0 2px 6px 2px;
     }
-    .perf-panel .settings-lock-row input[type="checkbox"] {
-      width: 13px;
-      height: 13px;
-    }
-    .perf-panel .settings-lock-row label {
-      font-size: 0.72rem;
-    }
+    .perf-panel .settings-lock-row input[type="checkbox"] { width: 13px; height: 13px; }
+    .perf-panel .settings-lock-row label { font-size: 0.72rem; }
 
     .settings-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
     .settings-row label { font-size: 0.8rem; font-weight: 500; color: #5c4033; flex: 0 0 160px; }
@@ -2040,92 +1536,16 @@
       .settings-row { flex-wrap: wrap; }
       .settings-row label { flex: 0 0 100%; margin-bottom: 2px; }
       .settings-row input[type="number"].settings-num { flex: 0 0 70px; }
-      .sizes-panel { min-width: calc(300px * var(--ui-scale)); }
     }
   </style>
 </head>
 <body class="easy-mode">
 <div class="app">
-  <div class="toolbar">
-    <div class="toolbar-left">
-      <div class="toolbar-row">
-      <h1>🎸 Chord Chart Creator</h1>
-      <span class="current-song" id="currentSongName" title=""></span>
-      <button class="btn-toggle" id="toggleMode" title="Switch between Easy and Advanced mode">😵 Switch to ADVANCED MODE</button>
-
-      <div class="dropdown">
-        <button class="btn btn-outline" id="dropdownToggle">🎵 Songs ▼</button>
-        <div class="dropdown-content" id="dropdownContent">
-          <div class="dropdown-item" id="loadSingleFile" style="color: #8b6b4a; font-weight: 600;">⬆️ Upload a Song</div>
-          <div class="dropdown-divider"></div>
-          <div class="dropdown-label">🎵 SONG LIST</div>
-          <div id="songsList"></div>
-        </div>
-      </div>
-
-      <div class="dropdown">
-        <button class="btn btn-outline" id="sizesToggle">🎚️ Sizes ▼</button>
-        <div class="dropdown-content sizes-panel" id="sizesContent">
-          <div class="sizes-lock-row" id="lockRow">
-            <input type="checkbox" id="lockCheckbox">
-            <label for="lockCheckbox">🔒 Lock all settings (protects while typing new text)</label>
-          </div>
-          <div class="sizes-row">
-            <span class="sizes-row-label">🔍 EVERYTHING:</span>
-            <input type="range" id="masterScaleSlider" min="0" max="100" step="0.5" value="50">
-            <button type="button" class="sizes-row-step" id="masterScaleDown" title="Decrease">−</button>
-            <input type="number" id="masterScaleNum" min="0.1" max="10" step="0.01" value="1">
-            <button type="button" class="sizes-row-step" id="masterScaleUp" title="Increase">+</button>
-            <button class="sizes-row-reset" id="masterScaleReset" title="Reset to 1.00">↺</button>
-          </div>
-          <div class="sizes-row">
-            <span class="sizes-row-label">🔖 Labels:</span>
-            <input type="range" id="labelSizeToolbarSlider" min="0" max="100" step="0.5" value="50">
-            <button type="button" class="sizes-row-step" id="labelSizeToolbarDown" title="Decrease">−</button>
-            <input type="number" id="labelSizeToolbarNum" min="0.25" max="4" step="0.01" value="1">
-            <button type="button" class="sizes-row-step" id="labelSizeToolbarUp" title="Increase">+</button>
-            <button class="sizes-row-reset" id="labelSizeToolbarReset" title="Reset to 1.00">↺</button>
-          </div>
-          <div class="sizes-row">
-            <span class="sizes-row-label">🎼 Chords:</span>
-            <input type="range" id="chordSizeToolbarSlider" min="0" max="100" step="0.5" value="50">
-            <button type="button" class="sizes-row-step" id="chordSizeToolbarDown" title="Decrease">−</button>
-            <input type="number" id="chordSizeToolbarNum" min="0.25" max="4" step="0.01" value="1">
-            <button type="button" class="sizes-row-step" id="chordSizeToolbarUp" title="Increase">+</button>
-            <button class="sizes-row-reset" id="chordSizeToolbarReset" title="Reset to 1.00">↺</button>
-          </div>
-          <div class="sizes-row">
-            <span class="sizes-row-label">🎤 Lyrics:</span>
-            <input type="range" id="lyricSizeToolbarSlider" min="0" max="100" step="0.5" value="50">
-            <button type="button" class="sizes-row-step" id="lyricSizeToolbarDown" title="Decrease">−</button>
-            <input type="number" id="lyricSizeToolbarNum" min="0.25" max="4" step="0.01" value="1">
-            <button type="button" class="sizes-row-step" id="lyricSizeToolbarUp" title="Increase">+</button>
-            <button class="sizes-row-reset" id="lyricSizeToolbarReset" title="Reset to 1.00">↺</button>
-          </div>
-        </div>
-      </div>
-
-      <button class="btn-transpose advanced-only" id="transposeDown" title="Transpose down a semitone">♭</button>
-      <span class="transpose-info advanced-only" id="transposeInfo">0</span>
-      <button class="btn-transpose advanced-only" id="transposeUp" title="Transpose up a semitone">♯</button>
-      </div>
-
-      <div class="toolbar-row">
-      <!-- toolbar layout toggle removed (Phone/Desktop switch deprecated) -->
-
-      <button class="btn btn-success" id="exportPNG">📷 Export Chord Chart as PNG</button>
-      <button class="btn btn-success" id="saveSong">💾 Save Chord Chart</button>
-
-      <button class="btn btn-outline" id="openSettings" title="Open old settings">⚙️ Old Settings</button>
-      </div>
-    </div>
-  </div>
   <div class="title-bar" id="titleBar">
     <input type="text" class="title-input" id="titleInput" placeholder="Song Title — Artist" spellcheck="false" aria-label="Song title">
   </div>
   <div class="editor-wrapper layout-desktop" id="editorWrapper">
     <div class="panel-wall" id="panelWall" title="Drag to resize panels"></div>
-    <!-- ===== PANEL 1 (left) ===== -->
     <div class="panel" id="panel1">
       <div class="preview-area" id="previewArea">
         <div id="previewContainer" class="chord-preview">
@@ -2140,8 +1560,6 @@
         </div>
       </div>
     </div>
-
-    <!-- ===== PANEL 2 (right) ===== -->
     <div class="panel" id="panel2">
       <div class="preview-area" id="previewArea2">
         <div id="previewContainer2" class="chord-preview">
@@ -2159,8 +1577,9 @@
   </div>
 </div>
 
-<button class="chrome-toggle" id="chromeToggle" title="Collapse toolbar & editor (focus mode)" aria-label="Collapse toolbar and editor">☰</button>
-<button class="chrome-toggle-2" id="chromeToggle2" title="Collapse toolbar & editor (focus mode)" aria-label="Collapse toolbar and editor">⋯</button>
+<button class="chrome-toggle" id="chromeToggle" title="Collapse editor (focus mode)" aria-label="Collapse editor">☰</button>
+<button class="old-settings-toggle" id="oldSettingsToggle" title="Old Settings" aria-label="Old Settings">⛔</button>
+<!-- ⋯ button removed — toolbar is gone, so it has nothing to toggle -->
 <button class="perf-toggle" id="perfToggle" title="Open settings" aria-label="Open settings">⚙️</button>
 <button class="songs-float-toggle" id="songsFloatToggle" title="Songs" aria-label="Songs">🎵</button>
 <button class="key-float-toggle" id="keyFloatToggle" title="Key &amp; transpose" aria-label="Key and transpose">🔑</button>
@@ -2168,6 +1587,7 @@
 <button class="png-float-toggle" id="pngFloatToggle" title="Export Chord Chart as PNG" aria-label="Export Chord Chart as PNG">📷</button>
 <button class="save-float-toggle" id="saveFloatToggle" title="Save Chord Chart" aria-label="Save Chord Chart">💾</button>
 <button class="template-float-toggle" id="templateFloatToggle" title="Templates (look &amp; feel presets)" aria-label="Templates">🎨</button>
+
 <div class="template-float-panel" id="templateFloatPanel" role="dialog" aria-label="Templates">
   <div class="template-float-header">
     <span>🎨 Templates</span>
@@ -2181,7 +1601,6 @@
     <button class="template-float-btn primary" id="templateSaveBtn">💾 Save as Template…</button>
     <button class="template-float-btn" id="templateLoadBtn">📂 Load Template…</button>
     <div class="template-float-current" id="templateCurrentLabel"></div>
-
     <div class="template-float-divider"></div>
     <div class="template-float-subhead">Default template</div>
     <button class="template-float-btn" id="templateSetDefaultBtn">📌 Set as default template…</button>
@@ -2189,6 +1608,7 @@
     <div class="template-float-default-label" id="templateDefaultLabel"></div>
   </div>
 </div>
+
 <div class="songs-float-panel" id="songsFloatPanel" role="dialog" aria-label="Songs">
   <div class="songs-float-header">
     <span>🎵 Songs</span>
@@ -2200,6 +1620,7 @@
     <div id="songsFloatList"></div>
   </div>
 </div>
+
 <div class="key-float-panel" id="keyFloatPanel" role="dialog" aria-label="Key">
   <div class="key-float-header">
     <span>🔑 Key</span>
@@ -2208,12 +1629,12 @@
   <div class="key-float-body">
     <div class="key-float-row key-float-transpose-row">
       <label>Transpose</label>
-      <button type="button" class="btn-transpose" id="keyFloatTransposeDown" title="Transpose down a semitone">−</button>
-      <span class="transpose-info" id="keyFloatTransposeInfo">0</span>
-      <button type="button" class="btn-transpose" id="keyFloatTransposeUp" title="Transpose up a semitone">+</button>
+      <button type="button" class="btn-transpose" id="keyFloatTransposeDown" title="Transpose down a semitone">⬇️</button>
+      <button type="button" class="btn-transpose" id="keyFloatTransposeUp" title="Transpose up a semitone">⬆️</button>
     </div>
   </div>
 </div>
+
 <div class="perf-panel" id="perfPanel" role="dialog" aria-label="Settings">
   <div class="perf-panel-header">
     <span>⚙️ Settings</span>
@@ -2228,7 +1649,6 @@
     </div>
 
     <div class="perf-section-label">SIZES</div>
-
     <div class="perf-row">
       <label for="perfLabelSize">Labels</label>
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfLabelSize" title="Decrease">−</button>
@@ -2252,7 +1672,6 @@
     </div>
 
     <div class="perf-section-label">SPACING</div>
-
     <div class="perf-row">
       <label for="perfLabelSpacing">Labels</label>
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfLabelSpacing" title="Decrease">−</button>
@@ -2276,7 +1695,6 @@
     </div>
 
     <div class="perf-section-label">BARLINES</div>
-
     <div class="perf-row">
       <label for="perfPipeScale">Height</label>
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfPipeScale" title="Decrease">−</button>
@@ -2300,7 +1718,6 @@
     </div>
 
     <div class="perf-section-label">MARGINS</div>
-
     <div class="perf-row">
       <label for="perfMarginH">Horizontal</label>
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfMarginH" title="Decrease">−</button>
@@ -2506,29 +1923,10 @@
   (function() {
     'use strict';
 
-    // ===== TEMPLATE SETTING WHITELIST =====
-    // Declared at the very top so loadSong() can safely reference it during
-    // early initialization.
     const TEMPLATE_SETTING_KEYS = [
-      'masterScale',
-      'chordLineHeight',
-      'emptyLineHeight',
-      'chordLetterSpacing',
-      'lyricLetterSpacing',
-      'labelLetterSpacing',
-      'pipeScale',
-      'pipeThickness',
-      'pipeVerticalAlign',
-      'chordFont',
-      'chordFontCustom',
-      'lyricFont',
-      'lyricFontCustom',
-      'chordSizeMult',
-      'lyricSize',
-      'labelSize',
-      'labelRadius',
-      'previewPaddingH',
-      'previewPaddingV'
+      'masterScale','chordLineHeight','emptyLineHeight','chordLetterSpacing','lyricLetterSpacing','labelLetterSpacing',
+      'pipeScale','pipeThickness','pipeVerticalAlign','chordFont','chordFontCustom','lyricFont','lyricFontCustom',
+      'chordSizeMult','lyricSize','labelSize','labelRadius','previewPaddingH','previewPaddingV'
     ];
 
     // ===== AUTO-WRAP NUMBER INPUTS WITH ± BUTTONS =====
@@ -2551,7 +1949,6 @@
         group.appendChild(minusBtn);
         group.appendChild(input);
         group.appendChild(plusBtn);
-
         function step(direction) {
           const min = input.min !== '' ? parseFloat(input.min) : -Infinity;
           const max = input.max !== '' ? parseFloat(input.max) : Infinity;
@@ -2577,9 +1974,6 @@
     const previewContainer = document.getElementById('previewContainer');
     const inputArea = document.getElementById('inputArea');
     const previewArea = document.getElementById('previewArea');
-    // (removed: toggleBtn — replaced by floating ✏️ button)
-    const toggleModeBtn = document.getElementById('toggleMode');
-    const openSettingsBtn = document.getElementById('openSettings');
     const settingsOverlay = document.getElementById('settingsOverlay');
     const settingsPanel = document.getElementById('settingsPanel');
     const settingsClose = document.getElementById('settingsClose');
@@ -2592,23 +1986,10 @@
     const perfLockCheckbox = document.getElementById('perfLockCheckbox');
     const editorWrapper = document.getElementById('editorWrapper');
     const panelWall = document.getElementById('panelWall');
-    // const toggleLayoutBtn — removed (Phone/Desktop switch deprecated)
     const resizeHandle = document.getElementById('resizeHandle');
-    const dropdownToggle = document.getElementById('dropdownToggle');
-    const dropdownContent = document.getElementById('dropdownContent');
-    const songsList = document.getElementById('songsList');
     const dropZone = document.getElementById('dropZone');
-    const transposeUpBtn = document.getElementById('transposeUp');
-    const transposeDownBtn = document.getElementById('transposeDown');
-    const transposeInfo = document.getElementById('transposeInfo');
 
-    const currentSongNameEl = document.getElementById('currentSongName');
     const toastEl = document.getElementById('toast');
-
-    const sizesToggle = document.getElementById('sizesToggle');
-    const sizesContent = document.getElementById('sizesContent');
-    const lockRow = document.getElementById('lockRow');
-    const lockCheckbox = document.getElementById('lockCheckbox');
 
     const confirmOverlay = document.getElementById('confirmOverlay');
     const confirmMessage = document.getElementById('confirmMessage');
@@ -2616,13 +1997,11 @@
     const confirmNo = document.getElementById('confirmNo');
 
     const chromeToggle = document.getElementById('chromeToggle');
-    const chromeToggle2 = document.getElementById('chromeToggle2');
+    const oldSettingsToggle = document.getElementById('oldSettingsToggle');
     const editorFloatToggle = document.getElementById('editorFloatToggle');
-    // const layoutFloatToggle — removed (button no longer exists)
     const saveFloatToggle = document.getElementById('saveFloatToggle');
     const pngFloatToggle = document.getElementById('pngFloatToggle');
 
-    // ===== PANEL 2 DOM REFERENCES (second editor + preview) =====
     const inputEl2 = document.getElementById('chartInput2');
     const previewContent2 = document.getElementById('previewContent2');
     const previewContainer2 = document.getElementById('previewContainer2');
@@ -2639,11 +2018,11 @@
     const templateDefaultLabel = document.getElementById('templateDefaultLabel');
 
     // ===== STATE =====
-    let isLocked = false;                 // ✅ FIX: was undeclared
+    let isLocked = false;
     let currentSection = '';
     let isEditorCollapsed = false;
     let isAdvancedMode = false;
-    let currentLayout = 'phone';          // ✅ default is now Phone
+    let currentLayout = 'desktop';
     let isResizing = false;
     let isWallResizing = false;
     let startY = 0;
@@ -2651,15 +2030,10 @@
     let startWidth = 0;
     let startHeight = 0;
     let transposeSemitones = 0;
-    let currentKey = 'C';                 // ✅ FIX: default is now C major
-    let currentMode = 'major';            // ✅ FIX: default is now major
     let originalText = '';
     let originalTextLeft = '';
-    // ✅ FIX: declared here so syncFocusModeEditorVisibility() can never
-    // hit a temporal-dead-zone error if called during init.
     let isChromeCollapsed = false;
     let currentTemplateName = '';
-
     let confirmCallback = null;
 
     // ===== CONFIRM DIALOG =====
@@ -2729,10 +2103,7 @@
           const handle = await window.showSaveFilePicker({
             suggestedName: safeName,
             startIn: 'downloads',
-            types: [{
-              description: description || 'File',
-              accept: { [mimeType]: [ext] }
-            }]
+            types: [{ description: description || 'File', accept: { [mimeType]: [ext] } }]
           });
           const writable = await handle.createWritable();
           await writable.write(blob);
@@ -2759,11 +2130,6 @@
     }
 
     // ===== SETTINGS ELEMENT REFERENCES =====
-    const masterScaleSlider = document.getElementById('masterScaleSlider');
-    const masterScaleNum = document.getElementById('masterScaleNum');
-    const masterScaleReset = document.getElementById('masterScaleReset');
-    const masterScaleUp = document.getElementById('masterScaleUp');
-    const masterScaleDown = document.getElementById('masterScaleDown');
     const uiScaleSlider = document.getElementById('uiScaleSlider');
     const uiScaleNum = document.getElementById('uiScaleNum');
     const editorScaleSlider = document.getElementById('editorScaleSlider');
@@ -2803,30 +2169,12 @@
     const labelRadiusSlider = document.getElementById('labelRadiusSlider');
     const labelRadiusNum = document.getElementById('labelRadiusNum');
 
-    const lyricSizeToolbarSlider = document.getElementById('lyricSizeToolbarSlider');
-    const lyricSizeToolbarNum = document.getElementById('lyricSizeToolbarNum');
-    const lyricSizeToolbarUp = document.getElementById('lyricSizeToolbarUp');
-    const lyricSizeToolbarDown = document.getElementById('lyricSizeToolbarDown');
-    const lyricSizeToolbarReset = document.getElementById('lyricSizeToolbarReset');
-    const chordSizeToolbarSlider = document.getElementById('chordSizeToolbarSlider');
-    const chordSizeToolbarNum = document.getElementById('chordSizeToolbarNum');
-    const chordSizeToolbarUp = document.getElementById('chordSizeToolbarUp');
-    const chordSizeToolbarDown = document.getElementById('chordSizeToolbarDown');
-    const chordSizeToolbarReset = document.getElementById('chordSizeToolbarReset');
-    const labelSizeToolbarSlider = document.getElementById('labelSizeToolbarSlider');
-    const labelSizeToolbarNum = document.getElementById('labelSizeToolbarNum');
-    const labelSizeToolbarUp = document.getElementById('labelSizeToolbarUp');
-    const labelSizeToolbarDown = document.getElementById('labelSizeToolbarDown');
-    const labelSizeToolbarReset = document.getElementById('labelSizeToolbarReset');
-
     // ===== NOTE TABLES =====
     const NOTE_MAP = {
       'C': 0, 'B#': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3,
       'E': 4, 'Fb': 4, 'F': 5, 'E#': 5, 'F#': 6, 'Gb': 6, 'G': 7,
       'G#': 8, 'Ab': 8, 'A': 9, 'A#': 10, 'Bb': 10, 'B': 11, 'Cb': 11
     };
-
-    const VALID_MAJOR_KEYS = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'Gb', 'Db', 'Ab', 'Eb', 'Bb', 'F'];
 
     const MS_MIN = 0.1;
     const MS_MAX = 10;
@@ -2841,14 +2189,8 @@
       return Math.round(t * 1000) / 10;
     }
 
-    // ===== PER-CATEGORY SIZE RATIO MAPPING =====
-    // Internally we still store absolute values (labelSize=1.71, etc.), but
-    // the UI now presents them as RATIOS where 1.00 = the "sweet spot" look
-    // the user chose. Range 0.25 → 4.00 with 1.00 at the exact middle,
-    // log-mapped so a given % drag feels the same everywhere.
     const RATIO_MIN = 0.25;
     const RATIO_MAX = 4.0;
-    // Base values that correspond to "ratio = 1.00":
     const BASE_LABEL_SIZE = 1.71;
     const BASE_CHORD_MULT = 2.01;
     const BASE_LYRIC_SIZE = 1.71;
@@ -2862,17 +2204,12 @@
       const t = pos / 100;
       return RATIO_MIN * Math.pow(RATIO_MAX / RATIO_MIN, t);
     }
-    function internalToRatio(internal, base) {
-      return internal / base;
-    }
-    function ratioToInternal(ratio, base) {
-      return ratio * base;
-    }
+    function internalToRatio(internal, base) { return internal / base; }
+    function ratioToInternal(ratio, base) { return ratio * base; }
 
     const SETTINGS_KEY = 'chordChartSettings';
     const EDITOR_STATE_KEY = 'chordChartEditorHidden';
-    const LAYOUT_KEY = 'chordChartLayout';           // ✅ FIX: persist layout choice
-    const CHROME_STATE_KEY = 'chordChartChromeCollapsed'; // ✅ persist focus mode
+    const CHROME_STATE_KEY = 'chordChartChromeCollapsed';
 
     const DEFAULT_SETTINGS = {
       masterScale: 1,
@@ -2892,15 +2229,10 @@
       chordFontCustom: '',
       lyricFont: "'Sarabun', 'Noto Sans Thai', system-ui, sans-serif",
       lyricFontCustom: '',
-      // "Shared size" the user picked via the temporary experiment:
-      //   lyrics = 1.71rem
-      //   labels = 1.71rem
-      //   chords/pipes = 0.85 × chordSizeMult  →  chordSizeMult = 1.71 / 0.85 ≈ 2.01
       chordSizeMult: 2.01,
       lyricSize: 1.71,
       labelSize: 1.71,
       labelRadius: 4,
-      // Preview margins (px). Horizontal = left + right, Vertical = top + bottom.
       previewPaddingH: 8,
       previewPaddingV: 8
     };
@@ -2919,9 +2251,7 @@
           const parsed = JSON.parse(stored);
           settings = Object.assign({}, DEFAULT_SETTINGS, parsed);
         }
-      } catch (e) {
-        console.log('Could not load settings, using defaults');
-      }
+      } catch (e) { console.log('Could not load settings, using defaults'); }
     }
     function saveSettings() {
       try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
@@ -2935,27 +2265,6 @@
     function saveEditorHiddenState(hidden) {
       try { localStorage.setItem(EDITOR_STATE_KEY, hidden ? 'true' : 'false'); }
       catch (e) {}
-    }
-
-    // ✅ FIX: persist layout.
-    // Default is DESKTOP view for new users (or users whose saved layout
-    // value is somehow missing / invalid). Existing users who have
-    // already picked Desktop will keep Desktop, because their saved
-    // value will be 'desktop' and is honored here.
-    function loadLayoutState() {
-      try {
-        const v = localStorage.getItem(LAYOUT_KEY);
-        return (v === 'phone' || v === 'desktop') ? v : 'desktop';
-      } catch (e) { return 'phone'; }
-    }
-    function saveLayoutState(layout) {
-      try { localStorage.setItem(LAYOUT_KEY, layout); } catch (e) {}
-    }
-
-    // ✅ FIX: persist focus (chrome-collapsed) mode
-    function loadChromeCollapsedState() {
-      try { return localStorage.getItem(CHROME_STATE_KEY) === 'true'; }
-      catch (e) { return false; }
     }
     function saveChromeCollapsedState(collapsed) {
       try { localStorage.setItem(CHROME_STATE_KEY, collapsed ? 'true' : 'false'); }
@@ -2976,11 +2285,8 @@
       const lls = parseFloat(settings.lyricLetterSpacing) || 0;
       const bls = parseFloat(settings.labelLetterSpacing) || 0;
 
-      // ✅ FIX: use the user's chosen chord font
       root.style.setProperty('--font-chord', effectiveFont(settings.chordFont, settings.chordFontCustom));
-      // ✅ FIX: use the user's chosen lyric font (was hardcoded Sarabun)
       root.style.setProperty('--font-lyric', effectiveFont(settings.lyricFont, settings.lyricFontCustom));
-
       root.style.setProperty('--lyric-size', (settings.lyricSize * ms) + 'rem');
       root.style.setProperty('--label-size', (settings.labelSize * ms) + 'rem');
       root.style.setProperty('--label-radius', settings.labelRadius + 'px');
@@ -3000,7 +2306,6 @@
       root.style.setProperty('--chord-base-size', '0.85rem');
       root.style.setProperty('--preview-pad-h', (settings.previewPaddingH != null ? settings.previewPaddingH : 8) + 'px');
       root.style.setProperty('--preview-pad-v', (settings.previewPaddingV != null ? settings.previewPaddingV : 8) + 'px');
-      // Keep the floating performance panel readouts current if it exists.
       if (typeof syncPerfPanel === 'function' && document.getElementById('perfPanel')) {
         syncPerfPanel();
       }
@@ -3008,54 +2313,28 @@
     }
 
     function syncSettingsUI() {
-      masterScaleSlider.value = scaleToSliderPos(settings.masterScale);
-      masterScaleNum.value = Number(settings.masterScale).toFixed(2);
-
-      const labelRatio = internalToRatio(settings.labelSize, BASE_LABEL_SIZE);
-      labelSizeToolbarSlider.value = ratioToSliderPos(labelRatio);
-      if (document.activeElement !== labelSizeToolbarNum) labelSizeToolbarNum.value = labelRatio.toFixed(2);
-
-      const chordRatio = internalToRatio(settings.chordSizeMult, BASE_CHORD_MULT);
-      chordSizeToolbarSlider.value = ratioToSliderPos(chordRatio);
-      if (document.activeElement !== chordSizeToolbarNum) chordSizeToolbarNum.value = chordRatio.toFixed(2);
-
-      const lyricRatio = internalToRatio(settings.lyricSize, BASE_LYRIC_SIZE);
-      lyricSizeToolbarSlider.value = ratioToSliderPos(lyricRatio);
-      if (document.activeElement !== lyricSizeToolbarNum) lyricSizeToolbarNum.value = lyricRatio.toFixed(2);
-
       uiScaleSlider.value = settings.uiScale;
       uiScaleNum.value = Number(settings.uiScale).toFixed(2);
-
       editorScaleSlider.value = settings.editorScale;
       editorScaleNum.value = Number(settings.editorScale).toFixed(2);
-
       currentSongSizeSlider.value = settings.currentSongSize;
       currentSongSizeNum.value = Number(settings.currentSongSize).toFixed(2);
-
       chordLineHeightSlider.value = settings.chordLineHeight;
       chordLineHeightNum.value = Number(settings.chordLineHeight).toFixed(2);
-
       emptyLineHeightSlider.value = settings.emptyLineHeight;
       emptyLineHeightNum.value = Number(settings.emptyLineHeight).toFixed(0);
-
       editorWidthSlider.value = settings.editorWidth;
       editorWidthNum.value = Number(settings.editorWidth).toFixed(0);
-
       chordLetterSpacingSlider.value = settings.chordLetterSpacing;
       chordLetterSpacingNum.value = Number(settings.chordLetterSpacing).toFixed(3);
-
       lyricLetterSpacingSlider.value = settings.lyricLetterSpacing;
       lyricLetterSpacingNum.value = Number(settings.lyricLetterSpacing).toFixed(3);
-
       labelLetterSpacingSlider.value = settings.labelLetterSpacing;
       labelLetterSpacingNum.value = Number(settings.labelLetterSpacing).toFixed(3);
-
       pipeScaleSlider.value = settings.pipeScale;
       pipeScaleNum.value = Number(settings.pipeScale).toFixed(2);
-
       pipeThicknessSlider.value = settings.pipeThickness;
       pipeThicknessNum.value = Number(settings.pipeThickness).toFixed(3);
-
       pipeValignSlider.value = settings.pipeVerticalAlign;
       pipeValignNum.value = Number(settings.pipeVerticalAlign).toFixed(2);
 
@@ -3128,7 +2407,6 @@
     function openSettings() { syncSettingsUI(); settingsOverlay.classList.add('show'); }
     function closeSettings() { settingsOverlay.classList.remove('show'); }
 
-    openSettingsBtn.addEventListener('click', openSettings);
     settingsClose.addEventListener('click', closeSettings);
     settingsDone.addEventListener('click', closeSettings);
     settingsOverlay.addEventListener('click', function(e) {
@@ -3136,38 +2414,13 @@
     });
 
     // ===== LOCK SYSTEM =====
-    // There are two lock checkboxes on the page:
-    //   1. #lockCheckbox       → inside the toolbar's Sizes dropdown
-    //   2. #settingsLockCheckbox → inside the floating Settings panel
-    // Both are kept in sync via applyLockState(), so toggling either one
-    // updates the other and the entire app's locked/editable state.
-    // There are now THREE lock checkboxes on the page:
-    //   1. #lockCheckbox          → toolbar's Sizes dropdown
-    //   2. #settingsLockCheckbox  → toolbar's ⚙️ Settings modal
-    //   3. #perfLockCheckbox      → floating ⚙️ Performance panel
-    // All three are kept in sync via applyLockState().
     function applyLockState() {
-      lockCheckbox.checked = isLocked;
       if (settingsLockCheckbox) settingsLockCheckbox.checked = isLocked;
       if (perfLockCheckbox) perfLockCheckbox.checked = isLocked;
-      sizesContent.classList.toggle('locked', isLocked);
-      settingsPanel.classList.toggle('locked', isLocked);
-      settingsLockIndicator.style.display = isLocked ? 'inline' : 'none';
-      sizesToggle.textContent = isLocked ? '🎚️ Sizes 🔒 ▼' : '🎚️ Sizes ▼';
+      if (settingsPanel) settingsPanel.classList.toggle('locked', isLocked);
+      if (settingsLockIndicator) settingsLockIndicator.style.display = isLocked ? 'inline' : 'none';
     }
 
-    // --- Toolbar Sizes dropdown lock ---
-    lockCheckbox.addEventListener('change', function() {
-      isLocked = this.checked;
-      applyLockState();
-    });
-    lockRow.addEventListener('click', function(e) {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL') return;
-      isLocked = !isLocked;
-      applyLockState();
-    });
-
-    // --- Toolbar Settings modal lock ---
     if (settingsLockCheckbox) {
       settingsLockCheckbox.addEventListener('change', function() {
         isLocked = this.checked;
@@ -3176,15 +2429,11 @@
     }
     if (settingsLockRow) {
       settingsLockRow.addEventListener('click', function(e) {
-        // Let the checkbox handle its own click (so the label/input work natively);
-        // only intercept clicks on the surrounding row background.
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL') return;
         isLocked = !isLocked;
         applyLockState();
       });
     }
-
-    // --- Floating ⚙️ Performance panel lock ---
     if (perfLockCheckbox) {
       perfLockCheckbox.addEventListener('change', function() {
         isLocked = this.checked;
@@ -3199,41 +2448,7 @@
       });
     }
 
-    // ===== SIZES DROPDOWN =====
-    sizesToggle.addEventListener('click', function(e) {
-      e.stopPropagation();
-      dropdownContent.classList.remove('show');
-      document.querySelectorAll('.subfolder-popup.show').forEach(p => p.classList.remove('show'));
-      sizesContent.classList.toggle('show');
-    });
-    sizesContent.addEventListener('click', function(e) { e.stopPropagation(); });
-
     // ===== SETTERS =====
-    function setMasterScale(v) {
-      v = clampNum(v, MS_MIN, MS_MAX);
-      v = Math.round(v * 100) / 100;
-      settings.masterScale = v;
-      masterScaleSlider.value = scaleToSliderPos(v);
-      if (document.activeElement !== masterScaleNum) masterScaleNum.value = v.toFixed(2);
-      saveSettings();
-      applySettings();
-    }
-    masterScaleSlider.addEventListener('input', function() { setMasterScale(sliderPosToScale(parseFloat(this.value))); });
-    masterScaleNum.addEventListener('input', function() {
-      const v = parseFloat(this.value);
-      if (!isNaN(v)) setMasterScale(v);
-    });
-    masterScaleNum.addEventListener('blur', function() { this.value = settings.masterScale.toFixed(2); });
-    masterScaleReset.addEventListener('click', function() { setMasterScale(DEFAULT_SETTINGS.masterScale); });
-    masterScaleUp.addEventListener('click', function() {
-      const stepVal = parseFloat(masterScaleNum.step) || 0.05;
-      setMasterScale(parseFloat(settings.masterScale) + stepVal);
-    });
-    masterScaleDown.addEventListener('click', function() {
-      const stepVal = parseFloat(masterScaleNum.step) || 0.05;
-      setMasterScale(parseFloat(settings.masterScale) - stepVal);
-    });
-
     function setUIScale(v) {
       v = clampNum(v, 0.7, 1.6);
       settings.uiScale = v;
@@ -3424,8 +2639,6 @@
       settings.chordSizeMult = internal;
       chordSizeSlider.value = ratioToSliderPos(ratio);
       if (document.activeElement !== chordSizeNum) chordSizeNum.value = ratio.toFixed(2);
-      chordSizeToolbarSlider.value = ratioToSliderPos(ratio);
-      if (document.activeElement !== chordSizeToolbarNum) chordSizeToolbarNum.value = ratio.toFixed(2);
       saveSettings();
       applySettings();
     }
@@ -3463,8 +2676,6 @@
       settings.lyricSize = internal;
       lyricSizeSlider.value = ratioToSliderPos(ratio);
       if (document.activeElement !== lyricSizeNum) lyricSizeNum.value = ratio.toFixed(2);
-      lyricSizeToolbarSlider.value = ratioToSliderPos(ratio);
-      if (document.activeElement !== lyricSizeToolbarNum) lyricSizeToolbarNum.value = ratio.toFixed(2);
       saveSettings();
       applySettings();
     }
@@ -3483,8 +2694,6 @@
       settings.labelSize = internal;
       labelSizeSlider.value = ratioToSliderPos(ratio);
       if (document.activeElement !== labelSizeNum) labelSizeNum.value = ratio.toFixed(2);
-      labelSizeToolbarSlider.value = ratioToSliderPos(ratio);
-      if (document.activeElement !== labelSizeToolbarNum) labelSizeToolbarNum.value = ratio.toFixed(2);
       saveSettings();
       applySettings();
     }
@@ -3512,65 +2721,6 @@
     });
     labelRadiusNum.addEventListener('blur', function() { this.value = settings.labelRadius.toFixed(1); });
 
-    // Toolbar mirrored setters
-    // ± buttons step MULTIPLICATIVELY by ×1.05 / ÷1.05 in ratio space,
-    // so a single click feels the same near any ratio value.
-    const MULT_STEP = 1.05;
-
-    lyricSizeToolbarSlider.addEventListener('input', function() { setLyricSize(sliderPosToRatio(parseFloat(this.value))); });
-    lyricSizeToolbarNum.addEventListener('input', function() {
-      const v = parseFloat(this.value);
-      if (!isNaN(v)) setLyricSize(v);
-    });
-    lyricSizeToolbarNum.addEventListener('blur', function() {
-      this.value = internalToRatio(settings.lyricSize, BASE_LYRIC_SIZE).toFixed(2);
-    });
-    lyricSizeToolbarUp.addEventListener('click', function() {
-      const cur = internalToRatio(settings.lyricSize, BASE_LYRIC_SIZE);
-      setLyricSize(cur * MULT_STEP);
-    });
-    lyricSizeToolbarDown.addEventListener('click', function() {
-      const cur = internalToRatio(settings.lyricSize, BASE_LYRIC_SIZE);
-      setLyricSize(cur / MULT_STEP);
-    });
-    lyricSizeToolbarReset.addEventListener('click', function() { setLyricSize(1); });
-
-    chordSizeToolbarSlider.addEventListener('input', function() { setChordSize(sliderPosToRatio(parseFloat(this.value))); });
-    chordSizeToolbarNum.addEventListener('input', function() {
-      const v = parseFloat(this.value);
-      if (!isNaN(v)) setChordSize(v);
-    });
-    chordSizeToolbarNum.addEventListener('blur', function() {
-      this.value = internalToRatio(settings.chordSizeMult, BASE_CHORD_MULT).toFixed(2);
-    });
-    chordSizeToolbarUp.addEventListener('click', function() {
-      const cur = internalToRatio(settings.chordSizeMult, BASE_CHORD_MULT);
-      setChordSize(cur * MULT_STEP);
-    });
-    chordSizeToolbarDown.addEventListener('click', function() {
-      const cur = internalToRatio(settings.chordSizeMult, BASE_CHORD_MULT);
-      setChordSize(cur / MULT_STEP);
-    });
-    chordSizeToolbarReset.addEventListener('click', function() { setChordSize(1); });
-
-    labelSizeToolbarSlider.addEventListener('input', function() { setLabelSize(sliderPosToRatio(parseFloat(this.value))); });
-    labelSizeToolbarNum.addEventListener('input', function() {
-      const v = parseFloat(this.value);
-      if (!isNaN(v)) setLabelSize(v);
-    });
-    labelSizeToolbarNum.addEventListener('blur', function() {
-      this.value = internalToRatio(settings.labelSize, BASE_LABEL_SIZE).toFixed(2);
-    });
-    labelSizeToolbarUp.addEventListener('click', function() {
-      const cur = internalToRatio(settings.labelSize, BASE_LABEL_SIZE);
-      setLabelSize(cur * MULT_STEP);
-    });
-    labelSizeToolbarDown.addEventListener('click', function() {
-      const cur = internalToRatio(settings.labelSize, BASE_LABEL_SIZE);
-      setLabelSize(cur / MULT_STEP);
-    });
-    labelSizeToolbarReset.addEventListener('click', function() { setLabelSize(1); });
-
     settingsReset.addEventListener('click', function() {
       showConfirm('Reset all settings to defaults?', function() {
         settings = Object.assign({}, DEFAULT_SETTINGS);
@@ -3581,25 +2731,19 @@
       });
     });
 
-    // ===== TRANSPOSE (key is now fixed at C major for spelling purposes) =====
-    function getCurrentKey() {
-      return 'C';
-    }
+    // ===== TRANSPOSE =====
+    function getCurrentKey() { return 'C'; }
 
-    // Diatonic note names in order of increasing pitch (C major).
     const DIATONIC_SHARPS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
     const DIATONIC_FLATS  = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
-    // Map a chromatic pitch class (0..11) to a sharp or flat spelling.
+    let preferFlats = false;
+
     function spellPitch(pitch, useFlats) {
       pitch = ((pitch % 12) + 12) % 12;
       return useFlats ? DIATONIC_FLATS[pitch] : DIATONIC_SHARPS[pitch];
     }
 
-    // ✅ Transpose a chord by semitones, preserving its diatonic interval
-    //    relationship to the key. This is what makes Bb→F# correct in one
-    //    key and Bb→Gb correct in another: we transpose by SCALE DEGREE
-    //    when possible, not by raw chromatic distance.
     function transposeChordWithKey(chord, semitones, key) {
       if (!chord || chord === '_' || chord === '') return chord;
       if (semitones === 0) return chord;
@@ -3616,37 +2760,20 @@
 
       if (rootIndex === undefined) return chord;
 
-      // Compute the new pitch class by adding semitones chromatically.
       const newRootIndex = (rootIndex + semitones + 12) % 12;
-
-      // Determine the diatonic letter (A–G) of the ORIGINAL chord and the
-      // new chord. We keep the same scale-degree letter, and derive the
-      // accidental by comparing the actual pitch. This is standard music
-      // theory: transpose by letter-step, then spell the accidental.
       const LETTERS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-      // Natural pitch classes for each letter in C major.
       const LETTER_PITCH = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 
       const originalLetter = root.charAt(0).toUpperCase();
       const originalLetterIndex = LETTERS.indexOf(originalLetter);
-
-      // How many letter-steps does the transposition cover? Scale the
-      // chromatic distance to diatonic steps: a minor 3rd (3 semitones)
-      // is 2 letter-steps, a perfect 5th (7 semitones) is 4 letter-steps.
       const diatonicSteps = Math.round((semitones * 7) / 12);
 
-      // Resolve the target letter by moving diatonicSteps from the
-      // original letter.
       let targetLetterIndex = (originalLetterIndex + diatonicSteps) % 7;
       if (targetLetterIndex < 0) targetLetterIndex += 7;
       const targetLetter = LETTERS[targetLetterIndex];
 
-      // Natural pitch of the target letter.
       const naturalPitch = LETTER_PITCH[targetLetter];
-      // Accidental offset = actual pitch − natural pitch (mod 12).
       let accOffset = (newRootIndex - naturalPitch + 12) % 12;
-      // If offset > 6, it's actually a flatter spelling (e.g. Cb instead
-      // of B#). Normalize into −2..+2 range, but cap at double accidentals.
       if (accOffset > 6) accOffset -= 12;
 
       let accidental = '';
@@ -3656,33 +2783,20 @@
       else if (accOffset === -2) accidental = 'bb';
 
       const newRoot = targetLetter + accidental;
-
-      // Sanity check: if the new root doesn't resolve to the same pitch
-      // class, fall back to the sharp/flat spelling of the target pitch.
       const check = NOTE_MAP[newRoot];
       if (check !== newRootIndex) {
         return spellPitch(newRootIndex, preferFlats) + rest;
       }
-
       return newRoot + rest;
     }
 
-    // ✅ FIX: only transpose lines that look like chord lines (contain '|'),
-    //          and use a stricter chord regex so plain lyric words like "A" aren't moved.
-    // Note: this regex accepts plain letters A–G (with optional #/b) followed by
-    // only chord-quality suffixes. Words like "Amazing" won't match because
-    // "azing" isn't a valid suffix. But "A" alone WILL match — which is why
-    // transposeText() guards on `line.includes('|')` first.
     const CHORD_TOKEN_RE = /^[A-Ga-g][#b]?(?:maj|min|m|dim|aug|sus|add|°|ø|Δ|\d|[#b]\d|\/[A-Ga-g][#b]?)*$/;
 
     function transposeText(text, semitones, key) {
       if (semitones === 0) return text;
-
       const lines = text.split('\n');
       const transposedLines = lines.map(line => {
-        // Only transpose lines that contain a barline — those are chord lines.
         if (!line.includes('|')) return line;
-
         const tokens = line.split(/(\s+|\|)/);
         return tokens.map(token => {
           if (/^[|\s]+$/.test(token)) return token;
@@ -3696,7 +2810,6 @@
           return token;
         }).join('');
       });
-
       return transposedLines.join('\n');
     }
 
@@ -3712,60 +2825,28 @@
       }
       updatePreview();
       updatePreview2();
-      transposeInfo.textContent = transposeSemitones;
-      // Keep the floating Key panel's readout in sync (if the panel
-      // exists). Guard against undefined because this function runs
-      // during INIT before some DOM refs may be ready.
-      const floatInfo = document.getElementById('keyFloatTransposeInfo');
-      if (floatInfo) floatInfo.textContent = transposeSemitones;
     }
-    let preferFlats = false;
     const TRANSPOSE_MIN = 0;
     const TRANSPOSE_MAX = 11;
 
     function transposeUp() {
       preferFlats = false;
       transposeSemitones++;
-      if (transposeSemitones > TRANSPOSE_MAX) {
-        transposeSemitones = TRANSPOSE_MIN;
-      }
+      if (transposeSemitones > TRANSPOSE_MAX) transposeSemitones = TRANSPOSE_MIN;
       applyTransposition();
     }
     function transposeDown() {
       preferFlats = true;
       transposeSemitones--;
-      if (transposeSemitones < TRANSPOSE_MIN) {
-        transposeSemitones = TRANSPOSE_MAX;
-      }
+      if (transposeSemitones < TRANSPOSE_MIN) transposeSemitones = TRANSPOSE_MAX;
       applyTransposition();
     }
     function resetTransposition() {
       transposeSemitones = 0;
-      transposeInfo.textContent = '0';
-      const floatInfo = document.getElementById('keyFloatTransposeInfo');
-      if (floatInfo) floatInfo.textContent = '0';
-      if (originalText) {
-        inputEl2.value = originalText;
-      }
-      if (originalTextLeft) {
-        inputEl.value = originalTextLeft;
-      }
+      if (originalText) inputEl2.value = originalText;
+      if (originalTextLeft) inputEl.value = originalTextLeft;
       updatePreview();
       updatePreview2();
-    }
-
-    // ===== SONG NAME =====
-    function setCurrentSongName(name) {
-      if (!name || !name.trim()) {
-        currentSongNameEl.classList.remove('show');
-        currentSongNameEl.textContent = '';
-        currentSongNameEl.title = '';
-        return;
-      }
-      const clean = name.trim();
-      currentSongNameEl.textContent = clean;
-      currentSongNameEl.title = 'Currently loaded song: ' + clean;
-      currentSongNameEl.classList.add('show');
     }
 
     function loadSong(lyricText, chordText, fileName, settingsSnapshot, songTitle) {
@@ -3773,15 +2854,10 @@
       inputEl2.value = chordText;
       originalText = inputEl2.value;
       originalTextLeft = inputEl.value;
-      // Restore the title bar text (empty string clears it).
+
       const titleEl = document.getElementById('titleInput');
       if (titleEl) titleEl.value = (typeof songTitle === 'string') ? songTitle : '';
 
-      // ✅ The loaded song's settings snapshot provides the song text, but
-      //    the CURRENT template / session settings own the look. We only
-      //    take non-template keys (like editorWidth, uiScale, editorScale,
-      //    currentSongSize) from the song file, and ignore the template-y
-      //    visual keys so the chart stays styled the way the user set up.
       if (settingsSnapshot && typeof settingsSnapshot === 'object') {
         const merged = Object.assign({}, settings);
         Object.keys(settingsSnapshot).forEach(k => {
@@ -3796,7 +2872,6 @@
       }
 
       resetTransposition();
-      if (fileName) setCurrentSongName(fileName);
     }
 
     // ===== DRAG & DROP =====
@@ -3914,7 +2989,6 @@
         try { parsed = JSON.parse(trimmed); } catch (e) { parsed = null; }
       }
       if (parsed && parsed.app === 'chord-chart-creator' && parsed.type === 'song') {
-        // New format (v2+): separate lyricText and chordText.
         if (typeof parsed.lyricText === 'string' || typeof parsed.chordText === 'string') {
           return {
             title: typeof parsed.title === 'string' ? parsed.title : '',
@@ -3923,7 +2997,6 @@
             settings: (parsed.settings && typeof parsed.settings === 'object') ? parsed.settings : null
           };
         }
-        // Old format (v1): single songText field. Route it to the CHORDS pane.
         if (typeof parsed.songText === 'string') {
           return {
             title: typeof parsed.title === 'string' ? parsed.title : '',
@@ -3933,7 +3006,6 @@
           };
         }
       }
-      // Plain text file (raw .txt) — route it to the CHORDS pane.
       return { title: '', lyricText: '', chordText: raw, settings: null };
     }
 
@@ -3968,8 +3040,6 @@
       return parts.join('/');
     }
 
-    // Render the stored songs into ANY container (toolbar dropdown OR floating panel).
-    // Shared by displayStoredSongs() and the floating songs panel.
     function renderSongsInto(container) {
       if (!container) return;
       const storedSongs = loadStoredSongs();
@@ -4086,10 +3156,7 @@
       }
     }
 
-    // Backward-compatible wrapper: fills the toolbar dropdown's list.
     function displayStoredSongs() {
-      renderSongsInto(songsList);
-      // Keep the floating panel in sync if it happens to be open.
       if (songsFloatPanel && songsFloatPanel.classList.contains('show')) {
         renderSongsInto(songsFloatList);
       }
@@ -4115,13 +3182,10 @@
 
       nameSpan.addEventListener('click', function(e) {
         e.stopPropagation();
-        // Stored songs may be in new (lyricText/chordText) or old (content) form.
         const lyric = song.lyricText != null ? song.lyricText : '';
         const chord = song.chordText != null ? song.chordText : (song.content || '');
         loadSong(lyric, chord, song.name, song.settings || null, song.title || '');
         if (song.settings && typeof song.settings === 'object') showToast('Loaded "' + song.name + '"');
-        // Close whichever panel this item lives in (toolbar dropdown or floating panel).
-        dropdownContent.classList.remove('show');
         if (typeof songsFloatPanel !== 'undefined' && songsFloatPanel) {
           songsFloatPanel.classList.remove('show');
           if (typeof songsFloatToggle !== 'undefined' && songsFloatToggle) songsFloatToggle.classList.remove('active');
@@ -4135,69 +3199,6 @@
       return songItem;
     }
 
-    dropdownToggle.addEventListener('click', function(e) {
-      e.stopPropagation();
-      sizesContent.classList.remove('show');
-      dropdownContent.classList.toggle('show');
-      document.querySelectorAll('.subfolder-popup.show').forEach(p => p.classList.remove('show'));
-      displayStoredSongs();
-    });
-
-    document.addEventListener('click', function(e) {
-      if (!dropdownToggle.contains(e.target) && !dropdownContent.contains(e.target)) {
-        dropdownContent.classList.remove('show');
-        document.querySelectorAll('.subfolder-popup.show').forEach(p => p.classList.remove('show'));
-      }
-      if (!sizesToggle.contains(e.target) && !sizesContent.contains(e.target)) {
-        sizesContent.classList.remove('show');
-      }
-    });
-
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        dropdownContent.classList.remove('show');
-        document.querySelectorAll('.subfolder-popup.show').forEach(p => p.classList.remove('show'));
-        sizesContent.classList.remove('show');
-      }
-    });
-
-    document.getElementById('loadSingleFile').addEventListener('click', function(e) {
-      e.stopPropagation();
-      const fileInput = document.createElement('input');
-      fileInput.type = 'file';
-      fileInput.accept = '.txt,.chordchart,.json';
-      // Uncomment the next line to allow selecting a whole folder at once:
-      // fileInput.webkitdirectory = true;
-
-      fileInput.onchange = function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(event) {
-          const raw = event.target.result;
-          const parsed = parseChordChartFile(raw, file.name);
-          const fileName = stripExtension(file.name);
-          const folder = file.webkitRelativePath ? getFolderPath(file.webkitRelativePath) : '';
-          const storedSongs = loadStoredSongs() || [];
-          const existingIndex = storedSongs.findIndex(s => s.name === fileName && s.folder === folder);
-          const entry = { name: fileName, title: parsed.title || '', lyricText: parsed.lyricText, chordText: parsed.chordText, folder: folder };
-          if (parsed.settings) entry.settings = parsed.settings;
-          if (existingIndex >= 0) {
-            storedSongs[existingIndex] = Object.assign({}, storedSongs[existingIndex], entry);
-          } else {
-            storedSongs.push(entry);
-          }
-          saveSongsToStorage(storedSongs);
-          loadSong(parsed.lyricText, parsed.chordText, fileName, parsed.settings, parsed.title);
-          if (parsed.settings) showToast('Applied settings from "' + fileName + '"');
-          dropdownContent.classList.remove('show');
-          displayStoredSongs();
-        };
-        reader.readAsText(file);
-      };
-      fileInput.click();
-    });
-
     // ===== RESIZE HANDLE =====
     function startResize(clientX, clientY) {
       isResizing = true;
@@ -4205,7 +3206,7 @@
       startX = clientX;
       startHeight = inputArea.offsetHeight;
       startWidth = inputArea.offsetWidth;
-      document.body.style.cursor = currentLayout === 'phone' ? 'ew-resize' : 'ns-resize';
+      document.body.style.cursor = 'ns-resize';
       document.body.style.userSelect = 'none';
     }
     resizeHandle.addEventListener('mousedown', function(e) {
@@ -4219,46 +3220,23 @@
     }, { passive: false });
     function doResize(clientX, clientY) {
       if (!isResizing) return;
-      if (currentLayout === 'phone') {
-        const deltaX = clientX - startX;
-        let newWidth = startWidth + deltaX;
-        const wrapperWidth = editorWrapper.offsetWidth || 1;
-        let newPercent = (newWidth / wrapperWidth) * 100;
-        newPercent = Math.max(10, Math.min(90, newPercent));
-        newPercent = Math.round(newPercent);
-        settings.editorWidth = newPercent;
-        editorWidthSlider.value = newPercent;
-        if (document.activeElement !== editorWidthNum) editorWidthNum.value = newPercent.toFixed(0);
-        saveSettings();
-        document.documentElement.style.setProperty('--editor-width', newPercent + '%');
-        clearTimeout(window._resizeTimeout);
-        window._resizeTimeout = setTimeout(adjustChordSizes, 100);
-      } else {
-        const deltaY = startY - clientY;
-        let newHeight = startHeight + deltaY;
-        newHeight = Math.max(60, Math.min(window.innerHeight * 0.7, newHeight));
-        inputArea.style.height = newHeight + 'px';
-        inputArea.style.maxHeight = newHeight + 'px';
-        clearTimeout(window._resizeTimeout);
-        window._resizeTimeout = setTimeout(adjustChordSizes, 100);
-      }
+      const deltaY = startY - clientY;
+      let newHeight = startHeight + deltaY;
+      newHeight = Math.max(60, Math.min(window.innerHeight * 0.7, newHeight));
+      inputArea.style.height = newHeight + 'px';
+      inputArea.style.maxHeight = newHeight + 'px';
+      clearTimeout(window._resizeTimeout);
+      window._resizeTimeout = setTimeout(adjustChordSizes, 100);
     }
     function endResize() {
       if (!isResizing) return;
       isResizing = false;
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
-      if (currentLayout === 'phone') {
-        editorWidthSlider.value = settings.editorWidth;
-        if (document.activeElement !== editorWidthNum) editorWidthNum.value = settings.editorWidth.toFixed(0);
-      }
       setTimeout(adjustChordSizes, 150);
     }
 
-    // ===== VERTICAL WALL RESIZE (split panels left/right) =====
-    // Drag the wall at the center to change the ratio between panel 1
-    // and panel 2. We store the split as a percentage of the wrapper's
-    // width, clamped to 15%–85% so neither side can disappear.
+    // ===== WALL RESIZE =====
     let wallStartX = 0;
     let wallStartPercent = 50;
 
@@ -4329,86 +3307,37 @@
       endWallResize();
     });
 
-    // ===== EDITOR / MODE / LAYOUT TOGGLES =====
-    // The ✏️ floating button hides / shows BOTH editors at once, so
-    // both previews claim the full panel height together. We toggle
-    // the `.collapsed` class on both input areas in lockstep.
+    // ===== EDITOR TOGGLE =====
     function applyEditorState(hidden) {
       isEditorCollapsed = hidden;
       inputArea.classList.toggle('collapsed', hidden);
       inputArea2.classList.toggle('collapsed', hidden);
-      // Update the floating pencil button to reflect the current state.
-      // Pencil gets an active (dark) style while the editor is hidden.
       editorFloatToggle.classList.toggle('active', hidden);
       editorFloatToggle.title = hidden ? 'Show both editors' : 'Hide both editors';
       editorFloatToggle.setAttribute('aria-label', editorFloatToggle.title);
       setTimeout(adjustChordSizes, 350);
     }
 
-    // In focus (hamburger) mode, the editor is hidden by default unless the
-    // user has explicitly brought it back with the ✏️ button. This function
-    // keeps the CSS class hooks in sync with the current state.
     function syncFocusModeEditorVisibility() {
-      // The editor should be visible in focus mode only when:
-      //   1. Focus mode is active, AND
-      //   2. The user has NOT collapsed the editor.
       const visibleInFocusMode = isChromeCollapsed && !isEditorCollapsed;
-
       inputArea.classList.toggle('focus-visible', visibleInFocusMode);
       editorWrapper.classList.toggle('editor-shown', visibleInFocusMode);
       setTimeout(adjustChordSizes, 200);
     }
 
-    // ✅ Phone view = vertical split: editor on LEFT, preview on RIGHT.
-    //    We reorder the DOM (editor first) so flex-direction: row puts them
-    //    in that order without needing row-reverse or CSS gymnastics.
-    //    Desktop view = normal stacked layout: preview on top, editor below.
-    //
-    //    Default is now PHONE view (see loadLayoutState() below).
-    // Layout is fixed: Desktop view = preview on top, editor on bottom.
-    // The Phone/Desktop toggle has been removed. This function still runs
-    // once at init so the DOM is set up correctly and the editor's
-    // collapsed state is applied.
-    function applyLayout(layout) {
-      // Ensure we're in desktop layout classes.
+    function applyLayout() {
       currentLayout = 'desktop';
       editorWrapper.classList.remove('layout-phone', 'layout-desktop');
       editorWrapper.classList.add('layout-desktop');
-
-      // Preview and editor are already in the right DOM order inside each
-      // .panel (preview first, editor second) — no reordering needed.
-
-      // Re-apply collapsed state so the correct hide animation runs.
       applyEditorState(isEditorCollapsed);
       setTimeout(adjustChordSizes, 350);
     }
-
-    // Layout toggle buttons removed (Phone/Desktop switch deprecated).
-    // applyLayout() is still called once at init to set up the desktop view.
-
-    // Floating save button: clicks the toolbar's Save Chord Chart button,
-    // which already contains all the save logic (file picker, JSON payload,
-    // filename generation, success feedback). We just forward the click.
-    saveFloatToggle.addEventListener('click', function(e) {
-      e.stopPropagation();
-      document.getElementById('saveSong').click();
-    });
-
-    // Floating PNG export button: clicks the toolbar's Export Chord Chart
-    // as PNG button, which already contains all the export logic
-    // (html2canvas render, blob, file picker). We just forward the click.
-    pngFloatToggle.addEventListener('click', function(e) {
-      e.stopPropagation();
-      document.getElementById('exportPNG').click();
-    });
 
     editorFloatToggle.addEventListener('click', function(e) {
       e.stopPropagation();
       const newHidden = !isEditorCollapsed;
       applyEditorState(newHidden);
       saveEditorHiddenState(newHidden);
-      // If we're in focus (hamburger) mode, tell the wrapper whether the
-      // editor is meant to be visible. This drives the CSS override above.
       syncFocusModeEditorVisibility();
     });
 
@@ -4416,17 +3345,12 @@
       isAdvancedMode = advanced;
       if (advanced) {
         document.body.classList.remove('easy-mode');
-        toggleModeBtn.textContent = '😃 Switch to EASY MODE';
-        const savedHidden = loadEditorHiddenState();
-        applyEditorState(savedHidden);
       } else {
         document.body.classList.add('easy-mode');
-        toggleModeBtn.textContent = '😵 Switch to ADVANCED MODE';
-        applyEditorState(false);
       }
+      applyEditorState(false);
       setTimeout(adjustChordSizes, 250);
     }
-    toggleModeBtn.addEventListener('click', function() { applyMode(!isAdvancedMode); });
 
     // ===== SECTION LABEL SYSTEM =====
     function expandSectionShortcut(name) {
@@ -4524,18 +3448,11 @@
       return simplified;
     }
 
-    // ===== CHORD SIZING (fixed, no auto-fit) =====
-    // Chords and pipes now use a fixed size derived from user settings:
-    //   base 0.85rem × chordSizeMult × masterScale
-    // No measurement of the preview width is performed, so the chord size
-    // stays constant regardless of window size, layout, or editor split.
     function adjustChordSizes() {
       const mult = parseFloat(settings.chordSizeMult) || 1;
       const ms = parseFloat(settings.masterScale) || 1;
       const finalSize = 0.85 * mult * ms;
 
-      // Apply to both previews. Panel 1 (lyrics pane) rarely has chord
-      // tokens, but if it does they'll get sized too — harmless.
       [previewContent, previewContent2].forEach(function(content) {
         if (!content) return;
         content.querySelectorAll('.chord-token, .space, .pipe').forEach(t => {
@@ -4545,41 +3462,22 @@
     }
 
     // ===== RENDER =====
-    // Normalize bracket-wrapped section labels so that ALL THREE of
-    // these forms render identically:
-    //   Intro (extra info)
-    //   [Intro (extra info)]
-    //   [Intro] (extra info)
-    // We strip the wrapping brackets when the content looks like a
-    // section label, then let the bare-label branch further down handle
-    // the bold-name / thin-extra split. Non-label bracketed lines like
-    // `[My Custom Tag]` are left alone for the existing custom-label
-    // branch to catch.
     const SECTION_NAMES_RE = /^(Intro|Verse|Pre-Chorus|Chorus|Post-Chorus|Bridge|Outro|Instrumental|Tag|Ending|Coda)/i;
 
     function normalizeBracketLabel(trimmedLine) {
       if (!trimmedLine || trimmedLine.charAt(0) !== '[') return trimmedLine;
-
-      // Case A: whole line is `[...]` — e.g. `[Intro]` or `[Intro (extra)]`
       const fullBracket = trimmedLine.match(/^\[(.*?)\]\s*(.*)$/);
       if (fullBracket) {
         const inside = fullBracket[1].trim();
         const trailing = fullBracket[2].trim();
-        // If what's inside starts with a known section name, unwrap it
-        // so the bare-label branch can parse name + extra.
         if (SECTION_NAMES_RE.test(inside)) {
           return trailing ? (inside + ' ' + trailing) : inside;
         }
-        return trimmedLine;   // let the custom-label branch handle it
+        return trimmedLine;
       }
       return trimmedLine;
     }
 
-    // Detect a "silent section marker": a line that is ENTIRELY
-    //   ((some text))
-    // The renderer will consume it, update currentSection for coloring
-    // purposes, but emit no HTML. Use this to color upcoming lyrics
-    // without showing a visible label pill.
     const SILENT_MARKER_RE = /^\(\((.*)\)\)$/;
 
     function parseSilentMarker(trimmedLine) {
@@ -4635,7 +3533,6 @@
           continue;
         }
 
-        // ((hidden)) → update currentSection for color, emit no HTML.
         const silentMarker = parseSilentMarker(trimmed);
         if (silentMarker !== null) {
           const expanded = expandSectionShortcut(silentMarker);
@@ -4730,11 +3627,6 @@
 
     function updatePreview() { renderPreview(inputEl.value); }
 
-    // ===== PREVIEW 2 (identical to Preview 1) =====
-    // Both previews render identically: mixed chord/lyric lines, same
-    // fonts, same section labels. The only reason this function exists
-    // separately is that it writes into previewContent2 instead of
-    // previewContent.
     function renderPreview2(text) {
       if (!text || text.trim() === '') {
         previewContent2.innerHTML = '';
@@ -4756,7 +3648,6 @@
           continue;
         }
 
-        // ((hidden)) → update currentSection for color, emit no HTML.
         const silentMarker = parseSilentMarker(trimmed);
         if (silentMarker !== null) {
           const expanded = expandSectionShortcut(silentMarker);
@@ -4835,8 +3726,6 @@
           continue;
         }
 
-        // Same rules as Preview 1: barline lines are chords, everything
-        // else is a lyric line.
         if (line.includes('|')) {
           let sectionClass = getSectionClass(currentSection);
           if (currentSection === 'custom' || currentSection.toLowerCase().includes('custom')) sectionClass = 'section-custom';
@@ -4855,16 +3744,14 @@
     function updatePreview2() { renderPreview2(inputEl2.value); }
 
     // ===== SAVE CHORD CHART =====
-    document.getElementById('saveSong').addEventListener('click', async function() {
+    saveFloatToggle.addEventListener('click', async function() {
       const lyricText = inputEl.value;
       const chordText = inputEl2.value;
       if ((!lyricText || lyricText.trim() === '') && (!chordText || chordText.trim() === '')) {
         alert('Nothing to save. Both editors are empty.');
         return;
       }
-      const songName = currentSongNameEl && currentSongNameEl.classList.contains('show')
-        ? (currentSongNameEl.textContent || 'chord-chart')
-        : 'chord-chart';
+      const songName = 'chord-chart';
       const sanitizedName = songName.replace(/[<>:"/\\|?*\x00-\x1f]/g, '').trim() || 'chord-chart';
       const timestamp = new Date().toISOString().slice(0, 10);
       const fileName = `${sanitizedName}_${timestamp}.chordchart`;
@@ -4885,16 +3772,12 @@
       const result = await saveFileWithPicker(fileName, blob, 'application/json', 'Chord chart');
       if (result.cancelled) return;
 
-      const originalLabel = this.textContent;
-      this.textContent = '✅ Saved!';
-      setTimeout(() => { this.textContent = originalLabel; }, 2000);
+      this.textContent = '✅';
+      setTimeout(() => { this.textContent = '💾'; }, 1500);
     });
 
     // ===== SAVE AS PNG =====
-    // ✅ FIX: wrap in try/finally so styles always restore, even on cancel/error
-    document.getElementById('exportPNG').addEventListener('click', async function() {
-      // ✅ FIX: refuse to export an empty chart (would produce a blank
-      // white PNG). Mirrors the guard on the Save Chord Chart button.
+    pngFloatToggle.addEventListener('click', async function() {
       if ((!inputEl.value || inputEl.value.trim() === '') &&
           (!inputEl2.value || inputEl2.value.trim() === '')) {
         alert('Nothing to export. Both editors are empty.');
@@ -4902,11 +3785,7 @@
       }
       const preview = document.getElementById('previewContainer');
       const contentWrapper = document.getElementById('previewContent');
-      const songName = currentSongNameEl && currentSongNameEl.classList.contains('show')
-        ? (currentSongNameEl.textContent || 'chord-chart')
-        : 'chord-chart';
-      const originalLabel = this.textContent;
-      this.textContent = '⏳ Exporting...';
+      this.textContent = '⏳';
       this.disabled = true;
 
       const originalStyles = {
@@ -4980,23 +3859,23 @@
 
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
 
-        const sanitizedName = songName.replace(/[<>:"/\\|?*\x00-\x1f]/g, '').trim() || 'chord-chart';
+        const sanitizedName = 'chord-chart';
         const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
         const fileName = `${sanitizedName}_${timestamp}.png`;
 
         const result = await saveFileWithPicker(fileName, blob, 'image/png', 'PNG image');
-        if (result.cancelled) return;  // finally will still restore
+        if (result.cancelled) return;
 
-        this.textContent = '✅ Exported!';
+        this.textContent = '✅';
         setTimeout(() => {
-          this.textContent = originalLabel;
+          this.textContent = '📷';
           this.disabled = false;
         }, 2000);
       } catch (err) {
         console.error('Export failed:', err);
-        this.textContent = '❌ Export failed';
+        this.textContent = '❌';
         setTimeout(() => {
-          this.textContent = originalLabel;
+          this.textContent = '📷';
           this.disabled = false;
         }, 2000);
       } finally {
@@ -5004,10 +3883,7 @@
       }
     });
 
-    // ===== TRANSPOSE BUTTONS =====
-    transposeUpBtn.addEventListener('click', transposeUp);
-    transposeDownBtn.addEventListener('click', transposeDown);
-
+    // ===== KEYBOARD SHORTCUTS =====
     document.addEventListener('keydown', function(e) {
       if (e.ctrlKey && e.shiftKey && (e.key === 'ArrowUp' || e.key === '=' || e.key === '+')) {
         e.preventDefault();
@@ -5027,7 +3903,6 @@
     const perfPanel = document.getElementById('perfPanel');
     const perfClose = document.getElementById('perfClose');
 
-    // perfMaster / perfMasterReadout removed — no master slider in the panel
     const perfChordSize = document.getElementById('perfChordSize');
     const perfChordSizeReadout = document.getElementById('perfChordSizeReadout');
     const perfPipeScale = document.getElementById('perfPipeScale');
@@ -5062,8 +3937,6 @@
       keyFloatToggle.classList.toggle('active', next);
       keyFloatToggle.title = next ? 'Close key' : 'Key & transpose';
       if (next) {
-        const floatInfo = document.getElementById('keyFloatTransposeInfo');
-        if (floatInfo) floatInfo.textContent = transposeSemitones;
         if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
         if (typeof toggleSongsFloatPanel === 'function') toggleSongsFloatPanel(false);
         if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
@@ -5078,13 +3951,8 @@
       toggleKeyFloatPanel(false);
     });
 
-    // ===== FLOATING 🔑 KEY PANEL — TRANSPOSE BUTTONS =====
-    // The − / + buttons inside the floating Key panel call the same
-    // transposeUp() / transposeDown() helpers as the toolbar buttons,
-    // so the circular wrap behavior (FIX 29) is shared automatically.
     const keyFloatTransposeUp = document.getElementById('keyFloatTransposeUp');
     const keyFloatTransposeDown = document.getElementById('keyFloatTransposeDown');
-    const keyFloatTransposeInfo = document.getElementById('keyFloatTransposeInfo');
 
     if (keyFloatTransposeUp) {
       keyFloatTransposeUp.addEventListener('click', function(e) {
@@ -5113,7 +3981,6 @@
       songsFloatToggle.title = next ? 'Close songs' : 'Songs';
       if (next) {
         renderSongsInto(songsFloatList);
-        // Mutually close the other float panels so they don't overlap.
         if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
         if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
         if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
@@ -5128,9 +3995,6 @@
       toggleSongsFloatPanel(false);
     });
 
-    // Same behaviour as the toolbar's "Open 1 Song File", wired to the floating panel entry.
-    // Moved here (after the FLOATING SONGS PANEL const declarations) to avoid a
-    // temporal-dead-zone ReferenceError on load.
     songsFloatOpenFile.addEventListener('click', function(e) {
       e.stopPropagation();
       const fileInput = document.createElement('input');
@@ -5166,13 +4030,10 @@
       fileInput.click();
     });
 
-    // ===== 🎨 TEMPLATE SYSTEM =====
+    // ===== TEMPLATE SYSTEM =====
     const TEMPLATE_APP_ID = 'chord-chart-creator';
     const TEMPLATE_TYPE = 'template';
     const TEMPLATE_VERSION = 1;
-
-    // (TEMPLATE_SETTING_KEYS moved to the top of the IIFE.)
-
     const DEFAULT_TEMPLATE_KEY = 'chordChartDefaultTemplate';
 
     function loadStoredDefaultTemplate() {
@@ -5189,16 +4050,6 @@
     function clearStoredDefaultTemplate() {
       try { localStorage.removeItem(DEFAULT_TEMPLATE_KEY); }
       catch (e) {}
-    }
-    function applyTemplateObject(parsed) {
-      TEMPLATE_SETTING_KEYS.forEach(k => {
-        if (parsed.settings[k] !== undefined) {
-          settings[k] = parsed.settings[k];
-        }
-      });
-      saveSettings();
-      syncSettingsUI();
-      applySettings();
     }
     function updateDefaultTemplateLabel() {
       if (!templateDefaultLabel) return;
@@ -5273,7 +4124,6 @@
       const fileInput = document.createElement('input');
       fileInput.type = 'file';
       fileInput.accept = '.chordtemplate,application/json,.json';
-
       fileInput.onchange = function(ev) {
         const file = ev.target.files && ev.target.files[0];
         if (!file) return;
@@ -5286,18 +4136,15 @@
                   'A template must be a JSON file with "type": "template".');
             return;
           }
-
           TEMPLATE_SETTING_KEYS.forEach(k => {
             if (parsed.settings[k] !== undefined) {
               settings[k] = parsed.settings[k];
             }
           });
-
           saveSettings();
           syncSettingsUI();
           applySettings();
           applyEditorState(isEditorCollapsed);
-
           currentTemplateName = parsed.name || 'Untitled Template';
           updateTemplateLabel();
           showToast('Template applied: ' + currentTemplateName);
@@ -5378,6 +4225,7 @@
       });
     });
 
+    // ===== PERF PANEL =====
     function togglePerfPanel(open) {
       const next = (typeof open === 'boolean') ? open : !perfPanel.classList.contains('show');
       perfPanel.classList.toggle('show', next);
@@ -5385,7 +4233,6 @@
       perfToggle.title = next ? 'Close settings' : 'Open settings';
       if (next) {
         syncPerfPanel();
-        // Mutually close the other float panels so they don't overlap.
         if (typeof toggleSongsFloatPanel === 'function') toggleSongsFloatPanel(false);
         if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
         if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
@@ -5394,9 +4241,7 @@
     perfToggle.addEventListener('click', function(e) { e.stopPropagation(); togglePerfPanel(); });
     perfClose.addEventListener('click', function(e) { e.stopPropagation(); togglePerfPanel(false); });
 
-    // Sync all panel sliders from the current settings.
     function syncPerfPanel() {
-      // SIZES
       const chR = internalToRatio(settings.chordSizeMult, BASE_CHORD_MULT);
       perfChordSize.value = ratioToSliderPos(chR);
       perfChordSizeReadout.value = chR.toFixed(2);
@@ -5418,7 +4263,6 @@
       perfLabelSize.value = ratioToSliderPos(lbR);
       perfLabelSizeReadout.value = lbR.toFixed(2);
 
-      // SPACING
       perfLyricSpacing.value = settings.lyricLetterSpacing;
       perfLyricSpacingReadout.value = Number(settings.lyricLetterSpacing).toFixed(3);
 
@@ -5428,7 +4272,6 @@
       perfLabelSpacing.value = settings.labelLetterSpacing;
       perfLabelSpacingReadout.value = Number(settings.labelLetterSpacing).toFixed(3);
 
-      // LAYOUT
       perfMarginH.value = (settings.previewPaddingH != null ? settings.previewPaddingH : 8);
       perfMarginHReadout.value = Number(perfMarginH.value).toFixed(0);
 
@@ -5436,7 +4279,6 @@
       perfMarginVReadout.value = Number(perfMarginV.value).toFixed(0);
     }
 
-    // Panel slider → existing setters (keeps everything in sync).
     perfChordSize.addEventListener('input', function() {
       const ratio = sliderPosToRatio(parseFloat(this.value));
       perfChordSizeReadout.value = ratio.toFixed(2);
@@ -5495,12 +4337,6 @@
       setPreviewPaddingV(v);
     });
 
-    // ===== PERFORMANCE PANEL STEP BUTTONS =====
-    // Each ± button nudges its sibling slider by one step (or by a
-    // multiplicative factor for the ratio-based sliders, matching the
-    // behaviour of the toolbar's own ± buttons).
-    // Ratio sliders are identified by the readout IDs, since their
-    // numeric values are ratios not raw slider positions.
     const PERF_MULT_TARGETS = {
       perfChordSize: true,
       perfLyricSize: true,
@@ -5518,9 +4354,7 @@
           const slider = document.getElementById(targetId);
           if (!slider) return;
 
-          // Ratio sliders (chord / lyric / label size): multiply / divide in ratio space.
           if (PERF_MULT_TARGETS[targetId]) {
-            // Slider position → ratio, apply factor, → slider position.
             const pos = parseFloat(slider.value);
             const ratio = sliderPosToRatio(pos);
             const newRatio = dir > 0 ? ratio * PERF_MULT_STEP : ratio / PERF_MULT_STEP;
@@ -5530,14 +4364,12 @@
             return;
           }
 
-          // Everything else: additive in slider units, matching the slider's own step.
           const stepVal = parseFloat(slider.step) || 1;
           const min = parseFloat(slider.min);
           const max = parseFloat(slider.max);
           let v = parseFloat(slider.value) + dir * stepVal;
           if (!isNaN(min)) v = Math.max(min, v);
           if (!isNaN(max)) v = Math.min(max, v);
-          // Round to the slider's precision to avoid floating-point dust.
           const decimals = (String(stepVal).split('.')[1] || '').length;
           slider.value = parseFloat(v.toFixed(decimals));
           slider.dispatchEvent(new Event('input', { bubbles: true }));
@@ -5546,22 +4378,10 @@
     }
     wirePerfStepButtons();
 
-    // ===== FADE PANEL WHILE DRAGGING A SLIDER OR TAPPING ± BUTTONS =====
-    // Two ways the panel becomes faded:
-    //   1. Dragging a slider  → fades while held, snaps back on release.
-    //   2. Tapping a ± button → fades and STAYS faded.
-    // To unfade after a ± tap, the user clicks anywhere on the panel
-    // background that isn't an interactive control. That click is caught
-    // by the panel-wide listener below.
     (function wirePerfPanelDragFade() {
-      function fade() {
-        perfPanel.classList.add('dragging');
-      }
-      function unfade() {
-        perfPanel.classList.remove('dragging');
-      }
+      function fade() { perfPanel.classList.add('dragging'); }
+      function unfade() { perfPanel.classList.remove('dragging'); }
 
-      // Sliders: fade on grab, unfade on release (unchanged behavior).
       perfPanel.querySelectorAll('input[type="range"]').forEach(function (slider) {
         slider.addEventListener('pointerdown', fade);
         slider.addEventListener('pointerup', unfade);
@@ -5569,7 +4389,6 @@
         slider.addEventListener('blur', unfade);
       });
 
-      // ± step buttons: fade on tap and leave the panel faded. No timer.
       perfPanel.querySelectorAll('button[data-perf-target]').forEach(function (btn) {
         btn.addEventListener('pointerdown', function (e) {
           if (e.button !== undefined && e.button !== 0) return;
@@ -5577,46 +4396,33 @@
         });
       });
 
-      // Clicking on the panel's "background" (anywhere that isn't an
-      // interactive control) unfades it. We check the click target:
-      //   - If it's inside a slider, a ± button, a reset button, a label,
-      //     or a readout input, we ignore it (those have their own rules).
-      //   - Otherwise — panel padding, header area, section labels,
-      //     divider lines, etc. — it's a deliberate "I'm done" click.
       perfPanel.addEventListener('click', function (e) {
         const t = e.target;
-        // Ignore clicks on interactive elements.
         if (t.closest('input, button, select, textarea, label')) return;
         unfade();
       });
 
-      // Escape hatch: if the panel gets closed while faded, clear too.
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') unfade();
       });
     })();
 
-    // Clicking outside the panels closes them.
     document.addEventListener('click', function(e) {
-      // Perf panel
       if (perfPanel.classList.contains('show') &&
           !perfPanel.contains(e.target) &&
           !perfToggle.contains(e.target)) {
         togglePerfPanel(false);
       }
-      // Songs float panel
       if (songsFloatPanel.classList.contains('show') &&
           !songsFloatPanel.contains(e.target) &&
           !songsFloatToggle.contains(e.target)) {
         toggleSongsFloatPanel(false);
       }
-      // Key float panel
       if (keyFloatPanel.classList.contains('show') &&
           !keyFloatPanel.contains(e.target) &&
           !keyFloatToggle.contains(e.target)) {
         toggleKeyFloatPanel(false);
       }
-      // Template float panel
       if (templateFloatPanel.classList.contains('show') &&
           !templateFloatPanel.contains(e.target) &&
           !templateFloatToggle.contains(e.target)) {
@@ -5624,24 +4430,13 @@
       }
     });
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && perfPanel.classList.contains('show')) {
-        togglePerfPanel(false);
-      }
-      if (e.key === 'Escape' && songsFloatPanel.classList.contains('show')) {
-        toggleSongsFloatPanel(false);
-      }
-      if (e.key === 'Escape' && keyFloatPanel.classList.contains('show')) {
-        toggleKeyFloatPanel(false);
-      }
-      if (e.key === 'Escape' && templateFloatPanel.classList.contains('show')) {
-        toggleTemplateFloatPanel(false);
-      }
+      if (e.key === 'Escape' && perfPanel.classList.contains('show')) togglePerfPanel(false);
+      if (e.key === 'Escape' && songsFloatPanel.classList.contains('show')) toggleSongsFloatPanel(false);
+      if (e.key === 'Escape' && keyFloatPanel.classList.contains('show')) toggleKeyFloatPanel(false);
+      if (e.key === 'Escape' && templateFloatPanel.classList.contains('show')) toggleTemplateFloatPanel(false);
     });
 
     // ===== CHROME COLLAPSE (focus mode) =====
-    // Hides the toolbar and the editor so the preview fills the screen.
-    // Starts expanded on every load (see applyChromeCollapsed(false) in INIT).
-
     function applyChromeCollapsed(collapsed) {
       isChromeCollapsed = !!collapsed;
       document.body.classList.toggle('chrome-collapsed', isChromeCollapsed);
@@ -5650,35 +4445,18 @@
         ? 'Expand toolbar & editor'
         : 'Collapse toolbar & editor (focus mode)';
       chromeToggle.setAttribute('aria-label', chromeToggle.title);
-      // Keep the 2nd-row twin button in lockstep with the ☰ hamburger.
-      if (chromeToggle2) {
-        chromeToggle2.classList.toggle('active', isChromeCollapsed);
-        chromeToggle2.title = chromeToggle.title;
-        chromeToggle2.setAttribute('aria-label', chromeToggle.title);
-      }
-      // Sync whether the editor should be visible in the new focus state.
       syncFocusModeEditorVisibility();
-      // (Focus-mode state is saved here but intentionally NOT restored
-      //  on boot — see INIT. Kept so the state is available if we
-      //  re-enable focus mode persistence later.)
       saveChromeCollapsedState(isChromeCollapsed);
-      // Recompute chord sizes because the preview width changes
       setTimeout(adjustChordSizes, 200);
       setTimeout(adjustChordSizes, 400);
     }
 
-    // ===== 1ST-ROW FLOATING BUTTONS VISIBILITY TOGGLE (☰ hamburger) =====
-    // The ☰ hamburger hides/shows the 1st row of floating buttons
-    // (⚙️ 📱 🔑 📷 💾 🎵 ✏️). It does NOT touch the toolbar.
-    // The ☰ and its ⋯ twin stay visible so the user can toggle them back.
     let isFirstRowHidden = false;
 
     function applyFirstRowHidden(hidden) {
       isFirstRowHidden = !!hidden;
       document.body.classList.toggle('first-row-hidden', isFirstRowHidden);
-      const label = isFirstRowHidden
-        ? 'Show floating buttons'
-        : 'Hide floating buttons';
+      const label = isFirstRowHidden ? 'Show floating buttons' : 'Hide floating buttons';
       chromeToggle.classList.toggle('active', isFirstRowHidden);
       chromeToggle.title = label;
       chromeToggle.setAttribute('aria-label', label);
@@ -5689,37 +4467,16 @@
       applyFirstRowHidden(!isFirstRowHidden);
     });
 
-    // ===== TOP PANEL (TOOLBAR) VISIBILITY TOGGLE (⋯ twin) =====
-    // The ⋯ button hides/shows the toolbar. It does NOT touch the
-    // floating buttons. The ☰ and its ⋯ twin stay visible so the user
-    // can toggle the toolbar back.
-    let isToolbarHidden = false;
-
-    function applyToolbarHidden(hidden) {
-      isToolbarHidden = !!hidden;
-      document.body.classList.toggle('toolbar-hidden', isToolbarHidden);
-      const label = isToolbarHidden
-        ? 'Show top panel'
-        : 'Hide top panel';
-      if (chromeToggle2) {
-        chromeToggle2.classList.toggle('active', isToolbarHidden);
-        chromeToggle2.title = label;
-        chromeToggle2.setAttribute('aria-label', label);
-      }
-    }
-
-    if (chromeToggle2) {
-      chromeToggle2.addEventListener('click', function(e) {
+    if (oldSettingsToggle) {
+      oldSettingsToggle.addEventListener('click', function(e) {
         e.stopPropagation();
-        applyToolbarHidden(!isToolbarHidden);
+        openSettings();
       });
     }
 
     // ===== INIT =====
     loadSettings();
 
-    // If a default template was stored, apply it BEFORE the first render
-    // so the app boots up already styled the way the user wants.
     const bootDefault = loadStoredDefaultTemplate();
     if (bootDefault) {
       TEMPLATE_SETTING_KEYS.forEach(k => {
@@ -5734,47 +4491,18 @@
     syncSettingsUI();
     applySettings();
     applyLockState();
-    applyLayout('desktop');   // Layout is fixed; the toggle was removed.
+    applyLayout();
 
-    // ===== TITLE BAR WIRING =====
-    // The title bar is a single-line text input at the top of the editor
-    // area. Its content is purely visual for now (a header for the chart)
-    // and is NOT saved with the song — if you want it persisted later,
-    // say the word and I'll add it to the .chordchart payload.
     const titleInput = document.getElementById('titleInput');
     if (titleInput) {
-      // Prevent Enter from submitting anything / blurring.
       titleInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') e.preventDefault();
       });
-      // Also let the user type freely; nothing else to wire up yet.
     }
 
     applyMode(false);
-    // ✅ Focus mode (hiding the toolbar + editor together) is no longer
-    // exposed in the UI. Force it OFF on every load so existing users
-    // whose localStorage still says "collapsed" don't boot into a stuck
-    // state with no way back.
     applyChromeCollapsed(false);
-    // NOTE: loadChromeCollapsedState() / saveChromeCollapsedState() are
-    // intentionally unused — focus mode is always off on load.
-    // ✅ Default startup state (Option C):
-    //   • ☰ "hamburger" toggle → OFF (1st-row floating buttons visible)
-    //   • ⋯ "twin" toggle       → UNPRESSED (cream), even though the
-    //                              toolbar itself IS hidden on load.
-    // Clicking ⋯ reveals the toolbar; clicking again hides it (and only
-    // from the 2nd click onward does the button look pressed).
     applyFirstRowHidden(false);
-    // ✅ Option C: toolbar HIDDEN on load, but the ⋯ button stays UNPRESSED.
-    // We set the body class directly (instead of calling applyToolbarHidden(true))
-    // so the ⋯ button never receives the .active (pressed/brown) styling.
-    isToolbarHidden = true;
-    document.body.classList.add('toolbar-hidden');
-    if (chromeToggle2) {
-      chromeToggle2.classList.remove('active');
-      chromeToggle2.title = 'Show top panel';
-      chromeToggle2.setAttribute('aria-label', 'Show top panel');
-    }
     if (typeof syncPerfPanel === 'function') syncPerfPanel();
 
     displayStoredSongs();
@@ -5788,12 +4516,9 @@
       updatePreview();
     });
 
-    // Editor 2 (chords pane) — this is where chords live, so this is
-    // where transpose tracking happens.
     inputEl2.addEventListener('input', function() {
       originalText = inputEl2.value;
       transposeSemitones = 0;
-      transposeInfo.textContent = '0';
       updatePreview2();
     });
 
