@@ -623,6 +623,17 @@
       transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
       font-family: inherit;
+      overflow: hidden;
+    }
+    .split-float-toggle .split-icon {
+      display: inline-block;
+      line-height: 1;
+      font-size: 1.1rem;
+      transition: font-size 0.15s ease;
+    }
+    .split-float-toggle .split-icon.pair {
+      font-size: 0.78rem;
+      letter-spacing: -0.05em;
     }
     .split-float-toggle:hover {
       background: rgba(196, 173, 146, 0.95);
@@ -3354,14 +3365,14 @@
 
     // ===== SPLIT VIEW TOGGLE (left / center / right) =====
     const SPLIT_STATE_KEY = 'chordChartSplitState';
-    const SPLIT_ICONS = { center: '⬛', left: '⬅️', right: '➡️' };
+    const SPLIT_ICONS = { center: '🎤🎸', left: '🎸', right: '🎤' };
     const SPLIT_TITLES = {
-      center: 'Split view: center (tap for left)',
-      left: 'Split view: left (tap for right)',
-      right: 'Split view: right (tap for center)'
+      center: 'Split view: both sides (tap for chords only)',
+      left: 'Split view: chords only (tap for lyrics only)',
+      right: 'Split view: lyrics only (tap for both)'
     };
-    let splitState = 'center';
 
+    let splitState = 'center';
     function applySplitState(state) {
       if (state !== 'left' && state !== 'center' && state !== 'right') state = 'center';
       splitState = state;
@@ -3383,10 +3394,16 @@
       }
 
       if (splitFloatToggle) {
-        splitFloatToggle.textContent = SPLIT_ICONS[state];
+        const iconText = SPLIT_ICONS[state];
+        const isPair = Array.from(iconText).length > 1;
+        splitFloatToggle.textContent = '';
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'split-icon' + (isPair ? ' pair' : '');
+        iconSpan.textContent = iconText;
+        splitFloatToggle.appendChild(iconSpan);
         splitFloatToggle.title = SPLIT_TITLES[state];
         splitFloatToggle.setAttribute('aria-label', SPLIT_TITLES[state]);
-        splitFloatToggle.classList.toggle('active', state !== 'center');
+        splitFloatToggle.classList.remove('active');
       }
 
       try { localStorage.setItem(SPLIT_STATE_KEY, state); } catch (e) {}
