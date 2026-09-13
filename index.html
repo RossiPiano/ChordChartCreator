@@ -198,11 +198,13 @@
       transition: height 0.3s ease, width 0.3s ease, transform 0.3s ease, padding 0.2s ease;
     }
     .input-area.collapsed {
-      max-height: 0;
-      padding: 0;
-      border-top: none;
-      min-height: 0;
-      height: 0;
+      max-height: 0 !important;
+      min-height: 0 !important;
+      height: 0 !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      border: 0 !important;
+      overflow: hidden !important;
     }
 
     .resize-handle {
@@ -264,6 +266,7 @@
       white-space: pre;
       overflow-x: hidden;
       overflow-y: auto;
+      overflow-y: scroll;
       scrollbar-width: none;
       -ms-overflow-style: none;
     }
@@ -3172,11 +3175,22 @@
       updatePreview2();
     }
 
-    function loadSong(lyricText, chordText, fileName, settingsSnapshot, songTitle) {
+    function loadSong(lyricText, chordText, fileName, settingsSnapshot, songTitle, leftTimeText, rightTimeText) {
       inputEl.value = lyricText;
       inputEl2.value = chordText;
       originalText = inputEl2.value;
       originalTextLeft = inputEl.value;
+
+      const leftTimeEl = document.getElementById('timeInput');
+      const rightTimeEl = document.getElementById('timeInput2');
+      if (leftTimeEl) leftTimeEl.value = (typeof leftTimeText === 'string') ? leftTimeText : '';
+      if (rightTimeEl) rightTimeEl.value = (typeof rightTimeText === 'string') ? rightTimeText : '';
+
+      // Grow each gutter to the line count of its editor so it can scroll with it.
+      if (typeof window.__padGutterToMatch === 'function') {
+        window.__padGutterToMatch(leftTimeEl, inputEl);
+        window.__padGutterToMatch(rightTimeEl, inputEl2);
+      }
 
       const titleEl = document.getElementById('titleInput');
       if (titleEl) titleEl.value = (typeof songTitle === 'string') ? songTitle : '';
@@ -3198,6 +3212,7 @@
       preferFlats = false;
       updatePreview();
       updatePreview2();
+      if (typeof autoscrollRefreshTimestamps === 'function') autoscrollRefreshTimestamps();
     }
 
     // ===== DRAG & DROP =====
@@ -3240,7 +3255,15 @@
 
           const storedSongs = loadStoredSongs() || [];
           const existingIndex = storedSongs.findIndex(s => s.name === fileName && s.folder === folder);
-          const entry = { name: fileName, title: parsed.title || '', lyricText: parsed.lyricText, chordText: parsed.chordText, folder: folder };
+          const entry = {
+            name: fileName,
+            title: parsed.title || '',
+            lyricText: parsed.lyricText,
+            chordText: parsed.chordText,
+            leftTimeText: parsed.leftTimeText || '',
+            rightTimeText: parsed.rightTimeText || '',
+            folder: folder
+          };
           if (parsed.settings) entry.settings = parsed.settings;
           if (existingIndex >= 0) {
             storedSongs[existingIndex] = Object.assign({}, storedSongs[existingIndex], entry);
@@ -3249,7 +3272,7 @@
           }
           saveSongsToStorage(storedSongs);
 
-          loadSong(parsed.lyricText, parsed.chordText, fileName, parsed.settings, parsed.title);
+          loadSong(parsed.lyricText, parsed.chordText, fileName, parsed.settings, parsed.title, parsed.leftTimeText, parsed.rightTimeText);
           if (parsed.settings) showToast('Loaded "' + fileName + '"');
           displayStoredSongs();
         };
@@ -3271,7 +3294,15 @@
           const folder = file.webkitRelativePath ? getFolderPath(file.webkitRelativePath) : '';
 
           const existingIndex = storedSongs.findIndex(s => s.name === fileName && s.folder === folder);
-          const entry = { name: fileName, title: parsed.title || '', lyricText: parsed.lyricText, chordText: parsed.chordText, folder: folder };
+          const entry = {
+            name: fileName,
+            title: parsed.title || '',
+            lyricText: parsed.lyricText,
+            chordText: parsed.chordText,
+            leftTimeText: parsed.leftTimeText || '',
+            rightTimeText: parsed.rightTimeText || '',
+            folder: folder
+          };
           if (parsed.settings) entry.settings = parsed.settings;
           if (existingIndex >= 0) {
             storedSongs[existingIndex] = Object.assign({}, storedSongs[existingIndex], entry);
@@ -3288,7 +3319,7 @@
             saveSongsToStorage(storedSongs);
             displayStoredSongs();
             if (firstParsed) {
-              loadSong(firstParsed.lyricText, firstParsed.chordText, firstFileName, firstParsed.settings, firstParsed.title);
+              loadSong(firstParsed.lyricText, firstParsed.chordText, firstFileName, firstParsed.settings, firstParsed.title, firstParsed.leftTimeText, firstParsed.rightTimeText);
               if (firstParsed.settings) showToast('Loaded "' + firstFileName + '"');
             }
           }
@@ -3320,6 +3351,8 @@
             title: typeof parsed.title === 'string' ? parsed.title : '',
             lyricText: typeof parsed.lyricText === 'string' ? parsed.lyricText : '',
             chordText: typeof parsed.chordText === 'string' ? parsed.chordText : '',
+            leftTimeText: typeof parsed.leftTimeText === 'string' ? parsed.leftTimeText : '',
+            rightTimeText: typeof parsed.rightTimeText === 'string' ? parsed.rightTimeText : '',
             settings: (parsed.settings && typeof parsed.settings === 'object') ? parsed.settings : null
           };
         }
@@ -3328,11 +3361,13 @@
             title: typeof parsed.title === 'string' ? parsed.title : '',
             lyricText: '',
             chordText: parsed.songText,
+            leftTimeText: '',
+            rightTimeText: '',
             settings: (parsed.settings && typeof parsed.settings === 'object') ? parsed.settings : null
           };
         }
       }
-      return { title: '', lyricText: '', chordText: raw, settings: null };
+      return { title: '', lyricText: '', chordText: raw, leftTimeText: '', rightTimeText: '', settings: null };
     }
 
     // ===== STORED SONGS =====
@@ -3510,7 +3545,9 @@
         e.stopPropagation();
         const lyric = song.lyricText != null ? song.lyricText : '';
         const chord = song.chordText != null ? song.chordText : (song.content || '');
-        loadSong(lyric, chord, song.name, song.settings || null, song.title || '');
+        const leftTime = song.leftTimeText != null ? song.leftTimeText : '';
+        const rightTime = song.rightTimeText != null ? song.rightTimeText : '';
+        loadSong(lyric, chord, song.name, song.settings || null, song.title || '', leftTime, rightTime);
         if (song.settings && typeof song.settings === 'object') showToast('Loaded "' + song.name + '"');
         if (typeof songsFloatPanel !== 'undefined' && songsFloatPanel) {
           songsFloatPanel.classList.remove('show');
@@ -3526,37 +3563,56 @@
     }
 
     // ===== RESIZE HANDLE =====
-    function startResize(clientX, clientY) {
+    const resizeHandle2 = document.getElementById('resizeHandle2');
+
+    let activeResizeTarget = null;
+
+    function startResize(target, clientX, clientY) {
       isResizing = true;
+      activeResizeTarget = target;
       startY = clientY;
       startX = clientX;
-      startHeight = inputArea.offsetHeight;
-      startWidth = inputArea.offsetWidth;
+      startHeight = target.offsetHeight;
+      startWidth = target.offsetWidth;
       document.body.style.cursor = 'ns-resize';
       document.body.style.userSelect = 'none';
     }
     resizeHandle.addEventListener('mousedown', function(e) {
-      startResize(e.clientX, e.clientY);
+      startResize(inputArea, e.clientX, e.clientY);
       e.preventDefault();
     });
     resizeHandle.addEventListener('touchstart', function(e) {
       if (e.touches.length !== 1) return;
-      startResize(e.touches[0].clientX, e.touches[0].clientY);
+      startResize(inputArea, e.touches[0].clientX, e.touches[0].clientY);
       e.preventDefault();
     }, { passive: false });
+
+    if (resizeHandle2) {
+      resizeHandle2.addEventListener('mousedown', function(e) {
+        startResize(inputArea2, e.clientX, e.clientY);
+        e.preventDefault();
+      });
+      resizeHandle2.addEventListener('touchstart', function(e) {
+        if (e.touches.length !== 1) return;
+        startResize(inputArea2, e.touches[0].clientX, e.touches[0].clientY);
+        e.preventDefault();
+      }, { passive: false });
+    }
+
     function doResize(clientX, clientY) {
-      if (!isResizing) return;
+      if (!isResizing || !activeResizeTarget) return;
       const deltaY = startY - clientY;
       let newHeight = startHeight + deltaY;
       newHeight = Math.max(60, Math.min(window.innerHeight * 0.7, newHeight));
-      inputArea.style.height = newHeight + 'px';
-      inputArea.style.maxHeight = newHeight + 'px';
+      activeResizeTarget.style.height = newHeight + 'px';
+      activeResizeTarget.style.maxHeight = newHeight + 'px';
       clearTimeout(window._resizeTimeout);
       window._resizeTimeout = setTimeout(adjustChordSizes, 100);
     }
     function endResize() {
       if (!isResizing) return;
       isResizing = false;
+      activeResizeTarget = null;
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
       setTimeout(adjustChordSizes, 150);
@@ -3918,8 +3974,29 @@
     // ===== EDITOR TOGGLE =====
     function applyEditorState(hidden) {
       isEditorCollapsed = hidden;
+
+      // If the user ever dragged the resize handle, inline styles were written
+      // to inputArea.style.height and inputArea.style.maxHeight. Those inline
+      // styles beat the .collapsed class unless we clear them.
+      if (hidden) {
+        inputArea.style.height = '';
+        inputArea.style.maxHeight = '';
+        inputArea2.style.height = '';
+        inputArea2.style.maxHeight = '';
+      }
+
       inputArea.classList.toggle('collapsed', hidden);
       inputArea2.classList.toggle('collapsed', hidden);
+
+      // Belt-and-braces: force the geometry for the collapse direction, and
+      // let the .collapsed class alone handle it for the expand direction.
+      if (hidden) {
+        inputArea.style.height = '0px';
+        inputArea.style.maxHeight = '0px';
+        inputArea2.style.height = '0px';
+        inputArea2.style.maxHeight = '0px';
+      }
+
       editorFloatToggle.classList.toggle('active', hidden);
       editorFloatToggle.title = hidden ? 'Show both editors' : 'Hide both editors';
       editorFloatToggle.setAttribute('aria-label', editorFloatToggle.title);
@@ -4378,6 +4455,8 @@
       const fileName = `${sanitizedName}_${timestamp}.chordchart`;
 
       const titleText = (document.getElementById('titleInput') || {}).value || '';
+      const leftTime = (document.getElementById('timeInput') || {}).value || '';
+      const rightTime = (document.getElementById('timeInput2') || {}).value || '';
       const payload = {
         app: 'chord-chart-creator',
         version: 2,
@@ -4386,7 +4465,9 @@
         settings: Object.assign({}, settings),
         title: titleText,
         lyricText: lyricText,
-        chordText: chordText
+        chordText: chordText,
+        leftTimeText: leftTime,
+        rightTimeText: rightTime
       };
 
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
@@ -4721,7 +4802,15 @@
           const folder = file.webkitRelativePath ? getFolderPath(file.webkitRelativePath) : '';
           const storedSongs = loadStoredSongs() || [];
           const existingIndex = storedSongs.findIndex(s => s.name === fileName && s.folder === folder);
-          const entry = { name: fileName, title: parsed.title || '', lyricText: parsed.lyricText, chordText: parsed.chordText, folder: folder };
+          const entry = {
+            name: fileName,
+            title: parsed.title || '',
+            lyricText: parsed.lyricText,
+            chordText: parsed.chordText,
+            leftTimeText: parsed.leftTimeText || '',
+            rightTimeText: parsed.rightTimeText || '',
+            folder: folder
+          };
           if (parsed.settings) entry.settings = parsed.settings;
           if (existingIndex >= 0) {
             storedSongs[existingIndex] = Object.assign({}, storedSongs[existingIndex], entry);
@@ -4729,7 +4818,7 @@
             storedSongs.push(entry);
           }
           saveSongsToStorage(storedSongs);
-          loadSong(parsed.lyricText, parsed.chordText, fileName, parsed.settings, parsed.title);
+          loadSong(parsed.lyricText, parsed.chordText, fileName, parsed.settings, parsed.title, parsed.leftTimeText, parsed.rightTimeText);
           if (parsed.settings) showToast('Applied settings from "' + fileName + '"');
           songsFloatPanel.classList.remove('show');
           songsFloatToggle.classList.remove('active');
@@ -5278,16 +5367,67 @@
       const timeLeft = document.getElementById('timeInput');
       const timeRight = document.getElementById('timeInput2');
 
-      function syncScroll(a, b) {
+      function linkScrollPair(a, b) {
         if (!a || !b) return;
-        let locked = false;
-        a.addEventListener('scroll', function() {
-          if (locked) return;
-          locked = true;
-          b.scrollTop = a.scrollTop;
-          b.scrollLeft = a.scrollLeft;
-          setTimeout(function() { locked = false; }, 0);
-        });
+        let raf = 0;
+        function syncFrom(src, dst) {
+          if (raf) cancelAnimationFrame(raf);
+          raf = requestAnimationFrame(function () {
+            raf = 0;
+            if (dst.scrollTop !== src.scrollTop) dst.scrollTop = src.scrollTop;
+            if (dst.scrollLeft !== src.scrollLeft) dst.scrollLeft = src.scrollLeft;
+          });
+        }
+        a.addEventListener('scroll', function () { syncFrom(a, b); }, { passive: true });
+        b.addEventListener('scroll', function () { syncFrom(b, a); }, { passive: true });
+      }
+
+      function lineCount(s) {
+        if (!s) return 1;
+        return s.split('\n').length;
+      }
+
+      function padGutterToMatch(gutterEl, editorEl) {
+        if (!gutterEl || !editorEl) return;
+        const editorLines = lineCount(editorEl.value);
+        const gutterText = gutterEl.value;
+        const gutterLines = lineCount(gutterText);
+        if (gutterLines >= editorLines) return;
+        const extra = editorLines - gutterLines;
+        const isFocused = document.activeElement === gutterEl;
+        const selStart = isFocused ? gutterEl.selectionStart : null;
+        const selEnd = isFocused ? gutterEl.selectionEnd : null;
+        const scrollTopBefore = gutterEl.scrollTop;
+        gutterEl.value = gutterText + '\n'.repeat(extra);
+        gutterEl.scrollTop = scrollTopBefore;
+        if (isFocused && selStart !== null && selEnd !== null) {
+          try { gutterEl.setSelectionRange(selStart, selEnd); } catch (e) {}
+        }
+      }
+
+      // Expose for use outside this IIFE (loadSong runs before/after this in
+      // ways that make a direct reference unreliable).
+      window.__padGutterToMatch = padGutterToMatch;
+
+      function stripTrailingBlanks(gutterEl) {
+        if (!gutterEl) return;
+        const v = gutterEl.value;
+        const stripped = v.replace(/\n+$/, '');
+        if (stripped !== v) {
+          const isFocused = document.activeElement === gutterEl;
+          const selStart = isFocused ? gutterEl.selectionStart : null;
+          const selEnd = isFocused ? gutterEl.selectionEnd : null;
+          gutterEl.value = stripped;
+          if (isFocused && selStart !== null && selEnd !== null) {
+            try { gutterEl.setSelectionRange(selStart, selEnd); } catch (e) {}
+          }
+        }
+      }
+
+      function syncPair(gutterEl, editorEl) {
+        if (!gutterEl || !editorEl) return;
+        padGutterToMatch(gutterEl, editorEl);
+        linkScrollPair(gutterEl, editorEl);
       }
 
       if (timeLeft) {
@@ -5300,10 +5440,18 @@
           autoscrollRefreshTimestamps();
         });
       }
-      syncScroll(timeLeft, inputEl);
-      syncScroll(inputEl, timeLeft);
-      syncScroll(timeRight, inputEl2);
-      syncScroll(inputEl2, timeRight);
+
+      syncPair(timeLeft, inputEl);
+      syncPair(timeRight, inputEl2);
+
+      function attachPadOnEdit(editorEl, gutterEl) {
+        if (!editorEl || !gutterEl) return;
+        editorEl.addEventListener('input', function () {
+          padGutterToMatch(gutterEl, editorEl);
+        });
+      }
+      attachPadOnEdit(inputEl, timeLeft);
+      attachPadOnEdit(inputEl2, timeRight);
     })();
 
     (function wirePreviewCopy() {
