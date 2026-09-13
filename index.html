@@ -236,6 +236,62 @@
     }
 
     .drop-zone { flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative; }
+    .drop-zone.drag-over { background: rgba(245, 237, 224, 0.4); }
+    .editor-with-gutter {
+      flex: 1;
+      display: flex;
+      flex-direction: row;
+      min-height: 0;
+      align-items: stretch;
+    }
+    .editor-with-gutter .time-gutter {
+      flex: 0 0 72px;
+      width: 72px;
+      min-width: 0;
+      border-right: 1px solid #dcc9b0;
+      background: #faf5ec;
+      color: #8b6b4a;
+      font-size: calc(0.8rem * var(--editor-scale));
+      font-family: Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace;
+      line-height: 1.5;
+      padding: 8px 6px 8px 8px;
+      resize: none;
+      border-top: none;
+      border-bottom: none;
+      border-left: none;
+      outline: none;
+      text-align: right;
+      white-space: pre;
+      overflow-x: hidden;
+      overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .editor-with-gutter .time-gutter::-webkit-scrollbar {
+      display: none;
+    }
+    .editor-with-gutter .time-gutter:empty::before {
+      content: attr(data-placeholder);
+      color: #c9b8a0;
+      font-style: italic;
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    .editor-with-gutter .time-gutter::placeholder {
+      color: #c9b8a0;
+      font-style: italic;
+      opacity: 0.7;
+    }
+    .editor-with-gutter .time-gutter:focus {
+      background: #f5ede0;
+      color: #5c4033;
+    }
+    .editor-with-gutter > textarea#chartInput,
+    .editor-with-gutter > textarea#chartInput2 {
+      flex: 1 1 auto;
+      min-width: 0;
+      padding-left: 10px;
+    }
     textarea {
       width: 100%;
       flex: 1;
@@ -255,7 +311,17 @@
       font-kerning: none;
       letter-spacing: var(--chord-letter-spacing, 0em);
       word-spacing: 0;
+      scrollbar-width: thin;
+      scrollbar-color: #c4ad92 #f5ede0;
     }
+    textarea::-webkit-scrollbar { width: 10px; height: 10px; }
+    textarea::-webkit-scrollbar-track { background: #f5ede0; }
+    textarea::-webkit-scrollbar-thumb {
+      background: #c4ad92;
+      border-radius: 6px;
+      border: 2px solid #f5ede0;
+    }
+    textarea::-webkit-scrollbar-thumb:hover { background: #8b6b4a; }
     textarea:focus { border: none; box-shadow: none; outline: none; }
     .drop-zone .drop-message {
       display: none;
@@ -287,7 +353,17 @@
       overflow-x: hidden;
       line-height: var(--chord-line-height, 1.9);
       color: #3d2b1f;
+      scrollbar-width: thin;
+      scrollbar-color: #c4ad92 #f5ede0;
     }
+    .chord-preview::-webkit-scrollbar { width: 10px; height: 10px; }
+    .chord-preview::-webkit-scrollbar-track { background: #f5ede0; }
+    .chord-preview::-webkit-scrollbar-thumb {
+      background: #c4ad92;
+      border-radius: 6px;
+      border: 2px solid #f5ede0;
+    }
+    .chord-preview::-webkit-scrollbar-thumb:hover { background: #8b6b4a; }
 
     .chord-line,
     .chord-line * {
@@ -320,11 +396,13 @@
       display: block;
       padding: 1px 2px;
       font-weight: 400;
-      white-space: normal;
+      white-space: pre-wrap;
       word-wrap: break-word;
       overflow-wrap: break-word;
       text-align: left;
       min-height: 18px;
+      user-select: text;
+      -webkit-user-select: text;
       color: #3d2b1f;
       font-size: var(--lyric-size, 0.85rem);
       line-height: 1.5;
@@ -475,6 +553,7 @@
     .layout-float-toggle,
     .key-float-toggle,
     .split-float-toggle,
+    .autoscroll-float-toggle,
     .png-float-toggle,
     .save-float-toggle,
     .songs-float-toggle,
@@ -492,6 +571,7 @@
     body.first-row-hidden .layout-float-toggle,
     body.first-row-hidden .key-float-toggle,
     body.first-row-hidden .split-float-toggle,
+    body.first-row-hidden .autoscroll-float-toggle,
     body.first-row-hidden .png-float-toggle,
     body.first-row-hidden .save-float-toggle,
     body.first-row-hidden .songs-float-toggle,
@@ -644,6 +724,160 @@
       color: #ffffff;
       border-color: #4a3328;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .autoscroll-float-toggle {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border-radius: 10px;
+      border: 1px solid #c4ad92;
+      background: rgba(232, 220, 204, 0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: #3d2b1f;
+      font-size: 1.1rem;
+      line-height: 1;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      font-family: inherit;
+    }
+    .autoscroll-float-toggle:hover {
+      background: rgba(196, 173, 146, 0.95);
+      transform: scale(1.05);
+    }
+    .autoscroll-float-toggle.active {
+      background: #5c4033;
+      color: #ffffff;
+      border-color: #4a3328;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+    .autoscroll-float-toggle.playing {
+      background: #2e7a3f;
+      color: #ffffff;
+      border-color: #245f31;
+      box-shadow: 0 4px 12px rgba(46, 122, 63, 0.35);
+    }
+
+    .autoscroll-float-panel {
+      position: fixed;
+      top: 58px;
+      right: 10px;
+      left: auto;
+      z-index: 8200;
+      width: 280px;
+      max-width: calc(100vw - 20px);
+      background: #f5ede0;
+      border: 1px solid #c4ad92;
+      border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+      display: none;
+      flex-direction: column;
+      font-family: inherit;
+      color: #3d2b1f;
+    }
+    .autoscroll-float-panel.show { display: flex; }
+    .autoscroll-float-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: #e8dccc;
+      border-bottom: 2px solid #dcc9b0;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #5c4033;
+    }
+    .autoscroll-float-body {
+      padding: 12px 14px 14px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .autoscroll-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .autoscroll-btn {
+      background: #dcc9b0;
+      border: 1px solid #c4ad92;
+      color: #3d2b1f;
+      font-family: inherit;
+      font-size: 1rem;
+      line-height: 1;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .autoscroll-btn:hover { background: #c4ad92; border-color: #b0987a; }
+    .autoscroll-btn.primary {
+      background: #8b6b4a;
+      border-color: #7a5d3f;
+      color: #ffffff;
+    }
+    .autoscroll-btn.primary:hover { background: #7a5d3f; border-color: #6b4f35; }
+    .autoscroll-time {
+      font-family: Consolas, Menlo, Monaco, monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #3d2b1f;
+      margin-left: auto;
+      letter-spacing: 0.02em;
+    }
+    .autoscroll-row label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #5c4033;
+      flex: 0 0 60px;
+    }
+    .autoscroll-offset {
+      flex: 1 1 auto;
+      min-width: 0;
+      border: 1px solid #c4ad92;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.8rem;
+      font-family: inherit;
+      color: #3d2b1f;
+      background: #ffffff;
+      outline: none;
+      text-align: right;
+      -moz-appearance: textfield;
+    }
+    .autoscroll-offset::-webkit-outer-spin-button,
+    .autoscroll-offset::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .autoscroll-offset:focus { border-color: #8b6b4a; }
+    .autoscroll-unit {
+      font-size: 0.75rem;
+      color: #8b6b4a;
+      font-weight: 600;
+    }
+    .autoscroll-hint {
+      font-size: 0.72rem;
+      color: #8b6b4a;
+      line-height: 1.5;
+      padding: 6px 8px;
+      background: #ece0cf;
+      border-radius: 6px;
+      border: 1px solid #dcc9b0;
+      display: block;
+    }
+    .autoscroll-hint code {
+      background: #f5ede0;
+      border: 1px solid #dcc9b0;
+      border-radius: 3px;
+      padding: 0 4px;
+      font-family: Consolas, Menlo, Monaco, monospace;
+      font-size: 0.7rem;
     }
 
     .editor-float-toggle {
@@ -1604,7 +1838,10 @@
         <div class="resize-handle" id="resizeHandle"></div>
         <div class="drop-zone" id="dropZone">
           <div class="drop-message">📂 Drop a chord chart here</div>
-          <textarea id="chartInput" spellcheck="false"></textarea>
+          <div class="editor-with-gutter">
+            <textarea id="timeInput" class="time-gutter" spellcheck="false" placeholder="0:00&#10;0:05&#10;0:10"></textarea>
+            <textarea id="chartInput" spellcheck="false"></textarea>
+          </div>
         </div>
       </div>
     </div>
@@ -1618,7 +1855,10 @@
         <div class="resize-handle" id="resizeHandle2"></div>
         <div class="drop-zone" id="dropZone2">
           <div class="drop-message">📂 Drop a chord chart here</div>
-          <textarea id="chartInput2" spellcheck="false"></textarea>
+          <div class="editor-with-gutter">
+            <textarea id="timeInput2" class="time-gutter" spellcheck="false" placeholder="0:00&#10;0:05&#10;0:10"></textarea>
+            <textarea id="chartInput2" spellcheck="false"></textarea>
+          </div>
         </div>
       </div>
     </div>
@@ -1634,6 +1874,7 @@
     <button class="songs-float-toggle" id="songsFloatToggle" title="Songs" aria-label="Songs">🎵</button>
     <button class="key-float-toggle" id="keyFloatToggle" title="Key &amp; transpose" aria-label="Key and transpose">🔑</button>
     <button class="split-float-toggle" id="splitFloatToggle" title="Split view (left / center / right)" aria-label="Split view">⬛</button>
+    <button class="autoscroll-float-toggle" id="autoscrollFloatToggle" title="Auto-scroll by timestamps" aria-label="Auto-scroll">⏱️</button>
     <button class="editor-float-toggle" id="editorFloatToggle" title="Hide both editors" aria-label="Hide both editors">✏️</button>
     <button class="template-float-toggle" id="templateFloatToggle" title="Templates (look &amp; feel presets)" aria-label="Templates">🎨</button>
     <button class="save-float-toggle" id="saveFloatToggle" title="Save Chord Chart" aria-label="Save Chord Chart">💾</button>
@@ -1672,6 +1913,26 @@
     <div class="dropdown-item" id="songsFloatOpenFile" style="color: #8b6b4a; font-weight: 600;">⬆️ Upload a Song</div>
     <div class="dropdown-divider"></div>
     <div id="songsFloatList"></div>
+  </div>
+</div>
+
+<div class="autoscroll-float-panel" id="autoscrollFloatPanel" role="dialog" aria-label="Auto-scroll">
+  <div class="autoscroll-float-header">
+    <span>⏱️ Auto-scroll</span>
+    <button class="perf-close" id="autoscrollFloatClose" title="Close">✕</button>
+  </div>
+  <div class="autoscroll-float-body">
+    <div class="autoscroll-row">
+      <button type="button" class="autoscroll-btn primary" id="autoscrollPlay" title="Play">▶️</button>
+      <button type="button" class="autoscroll-btn" id="autoscrollStop" title="Stop and rewind">⏹️</button>
+      <span class="autoscroll-time" id="autoscrollTime">0:00 / 0:00</span>
+    </div>
+    <div class="autoscroll-row">
+      <label for="autoscrollOffset">Offset</label>
+      <input type="number" class="autoscroll-offset" id="autoscrollOffset" min="-30" max="30" step="1" value="0">
+      <span class="autoscroll-unit">s</span>
+    </div>
+    <div class="autoscroll-hint" id="autoscrollHint">No timestamps found. Add <code>0:45</code> at the start of a line.</div>
   </div>
 </div>
 
@@ -1978,8 +2239,9 @@
     'use strict';
 
     const TEMPLATE_SETTING_KEYS = [
-      'masterScale','chordLineHeight','emptyLineHeight','chordLetterSpacing','lyricLetterSpacing','labelLetterSpacing',
-      'pipeScale','pipeThickness','pipeVerticalAlign','chordFont','chordFontCustom','lyricFont','lyricFontCustom',
+      'masterScale','uiScale','editorScale','currentSongSize',
+      'chordLineHeight','emptyLineHeight','chordLetterSpacing','lyricLetterSpacing','labelLetterSpacing',
+      'pipeScale','pipeThickness','pipeVerticalAlign','editorWidth','chordFont','chordFontCustom','lyricFont','lyricFontCustom',
       'chordSizeMult','lyricSize','labelSize','labelRadius','previewPaddingH','previewPaddingV'
     ];
 
@@ -2366,6 +2628,14 @@
         syncPerfPanel();
       }
       requestAnimationFrame(() => adjustChordSizes());
+    }
+
+    function captureTemplateSnapshot() {
+      const snap = {};
+      TEMPLATE_SETTING_KEYS.forEach(k => {
+        if (settings[k] !== undefined) snap[k] = settings[k];
+      });
+      return snap;
     }
 
     function syncSettingsUI() {
@@ -3363,6 +3633,226 @@
       endWallResize();
     });
 
+    // ===== AUTO-SCROLL BY TIMESTAMPS =====
+    function parseTimeString(s) {
+      if (!s) return null;
+      const m = s.trim().match(/^(\d{1,2}):([0-5]\d)(?::([0-5]\d))?$/);
+      if (!m) return null;
+      const a = parseInt(m[1], 10);
+      const b = parseInt(m[2], 10);
+      const c = m[3] !== undefined ? parseInt(m[3], 10) : null;
+      return (c === null) ? (a * 60 + b) : (a * 3600 + b * 60 + c);
+    }
+
+    // Reads the timestamp gutter textarea and the editor text, and produces
+    // a list of { seconds, blockIndex } where blockIndex is the index of the
+    // rendered block in the preview. The two textareas must be line-aligned;
+    // for each editor line N, we look up the timestamp gutter line N. If it's
+    // blank, we walk upward to find the most recent non-blank timestamp above.
+    // Lines with no timestamp above them are unscrolled.
+    function extractTimestamps(timeText, editorText) {
+      const out = [];
+      if (!editorText) return out;
+
+      const editorLines = editorText.split('\n');
+      const timeLines = (timeText || '').split('\n');
+
+      // First pass: find each editor line's effective timestamp (sticky).
+      const lineTimestamps = new Array(editorLines.length).fill(null);
+      let lastSeconds = null;
+      for (let i = 0; i < editorLines.length; i++) {
+        const raw = timeLines[i] !== undefined ? timeLines[i].trim() : '';
+        if (raw !== '') {
+          const parsed = parseTimeString(raw);
+          if (parsed !== null) lastSeconds = parsed;
+        }
+        lineTimestamps[i] = lastSeconds;
+      }
+
+      // Second pass: map editor line index -> rendered block index.
+      let blockIndex = -1;
+      for (let i = 0; i < editorLines.length; i++) {
+        const contentLine = editorLines[i].trim();
+        const normalized = normalizeBracketLabel(contentLine);
+
+        let producesBlock = true;
+        if (normalized === '---' || normalized === '___' || normalized === '***') {
+          producesBlock = true;
+        } else if (normalized === '') {
+          producesBlock = true;
+        } else {
+          const silentMarker = parseSilentMarker(normalized);
+          if (silentMarker !== null) producesBlock = false;
+        }
+
+        if (producesBlock) blockIndex++;
+
+        if (producesBlock && lineTimestamps[i] !== null) {
+          const seconds = lineTimestamps[i];
+          const last = out[out.length - 1];
+          if (!last || last.seconds !== seconds) {
+            out.push({ seconds, blockIndex });
+          }
+        }
+      }
+
+      return out;
+    }
+
+    function findActiveBlock(timestamps, timeSeconds) {
+      let best = -1;
+      for (let i = 0; i < timestamps.length; i++) {
+        if (timestamps[i].seconds <= timeSeconds) best = timestamps[i].blockIndex;
+        else break;
+      }
+      return best;
+    }
+
+    function scrollPreviewToBlock(previewEl, contentEl, blockIndex) {
+      if (blockIndex < 0 || !previewEl || !contentEl) return;
+      const children = contentEl.children;
+      if (children.length === 0) return;
+      let idx = blockIndex;
+      if (idx >= children.length) idx = children.length - 1;
+      const target = children[idx];
+      if (!target) return;
+      const previewRect = previewEl.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      const delta = targetRect.top - previewRect.top;
+      const newScroll = previewEl.scrollTop + delta - 12;
+      previewEl.scrollTo({ top: Math.max(0, newScroll), behavior: 'smooth' });
+    }
+
+    const autoscroll = {
+      playing: false,
+      startWallClock: 0,
+      elapsedAtPause: 0,
+      offset: 0,
+      lyricsTimestamps: [],
+      chordsTimestamps: [],
+      lastLyricsBlock: -1,
+      lastChordsBlock: -1,
+      rafId: null
+    };
+
+    function autoscrollFormatTime(seconds) {
+      seconds = Math.max(0, Math.floor(seconds));
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      const s = seconds % 60;
+      const pad = n => String(n).padStart(2, '0');
+      return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
+    }
+
+    function autoscrollTotalDuration() {
+      let max = 0;
+      for (const t of autoscroll.lyricsTimestamps) if (t.seconds > max) max = t.seconds;
+      for (const t of autoscroll.chordsTimestamps) if (t.seconds > max) max = t.seconds;
+      return max;
+    }
+
+    function autoscrollCurrentTime() {
+      if (autoscroll.playing) {
+        return autoscroll.elapsedAtPause + (performance.now() - autoscroll.startWallClock) / 1000;
+      }
+      return autoscroll.elapsedAtPause;
+    }
+
+    function autoscrollUpdateReadout() {
+      const cur = autoscrollCurrentTime();
+      const tot = autoscrollTotalDuration();
+      const readout = document.getElementById('autoscrollTime');
+      if (readout) {
+        readout.textContent = autoscrollFormatTime(cur) + ' / ' + autoscrollFormatTime(tot);
+      }
+    }
+
+    function autoscrollRefreshTimestamps() {
+      const leftTime = document.getElementById('timeInput');
+      const rightTime = document.getElementById('timeInput2');
+      autoscroll.lyricsTimestamps = extractTimestamps(leftTime ? leftTime.value : '', inputEl.value);
+      autoscroll.chordsTimestamps = extractTimestamps(rightTime ? rightTime.value : '', inputEl2.value);
+      autoscroll.lastLyricsBlock = -1;
+      autoscroll.lastChordsBlock = -1;
+      const hint = document.getElementById('autoscrollHint');
+      if (hint) {
+        const n = autoscroll.lyricsTimestamps.length + autoscroll.chordsTimestamps.length;
+        if (n === 0) {
+          hint.textContent = 'No timestamps found. Add 0:45 in the time column.';
+        } else {
+          hint.textContent = 'Found ' + n + ' timestamp' + (n === 1 ? '' : 's') + '.';
+        }
+      }
+      autoscrollUpdateReadout();
+    }
+
+    function autoscrollTick() {
+      const cur = autoscrollCurrentTime() + autoscroll.offset;
+      const lb = findActiveBlock(autoscroll.lyricsTimestamps, cur);
+      const cb = findActiveBlock(autoscroll.chordsTimestamps, cur);
+
+      if (lb !== -1 && lb !== autoscroll.lastLyricsBlock) {
+        autoscroll.lastLyricsBlock = lb;
+        scrollPreviewToBlock(previewContainer, previewContent, lb);
+      }
+      if (cb !== -1 && cb !== autoscroll.lastChordsBlock) {
+        autoscroll.lastChordsBlock = cb;
+        scrollPreviewToBlock(previewContainer2, previewContent2, cb);
+      }
+
+      autoscrollUpdateReadout();
+
+      const total = autoscrollTotalDuration();
+      if (total > 0 && autoscrollCurrentTime() > total + 5) {
+        autoscrollStop();
+        return;
+      }
+
+      if (autoscroll.playing) {
+        autoscroll.rafId = requestAnimationFrame(autoscrollTick);
+      }
+    }
+
+    function autoscrollPlay() {
+      if (autoscroll.playing) return;
+      autoscroll.playing = true;
+      autoscroll.startWallClock = performance.now();
+      const playBtn = document.getElementById('autoscrollPlay');
+      if (playBtn) playBtn.textContent = '⏸️';
+      const toggle = document.getElementById('autoscrollFloatToggle');
+      if (toggle) toggle.classList.add('playing');
+      autoscroll.rafId = requestAnimationFrame(autoscrollTick);
+    }
+
+    function autoscrollPause() {
+      if (!autoscroll.playing) return;
+      autoscroll.elapsedAtPause = autoscrollCurrentTime();
+      autoscroll.playing = false;
+      if (autoscroll.rafId) cancelAnimationFrame(autoscroll.rafId);
+      autoscroll.rafId = null;
+      const playBtn = document.getElementById('autoscrollPlay');
+      if (playBtn) playBtn.textContent = '▶️';
+      const toggle = document.getElementById('autoscrollFloatToggle');
+      if (toggle) toggle.classList.remove('playing');
+      autoscrollUpdateReadout();
+    }
+
+    function autoscrollStop() {
+      autoscroll.playing = false;
+      if (autoscroll.rafId) cancelAnimationFrame(autoscroll.rafId);
+      autoscroll.rafId = null;
+      autoscroll.elapsedAtPause = 0;
+      autoscroll.lastLyricsBlock = -1;
+      autoscroll.lastChordsBlock = -1;
+      const playBtn = document.getElementById('autoscrollPlay');
+      if (playBtn) playBtn.textContent = '▶️';
+      const toggle = document.getElementById('autoscrollFloatToggle');
+      if (toggle) toggle.classList.remove('playing');
+      autoscrollUpdateReadout();
+      if (previewContainer) previewContainer.scrollTo({ top: 0, behavior: 'smooth' });
+      if (previewContainer2) previewContainer2.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     // ===== SPLIT VIEW TOGGLE (left / center / right) =====
     const SPLIT_STATE_KEY = 'chordChartSplitState';
     const SPLIT_ICONS = { center: '🎤🎸', left: '🎸', right: '🎤' };
@@ -3606,6 +4096,19 @@
       return inner;
     }
 
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function escapeAttr(s) {
+      return escapeHtml(s).replace(/\n/g, '&#10;');
+    }
+
     function renderChordLine(line, sectionClass) {
       let html = `<div class="chord-line">`;
       const tokens = line.match(/(\s+|\S+)/g) || [];
@@ -3624,7 +4127,7 @@
         let classes = 'chord-token';
         if (isUnderscore) classes += ' empty';
         if (sectionClass) classes += ` ${sectionClass}`;
-        html += `<span class="${classes}">${displayText}</span>`;
+        html += `<span class="${classes}" data-chord="${escapeAttr(token)}">${escapeHtml(displayText)}</span>`;
       }
       html += `</div>`;
       return html;
@@ -3663,7 +4166,7 @@
           const labelText = customLabelMatch[1].trim();
           const guessedClass = getSectionClass(labelText);
           const blockClass = guessedClass || 'section-custom';
-          html += `<div class="section-block ${blockClass}"><span class="section"><span class="section-name">${labelText}</span></span></div>`;
+          html += `<div class="section-block ${blockClass}" data-section="${escapeAttr(labelText)}"><span class="section"><span class="section-name">${escapeHtml(labelText)}</span></span></div>`;
           currentSection = labelText;
           continue;
         }
@@ -3687,7 +4190,7 @@
             const sectionClass = getSectionClass(displayName);
 
             if (!rest) {
-              html += `<div class="section-block ${sectionClass}"><span class="section"><span class="section-name">${displayName}</span></span></div>`;
+              html += `<div class="section-block ${sectionClass}" data-section="${escapeAttr(displayName)}"><span class="section"><span class="section-name">${escapeHtml(displayName)}</span></span></div>`;
             } else {
               const numberMatch = rest.match(/^(\d+)\s*(.*)$/);
               let boldPart = displayName;
@@ -3698,9 +4201,9 @@
                 boldPart = displayName + ' ' + number;
                 thinPart = restAfterNumber;
               }
-              let fullLabel = `<span class="section-name">${boldPart}</span>`;
-              if (thinPart) fullLabel += ` <span class="section-extra">${thinPart}</span>`;
-              html += `<div class="section-block ${sectionClass}"><span class="section">${fullLabel}</span></div>`;
+              let fullLabel = `<span class="section-name">${escapeHtml(boldPart)}</span>`;
+              if (thinPart) fullLabel += ` <span class="section-extra">${escapeHtml(thinPart)}</span>`;
+              html += `<div class="section-block ${sectionClass}" data-section="${escapeAttr(boldPart + (thinPart ? ' ' + thinPart : ''))}"><span class="section">${fullLabel}</span></div>`;
             }
             continue;
           }
@@ -3723,20 +4226,20 @@
             boldPart = expandedName + ' ' + number;
             thinPart = restAfterNumber;
           }
-          let fullLabel = `<span class="section-name">${boldPart}</span>`;
-          if (thinPart) fullLabel += ` <span class="section-extra">${thinPart}</span>`;
-          html += `<div class="section-block ${sectionClass}"><span class="section">${fullLabel}</span></div>`;
+          let fullLabel = `<span class="section-name">${escapeHtml(boldPart)}</span>`;
+          if (thinPart) fullLabel += ` <span class="section-extra">${escapeHtml(thinPart)}</span>`;
+          html += `<div class="section-block ${sectionClass}" data-section="${escapeAttr(boldPart + (thinPart ? ' ' + thinPart : ''))}"><span class="section">${fullLabel}</span></div>`;
           continue;
         }
 
-        if (line.includes('|')) {
+        if (rawTrimmed.includes('|')) {
           let sectionClass = getSectionClass(currentSection);
-          html += renderChordLine(line, sectionClass);
+          html += renderChordLine(rawTrimmed, sectionClass);
         } else {
           let lyricSectionClass = getSectionClass(currentSection);
           let lyricWrapClasses = 'lyrics-line';
           if (lyricSectionClass) lyricWrapClasses += ' ' + lyricSectionClass;
-          html += `<div class="${lyricWrapClasses}"><span class="lyric-text">${trimmed}</span></div>`;
+          html += `<div class="${lyricWrapClasses}"><span class="lyric-text">${escapeHtml(trimmed)}</span></div>`;
         }
       }
       previewContent.innerHTML = html;
@@ -3778,7 +4281,7 @@
           const labelText = customLabelMatch[1].trim();
           const guessedClass = getSectionClass(labelText);
           const blockClass = guessedClass || 'section-custom';
-          html += `<div class="section-block ${blockClass}"><span class="section"><span class="section-name">${labelText}</span></span></div>`;
+          html += `<div class="section-block ${blockClass}" data-section="${escapeAttr(labelText)}"><span class="section"><span class="section-name">${escapeHtml(labelText)}</span></span></div>`;
           currentSection = labelText;
           continue;
         }
@@ -3802,7 +4305,7 @@
             const sectionClass = getSectionClass(displayName);
 
             if (!rest) {
-              html += `<div class="section-block ${sectionClass}"><span class="section"><span class="section-name">${displayName}</span></span></div>`;
+              html += `<div class="section-block ${sectionClass}" data-section="${escapeAttr(displayName)}"><span class="section"><span class="section-name">${escapeHtml(displayName)}</span></span></div>`;
             } else {
               const numberMatch = rest.match(/^(\d+)\s*(.*)$/);
               let boldPart = displayName;
@@ -3813,9 +4316,9 @@
                 boldPart = displayName + ' ' + number;
                 thinPart = restAfterNumber;
               }
-              let fullLabel = `<span class="section-name">${boldPart}</span>`;
-              if (thinPart) fullLabel += ` <span class="section-extra">${thinPart}</span>`;
-              html += `<div class="section-block ${sectionClass}"><span class="section">${fullLabel}</span></div>`;
+              let fullLabel = `<span class="section-name">${escapeHtml(boldPart)}</span>`;
+              if (thinPart) fullLabel += ` <span class="section-extra">${escapeHtml(thinPart)}</span>`;
+              html += `<div class="section-block ${sectionClass}" data-section="${escapeAttr(boldPart + (thinPart ? ' ' + thinPart : ''))}"><span class="section">${fullLabel}</span></div>`;
             }
             continue;
           }
@@ -3838,21 +4341,21 @@
             boldPart = expandedName + ' ' + number;
             thinPart = restAfterNumber;
           }
-          let fullLabel = `<span class="section-name">${boldPart}</span>`;
-          if (thinPart) fullLabel += ` <span class="section-extra">${thinPart}</span>`;
-          html += `<div class="section-block ${sectionClass}"><span class="section">${fullLabel}</span></div>`;
+          let fullLabel = `<span class="section-name">${escapeHtml(boldPart)}</span>`;
+          if (thinPart) fullLabel += ` <span class="section-extra">${escapeHtml(thinPart)}</span>`;
+          html += `<div class="section-block ${sectionClass}" data-section="${escapeAttr(boldPart + (thinPart ? ' ' + thinPart : ''))}"><span class="section">${fullLabel}</span></div>`;
           continue;
         }
 
-        if (line.includes('|')) {
+        if (rawTrimmed.includes('|')) {
           let sectionClass = getSectionClass(currentSection);
           if (currentSection === 'custom' || currentSection.toLowerCase().includes('custom')) sectionClass = 'section-custom';
-          html += renderChordLine(line, sectionClass);
+          html += renderChordLine(rawTrimmed, sectionClass);
         } else {
           let lyricSectionClass = getSectionClass(currentSection);
           let lyricWrapClasses = 'lyrics-line';
           if (lyricSectionClass) lyricWrapClasses += ' ' + lyricSectionClass;
-          html += `<div class="${lyricWrapClasses}"><span class="lyric-text">${trimmed}</span></div>`;
+          html += `<div class="${lyricWrapClasses}"><span class="lyric-text">${escapeHtml(trimmed)}</span></div>`;
         }
       }
       previewContent2.innerHTML = html;
@@ -4066,6 +4569,72 @@
     const perfMarginHReadout = document.getElementById('perfMarginHReadout');
     const perfMarginV = document.getElementById('perfMarginV');
     const perfMarginVReadout = document.getElementById('perfMarginVReadout');
+
+    // ===== FLOATING AUTOSCROLL PANEL =====
+    const AUTOSCROLL_OFFSET_KEY = 'chordChartAutoscrollOffset';
+    const autoscrollFloatToggle = document.getElementById('autoscrollFloatToggle');
+    const autoscrollFloatPanel = document.getElementById('autoscrollFloatPanel');
+    const autoscrollFloatClose = document.getElementById('autoscrollFloatClose');
+    const autoscrollPlayBtn = document.getElementById('autoscrollPlay');
+    const autoscrollStopBtn = document.getElementById('autoscrollStop');
+    const autoscrollOffsetInput = document.getElementById('autoscrollOffset');
+
+    function toggleAutoscrollFloatPanel(open) {
+      const next = (typeof open === 'boolean') ? open : !autoscrollFloatPanel.classList.contains('show');
+      autoscrollFloatPanel.classList.toggle('show', next);
+      autoscrollFloatToggle.classList.toggle('active', next);
+      autoscrollFloatToggle.title = next ? 'Close auto-scroll' : 'Auto-scroll by timestamps';
+      if (next) {
+        autoscrollRefreshTimestamps();
+        if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
+        if (typeof toggleSongsFloatPanel === 'function') toggleSongsFloatPanel(false);
+        if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
+        if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
+      }
+    }
+
+    if (autoscrollFloatToggle) {
+      autoscrollFloatToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleAutoscrollFloatPanel();
+      });
+    }
+    if (autoscrollFloatClose) {
+      autoscrollFloatClose.addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleAutoscrollFloatPanel(false);
+      });
+    }
+    if (autoscrollPlayBtn) {
+      autoscrollPlayBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (autoscroll.playing) autoscrollPause();
+        else autoscrollPlay();
+      });
+    }
+    if (autoscrollStopBtn) {
+      autoscrollStopBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        autoscrollStop();
+      });
+    }
+    if (autoscrollOffsetInput) {
+      autoscrollOffsetInput.addEventListener('input', function() {
+        let v = parseFloat(this.value);
+        if (isNaN(v)) v = 0;
+        if (v < -30) v = -30;
+        if (v > 30) v = 30;
+        autoscroll.offset = v;
+        try { localStorage.setItem(AUTOSCROLL_OFFSET_KEY, String(v)); } catch (e) {}
+      });
+      autoscrollOffsetInput.addEventListener('blur', function() {
+        if (this.value === '' || isNaN(parseFloat(this.value))) {
+          this.value = 0;
+          autoscroll.offset = 0;
+          try { localStorage.setItem(AUTOSCROLL_OFFSET_KEY, '0'); } catch (e) {}
+        }
+      });
+    }
 
     // ===== FLOATING KEY PANEL =====
     const keyFloatToggle = document.getElementById('keyFloatToggle');
@@ -4572,12 +5141,18 @@
           !templateFloatToggle.contains(e.target)) {
         toggleTemplateFloatPanel(false);
       }
+      if (autoscrollFloatPanel.classList.contains('show') &&
+          !autoscrollFloatPanel.contains(e.target) &&
+          !autoscrollFloatToggle.contains(e.target)) {
+        toggleAutoscrollFloatPanel(false);
+      }
     });
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && perfPanel.classList.contains('show')) togglePerfPanel(false);
       if (e.key === 'Escape' && songsFloatPanel.classList.contains('show')) toggleSongsFloatPanel(false);
       if (e.key === 'Escape' && keyFloatPanel.classList.contains('show')) toggleKeyFloatPanel(false);
       if (e.key === 'Escape' && templateFloatPanel.classList.contains('show')) toggleTemplateFloatPanel(false);
+      if (e.key === 'Escape' && autoscrollFloatPanel.classList.contains('show')) toggleAutoscrollFloatPanel(false);
     });
 
     // ===== CHROME COLLAPSE (focus mode) =====
@@ -4645,9 +5220,26 @@
     applyLayout();
     applySplitState(splitState);
 
+    try {
+      const storedOffset = localStorage.getItem(AUTOSCROLL_OFFSET_KEY);
+      if (storedOffset !== null) {
+        const v = parseFloat(storedOffset);
+        if (!isNaN(v)) {
+          autoscroll.offset = v;
+          if (autoscrollOffsetInput) autoscrollOffsetInput.value = String(v);
+        }
+      }
+    } catch (e) {}
+    if (typeof autoscrollRefreshTimestamps === 'function') autoscrollRefreshTimestamps();
+
     const titleInput = document.getElementById('titleInput');
     if (titleInput) {
       titleInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+          e.preventDefault();
+          if (saveFloatToggle) saveFloatToggle.click();
+          return;
+        }
         if (e.key === 'Enter') e.preventDefault();
       });
     }
@@ -4668,6 +5260,7 @@
         transposeSemitones = 0;
       }
       updatePreview();
+      autoscrollRefreshTimestamps();
     });
 
     inputEl2.addEventListener('input', function() {
@@ -4676,7 +5269,59 @@
         transposeSemitones = 0;
       }
       updatePreview2();
+      autoscrollRefreshTimestamps();
     });
+
+    // Wire the two timestamp gutter textareas: on input, refresh timestamps.
+    // On scroll of either textarea in a pair, sync the other.
+    (function wireTimeGutters() {
+      const timeLeft = document.getElementById('timeInput');
+      const timeRight = document.getElementById('timeInput2');
+
+      function syncScroll(a, b) {
+        if (!a || !b) return;
+        let locked = false;
+        a.addEventListener('scroll', function() {
+          if (locked) return;
+          locked = true;
+          b.scrollTop = a.scrollTop;
+          b.scrollLeft = a.scrollLeft;
+          setTimeout(function() { locked = false; }, 0);
+        });
+      }
+
+      if (timeLeft) {
+        timeLeft.addEventListener('input', function() {
+          autoscrollRefreshTimestamps();
+        });
+      }
+      if (timeRight) {
+        timeRight.addEventListener('input', function() {
+          autoscrollRefreshTimestamps();
+        });
+      }
+      syncScroll(timeLeft, inputEl);
+      syncScroll(inputEl, timeLeft);
+      syncScroll(timeRight, inputEl2);
+      syncScroll(inputEl2, timeRight);
+    })();
+
+    (function wirePreviewCopy() {
+      function wire(previewEl) {
+        if (!previewEl) return;
+        previewEl.addEventListener('copy', function(e) {
+          const sel = window.getSelection();
+          if (!sel || sel.isCollapsed) return;
+          const text = sel.toString();
+          if (e.clipboardData) {
+            e.clipboardData.setData('text/plain', text);
+            e.preventDefault();
+          }
+        });
+      }
+      wire(previewContainer);
+      wire(previewContainer2);
+    })();
 
     updatePreview();
     updatePreview2();
@@ -4690,6 +5335,46 @@
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(adjustChordSizes, 100);
     });
+
+    (function wirePreviewToEditor() {
+      function wire(previewEl, textareaEl) {
+        if (!previewEl || !textareaEl) return;
+        previewEl.addEventListener('dblclick', function(e) {
+          const chordSpan = e.target.closest('.chord-token');
+          if (chordSpan) {
+            const chord = chordSpan.getAttribute('data-chord');
+            if (!chord) return;
+            e.preventDefault();
+            const before = textareaEl.value;
+            const idx = before.indexOf(chord);
+            if (idx >= 0) {
+              textareaEl.focus();
+              textareaEl.setSelectionRange(idx, idx + chord.length);
+            } else {
+              textareaEl.focus();
+            }
+            return;
+          }
+          const sectionEl = e.target.closest('.section-block');
+          if (sectionEl) {
+            const sectionName = sectionEl.getAttribute('data-section');
+            if (!sectionName) return;
+            e.preventDefault();
+            const before = textareaEl.value;
+            const idx = before.toLowerCase().indexOf(sectionName.toLowerCase());
+            if (idx >= 0) {
+              textareaEl.focus();
+              textareaEl.setSelectionRange(idx, idx + sectionName.length);
+            } else {
+              textareaEl.focus();
+            }
+            return;
+          }
+        });
+      }
+      wire(previewContainer, inputEl);
+      wire(previewContainer2, inputEl2);
+    })();
   })();
 </script>
 </body>
