@@ -171,6 +171,10 @@
       font-weight: 500;
       min-width: calc(28px * var(--ui-scale));
       text-align: center;
+      /* Hidden by FIX 32 — the numeric semitone value is no longer
+         shown to the user. The element stays in the DOM so existing
+         JS (.textContent = ...) keeps working without errors. */
+      display: none !important;
     }
 
     .dropdown { position: relative; display: inline-block; }
@@ -419,6 +423,53 @@
     .settings-panel.locked .settings-row input,
     .settings-panel.locked .settings-row select,
     .settings-panel.locked .settings-row button { opacity: 0.45; pointer-events: none; }
+
+    /* ===== TITLE BAR =====
+       A thin, full-width, sticky title strip that sits between the
+       toolbar (or top of viewport, when the toolbar is hidden) and the
+       two editor panels. Fixed height so it never competes with the
+       previews for vertical space. Centered text, borderless input,
+       matches the panel background so it reads as part of the canvas. */
+    .title-bar {
+      flex-shrink: 0;
+      width: 100%;
+      height: 30px;
+      background: #f5ede0;
+      border-bottom: 2px solid #dcc9b0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 12px;
+      box-sizing: border-box;
+      z-index: 500;
+    }
+    .title-bar .title-input {
+      width: 100%;
+      max-width: 900px;
+      border: none;
+      outline: none;
+      background: transparent;
+      text-align: center;
+      font-family: var(--font-lyric, Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace);
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: #3d2b1f;
+      padding: 0;
+      line-height: 30px;
+      height: 30px;
+    }
+    .title-bar .title-input::placeholder {
+      color: #b0987a;
+      font-weight: 400;
+      font-style: italic;
+    }
+    /* When the toolbar is hidden the title bar remains visible — it
+       doesn't need any special positioning because it's inside the
+       normal flex column of .app. If the user wants it truly
+       "sticky-on-scroll", it already is: the app never scrolls
+       (html, body { overflow: hidden }) and each preview scrolls
+       internally. */
 
     .editor-wrapper {
       display: grid;
@@ -1012,7 +1063,7 @@
     .perf-toggle {
       position: fixed;
       top: 10px;
-      right: 58px; /* sits just left of the ☰ hamburger, same height */
+      right: 58px;
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -1048,7 +1099,7 @@
     .songs-float-toggle {
       position: fixed;
       top: 10px;
-      right: 298px; /* shifted left after 📱 layout removal */
+      right: 346px;
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -1084,7 +1135,7 @@
     .editor-float-toggle {
       position: fixed;
       top: 10px;
-      right: 346px; /* leftmost of the floating cluster */
+      right: 250px;
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -1117,53 +1168,12 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
 
-    /* ===== FLOATING LAYOUT BUTTON ===== */
-    .layout-float-toggle {
-      position: fixed;
-      top: 10px;
-      right: 106px; /* between ⚙️ perf and 🔑 key */
-      z-index: 8000;
-      width: 38px;
-      height: 38px;
-      padding: 0;
-      border-radius: 10px;
-      border: 1px solid #c4ad92;
-      background: rgba(232, 220, 204, 0.85);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      color: #3d2b1f;
-      font-size: 1.1rem;
-      line-height: 1;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-      font-family: inherit;
-    }
-    .layout-float-toggle:hover {
-      background: rgba(196, 173, 146, 0.95);
-      transform: scale(1.05);
-    }
-    /* The pressed-in (active) state MUST override the base styles AND the
-       hover state, since Phone View is now the default and the button
-       starts pressed. Order matters: `:hover.active` and `.active`
-       come after the plain `.layout-float-toggle` rules so they win. */
-    .layout-float-toggle.active,
-    .layout-float-toggle.active:hover {
-      background: #5c4033;
-      color: #ffffff;
-      border-color: #4a3328;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    }
 
     /* ===== FLOATING SAVE BUTTON ===== */
     .save-float-toggle {
       position: fixed;
       top: 10px;
-      right: 202px; /* shifted left after 📱 layout removal */
+      right: 154px;
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -1200,7 +1210,7 @@
     .png-float-toggle {
       position: fixed;
       top: 10px;
-      right: 154px; /* shifted left after 📱 layout removal */
+      right: 106px;
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -1237,7 +1247,7 @@
     .key-float-toggle {
       position: fixed;
       top: 10px;
-      right: 106px; /* shifted left after 📱 layout removal */
+      right: 298px;
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -1339,11 +1349,29 @@
     }
     .key-float-row select:focus { border-color: #8b6b4a; }
 
+    /* Transpose row inside the floating 🔑 Key panel. Uses the same
+       .btn-transpose and .transpose-info classes as the toolbar so the
+       look is consistent, but the row is centered because the label
+       column is narrower here. */
+    .key-float-row.key-float-transpose-row {
+      gap: 8px;
+    }
+    .key-float-row.key-float-transpose-row .btn-transpose {
+      min-width: 30px;
+      padding: 4px 8px;
+      font-size: 0.95rem;
+    }
+    .key-float-row.key-float-transpose-row .transpose-info {
+      flex: 1;
+      font-size: 0.8rem;
+      padding: 4px 8px;
+    }
+
     /* ===== FLOATING TEMPLATE PANEL ===== */
     .template-float-toggle {
       position: fixed;
       top: 10px;
-      right: 250px; /* shifted left after 📱 layout removal */
+      right: 202px;
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -1754,7 +1782,9 @@
     /* Editor is hidden in focus mode ONLY when the user hasn't explicitly
        brought it back with the ✏️ button. The `.collapsed` class is the
        single source of truth; focus mode just forces it when the user
-       hasn't asked otherwise. */
+       hasn't asked otherwise. This selector already targets BOTH
+       .input-area and .input-area2 because both use the .input-area
+       class in their markup. */
     body.chrome-collapsed .input-area:not(.focus-visible) {
       display: none !important;
     }
@@ -2075,30 +2105,6 @@
         </div>
       </div>
 
-      <div class="key-selector advanced-only">
-        <span id="keyLabel">🔑 Key:</span>
-        <select id="keySelect">
-          <option value="C" selected>C</option>
-          <option value="G">G</option>
-          <option value="D">D</option>
-          <option value="A">A</option>
-          <option value="E">E</option>
-          <option value="B">B</option>
-          <option value="F#">F#</option>
-          <option value="Gb">Gb</option>
-          <option value="Db">Db</option>
-          <option value="Ab">Ab</option>
-          <option value="Eb">Eb</option>
-          <option value="Bb">Bb</option>
-          <option value="F">F</option>
-        </select>
-        <select class="key-mode-select" id="keyModeSelect">
-          <option value="major" selected>Major</option>
-          <option value="minor">Minor</option>
-        </select>
-        <span style="font-size:0.8rem; opacity:0.7;" id="keyDisplay">(C)</span>
-      </div>
-
       <button class="btn-transpose advanced-only" id="transposeDown" title="Transpose down a semitone">♭</button>
       <span class="transpose-info advanced-only" id="transposeInfo">0</span>
       <button class="btn-transpose advanced-only" id="transposeUp" title="Transpose up a semitone">♯</button>
@@ -2113,6 +2119,9 @@
       <button class="btn btn-outline" id="openSettings" title="Open old settings">⚙️ Old Settings</button>
       </div>
     </div>
+  </div>
+  <div class="title-bar" id="titleBar">
+    <input type="text" class="title-input" id="titleInput" placeholder="Song Title — Artist" spellcheck="false" aria-label="Song title">
   </div>
   <div class="editor-wrapper layout-desktop" id="editorWrapper">
     <div class="panel-wall" id="panelWall" title="Drag to resize panels"></div>
@@ -2153,12 +2162,11 @@
 <button class="chrome-toggle" id="chromeToggle" title="Collapse toolbar & editor (focus mode)" aria-label="Collapse toolbar and editor">☰</button>
 <button class="chrome-toggle-2" id="chromeToggle2" title="Collapse toolbar & editor (focus mode)" aria-label="Collapse toolbar and editor">⋯</button>
 <button class="perf-toggle" id="perfToggle" title="Open settings" aria-label="Open settings">⚙️</button>
-<!-- 📱 layout toggle removed (Phone/Desktop switch deprecated) -->
+<button class="songs-float-toggle" id="songsFloatToggle" title="Songs" aria-label="Songs">🎵</button>
 <button class="key-float-toggle" id="keyFloatToggle" title="Key &amp; transpose" aria-label="Key and transpose">🔑</button>
+<button class="editor-float-toggle" id="editorFloatToggle" title="Hide both editors" aria-label="Hide both editors">✏️</button>
 <button class="png-float-toggle" id="pngFloatToggle" title="Export Chord Chart as PNG" aria-label="Export Chord Chart as PNG">📷</button>
 <button class="save-float-toggle" id="saveFloatToggle" title="Save Chord Chart" aria-label="Save Chord Chart">💾</button>
-<button class="songs-float-toggle" id="songsFloatToggle" title="Songs" aria-label="Songs">🎵</button>
-<button class="editor-float-toggle" id="editorFloatToggle" title="Hide editor" aria-label="Hide editor">✏️</button>
 <button class="template-float-toggle" id="templateFloatToggle" title="Templates (look &amp; feel presets)" aria-label="Templates">🎨</button>
 <div class="template-float-panel" id="templateFloatPanel" role="dialog" aria-label="Templates">
   <div class="template-float-header">
@@ -2198,30 +2206,11 @@
     <button class="perf-close" id="keyFloatClose" title="Close">✕</button>
   </div>
   <div class="key-float-body">
-    <div class="key-float-row">
-      <label for="keySelectFloat">Key</label>
-      <select id="keySelectFloat">
-        <option value="C">C</option>
-        <option value="G">G</option>
-        <option value="D">D</option>
-        <option value="A">A</option>
-        <option value="E">E</option>
-        <option value="B">B</option>
-        <option value="F#">F#</option>
-        <option value="Gb">Gb</option>
-        <option value="Db">Db</option>
-        <option value="Ab">Ab</option>
-        <option value="Eb">Eb</option>
-        <option value="Bb">Bb</option>
-        <option value="F">F</option>
-      </select>
-    </div>
-    <div class="key-float-row">
-      <label for="keyModeSelectFloat">Mode</label>
-      <select id="keyModeSelectFloat">
-        <option value="major">Major</option>
-        <option value="minor">Minor</option>
-      </select>
+    <div class="key-float-row key-float-transpose-row">
+      <label>Transpose</label>
+      <button type="button" class="btn-transpose" id="keyFloatTransposeDown" title="Transpose down a semitone">−</button>
+      <span class="transpose-info" id="keyFloatTransposeInfo">0</span>
+      <button type="button" class="btn-transpose" id="keyFloatTransposeUp" title="Transpose up a semitone">+</button>
     </div>
   </div>
 </div>
@@ -2612,9 +2601,7 @@
     const transposeUpBtn = document.getElementById('transposeUp');
     const transposeDownBtn = document.getElementById('transposeDown');
     const transposeInfo = document.getElementById('transposeInfo');
-    const keySelect = document.getElementById('keySelect');
-    const keyModeSelect = document.getElementById('keyModeSelect');
-    const keyDisplay = document.getElementById('keyDisplay');
+
     const currentSongNameEl = document.getElementById('currentSongName');
     const toastEl = document.getElementById('toast');
 
@@ -2667,6 +2654,7 @@
     let currentKey = 'C';                 // ✅ FIX: default is now C major
     let currentMode = 'major';            // ✅ FIX: default is now major
     let originalText = '';
+    let originalTextLeft = '';
     // ✅ FIX: declared here so syncFocusModeEditorVisibility() can never
     // hit a temporal-dead-zone error if called during init.
     let isChromeCollapsed = false;
@@ -2839,13 +2827,6 @@
     };
 
     const VALID_MAJOR_KEYS = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'Gb', 'Db', 'Ab', 'Eb', 'Bb', 'F'];
-    const VALID_MINOR_KEYS = ['Am', 'Em', 'Bm', 'F#m', 'C#m', 'G#m', 'D#m', 'Ebm', 'Bbm', 'Fm', 'Cm', 'Gm', 'Dm'];
-    const VALID_ROOTS = [...VALID_MAJOR_KEYS, ...VALID_MINOR_KEYS];
-
-    const MINOR_KEY_MAP = {
-      'C': 'Am', 'G': 'Em', 'D': 'Bm', 'A': 'F#m', 'E': 'C#m', 'B': 'G#m',
-      'F#': 'D#m', 'Gb': 'Ebm', 'Db': 'Bbm', 'Ab': 'Fm', 'Eb': 'Cm', 'Bb': 'Gm', 'F': 'Dm'
-    };
 
     const MS_MIN = 0.1;
     const MS_MAX = 10;
@@ -3600,79 +3581,88 @@
       });
     });
 
-    // ===== KEY / TRANSPOSE =====
-    function updateKeyDisplay() {
-      const majorRoot = keySelect.value;
-      const minorRoot = MINOR_KEY_MAP[majorRoot] || 'Am';
-      const displayKey = currentMode === 'minor' ? minorRoot : majorRoot;
-      keyDisplay.textContent = `(${displayKey})`;
-    }
+    // ===== TRANSPOSE (key is now fixed at C major for spelling purposes) =====
     function getCurrentKey() {
-      const majorRoot = keySelect.value;
-      if (currentMode === 'minor') {
-        return MINOR_KEY_MAP[majorRoot] || majorRoot;
-      }
-      return majorRoot;
+      return 'C';
     }
 
-    keySelect.addEventListener('change', function() {
-      currentKey = getCurrentKey();
-      updateKeyDisplay();
-      resetTransposition();
-    });
-    keyModeSelect.addEventListener('change', function() {
-      currentMode = this.value;
-      currentKey = getCurrentKey();
-      updateKeyDisplay();
-      resetTransposition();
-    });
+    // Diatonic note names in order of increasing pitch (C major).
+    const DIATONIC_SHARPS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const DIATONIC_FLATS  = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
-    // ✅ FIX: strip trailing 'm' before NOTE_MAP lookup so minor keys work
+    // Map a chromatic pitch class (0..11) to a sharp or flat spelling.
+    function spellPitch(pitch, useFlats) {
+      pitch = ((pitch % 12) + 12) % 12;
+      return useFlats ? DIATONIC_FLATS[pitch] : DIATONIC_SHARPS[pitch];
+    }
+
+    // ✅ Transpose a chord by semitones, preserving its diatonic interval
+    //    relationship to the key. This is what makes Bb→F# correct in one
+    //    key and Bb→Gb correct in another: we transpose by SCALE DEGREE
+    //    when possible, not by raw chromatic distance.
     function transposeChordWithKey(chord, semitones, key) {
       if (!chord || chord === '_' || chord === '') return chord;
       if (semitones === 0) return chord;
 
-      const match = chord.match(/^([A-G][#b]?)(.*)$/);
+      const match = chord.match(/^([A-Ga-g][#b]?)(.*)$/);
       if (!match) return chord;
 
       const root = match[1];
       const rest = match[2] || '';
 
-      const keyRoot = (key || '').replace(/m$/, '');          // ← FIX
-      const keyIndex = NOTE_MAP[keyRoot];
-      const rootIndex = NOTE_MAP[root];
+      const rootIndex = NOTE_MAP[root] !== undefined
+        ? NOTE_MAP[root]
+        : NOTE_MAP[root.charAt(0).toUpperCase() + root.slice(1)];
 
-      if (keyIndex === undefined || rootIndex === undefined) return chord;
+      if (rootIndex === undefined) return chord;
 
-      let interval = (rootIndex - keyIndex + 12) % 12;
-      let newKeyIndex = (keyIndex + semitones + 12) % 12;
+      // Compute the new pitch class by adding semitones chromatically.
+      const newRootIndex = (rootIndex + semitones + 12) % 12;
 
-      const validKeys = VALID_MAJOR_KEYS.filter(r => NOTE_MAP[r] === newKeyIndex);
-      if (validKeys.length === 0) return chord;
+      // Determine the diatonic letter (A–G) of the ORIGINAL chord and the
+      // new chord. We keep the same scale-degree letter, and derive the
+      // accidental by comparing the actual pitch. This is standard music
+      // theory: transpose by letter-step, then spell the accidental.
+      const LETTERS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+      // Natural pitch classes for each letter in C major.
+      const LETTER_PITCH = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 
-      const keyHasSharp = keyRoot.includes('#');
-      const keyHasFlat = keyRoot.includes('b');
+      const originalLetter = root.charAt(0).toUpperCase();
+      const originalLetterIndex = LETTERS.indexOf(originalLetter);
 
-      let newKey;
-      if (keyHasSharp) newKey = validKeys.find(r => r.includes('#'));
-      else if (keyHasFlat) newKey = validKeys.find(r => r.includes('b'));
-      else newKey = validKeys.find(r => !r.includes('#') && !r.includes('b'));
-      newKey = newKey || validKeys[0];
+      // How many letter-steps does the transposition cover? Scale the
+      // chromatic distance to diatonic steps: a minor 3rd (3 semitones)
+      // is 2 letter-steps, a perfect 5th (7 semitones) is 4 letter-steps.
+      const diatonicSteps = Math.round((semitones * 7) / 12);
 
-      const newKeyIndexActual = NOTE_MAP[newKey];
-      let newRootIndex = (newKeyIndexActual + interval) % 12;
+      // Resolve the target letter by moving diatonicSteps from the
+      // original letter.
+      let targetLetterIndex = (originalLetterIndex + diatonicSteps) % 7;
+      if (targetLetterIndex < 0) targetLetterIndex += 7;
+      const targetLetter = LETTERS[targetLetterIndex];
 
-      const validRoots = VALID_MAJOR_KEYS.filter(r => NOTE_MAP[r] === newRootIndex);
-      if (validRoots.length === 0) return chord;
+      // Natural pitch of the target letter.
+      const naturalPitch = LETTER_PITCH[targetLetter];
+      // Accidental offset = actual pitch − natural pitch (mod 12).
+      let accOffset = (newRootIndex - naturalPitch + 12) % 12;
+      // If offset > 6, it's actually a flatter spelling (e.g. Cb instead
+      // of B#). Normalize into −2..+2 range, but cap at double accidentals.
+      if (accOffset > 6) accOffset -= 12;
 
-      const originalHasSharp = root.includes('#');
-      const originalHasFlat = root.includes('b');
+      let accidental = '';
+      if (accOffset === 1) accidental = '#';
+      else if (accOffset === 2) accidental = '##';
+      else if (accOffset === -1) accidental = 'b';
+      else if (accOffset === -2) accidental = 'bb';
 
-      let newRoot;
-      if (originalHasSharp) newRoot = validRoots.find(r => r.includes('#'));
-      else if (originalHasFlat) newRoot = validRoots.find(r => r.includes('b'));
-      else newRoot = validRoots.find(r => !r.includes('#') && !r.includes('b'));
-      newRoot = newRoot || validRoots[0];
+      const newRoot = targetLetter + accidental;
+
+      // Sanity check: if the new root doesn't resolve to the same pitch
+      // class, fall back to the sharp/flat spelling of the target pitch.
+      const check = NOTE_MAP[newRoot];
+      if (check !== newRootIndex) {
+        return spellPitch(newRootIndex, preferFlats) + rest;
+      }
 
       return newRoot + rest;
     }
@@ -3683,7 +3673,7 @@
     // only chord-quality suffixes. Words like "Amazing" won't match because
     // "azing" isn't a valid suffix. But "A" alone WILL match — which is why
     // transposeText() guards on `line.includes('|')` first.
-    const CHORD_TOKEN_RE = /^[A-G][#b]?(?:maj|min|m|dim|aug|sus|add|°|ø|Δ|\d|[#b]\d|\/[A-G][#b]?)*$/;
+    const CHORD_TOKEN_RE = /^[A-Ga-g][#b]?(?:maj|min|m|dim|aug|sus|add|°|ø|Δ|\d|[#b]\d|\/[A-Ga-g][#b]?)*$/;
 
     function transposeText(text, semitones, key) {
       if (semitones === 0) return text;
@@ -3712,29 +3702,53 @@
 
     function applyTransposition() {
       const key = getCurrentKey();
-      if (transposeSemitones === 0) {
+      const semis = ((transposeSemitones % 12) + 12) % 12;
+      if (semis === 0) {
         inputEl2.value = originalText;
+        inputEl.value = originalTextLeft;
       } else {
-        inputEl2.value = transposeText(originalText, transposeSemitones, key);
+        inputEl2.value = transposeText(originalText, semis, key);
+        inputEl.value = transposeText(originalTextLeft, semis, key);
       }
+      updatePreview();
       updatePreview2();
       transposeInfo.textContent = transposeSemitones;
+      // Keep the floating Key panel's readout in sync (if the panel
+      // exists). Guard against undefined because this function runs
+      // during INIT before some DOM refs may be ready.
+      const floatInfo = document.getElementById('keyFloatTransposeInfo');
+      if (floatInfo) floatInfo.textContent = transposeSemitones;
     }
+    let preferFlats = false;
+    const TRANSPOSE_MIN = 0;
+    const TRANSPOSE_MAX = 11;
+
     function transposeUp() {
-      if (transposeSemitones >= 6) return;
+      preferFlats = false;
       transposeSemitones++;
+      if (transposeSemitones > TRANSPOSE_MAX) {
+        transposeSemitones = TRANSPOSE_MIN;
+      }
       applyTransposition();
     }
     function transposeDown() {
-      if (transposeSemitones <= -6) return;
+      preferFlats = true;
       transposeSemitones--;
+      if (transposeSemitones < TRANSPOSE_MIN) {
+        transposeSemitones = TRANSPOSE_MAX;
+      }
       applyTransposition();
     }
     function resetTransposition() {
       transposeSemitones = 0;
       transposeInfo.textContent = '0';
+      const floatInfo = document.getElementById('keyFloatTransposeInfo');
+      if (floatInfo) floatInfo.textContent = '0';
       if (originalText) {
         inputEl2.value = originalText;
+      }
+      if (originalTextLeft) {
+        inputEl.value = originalTextLeft;
       }
       updatePreview();
       updatePreview2();
@@ -3754,10 +3768,14 @@
       currentSongNameEl.classList.add('show');
     }
 
-    function loadSong(lyricText, chordText, fileName, settingsSnapshot) {
+    function loadSong(lyricText, chordText, fileName, settingsSnapshot, songTitle) {
       inputEl.value = lyricText;
       inputEl2.value = chordText;
       originalText = inputEl2.value;
+      originalTextLeft = inputEl.value;
+      // Restore the title bar text (empty string clears it).
+      const titleEl = document.getElementById('titleInput');
+      if (titleEl) titleEl.value = (typeof songTitle === 'string') ? songTitle : '';
 
       // ✅ The loaded song's settings snapshot provides the song text, but
       //    the CURRENT template / session settings own the look. We only
@@ -3821,7 +3839,7 @@
 
           const storedSongs = loadStoredSongs() || [];
           const existingIndex = storedSongs.findIndex(s => s.name === fileName && s.folder === folder);
-          const entry = { name: fileName, lyricText: parsed.lyricText, chordText: parsed.chordText, folder: folder };
+          const entry = { name: fileName, title: parsed.title || '', lyricText: parsed.lyricText, chordText: parsed.chordText, folder: folder };
           if (parsed.settings) entry.settings = parsed.settings;
           if (existingIndex >= 0) {
             storedSongs[existingIndex] = Object.assign({}, storedSongs[existingIndex], entry);
@@ -3830,7 +3848,7 @@
           }
           saveSongsToStorage(storedSongs);
 
-          loadSong(parsed.lyricText, parsed.chordText, fileName, parsed.settings);
+          loadSong(parsed.lyricText, parsed.chordText, fileName, parsed.settings, parsed.title);
           if (parsed.settings) showToast('Loaded "' + fileName + '"');
           displayStoredSongs();
         };
@@ -3852,7 +3870,7 @@
           const folder = file.webkitRelativePath ? getFolderPath(file.webkitRelativePath) : '';
 
           const existingIndex = storedSongs.findIndex(s => s.name === fileName && s.folder === folder);
-          const entry = { name: fileName, lyricText: parsed.lyricText, chordText: parsed.chordText, folder: folder };
+          const entry = { name: fileName, title: parsed.title || '', lyricText: parsed.lyricText, chordText: parsed.chordText, folder: folder };
           if (parsed.settings) entry.settings = parsed.settings;
           if (existingIndex >= 0) {
             storedSongs[existingIndex] = Object.assign({}, storedSongs[existingIndex], entry);
@@ -3869,7 +3887,7 @@
             saveSongsToStorage(storedSongs);
             displayStoredSongs();
             if (firstParsed) {
-              loadSong(firstParsed.lyricText, firstParsed.chordText, firstFileName, firstParsed.settings);
+              loadSong(firstParsed.lyricText, firstParsed.chordText, firstFileName, firstParsed.settings, firstParsed.title);
               if (firstParsed.settings) showToast('Loaded "' + firstFileName + '"');
             }
           }
@@ -3899,6 +3917,7 @@
         // New format (v2+): separate lyricText and chordText.
         if (typeof parsed.lyricText === 'string' || typeof parsed.chordText === 'string') {
           return {
+            title: typeof parsed.title === 'string' ? parsed.title : '',
             lyricText: typeof parsed.lyricText === 'string' ? parsed.lyricText : '',
             chordText: typeof parsed.chordText === 'string' ? parsed.chordText : '',
             settings: (parsed.settings && typeof parsed.settings === 'object') ? parsed.settings : null
@@ -3907,6 +3926,7 @@
         // Old format (v1): single songText field. Route it to the CHORDS pane.
         if (typeof parsed.songText === 'string') {
           return {
+            title: typeof parsed.title === 'string' ? parsed.title : '',
             lyricText: '',
             chordText: parsed.songText,
             settings: (parsed.settings && typeof parsed.settings === 'object') ? parsed.settings : null
@@ -3914,7 +3934,7 @@
         }
       }
       // Plain text file (raw .txt) — route it to the CHORDS pane.
-      return { lyricText: '', chordText: raw, settings: null };
+      return { title: '', lyricText: '', chordText: raw, settings: null };
     }
 
     // ===== STORED SONGS =====
@@ -4098,7 +4118,7 @@
         // Stored songs may be in new (lyricText/chordText) or old (content) form.
         const lyric = song.lyricText != null ? song.lyricText : '';
         const chord = song.chordText != null ? song.chordText : (song.content || '');
-        loadSong(lyric, chord, song.name, song.settings || null);
+        loadSong(lyric, chord, song.name, song.settings || null, song.title || '');
         if (song.settings && typeof song.settings === 'object') showToast('Loaded "' + song.name + '"');
         // Close whichever panel this item lives in (toolbar dropdown or floating panel).
         dropdownContent.classList.remove('show');
@@ -4160,7 +4180,7 @@
           const folder = file.webkitRelativePath ? getFolderPath(file.webkitRelativePath) : '';
           const storedSongs = loadStoredSongs() || [];
           const existingIndex = storedSongs.findIndex(s => s.name === fileName && s.folder === folder);
-          const entry = { name: fileName, lyricText: parsed.lyricText, chordText: parsed.chordText, folder: folder };
+          const entry = { name: fileName, title: parsed.title || '', lyricText: parsed.lyricText, chordText: parsed.chordText, folder: folder };
           if (parsed.settings) entry.settings = parsed.settings;
           if (existingIndex >= 0) {
             storedSongs[existingIndex] = Object.assign({}, storedSongs[existingIndex], entry);
@@ -4168,7 +4188,7 @@
             storedSongs.push(entry);
           }
           saveSongsToStorage(storedSongs);
-          loadSong(parsed.lyricText, parsed.chordText, fileName, parsed.settings);
+          loadSong(parsed.lyricText, parsed.chordText, fileName, parsed.settings, parsed.title);
           if (parsed.settings) showToast('Applied settings from "' + fileName + '"');
           dropdownContent.classList.remove('show');
           displayStoredSongs();
@@ -4310,13 +4330,17 @@
     });
 
     // ===== EDITOR / MODE / LAYOUT TOGGLES =====
+    // The ✏️ floating button hides / shows BOTH editors at once, so
+    // both previews claim the full panel height together. We toggle
+    // the `.collapsed` class on both input areas in lockstep.
     function applyEditorState(hidden) {
       isEditorCollapsed = hidden;
       inputArea.classList.toggle('collapsed', hidden);
+      inputArea2.classList.toggle('collapsed', hidden);
       // Update the floating pencil button to reflect the current state.
       // Pencil gets an active (dark) style while the editor is hidden.
       editorFloatToggle.classList.toggle('active', hidden);
-      editorFloatToggle.title = hidden ? 'Show editor' : 'Hide editor';
+      editorFloatToggle.title = hidden ? 'Show both editors' : 'Hide both editors';
       editorFloatToggle.setAttribute('aria-label', editorFloatToggle.title);
       setTimeout(adjustChordSizes, 350);
     }
@@ -4845,12 +4869,14 @@
       const timestamp = new Date().toISOString().slice(0, 10);
       const fileName = `${sanitizedName}_${timestamp}.chordchart`;
 
+      const titleText = (document.getElementById('titleInput') || {}).value || '';
       const payload = {
         app: 'chord-chart-creator',
         version: 2,
         type: 'song',
         savedAt: new Date().toISOString(),
         settings: Object.assign({}, settings),
+        title: titleText,
         lyricText: lyricText,
         chordText: chordText
       };
@@ -5029,8 +5055,6 @@
     const keyFloatToggle = document.getElementById('keyFloatToggle');
     const keyFloatPanel = document.getElementById('keyFloatPanel');
     const keyFloatClose = document.getElementById('keyFloatClose');
-    const keySelectFloat = document.getElementById('keySelectFloat');
-    const keyModeSelectFloat = document.getElementById('keyModeSelectFloat');
 
     function toggleKeyFloatPanel(open) {
       const next = (typeof open === 'boolean') ? open : !keyFloatPanel.classList.contains('show');
@@ -5038,10 +5062,8 @@
       keyFloatToggle.classList.toggle('active', next);
       keyFloatToggle.title = next ? 'Close key' : 'Key & transpose';
       if (next) {
-        // Sync both selects to the current toolbar state before showing.
-        keySelectFloat.value = keySelect.value;
-        keyModeSelectFloat.value = keyModeSelect.value;
-        // Mutually close the other float panels so they don't overlap.
+        const floatInfo = document.getElementById('keyFloatTransposeInfo');
+        if (floatInfo) floatInfo.textContent = transposeSemitones;
         if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
         if (typeof toggleSongsFloatPanel === 'function') toggleSongsFloatPanel(false);
         if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
@@ -5056,16 +5078,26 @@
       toggleKeyFloatPanel(false);
     });
 
-    // Mirror changes made in the floating panel back into the toolbar's
-    // selects, then fire the change event so the existing logic runs.
-    keySelectFloat.addEventListener('change', function() {
-      keySelect.value = this.value;
-      keySelect.dispatchEvent(new Event('change', { bubbles: true }));
-    });
-    keyModeSelectFloat.addEventListener('change', function() {
-      keyModeSelect.value = this.value;
-      keyModeSelect.dispatchEvent(new Event('change', { bubbles: true }));
-    });
+    // ===== FLOATING 🔑 KEY PANEL — TRANSPOSE BUTTONS =====
+    // The − / + buttons inside the floating Key panel call the same
+    // transposeUp() / transposeDown() helpers as the toolbar buttons,
+    // so the circular wrap behavior (FIX 29) is shared automatically.
+    const keyFloatTransposeUp = document.getElementById('keyFloatTransposeUp');
+    const keyFloatTransposeDown = document.getElementById('keyFloatTransposeDown');
+    const keyFloatTransposeInfo = document.getElementById('keyFloatTransposeInfo');
+
+    if (keyFloatTransposeUp) {
+      keyFloatTransposeUp.addEventListener('click', function(e) {
+        e.stopPropagation();
+        transposeUp();
+      });
+    }
+    if (keyFloatTransposeDown) {
+      keyFloatTransposeDown.addEventListener('click', function(e) {
+        e.stopPropagation();
+        transposeDown();
+      });
+    }
 
     // ===== FLOATING SONGS PANEL =====
     const songsFloatToggle = document.getElementById('songsFloatToggle');
@@ -5115,7 +5147,7 @@
           const folder = file.webkitRelativePath ? getFolderPath(file.webkitRelativePath) : '';
           const storedSongs = loadStoredSongs() || [];
           const existingIndex = storedSongs.findIndex(s => s.name === fileName && s.folder === folder);
-          const entry = { name: fileName, lyricText: parsed.lyricText, chordText: parsed.chordText, folder: folder };
+          const entry = { name: fileName, title: parsed.title || '', lyricText: parsed.lyricText, chordText: parsed.chordText, folder: folder };
           if (parsed.settings) entry.settings = parsed.settings;
           if (existingIndex >= 0) {
             storedSongs[existingIndex] = Object.assign({}, storedSongs[existingIndex], entry);
@@ -5123,7 +5155,7 @@
             storedSongs.push(entry);
           }
           saveSongsToStorage(storedSongs);
-          loadSong(parsed.lyricText, parsed.chordText, fileName, parsed.settings);
+          loadSong(parsed.lyricText, parsed.chordText, fileName, parsed.settings, parsed.title);
           if (parsed.settings) showToast('Applied settings from "' + fileName + '"');
           songsFloatPanel.classList.remove('show');
           songsFloatToggle.classList.remove('active');
@@ -5704,6 +5736,20 @@
     applyLockState();
     applyLayout('desktop');   // Layout is fixed; the toggle was removed.
 
+    // ===== TITLE BAR WIRING =====
+    // The title bar is a single-line text input at the top of the editor
+    // area. Its content is purely visual for now (a header for the chart)
+    // and is NOT saved with the song — if you want it persisted later,
+    // say the word and I'll add it to the .chordchart payload.
+    const titleInput = document.getElementById('titleInput');
+    if (titleInput) {
+      // Prevent Enter from submitting anything / blurring.
+      titleInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') e.preventDefault();
+      });
+      // Also let the user type freely; nothing else to wire up yet.
+    }
+
     applyMode(false);
     // ✅ Focus mode (hiding the toolbar + editor together) is no longer
     // exposed in the UI. Force it OFF on every load so existing users
@@ -5733,11 +5779,12 @@
 
     displayStoredSongs();
     originalText = inputEl2.value;
-    currentKey = getCurrentKey();
-    updateKeyDisplay();
+    originalTextLeft = inputEl.value;
     resetTransposition();
 
     inputEl.addEventListener('input', function() {
+      originalTextLeft = inputEl.value;
+      transposeSemitones = 0;
       updatePreview();
     });
 
