@@ -421,14 +421,73 @@
     .settings-panel.locked .settings-row button { opacity: 0.45; pointer-events: none; }
 
     .editor-wrapper {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr;
+      gap: 0;
+      /* The visible vertical wall between the two panels is drawn by
+         the ::after pseudo-element below, NOT by the grid gap. We zero
+         out the gap and paint a real 2px column down the middle so the
+         wall reads like the horizontal wall above the editor (which is
+         the .resize-handle's 8px strip). */
+      background: transparent;
       flex: 1;
       min-height: 0;
       overflow: hidden;
-      /* White behind everything so the editor's open/close animation
-         never flashes the parent's cream/tan background through. */
+      position: relative;
+    }
+    /* Vertical wall between panel 1 and panel 2. Visually IDENTICAL to
+       the .resize-handle above each editor: a 2px colored line that
+       thickens to 12px (and darkens to #8b6b4a) on hover / active.
+       The 2px idle thickness matches the toolbar's bottom border and
+       the editor's top border so the whole app reads as one grid. */
+    .panel-wall {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 3px;
+      transform: translateX(-50%);
+      background: #dcc9b0;
+      cursor: ew-resize;
+      z-index: 200;
+      pointer-events: auto;
+      transition: background 0.15s ease, width 0.15s ease;
+    }
+    /* Invisible hit-zone so the cursor doesn't have to be pixel-perfect. */
+    .panel-wall::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 32px;
+      height: auto;
+      transform: translateX(-50%);
+      background: transparent;
+      pointer-events: auto;
+    }
+    .panel-wall:hover,
+    .panel-wall:active {
+      background: #8b6b4a;
+      width: 6px;
+    }
+    /* Each panel = its own vertical stack: preview on top, editor on bottom. */
+    .editor-wrapper .panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      min-width: 0;
+      overflow: hidden;
       background: #ffffff;
+    }
+    /* Keep the panel1/panel2 preview area behaving like the old one. */
+    .editor-wrapper .panel .preview-area {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+    .editor-wrapper .panel .input-area {
+      flex: 0 0 auto;
     }
     .editor-wrapper.layout-phone {
       flex-direction: row;
@@ -738,6 +797,17 @@
     .chord-token.empty.section-outro { color: #6a8caf; }
     .chord-token.empty.section-custom { color: #888888; }
 
+    /* Lyrics use the same section colors as their chords. */
+    .lyrics-line.section-intro .lyric-text { color: #6a8caf; }
+    .lyrics-line.section-verse .lyric-text { color: #5a8a5a; }
+    .lyrics-line.section-pre-chorus .lyric-text { color: #d4953a; }
+    .lyrics-line.section-chorus .lyric-text { color: #c45a4a; }
+    .lyrics-line.section-post-chorus .lyric-text { color: #8b6b4a; }
+    .lyrics-line.section-bridge .lyric-text { color: #8a6a9a; }
+    .lyrics-line.section-instrumental .lyric-text { color: #5a5a5a; }
+    .lyrics-line.section-outro .lyric-text { color: #6a8caf; }
+    .lyrics-line.section-custom .lyric-text { color: #888888; }
+
     .key-selector {
       display: flex;
       align-items: center;
@@ -842,10 +912,10 @@
                   box-shadow 0.15s ease;
     }
 
-    /* Collapsed state: each button slides toward the ☰ hamburger and
-       fades out. `translateX` moves them right (toward the corner).
-       Each button's `right` offset is different, so we use a large
-       enough translate to guarantee they all reach the ☰ area.
+    /* Collapsed state: each button slides toward the ☰ hamburger
+       (top-right corner) and fades out. `translateX` moves them right
+       toward the corner; the large value guarantees they all reach the
+       ☰ area regardless of their individual `right` offsets.
 
        NOTE: We deliberately do NOT set `pointer-events: none` here, and
        we do NOT use `scale()`. Both of those caused the closing
@@ -978,7 +1048,7 @@
     .songs-float-toggle {
       position: fixed;
       top: 10px;
-      right: 346px;
+      right: 298px; /* shifted left after 📱 layout removal */
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -1014,7 +1084,7 @@
     .editor-float-toggle {
       position: fixed;
       top: 10px;
-      right: 394px; /* leftmost of the floating cluster */
+      right: 346px; /* leftmost of the floating cluster */
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -1093,7 +1163,7 @@
     .save-float-toggle {
       position: fixed;
       top: 10px;
-      right: 250px; /* between 📷 png and 🎵 songs */
+      right: 202px; /* shifted left after 📱 layout removal */
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -1130,7 +1200,7 @@
     .png-float-toggle {
       position: fixed;
       top: 10px;
-      right: 202px; /* between 💾 save and 🔑 key */
+      right: 154px; /* shifted left after 📱 layout removal */
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -1167,7 +1237,7 @@
     .key-float-toggle {
       position: fixed;
       top: 10px;
-      right: 154px; /* between 📱 layout and 🎵 songs */
+      right: 106px; /* shifted left after 📱 layout removal */
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -1273,7 +1343,7 @@
     .template-float-toggle {
       position: fixed;
       top: 10px;
-      right: 298px;
+      right: 250px; /* shifted left after 📱 layout removal */
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -2035,7 +2105,7 @@
       </div>
 
       <div class="toolbar-row">
-      <button class="btn-toggle" id="toggleLayout" title="Switch between Desktop and Phone view">📱 Phone View</button>
+      <!-- toolbar layout toggle removed (Phone/Desktop switch deprecated) -->
 
       <button class="btn btn-success" id="exportPNG">📷 Export Chord Chart as PNG</button>
       <button class="btn btn-success" id="saveSong">💾 Save Chord Chart</button>
@@ -2044,17 +2114,37 @@
       </div>
     </div>
   </div>
-  <div class="editor-wrapper layout-phone" id="editorWrapper">
-    <div class="input-area" id="inputArea">
-      <div class="resize-handle" id="resizeHandle"></div>
-      <div class="drop-zone" id="dropZone">
-        <div class="drop-message">📂 Drop a chord chart here</div>
-        <textarea id="chartInput" spellcheck="false"></textarea>
+  <div class="editor-wrapper layout-desktop" id="editorWrapper">
+    <div class="panel-wall" id="panelWall" title="Drag to resize panels"></div>
+    <!-- ===== PANEL 1 (left) ===== -->
+    <div class="panel" id="panel1">
+      <div class="preview-area" id="previewArea">
+        <div id="previewContainer" class="chord-preview">
+          <div class="content-wrapper" id="previewContent"></div>
+        </div>
+      </div>
+      <div class="input-area" id="inputArea">
+        <div class="resize-handle" id="resizeHandle"></div>
+        <div class="drop-zone" id="dropZone">
+          <div class="drop-message">📂 Drop a chord chart here</div>
+          <textarea id="chartInput" spellcheck="false"></textarea>
+        </div>
       </div>
     </div>
-    <div class="preview-area" id="previewArea">
-      <div id="previewContainer" class="chord-preview">
-        <div class="content-wrapper" id="previewContent"></div>
+
+    <!-- ===== PANEL 2 (right) ===== -->
+    <div class="panel" id="panel2">
+      <div class="preview-area" id="previewArea2">
+        <div id="previewContainer2" class="chord-preview">
+          <div class="content-wrapper" id="previewContent2"></div>
+        </div>
+      </div>
+      <div class="input-area" id="inputArea2">
+        <div class="resize-handle" id="resizeHandle2"></div>
+        <div class="drop-zone" id="dropZone2">
+          <div class="drop-message">📂 Drop a chord chart here</div>
+          <textarea id="chartInput2" spellcheck="false"></textarea>
+        </div>
       </div>
     </div>
   </div>
@@ -2063,7 +2153,7 @@
 <button class="chrome-toggle" id="chromeToggle" title="Collapse toolbar & editor (focus mode)" aria-label="Collapse toolbar and editor">☰</button>
 <button class="chrome-toggle-2" id="chromeToggle2" title="Collapse toolbar & editor (focus mode)" aria-label="Collapse toolbar and editor">⋯</button>
 <button class="perf-toggle" id="perfToggle" title="Open settings" aria-label="Open settings">⚙️</button>
-<button class="layout-float-toggle active" id="layoutFloatToggle" title="Phone View: ON (click to turn off)" aria-label="Phone View: ON (click to turn off)">📱</button>
+<!-- 📱 layout toggle removed (Phone/Desktop switch deprecated) -->
 <button class="key-float-toggle" id="keyFloatToggle" title="Key &amp; transpose" aria-label="Key and transpose">🔑</button>
 <button class="png-float-toggle" id="pngFloatToggle" title="Export Chord Chart as PNG" aria-label="Export Chord Chart as PNG">📷</button>
 <button class="save-float-toggle" id="saveFloatToggle" title="Save Chord Chart" aria-label="Save Chord Chart">💾</button>
@@ -2427,6 +2517,31 @@
   (function() {
     'use strict';
 
+    // ===== TEMPLATE SETTING WHITELIST =====
+    // Declared at the very top so loadSong() can safely reference it during
+    // early initialization.
+    const TEMPLATE_SETTING_KEYS = [
+      'masterScale',
+      'chordLineHeight',
+      'emptyLineHeight',
+      'chordLetterSpacing',
+      'lyricLetterSpacing',
+      'labelLetterSpacing',
+      'pipeScale',
+      'pipeThickness',
+      'pipeVerticalAlign',
+      'chordFont',
+      'chordFontCustom',
+      'lyricFont',
+      'lyricFontCustom',
+      'chordSizeMult',
+      'lyricSize',
+      'labelSize',
+      'labelRadius',
+      'previewPaddingH',
+      'previewPaddingV'
+    ];
+
     // ===== AUTO-WRAP NUMBER INPUTS WITH ± BUTTONS =====
     (function wrapNumberInputs() {
       document.querySelectorAll('.settings-row input[type="number"].settings-num').forEach(function(input) {
@@ -2487,7 +2602,8 @@
     const perfLockRow = document.getElementById('perfLockRow');
     const perfLockCheckbox = document.getElementById('perfLockCheckbox');
     const editorWrapper = document.getElementById('editorWrapper');
-    const toggleLayoutBtn = document.getElementById('toggleLayout');
+    const panelWall = document.getElementById('panelWall');
+    // const toggleLayoutBtn — removed (Phone/Desktop switch deprecated)
     const resizeHandle = document.getElementById('resizeHandle');
     const dropdownToggle = document.getElementById('dropdownToggle');
     const dropdownContent = document.getElementById('dropdownContent');
@@ -2515,9 +2631,16 @@
     const chromeToggle = document.getElementById('chromeToggle');
     const chromeToggle2 = document.getElementById('chromeToggle2');
     const editorFloatToggle = document.getElementById('editorFloatToggle');
-    const layoutFloatToggle = document.getElementById('layoutFloatToggle');
+    // const layoutFloatToggle — removed (button no longer exists)
     const saveFloatToggle = document.getElementById('saveFloatToggle');
     const pngFloatToggle = document.getElementById('pngFloatToggle');
+
+    // ===== PANEL 2 DOM REFERENCES (second editor + preview) =====
+    const inputEl2 = document.getElementById('chartInput2');
+    const previewContent2 = document.getElementById('previewContent2');
+    const previewContainer2 = document.getElementById('previewContainer2');
+    const inputArea2 = document.getElementById('inputArea2');
+    const previewArea2 = document.getElementById('previewArea2');
     const templateFloatToggle = document.getElementById('templateFloatToggle');
     const templateFloatPanel = document.getElementById('templateFloatPanel');
     const templateFloatClose = document.getElementById('templateFloatClose');
@@ -2535,6 +2658,7 @@
     let isAdvancedMode = false;
     let currentLayout = 'phone';          // ✅ default is now Phone
     let isResizing = false;
+    let isWallResizing = false;
     let startY = 0;
     let startX = 0;
     let startWidth = 0;
@@ -2833,14 +2957,14 @@
     }
 
     // ✅ FIX: persist layout.
-    // Default is PHONE view for new users (or users whose saved layout
+    // Default is DESKTOP view for new users (or users whose saved layout
     // value is somehow missing / invalid). Existing users who have
     // already picked Desktop will keep Desktop, because their saved
     // value will be 'desktop' and is honored here.
     function loadLayoutState() {
       try {
         const v = localStorage.getItem(LAYOUT_KEY);
-        return (v === 'phone' || v === 'desktop') ? v : 'phone';
+        return (v === 'phone' || v === 'desktop') ? v : 'desktop';
       } catch (e) { return 'phone'; }
     }
     function saveLayoutState(layout) {
@@ -3589,11 +3713,11 @@
     function applyTransposition() {
       const key = getCurrentKey();
       if (transposeSemitones === 0) {
-        inputEl.value = originalText;
+        inputEl2.value = originalText;
       } else {
-        inputEl.value = transposeText(originalText, transposeSemitones, key);
+        inputEl2.value = transposeText(originalText, transposeSemitones, key);
       }
-      updatePreview();
+      updatePreview2();
       transposeInfo.textContent = transposeSemitones;
     }
     function transposeUp() {
@@ -3610,9 +3734,10 @@
       transposeSemitones = 0;
       transposeInfo.textContent = '0';
       if (originalText) {
-        inputEl.value = originalText;
-        updatePreview();
+        inputEl2.value = originalText;
       }
+      updatePreview();
+      updatePreview2();
     }
 
     // ===== SONG NAME =====
@@ -3629,9 +3754,10 @@
       currentSongNameEl.classList.add('show');
     }
 
-    function loadSong(content, fileName, settingsSnapshot) {
-      originalText = content;
-      inputEl.value = content;
+    function loadSong(lyricText, chordText, fileName, settingsSnapshot) {
+      inputEl.value = lyricText;
+      inputEl2.value = chordText;
+      originalText = inputEl2.value;
 
       // ✅ The loaded song's settings snapshot provides the song text, but
       //    the CURRENT template / session settings own the look. We only
@@ -3695,7 +3821,7 @@
 
           const storedSongs = loadStoredSongs() || [];
           const existingIndex = storedSongs.findIndex(s => s.name === fileName && s.folder === folder);
-          const entry = { name: fileName, content: parsed.text, folder: folder };
+          const entry = { name: fileName, lyricText: parsed.lyricText, chordText: parsed.chordText, folder: folder };
           if (parsed.settings) entry.settings = parsed.settings;
           if (existingIndex >= 0) {
             storedSongs[existingIndex] = Object.assign({}, storedSongs[existingIndex], entry);
@@ -3704,7 +3830,7 @@
           }
           saveSongsToStorage(storedSongs);
 
-          loadSong(parsed.text, fileName, parsed.settings);
+          loadSong(parsed.lyricText, parsed.chordText, fileName, parsed.settings);
           if (parsed.settings) showToast('Loaded "' + fileName + '"');
           displayStoredSongs();
         };
@@ -3726,7 +3852,7 @@
           const folder = file.webkitRelativePath ? getFolderPath(file.webkitRelativePath) : '';
 
           const existingIndex = storedSongs.findIndex(s => s.name === fileName && s.folder === folder);
-          const entry = { name: fileName, content: parsed.text, folder: folder };
+          const entry = { name: fileName, lyricText: parsed.lyricText, chordText: parsed.chordText, folder: folder };
           if (parsed.settings) entry.settings = parsed.settings;
           if (existingIndex >= 0) {
             storedSongs[existingIndex] = Object.assign({}, storedSongs[existingIndex], entry);
@@ -3743,7 +3869,7 @@
             saveSongsToStorage(storedSongs);
             displayStoredSongs();
             if (firstParsed) {
-              loadSong(firstParsed.text, firstFileName, firstParsed.settings);
+              loadSong(firstParsed.lyricText, firstParsed.chordText, firstFileName, firstParsed.settings);
               if (firstParsed.settings) showToast('Loaded "' + firstFileName + '"');
             }
           }
@@ -3769,13 +3895,26 @@
       if (trimmed.startsWith('{')) {
         try { parsed = JSON.parse(trimmed); } catch (e) { parsed = null; }
       }
-      if (parsed && parsed.app === 'chord-chart-creator' && parsed.type === 'song' && typeof parsed.songText === 'string') {
-        return {
-          text: parsed.songText,
-          settings: (parsed.settings && typeof parsed.settings === 'object') ? parsed.settings : null
-        };
+      if (parsed && parsed.app === 'chord-chart-creator' && parsed.type === 'song') {
+        // New format (v2+): separate lyricText and chordText.
+        if (typeof parsed.lyricText === 'string' || typeof parsed.chordText === 'string') {
+          return {
+            lyricText: typeof parsed.lyricText === 'string' ? parsed.lyricText : '',
+            chordText: typeof parsed.chordText === 'string' ? parsed.chordText : '',
+            settings: (parsed.settings && typeof parsed.settings === 'object') ? parsed.settings : null
+          };
+        }
+        // Old format (v1): single songText field. Route it to the CHORDS pane.
+        if (typeof parsed.songText === 'string') {
+          return {
+            lyricText: '',
+            chordText: parsed.songText,
+            settings: (parsed.settings && typeof parsed.settings === 'object') ? parsed.settings : null
+          };
+        }
       }
-      return { text: raw, settings: null };
+      // Plain text file (raw .txt) — route it to the CHORDS pane.
+      return { lyricText: '', chordText: raw, settings: null };
     }
 
     // ===== STORED SONGS =====
@@ -3858,7 +3997,7 @@
           }
 
           const subFolderNames = Object.keys(subTree).filter(k => k !== '_songs');
-          subFolderNames.sort((a, b) => a.localeCompare(b.name, 'th', { sensitivity: 'base' }));
+          subFolderNames.sort((a, b) => a.localeCompare(b, 'th', { sensitivity: 'base' }));
 
           subFolderNames.forEach(subFolderName => {
             const subFolderTree = subTree[subFolderName];
@@ -3956,7 +4095,10 @@
 
       nameSpan.addEventListener('click', function(e) {
         e.stopPropagation();
-        loadSong(song.content, song.name, song.settings || null);
+        // Stored songs may be in new (lyricText/chordText) or old (content) form.
+        const lyric = song.lyricText != null ? song.lyricText : '';
+        const chord = song.chordText != null ? song.chordText : (song.content || '');
+        loadSong(lyric, chord, song.name, song.settings || null);
         if (song.settings && typeof song.settings === 'object') showToast('Loaded "' + song.name + '"');
         // Close whichever panel this item lives in (toolbar dropdown or floating panel).
         dropdownContent.classList.remove('show');
@@ -4018,7 +4160,7 @@
           const folder = file.webkitRelativePath ? getFolderPath(file.webkitRelativePath) : '';
           const storedSongs = loadStoredSongs() || [];
           const existingIndex = storedSongs.findIndex(s => s.name === fileName && s.folder === folder);
-          const entry = { name: fileName, content: parsed.text, folder: folder };
+          const entry = { name: fileName, lyricText: parsed.lyricText, chordText: parsed.chordText, folder: folder };
           if (parsed.settings) entry.settings = parsed.settings;
           if (existingIndex >= 0) {
             storedSongs[existingIndex] = Object.assign({}, storedSongs[existingIndex], entry);
@@ -4026,7 +4168,7 @@
             storedSongs.push(entry);
           }
           saveSongsToStorage(storedSongs);
-          loadSong(parsed.text, fileName, parsed.settings);
+          loadSong(parsed.lyricText, parsed.chordText, fileName, parsed.settings);
           if (parsed.settings) showToast('Applied settings from "' + fileName + '"');
           dropdownContent.classList.remove('show');
           displayStoredSongs();
@@ -4092,16 +4234,80 @@
       }
       setTimeout(adjustChordSizes, 150);
     }
-    document.addEventListener('mousemove', function(e) { doResize(e.clientX, e.clientY); });
-    document.addEventListener('mouseup', endResize);
-    document.addEventListener('touchmove', function(e) {
-      if (!isResizing) return;
+
+    // ===== VERTICAL WALL RESIZE (split panels left/right) =====
+    // Drag the wall at the center to change the ratio between panel 1
+    // and panel 2. We store the split as a percentage of the wrapper's
+    // width, clamped to 15%–85% so neither side can disappear.
+    let wallStartX = 0;
+    let wallStartPercent = 50;
+
+    function applyWallSplit(percent) {
+      percent = Math.max(15, Math.min(85, percent));
+      panelWall.style.left = percent + '%';
+      editorWrapper.style.gridTemplateColumns = percent + '% 1fr';
+      editorWrapper.style.gridTemplateRows = '1fr';
+    }
+
+    function startWallResize(clientX) {
+      isWallResizing = true;
+      wallStartX = clientX;
+      const wrapperWidth = editorWrapper.offsetWidth || 1;
+      const wallLeftPx = panelWall.offsetLeft + (panelWall.offsetWidth / 2);
+      wallStartPercent = (wallLeftPx / wrapperWidth) * 100;
+      document.body.style.cursor = 'ew-resize';
+      document.body.style.userSelect = 'none';
+    }
+
+    function doWallResize(clientX) {
+      if (!isWallResizing) return;
+      const wrapperWidth = editorWrapper.offsetWidth || 1;
+      const deltaX = clientX - wallStartX;
+      const deltaPercent = (deltaX / wrapperWidth) * 100;
+      applyWallSplit(wallStartPercent + deltaPercent);
+      clearTimeout(window._wallResizeTimeout);
+      window._wallResizeTimeout = setTimeout(adjustChordSizes, 100);
+    }
+
+    function endWallResize() {
+      if (!isWallResizing) return;
+      isWallResizing = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      setTimeout(adjustChordSizes, 150);
+    }
+
+    panelWall.addEventListener('mousedown', function(e) {
+      startWallResize(e.clientX);
+      e.preventDefault();
+    });
+    panelWall.addEventListener('touchstart', function(e) {
       if (e.touches.length !== 1) return;
-      doResize(e.touches[0].clientX, e.touches[0].clientY);
+      startWallResize(e.touches[0].clientX);
       e.preventDefault();
     }, { passive: false });
-    document.addEventListener('touchend', endResize);
-    document.addEventListener('touchcancel', endResize);
+    document.addEventListener('mousemove', function(e) {
+      doResize(e.clientX, e.clientY);
+      doWallResize(e.clientX);
+    });
+    document.addEventListener('mouseup', function() {
+      endResize();
+      endWallResize();
+    });
+    document.addEventListener('touchmove', function(e) {
+      if (e.touches.length !== 1) return;
+      if (isResizing) doResize(e.touches[0].clientX, e.touches[0].clientY);
+      if (isWallResizing) doWallResize(e.touches[0].clientX);
+      if (isResizing || isWallResizing) e.preventDefault();
+    }, { passive: false });
+    document.addEventListener('touchend', function() {
+      endResize();
+      endWallResize();
+    });
+    document.addEventListener('touchcancel', function() {
+      endResize();
+      endWallResize();
+    });
 
     // ===== EDITOR / MODE / LAYOUT TOGGLES =====
     function applyEditorState(hidden) {
@@ -4135,66 +4341,26 @@
     //    Desktop view = normal stacked layout: preview on top, editor below.
     //
     //    Default is now PHONE view (see loadLayoutState() below).
+    // Layout is fixed: Desktop view = preview on top, editor on bottom.
+    // The Phone/Desktop toggle has been removed. This function still runs
+    // once at init so the DOM is set up correctly and the editor's
+    // collapsed state is applied.
     function applyLayout(layout) {
-      currentLayout = (layout === 'phone') ? 'phone' : 'desktop';
+      // Ensure we're in desktop layout classes.
+      currentLayout = 'desktop';
       editorWrapper.classList.remove('layout-phone', 'layout-desktop');
-      editorWrapper.classList.add('layout-' + currentLayout);
+      editorWrapper.classList.add('layout-desktop');
 
-      if (currentLayout === 'phone') {
-        // Editor first, preview second → editor on the LEFT
-        editorWrapper.insertBefore(inputArea, previewArea);
-      } else {
-        // Preview first, editor second → preview on TOP
-        editorWrapper.insertBefore(previewArea, inputArea);
-      }
+      // Preview and editor are already in the right DOM order inside each
+      // .panel (preview first, editor second) — no reordering needed.
 
-      // Button text shows the view you'd switch TO
-      toggleLayoutBtn.textContent = currentLayout === 'phone' ? '🖥️ Desktop View' : '📱 Phone View';
-      toggleLayoutBtn.classList.toggle('active', currentLayout === 'phone');
-
-      // Floating layout button: an On/Off toggle for Phone View.
-      // The icon is ALWAYS 📱. Only the pressed state changes:
-      //   Phone View ON  → pressed-in (dark, .active)
-      //   Phone View OFF → unpressed (cream base)
-      //
-      // ✅ Default is Phone view, so on first load this button
-      //    starts in the pressed-in state.
-      if (typeof layoutFloatToggle !== 'undefined' && layoutFloatToggle) {
-        layoutFloatToggle.textContent = '📱';
-        layoutFloatToggle.title = currentLayout === 'phone'
-          ? 'Phone View: ON (click to turn off)'
-          : 'Phone View: OFF (click to turn on)';
-        layoutFloatToggle.setAttribute('aria-label', layoutFloatToggle.title);
-        layoutFloatToggle.classList.toggle('active', currentLayout === 'phone');
-      } else {
-        // Fallback for the very first paint if the DOM ref isn't
-        // available yet: look the button up directly.
-        const btn = document.getElementById('layoutFloatToggle');
-        if (btn) {
-          btn.textContent = '📱';
-          btn.title = currentLayout === 'phone'
-            ? 'Phone View: ON (click to turn off)'
-            : 'Phone View: OFF (click to turn on)';
-          btn.setAttribute('aria-label', btn.title);
-          btn.classList.toggle('active', currentLayout === 'phone');
-        }
-      }
-
-      // Re-apply collapsed state so the correct hide animation runs in the new orientation
+      // Re-apply collapsed state so the correct hide animation runs.
       applyEditorState(isEditorCollapsed);
-      saveLayoutState(currentLayout);
       setTimeout(adjustChordSizes, 350);
     }
 
-    toggleLayoutBtn.addEventListener('click', function() {
-      applyLayout(currentLayout === 'phone' ? 'desktop' : 'phone');
-    });
-
-    // Floating layout toggle: same behavior as the toolbar button.
-    layoutFloatToggle.addEventListener('click', function(e) {
-      e.stopPropagation();
-      applyLayout(currentLayout === 'phone' ? 'desktop' : 'phone');
-    });
+    // Layout toggle buttons removed (Phone/Desktop switch deprecated).
+    // applyLayout() is still called once at init to set up the desktop view.
 
     // Floating save button: clicks the toolbar's Save Chord Chart button,
     // which already contains all the save logic (file picker, JSON payload,
@@ -4340,15 +4506,17 @@
     // No measurement of the preview width is performed, so the chord size
     // stays constant regardless of window size, layout, or editor split.
     function adjustChordSizes() {
-      const content = previewContent;
-      if (!content) return;
-
       const mult = parseFloat(settings.chordSizeMult) || 1;
       const ms = parseFloat(settings.masterScale) || 1;
       const finalSize = 0.85 * mult * ms;
 
-      content.querySelectorAll('.chord-token, .space, .pipe').forEach(t => {
-        t.style.fontSize = Math.round(finalSize * 1000) / 1000 + 'rem';
+      // Apply to both previews. Panel 1 (lyrics pane) rarely has chord
+      // tokens, but if it does they'll get sized too — harmless.
+      [previewContent, previewContent2].forEach(function(content) {
+        if (!content) return;
+        content.querySelectorAll('.chord-token, .space, .pipe').forEach(t => {
+          t.style.fontSize = Math.round(finalSize * 1000) / 1000 + 'rem';
+        });
       });
     }
 
@@ -4399,8 +4567,10 @@
         const customLabelMatch = trimmed.match(/^\[(.*?)\]$/);
         if (customLabelMatch) {
           const labelText = customLabelMatch[1].trim();
-          html += `<div class="section-block section-custom"><span class="section"><span class="section-name">${labelText}</span></span></div>`;
-          currentSection = 'custom';
+          const guessedClass = getSectionClass(labelText);
+          const blockClass = guessedClass || 'section-custom';
+          html += `<div class="section-block ${blockClass}"><span class="section"><span class="section-name">${labelText}</span></span></div>`;
+          currentSection = labelText;
           continue;
         }
 
@@ -4467,10 +4637,12 @@
 
         if (line.includes('|')) {
           let sectionClass = getSectionClass(currentSection);
-          if (currentSection === 'custom' || currentSection.toLowerCase().includes('custom')) sectionClass = 'section-custom';
           html += renderChordLine(line, sectionClass);
         } else {
-          html += `<div class="lyrics-line"><span class="lyric-text">${trimmed}</span></div>`;
+          let lyricSectionClass = getSectionClass(currentSection);
+          let lyricWrapClasses = 'lyrics-line';
+          if (lyricSectionClass) lyricWrapClasses += ' ' + lyricSectionClass;
+          html += `<div class="${lyricWrapClasses}"><span class="lyric-text">${trimmed}</span></div>`;
         }
       }
       previewContent.innerHTML = html;
@@ -4479,11 +4651,126 @@
 
     function updatePreview() { renderPreview(inputEl.value); }
 
+    // ===== PREVIEW 2 (identical to Preview 1) =====
+    // Both previews render identically: mixed chord/lyric lines, same
+    // fonts, same section labels. The only reason this function exists
+    // separately is that it writes into previewContent2 instead of
+    // previewContent.
+    function renderPreview2(text) {
+      if (!text || text.trim() === '') {
+        previewContent2.innerHTML = '';
+        return;
+      }
+      let html = '';
+      const lines = text.split('\n');
+      currentSection = '';
+
+      for (let line of lines) {
+        const trimmed = line.trim();
+        if (trimmed === '---' || trimmed === '___' || trimmed === '***') {
+          html += `<div class="hr-line"><span class="hr"></span></div>`;
+          continue;
+        }
+        if (trimmed === '') {
+          html += `<div class="empty-line"></div>`;
+          continue;
+        }
+        const customLabelMatch = trimmed.match(/^\[(.*?)\]$/);
+        if (customLabelMatch) {
+          const labelText = customLabelMatch[1].trim();
+          const guessedClass = getSectionClass(labelText);
+          const blockClass = guessedClass || 'section-custom';
+          html += `<div class="section-block ${blockClass}"><span class="section"><span class="section-name">${labelText}</span></span></div>`;
+          currentSection = labelText;
+          continue;
+        }
+
+        const sectionNameMatch = trimmed.match(/^(Intro|Verse|Pre-Chorus|Chorus|Post-Chorus|Bridge|Outro|Instrumental|Tag|Ending|Coda)/i);
+        if (sectionNameMatch) {
+          const sectionName = sectionNameMatch[1].trim();
+          const rest = trimmed.substring(sectionName.length).trim();
+          const restWordCount = rest ? rest.split(/\s+/).filter(w => w).length : 0;
+
+          let isLabel = false;
+          if (!rest) isLabel = true;
+          else if (rest.match(/^\d+\s*$/)) isLabel = true;
+          else if (rest.match(/^[\(\[].*[\)\]]\s*$/)) isLabel = true;
+          else if (rest.match(/^\d+\s*[\(\[].*[\)\]]\s*$/)) isLabel = true;
+          else if (restWordCount <= 3 && !rest.match(/[.!?,;:]/)) isLabel = true;
+
+          if (isLabel) {
+            let displayName = sectionName.charAt(0).toUpperCase() + sectionName.slice(1);
+            currentSection = displayName;
+            const sectionClass = getSectionClass(displayName);
+
+            if (!rest) {
+              html += `<div class="section-block ${sectionClass}"><span class="section"><span class="section-name">${displayName}</span></span></div>`;
+            } else {
+              const numberMatch = rest.match(/^(\d+)\s*(.*)$/);
+              let boldPart = displayName;
+              let thinPart = rest;
+              if (numberMatch) {
+                const number = numberMatch[1];
+                const restAfterNumber = numberMatch[2] ? numberMatch[2].trim() : '';
+                boldPart = displayName + ' ' + number;
+                thinPart = restAfterNumber;
+              }
+              let fullLabel = `<span class="section-name">${boldPart}</span>`;
+              if (thinPart) fullLabel += ` <span class="section-extra">${thinPart}</span>`;
+              html += `<div class="section-block ${sectionClass}"><span class="section">${fullLabel}</span></div>`;
+            }
+            continue;
+          }
+        }
+
+        const numberShortcutMatch = trimmed.match(/^\s*([2-7][1-9]|[1-8])\s*(.*)$/i);
+        if (numberShortcutMatch) {
+          const shortcut = numberShortcutMatch[1].trim();
+          let extraText = numberShortcutMatch[2] ? numberShortcutMatch[2].trim() : '';
+          const expandedName = expandSectionShortcut(shortcut);
+          currentSection = expandedName;
+          const sectionClass = getSectionClass(expandedName);
+
+          const numberMatch = extraText.match(/^(\d+)\s*(.*)$/);
+          let boldPart = expandedName;
+          let thinPart = extraText;
+          if (numberMatch) {
+            const number = numberMatch[1];
+            const restAfterNumber = numberMatch[2] ? numberMatch[2].trim() : '';
+            boldPart = expandedName + ' ' + number;
+            thinPart = restAfterNumber;
+          }
+          let fullLabel = `<span class="section-name">${boldPart}</span>`;
+          if (thinPart) fullLabel += ` <span class="section-extra">${thinPart}</span>`;
+          html += `<div class="section-block ${sectionClass}"><span class="section">${fullLabel}</span></div>`;
+          continue;
+        }
+
+        // Same rules as Preview 1: barline lines are chords, everything
+        // else is a lyric line.
+        if (line.includes('|')) {
+          let sectionClass = getSectionClass(currentSection);
+          if (currentSection === 'custom' || currentSection.toLowerCase().includes('custom')) sectionClass = 'section-custom';
+          html += renderChordLine(line, sectionClass);
+        } else {
+          let lyricSectionClass = getSectionClass(currentSection);
+          let lyricWrapClasses = 'lyrics-line';
+          if (lyricSectionClass) lyricWrapClasses += ' ' + lyricSectionClass;
+          html += `<div class="${lyricWrapClasses}"><span class="lyric-text">${trimmed}</span></div>`;
+        }
+      }
+      previewContent2.innerHTML = html;
+      requestAnimationFrame(() => { setTimeout(adjustChordSizes, 50); });
+    }
+
+    function updatePreview2() { renderPreview2(inputEl2.value); }
+
     // ===== SAVE CHORD CHART =====
     document.getElementById('saveSong').addEventListener('click', async function() {
-      const content = inputEl.value;
-      if (!content || content.trim() === '') {
-        alert('Nothing to save. The editor is empty.');
+      const lyricText = inputEl.value;
+      const chordText = inputEl2.value;
+      if ((!lyricText || lyricText.trim() === '') && (!chordText || chordText.trim() === '')) {
+        alert('Nothing to save. Both editors are empty.');
         return;
       }
       const songName = currentSongNameEl && currentSongNameEl.classList.contains('show')
@@ -4495,11 +4782,12 @@
 
       const payload = {
         app: 'chord-chart-creator',
-        version: 1,
+        version: 2,
         type: 'song',
         savedAt: new Date().toISOString(),
         settings: Object.assign({}, settings),
-        songText: content
+        lyricText: lyricText,
+        chordText: chordText
       };
 
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
@@ -4516,8 +4804,9 @@
     document.getElementById('exportPNG').addEventListener('click', async function() {
       // ✅ FIX: refuse to export an empty chart (would produce a blank
       // white PNG). Mirrors the guard on the Save Chord Chart button.
-      if (!inputEl.value || inputEl.value.trim() === '') {
-        alert('Nothing to export. The editor is empty.');
+      if ((!inputEl.value || inputEl.value.trim() === '') &&
+          (!inputEl2.value || inputEl2.value.trim() === '')) {
+        alert('Nothing to export. Both editors are empty.');
         return;
       }
       const preview = document.getElementById('previewContainer');
@@ -4761,7 +5050,7 @@
           const folder = file.webkitRelativePath ? getFolderPath(file.webkitRelativePath) : '';
           const storedSongs = loadStoredSongs() || [];
           const existingIndex = storedSongs.findIndex(s => s.name === fileName && s.folder === folder);
-          const entry = { name: fileName, content: parsed.text, folder: folder };
+          const entry = { name: fileName, lyricText: parsed.lyricText, chordText: parsed.chordText, folder: folder };
           if (parsed.settings) entry.settings = parsed.settings;
           if (existingIndex >= 0) {
             storedSongs[existingIndex] = Object.assign({}, storedSongs[existingIndex], entry);
@@ -4769,7 +5058,7 @@
             storedSongs.push(entry);
           }
           saveSongsToStorage(storedSongs);
-          loadSong(parsed.text, fileName, parsed.settings);
+          loadSong(parsed.lyricText, parsed.chordText, fileName, parsed.settings);
           if (parsed.settings) showToast('Applied settings from "' + fileName + '"');
           songsFloatPanel.classList.remove('show');
           songsFloatToggle.classList.remove('active');
@@ -4785,27 +5074,7 @@
     const TEMPLATE_TYPE = 'template';
     const TEMPLATE_VERSION = 1;
 
-    const TEMPLATE_SETTING_KEYS = [
-      'masterScale',
-      'chordLineHeight',
-      'emptyLineHeight',
-      'chordLetterSpacing',
-      'lyricLetterSpacing',
-      'labelLetterSpacing',
-      'pipeScale',
-      'pipeThickness',
-      'pipeVerticalAlign',
-      'chordFont',
-      'chordFontCustom',
-      'lyricFont',
-      'lyricFontCustom',
-      'chordSizeMult',
-      'lyricSize',
-      'labelSize',
-      'labelRadius',
-      'previewPaddingH',
-      'previewPaddingV'
-    ];
+    // (TEMPLATE_SETTING_KEYS moved to the top of the IIFE.)
 
     const DEFAULT_TEMPLATE_KEY = 'chordChartDefaultTemplate';
 
@@ -5368,7 +5637,7 @@
     syncSettingsUI();
     applySettings();
     applyLockState();
-    applyLayout(loadLayoutState());   // ✅ FIX: restore saved layout
+    applyLayout('desktop');   // Layout is fixed; the toggle was removed.
 
     applyMode(false);
     // ✅ Focus mode (hiding the toolbar + editor together) is no longer
@@ -5398,19 +5667,26 @@
     if (typeof syncPerfPanel === 'function') syncPerfPanel();
 
     displayStoredSongs();
-    originalText = inputEl.value;
+    originalText = inputEl2.value;
     currentKey = getCurrentKey();
     updateKeyDisplay();
     resetTransposition();
 
     inputEl.addEventListener('input', function() {
-      originalText = inputEl.value;
-      transposeSemitones = 0;
-      transposeInfo.textContent = '0';
       updatePreview();
     });
 
+    // Editor 2 (chords pane) — this is where chords live, so this is
+    // where transpose tracking happens.
+    inputEl2.addEventListener('input', function() {
+      originalText = inputEl2.value;
+      transposeSemitones = 0;
+      transposeInfo.textContent = '0';
+      updatePreview2();
+    });
+
     updatePreview();
+    updatePreview2();
     window.addEventListener('load', function() {
       setTimeout(adjustChordSizes, 500);
       setTimeout(adjustChordSizes, 1500);
