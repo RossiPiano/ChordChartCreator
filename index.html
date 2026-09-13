@@ -833,6 +833,7 @@
     .png-float-toggle,
     .save-float-toggle,
     .songs-float-toggle,
+    .template-float-toggle,
     .editor-float-toggle {
       transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1),
                   opacity 0.8s cubic-bezier(0.4, 0.0, 0.2, 1),
@@ -861,6 +862,7 @@
     body.first-row-hidden .png-float-toggle,
     body.first-row-hidden .save-float-toggle,
     body.first-row-hidden .songs-float-toggle,
+    body.first-row-hidden .template-float-toggle,
     body.first-row-hidden .editor-float-toggle {
       transform: translateX(360px);
       opacity: 0;
@@ -976,7 +978,7 @@
     .songs-float-toggle {
       position: fixed;
       top: 10px;
-      right: 298px; /* shifted left to make room for the 📷 export button */
+      right: 346px;
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -1012,7 +1014,7 @@
     .editor-float-toggle {
       position: fixed;
       top: 10px;
-      right: 346px; /* leftmost of the floating cluster */
+      right: 394px; /* leftmost of the floating cluster */
       z-index: 8000;
       width: 38px;
       height: 38px;
@@ -1266,6 +1268,161 @@
       font-family: inherit;
     }
     .key-float-row select:focus { border-color: #8b6b4a; }
+
+    /* ===== FLOATING TEMPLATE PANEL ===== */
+    .template-float-toggle {
+      position: fixed;
+      top: 10px;
+      right: 298px;
+      z-index: 8000;
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border-radius: 10px;
+      border: 1px solid #c4ad92;
+      background: rgba(232, 220, 204, 0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: #3d2b1f;
+      font-size: 1.1rem;
+      line-height: 1;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      font-family: inherit;
+    }
+    .template-float-toggle:hover {
+      background: rgba(196, 173, 146, 0.95);
+      transform: scale(1.05);
+    }
+    .template-float-toggle.active {
+      background: #5c4033;
+      color: #ffffff;
+      border-color: #4a3328;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .template-float-panel {
+      position: fixed;
+      top: 58px;
+      right: 10px;
+      left: auto;
+      z-index: 8200;
+      width: 300px;
+      max-width: calc(100vw - 20px);
+      max-height: calc(100vh - 72px);
+      overflow-y: auto;
+      background: #f5ede0;
+      border: 1px solid #c4ad92;
+      border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+      display: none;
+      flex-direction: column;
+      font-family: inherit;
+      color: #3d2b1f;
+    }
+    .template-float-panel.show { display: flex; }
+    .template-float-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: #e8dccc;
+      border-bottom: 2px solid #dcc9b0;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #5c4033;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    .template-float-body {
+      padding: 12px 14px 14px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .template-float-note {
+      font-size: 0.72rem;
+      color: #8b6b4a;
+      line-height: 1.5;
+      padding: 6px 8px;
+      background: #ece0cf;
+      border-radius: 6px;
+      border: 1px solid #dcc9b0;
+    }
+    .template-float-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 10px 12px;
+      background: #dcc9b0;
+      border: 1px solid #c4ad92;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #3d2b1f;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .template-float-btn:hover { background: #c4ad92; border-color: #b0987a; }
+    .template-float-btn.primary {
+      background: #8b6b4a;
+      border-color: #7a5d3f;
+      color: #ffffff;
+    }
+    .template-float-btn.primary:hover { background: #7a5d3f; border-color: #6b4f35; }
+    .template-float-current {
+      font-size: 0.72rem;
+      color: #5c4033;
+      text-align: center;
+      padding: 4px 0 0 0;
+      font-weight: 500;
+      opacity: 0.75;
+    }
+    .template-float-current strong {
+      font-weight: 700;
+      color: #5c4033;
+      opacity: 1;
+    }
+    .template-float-divider {
+      border-top: 1px solid #dcc9b0;
+      margin: 4px 0 2px 0;
+    }
+    .template-float-subhead {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #b0987a;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 2px 0 0 0;
+    }
+    .template-float-default-label {
+      font-size: 0.72rem;
+      color: #5c4033;
+      text-align: center;
+      padding: 2px 0 0 0;
+      font-weight: 500;
+      opacity: 0.8;
+    }
+    .template-float-default-label strong {
+      font-weight: 700;
+      color: #5c4033;
+      opacity: 1;
+    }
+    .template-float-btn.danger {
+      color: #a1402f;
+    }
+    .template-float-btn.danger:hover { background: #e8cfc9; border-color: #c45a4a; }
 
     .songs-float-panel {
       position: fixed;
@@ -1903,6 +2060,28 @@
 <button class="save-float-toggle" id="saveFloatToggle" title="Save Chord Chart" aria-label="Save Chord Chart">💾</button>
 <button class="songs-float-toggle" id="songsFloatToggle" title="Songs" aria-label="Songs">🎵</button>
 <button class="editor-float-toggle" id="editorFloatToggle" title="Hide editor" aria-label="Hide editor">✏️</button>
+<button class="template-float-toggle" id="templateFloatToggle" title="Templates (look &amp; feel presets)" aria-label="Templates">🎨</button>
+<div class="template-float-panel" id="templateFloatPanel" role="dialog" aria-label="Templates">
+  <div class="template-float-header">
+    <span>🎨 Templates</span>
+    <button class="perf-close" id="templateFloatClose" title="Close">✕</button>
+  </div>
+  <div class="template-float-body">
+    <div class="template-float-note">
+      A template stores only the <strong>look</strong> — sizes, spacing, fonts, margins.
+      Your song and its transpose stay untouched.
+    </div>
+    <button class="template-float-btn primary" id="templateSaveBtn">💾 Save as Template…</button>
+    <button class="template-float-btn" id="templateLoadBtn">📂 Load Template…</button>
+    <div class="template-float-current" id="templateCurrentLabel"></div>
+
+    <div class="template-float-divider"></div>
+    <div class="template-float-subhead">Default template</div>
+    <button class="template-float-btn" id="templateSetDefaultBtn">📌 Set as default template…</button>
+    <button class="template-float-btn danger" id="templateClearDefaultBtn">🗑️ Clear default</button>
+    <div class="template-float-default-label" id="templateDefaultLabel"></div>
+  </div>
+</div>
 <div class="songs-float-panel" id="songsFloatPanel" role="dialog" aria-label="Songs">
   <div class="songs-float-header">
     <span>🎵 Songs</span>
@@ -2341,6 +2520,15 @@
     const layoutFloatToggle = document.getElementById('layoutFloatToggle');
     const saveFloatToggle = document.getElementById('saveFloatToggle');
     const pngFloatToggle = document.getElementById('pngFloatToggle');
+    const templateFloatToggle = document.getElementById('templateFloatToggle');
+    const templateFloatPanel = document.getElementById('templateFloatPanel');
+    const templateFloatClose = document.getElementById('templateFloatClose');
+    const templateSaveBtn = document.getElementById('templateSaveBtn');
+    const templateLoadBtn = document.getElementById('templateLoadBtn');
+    const templateCurrentLabel = document.getElementById('templateCurrentLabel');
+    const templateSetDefaultBtn = document.getElementById('templateSetDefaultBtn');
+    const templateClearDefaultBtn = document.getElementById('templateClearDefaultBtn');
+    const templateDefaultLabel = document.getElementById('templateDefaultLabel');
 
     // ===== STATE =====
     let isLocked = false;                 // ✅ FIX: was undeclared
@@ -2360,6 +2548,7 @@
     // ✅ FIX: declared here so syncFocusModeEditorVisibility() can never
     // hit a temporal-dead-zone error if called during init.
     let isChromeCollapsed = false;
+    let currentTemplateName = '';
 
     let confirmCallback = null;
 
@@ -2414,10 +2603,14 @@
       let ext = '.txt';
       if (mimeType === 'image/png') ext = '.png';
       else if (mimeType === 'text/plain') ext = '.txt';
-      else if (mimeType === 'application/json') ext = '.chordchart';
+      else if (mimeType === 'application/json') {
+        const lower = safeName.toLowerCase();
+        if (lower.endsWith('.chordtemplate')) ext = '.chordtemplate';
+        else ext = '.chordchart';
+      }
 
       const dotIdx = safeName.lastIndexOf('.');
-      if (dotIdx < 0 || safeName.substring(dotIdx).length > 12) {
+      if (dotIdx < 0 || safeName.substring(dotIdx).length > 20) {
         safeName += ext;
       }
 
@@ -2798,7 +2991,7 @@
       settings.previewPaddingH = v;
       if (typeof perfMarginH !== 'undefined' && perfMarginH) {
         perfMarginH.value = v;
-        if (typeof perfMarginHReadout !== 'undefined' && perfMarginHReadout) perfMarginHReadout.textContent = v.toFixed(0);
+        if (typeof perfMarginHReadout !== 'undefined' && perfMarginHReadout) perfMarginHReadout.value = v.toFixed(0);
       }
       saveSettings();
       applySettings();
@@ -2808,7 +3001,7 @@
       settings.previewPaddingV = v;
       if (typeof perfMarginV !== 'undefined' && perfMarginV) {
         perfMarginV.value = v;
-        if (typeof perfMarginVReadout !== 'undefined' && perfMarginVReadout) perfMarginVReadout.textContent = v.toFixed(0);
+        if (typeof perfMarginVReadout !== 'undefined' && perfMarginVReadout) perfMarginVReadout.value = v.toFixed(0);
       }
       saveSettings();
       applySettings();
@@ -3437,12 +3630,25 @@
     function loadSong(content, fileName, settingsSnapshot) {
       originalText = content;
       inputEl.value = content;
+
+      // ✅ The loaded song's settings snapshot provides the song text, but
+      //    the CURRENT template / session settings own the look. We only
+      //    take non-template keys (like editorWidth, uiScale, editorScale,
+      //    currentSongSize) from the song file, and ignore the template-y
+      //    visual keys so the chart stays styled the way the user set up.
       if (settingsSnapshot && typeof settingsSnapshot === 'object') {
-        settings = Object.assign({}, DEFAULT_SETTINGS, settingsSnapshot);
+        const merged = Object.assign({}, settings);
+        Object.keys(settingsSnapshot).forEach(k => {
+          if (TEMPLATE_SETTING_KEYS.indexOf(k) === -1) {
+            merged[k] = settingsSnapshot[k];
+          }
+        });
+        settings = merged;
         saveSettings();
         syncSettingsUI();
         applySettings();
       }
+
       resetTransposition();
       if (fileName) setCurrentSongName(fileName);
     }
@@ -3497,7 +3703,7 @@
           saveSongsToStorage(storedSongs);
 
           loadSong(parsed.text, fileName, parsed.settings);
-          if (parsed.settings) showToast('Applied settings from "' + fileName + '"');
+          if (parsed.settings) showToast('Loaded "' + fileName + '"');
           displayStoredSongs();
         };
         reader.readAsText(file);
@@ -3536,7 +3742,7 @@
             displayStoredSongs();
             if (firstParsed) {
               loadSong(firstParsed.text, firstFileName, firstParsed.settings);
-              if (firstParsed.settings) showToast('Applied settings from "' + firstFileName + '"');
+              if (firstParsed.settings) showToast('Loaded "' + firstFileName + '"');
             }
           }
         };
@@ -3749,7 +3955,7 @@
       nameSpan.addEventListener('click', function(e) {
         e.stopPropagation();
         loadSong(song.content, song.name, song.settings || null);
-        if (song.settings && typeof song.settings === 'object') showToast('Applied settings from "' + song.name + '"');
+        if (song.settings && typeof song.settings === 'object') showToast('Loaded "' + song.name + '"');
         // Close whichever panel this item lives in (toolbar dropdown or floating panel).
         dropdownContent.classList.remove('show');
         if (typeof songsFloatPanel !== 'undefined' && songsFloatPanel) {
@@ -4464,6 +4670,7 @@
         // Mutually close the other float panels so they don't overlap.
         if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
         if (typeof toggleSongsFloatPanel === 'function') toggleSongsFloatPanel(false);
+        if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
       }
     }
     keyFloatToggle.addEventListener('click', function(e) {
@@ -4503,6 +4710,7 @@
         // Mutually close the other float panels so they don't overlap.
         if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
         if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
+        if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
       }
     }
     songsFloatToggle.addEventListener('click', function(e) {
@@ -4552,6 +4760,238 @@
       fileInput.click();
     });
 
+    // ===== 🎨 TEMPLATE SYSTEM =====
+    const TEMPLATE_APP_ID = 'chord-chart-creator';
+    const TEMPLATE_TYPE = 'template';
+    const TEMPLATE_VERSION = 1;
+
+    const TEMPLATE_SETTING_KEYS = [
+      'masterScale',
+      'chordLineHeight',
+      'emptyLineHeight',
+      'chordLetterSpacing',
+      'lyricLetterSpacing',
+      'labelLetterSpacing',
+      'pipeScale',
+      'pipeThickness',
+      'pipeVerticalAlign',
+      'chordFont',
+      'chordFontCustom',
+      'lyricFont',
+      'lyricFontCustom',
+      'chordSizeMult',
+      'lyricSize',
+      'labelSize',
+      'labelRadius',
+      'previewPaddingH',
+      'previewPaddingV'
+    ];
+
+    const DEFAULT_TEMPLATE_KEY = 'chordChartDefaultTemplate';
+
+    function loadStoredDefaultTemplate() {
+      try {
+        const raw = localStorage.getItem(DEFAULT_TEMPLATE_KEY);
+        if (!raw) return null;
+        return parseTemplateFile(raw);
+      } catch (e) { return null; }
+    }
+    function saveStoredDefaultTemplate(rawText) {
+      try { localStorage.setItem(DEFAULT_TEMPLATE_KEY, rawText); }
+      catch (e) { console.log('Could not save default template'); }
+    }
+    function clearStoredDefaultTemplate() {
+      try { localStorage.removeItem(DEFAULT_TEMPLATE_KEY); }
+      catch (e) {}
+    }
+    function applyTemplateObject(parsed) {
+      TEMPLATE_SETTING_KEYS.forEach(k => {
+        if (parsed.settings[k] !== undefined) {
+          settings[k] = parsed.settings[k];
+        }
+      });
+      saveSettings();
+      syncSettingsUI();
+      applySettings();
+    }
+    function updateDefaultTemplateLabel() {
+      if (!templateDefaultLabel) return;
+      const stored = loadStoredDefaultTemplate();
+      if (stored && stored.name) {
+        templateDefaultLabel.innerHTML = 'Default: <strong>' + stored.name + '</strong>';
+      } else {
+        templateDefaultLabel.textContent = 'No default set.';
+      }
+    }
+
+    function buildTemplatePayload(name) {
+      const subset = {};
+      TEMPLATE_SETTING_KEYS.forEach(k => {
+        if (settings[k] !== undefined) subset[k] = settings[k];
+      });
+      return {
+        app: TEMPLATE_APP_ID,
+        version: TEMPLATE_VERSION,
+        type: TEMPLATE_TYPE,
+        name: name || 'Untitled Template',
+        savedAt: new Date().toISOString(),
+        settings: subset
+      };
+    }
+
+    function parseTemplateFile(raw) {
+      let parsed = null;
+      try { parsed = JSON.parse(raw); } catch (e) { return null; }
+      if (!parsed || typeof parsed !== 'object') return null;
+      if (parsed.app !== TEMPLATE_APP_ID) return null;
+      if (parsed.type !== TEMPLATE_TYPE) return null;
+      if (!parsed.settings || typeof parsed.settings !== 'object') return null;
+      return parsed;
+    }
+
+    function sanitizeFileNameBase(name) {
+      let safe = (name || '').replace(/[<>:"/\\|?*\x00-\x1f]/g, '').trim();
+      if (!safe) safe = 'template';
+      return safe;
+    }
+
+    function updateTemplateLabel() {
+      if (!templateCurrentLabel) return;
+      if (currentTemplateName) {
+        templateCurrentLabel.innerHTML = 'Loaded: <strong>' + currentTemplateName + '</strong>';
+      } else {
+        templateCurrentLabel.textContent = 'No template loaded yet.';
+      }
+    }
+
+    async function saveTemplate() {
+      const input = window.prompt(
+        'Name this template (e.g. "Laptop 13in", "TV 1080p", "Phone portrait"):',
+        currentTemplateName || ''
+      );
+      if (input === null) return;
+      const name = input.trim() || 'Untitled Template';
+      const payload = buildTemplatePayload(name);
+
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const safeName = sanitizeFileNameBase(name) + '.chordtemplate';
+      const result = await saveFileWithPicker(safeName, blob, 'application/json', 'Chord chart template');
+      if (result.cancelled) return;
+
+      currentTemplateName = name;
+      updateTemplateLabel();
+      showToast('Template saved: ' + name);
+    }
+
+    function loadTemplate() {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.chordtemplate,application/json,.json';
+
+      fileInput.onchange = function(ev) {
+        const file = ev.target.files && ev.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const raw = e.target.result;
+          const parsed = parseTemplateFile(raw);
+          if (!parsed) {
+            alert('That file is not a valid .chordtemplate.\n\n' +
+                  'A template must be a JSON file with "type": "template".');
+            return;
+          }
+
+          TEMPLATE_SETTING_KEYS.forEach(k => {
+            if (parsed.settings[k] !== undefined) {
+              settings[k] = parsed.settings[k];
+            }
+          });
+
+          saveSettings();
+          syncSettingsUI();
+          applySettings();
+          applyEditorState(isEditorCollapsed);
+
+          currentTemplateName = parsed.name || 'Untitled Template';
+          updateTemplateLabel();
+          showToast('Template applied: ' + currentTemplateName);
+        };
+        reader.readAsText(file);
+      };
+      fileInput.click();
+    }
+
+    function toggleTemplateFloatPanel(open) {
+      const next = (typeof open === 'boolean') ? open : !templateFloatPanel.classList.contains('show');
+      templateFloatPanel.classList.toggle('show', next);
+      templateFloatToggle.classList.toggle('active', next);
+      templateFloatToggle.title = next ? 'Close templates' : 'Templates (look & feel presets)';
+      if (next) {
+        updateTemplateLabel();
+        updateDefaultTemplateLabel();
+        if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
+        if (typeof toggleSongsFloatPanel === 'function') toggleSongsFloatPanel(false);
+        if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
+      }
+    }
+
+    templateFloatToggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      toggleTemplateFloatPanel();
+    });
+    templateFloatClose.addEventListener('click', function(e) {
+      e.stopPropagation();
+      toggleTemplateFloatPanel(false);
+    });
+    templateSaveBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      saveTemplate();
+    });
+    templateLoadBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      loadTemplate();
+    });
+
+    templateSetDefaultBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.chordtemplate,application/json,.json';
+      fileInput.onchange = function(ev) {
+        const file = ev.target.files && ev.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(re) {
+          const raw = re.target.result;
+          const parsed = parseTemplateFile(raw);
+          if (!parsed) {
+            alert('That file is not a valid .chordtemplate.\n\n' +
+                  'A template must be a JSON file with "type": "template".');
+            return;
+          }
+          saveStoredDefaultTemplate(raw);
+          updateDefaultTemplateLabel();
+          showToast('Default template set: ' + (parsed.name || 'Untitled Template'));
+        };
+        reader.readAsText(file);
+      };
+      fileInput.click();
+    });
+
+    templateClearDefaultBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const stored = loadStoredDefaultTemplate();
+      if (!stored) {
+        showToast('No default template to clear.');
+        return;
+      }
+      showConfirm('Clear the default template? The app will boot with its built-in defaults.', function() {
+        clearStoredDefaultTemplate();
+        updateDefaultTemplateLabel();
+        showToast('Default template cleared.');
+      });
+    });
+
     function togglePerfPanel(open) {
       const next = (typeof open === 'boolean') ? open : !perfPanel.classList.contains('show');
       perfPanel.classList.toggle('show', next);
@@ -4562,6 +5002,7 @@
         // Mutually close the other float panels so they don't overlap.
         if (typeof toggleSongsFloatPanel === 'function') toggleSongsFloatPanel(false);
         if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
+        if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
       }
     }
     perfToggle.addEventListener('click', function(e) { e.stopPropagation(); togglePerfPanel(); });
@@ -4571,108 +5012,108 @@
     function syncPerfPanel() {
       // SIZES
       perfMaster.value = scaleToSliderPos(settings.masterScale);
-      perfMasterReadout.textContent = Number(settings.masterScale).toFixed(2);
+      perfMasterReadout.value = Number(settings.masterScale).toFixed(2);
 
       const chR = internalToRatio(settings.chordSizeMult, BASE_CHORD_MULT);
       perfChordSize.value = ratioToSliderPos(chR);
-      perfChordSizeReadout.textContent = chR.toFixed(2);
+      perfChordSizeReadout.value = chR.toFixed(2);
 
       perfPipeScale.value = settings.pipeScale;
-      perfPipeScaleReadout.textContent = Number(settings.pipeScale).toFixed(2);
+      perfPipeScaleReadout.value = Number(settings.pipeScale).toFixed(2);
 
       perfPipeThickness.value = settings.pipeThickness;
-      perfPipeThicknessReadout.textContent = Number(settings.pipeThickness).toFixed(3);
+      perfPipeThicknessReadout.value = Number(settings.pipeThickness).toFixed(3);
 
       perfPipeValign.value = settings.pipeVerticalAlign;
-      perfPipeValignReadout.textContent = Number(settings.pipeVerticalAlign).toFixed(2);
+      perfPipeValignReadout.value = Number(settings.pipeVerticalAlign).toFixed(2);
 
       const lyR = internalToRatio(settings.lyricSize, BASE_LYRIC_SIZE);
       perfLyricSize.value = ratioToSliderPos(lyR);
-      perfLyricSizeReadout.textContent = lyR.toFixed(2);
+      perfLyricSizeReadout.value = lyR.toFixed(2);
 
       const lbR = internalToRatio(settings.labelSize, BASE_LABEL_SIZE);
       perfLabelSize.value = ratioToSliderPos(lbR);
-      perfLabelSizeReadout.textContent = lbR.toFixed(2);
+      perfLabelSizeReadout.value = lbR.toFixed(2);
 
       // SPACING
       perfLyricSpacing.value = settings.lyricLetterSpacing;
-      perfLyricSpacingReadout.textContent = Number(settings.lyricLetterSpacing).toFixed(3);
+      perfLyricSpacingReadout.value = Number(settings.lyricLetterSpacing).toFixed(3);
 
       perfChordSpacing.value = settings.chordLetterSpacing;
-      perfChordSpacingReadout.textContent = Number(settings.chordLetterSpacing).toFixed(3);
+      perfChordSpacingReadout.value = Number(settings.chordLetterSpacing).toFixed(3);
 
       perfLabelSpacing.value = settings.labelLetterSpacing;
-      perfLabelSpacingReadout.textContent = Number(settings.labelLetterSpacing).toFixed(3);
+      perfLabelSpacingReadout.value = Number(settings.labelLetterSpacing).toFixed(3);
 
       // LAYOUT
       perfMarginH.value = (settings.previewPaddingH != null ? settings.previewPaddingH : 8);
-      perfMarginHReadout.textContent = Number(perfMarginH.value).toFixed(0);
+      perfMarginHReadout.value = Number(perfMarginH.value).toFixed(0);
 
       perfMarginV.value = (settings.previewPaddingV != null ? settings.previewPaddingV : 8);
-      perfMarginVReadout.textContent = Number(perfMarginV.value).toFixed(0);
+      perfMarginVReadout.value = Number(perfMarginV.value).toFixed(0);
     }
 
     // Panel slider → existing setters (keeps everything in sync).
     perfMaster.addEventListener('input', function() {
       const v = sliderPosToScale(parseFloat(this.value));
-      perfMasterReadout.textContent = v.toFixed(2);
+      perfMasterReadout.value = v.toFixed(2);
       setMasterScale(v);
     });
     perfChordSize.addEventListener('input', function() {
       const ratio = sliderPosToRatio(parseFloat(this.value));
-      perfChordSizeReadout.textContent = ratio.toFixed(2);
+      perfChordSizeReadout.value = ratio.toFixed(2);
       setChordSize(ratio);
     });
     perfPipeScale.addEventListener('input', function() {
       const v = parseFloat(this.value);
-      perfPipeScaleReadout.textContent = v.toFixed(2);
+      perfPipeScaleReadout.value = v.toFixed(2);
       setPipeScale(v);
     });
     perfPipeThickness.addEventListener('input', function() {
       const v = parseFloat(this.value);
-      perfPipeThicknessReadout.textContent = v.toFixed(3);
+      perfPipeThicknessReadout.value = v.toFixed(3);
       setPipeThickness(v);
     });
     perfPipeValign.addEventListener('input', function() {
       const v = parseFloat(this.value);
-      perfPipeValignReadout.textContent = v.toFixed(2);
+      perfPipeValignReadout.value = v.toFixed(2);
       setPipeValign(v);
     });
     perfLyricSize.addEventListener('input', function() {
       const ratio = sliderPosToRatio(parseFloat(this.value));
-      perfLyricSizeReadout.textContent = ratio.toFixed(2);
+      perfLyricSizeReadout.value = ratio.toFixed(2);
       setLyricSize(ratio);
     });
     perfLabelSize.addEventListener('input', function() {
       const ratio = sliderPosToRatio(parseFloat(this.value));
-      perfLabelSizeReadout.textContent = ratio.toFixed(2);
+      perfLabelSizeReadout.value = ratio.toFixed(2);
       setLabelSize(ratio);
     });
 
     perfLyricSpacing.addEventListener('input', function() {
       const v = parseFloat(this.value);
-      perfLyricSpacingReadout.textContent = v.toFixed(3);
+      perfLyricSpacingReadout.value = v.toFixed(3);
       setLyricLetterSpacing(v);
     });
     perfChordSpacing.addEventListener('input', function() {
       const v = parseFloat(this.value);
-      perfChordSpacingReadout.textContent = v.toFixed(3);
+      perfChordSpacingReadout.value = v.toFixed(3);
       setChordLetterSpacing(v);
     });
     perfLabelSpacing.addEventListener('input', function() {
       const v = parseFloat(this.value);
-      perfLabelSpacingReadout.textContent = v.toFixed(3);
+      perfLabelSpacingReadout.value = v.toFixed(3);
       setLabelLetterSpacing(v);
     });
 
     perfMarginH.addEventListener('input', function() {
       const v = parseFloat(this.value);
-      perfMarginHReadout.textContent = v.toFixed(0);
+      perfMarginHReadout.value = v.toFixed(0);
       setPreviewPaddingH(v);
     });
     perfMarginV.addEventListener('input', function() {
       const v = parseFloat(this.value);
-      perfMarginVReadout.textContent = v.toFixed(0);
+      perfMarginVReadout.value = v.toFixed(0);
       setPreviewPaddingV(v);
     });
 
@@ -4759,6 +5200,12 @@
           !keyFloatToggle.contains(e.target)) {
         toggleKeyFloatPanel(false);
       }
+      // Template float panel
+      if (templateFloatPanel.classList.contains('show') &&
+          !templateFloatPanel.contains(e.target) &&
+          !templateFloatToggle.contains(e.target)) {
+        toggleTemplateFloatPanel(false);
+      }
     });
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && perfPanel.classList.contains('show')) {
@@ -4769,6 +5216,9 @@
       }
       if (e.key === 'Escape' && keyFloatPanel.classList.contains('show')) {
         toggleKeyFloatPanel(false);
+      }
+      if (e.key === 'Escape' && templateFloatPanel.classList.contains('show')) {
+        toggleTemplateFloatPanel(false);
       }
     });
 
@@ -4849,6 +5299,20 @@
 
     // ===== INIT =====
     loadSettings();
+
+    // If a default template was stored, apply it BEFORE the first render
+    // so the app boots up already styled the way the user wants.
+    const bootDefault = loadStoredDefaultTemplate();
+    if (bootDefault) {
+      TEMPLATE_SETTING_KEYS.forEach(k => {
+        if (bootDefault.settings[k] !== undefined) {
+          settings[k] = bootDefault.settings[k];
+        }
+      });
+      saveSettings();
+      currentTemplateName = bootDefault.name || 'Untitled Template';
+    }
+
     syncSettingsUI();
     applySettings();
     applyLockState();
