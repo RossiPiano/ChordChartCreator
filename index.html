@@ -79,7 +79,7 @@
     .title-bar {
       flex-shrink: 0;
       width: 100%;
-      height: 30px;
+      height: 58px;
       background: #f5ede0;
       border-bottom: 2px solid #dcc9b0;
       display: flex;
@@ -97,13 +97,13 @@
       background: transparent;
       text-align: center;
       font-family: var(--font-lyric, Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace);
-      font-size: 0.9rem;
+      font-size: 1.05rem;
       font-weight: 600;
       letter-spacing: 0.02em;
       color: #3d2b1f;
       padding: 0;
-      line-height: 30px;
-      height: 30px;
+      line-height: 58px;
+      height: 58px;
     }
     .title-bar .title-input::placeholder {
       color: #b0987a;
@@ -3895,17 +3895,7 @@
     });
 
     // ===== SAVE AS PNG =====
-    pngFloatToggle.addEventListener('click', async function() {
-      if ((!inputEl.value || inputEl.value.trim() === '') &&
-          (!inputEl2.value || inputEl2.value.trim() === '')) {
-        alert('Nothing to export. Both editors are empty.');
-        return;
-      }
-      const preview = document.getElementById('previewContainer');
-      const contentWrapper = document.getElementById('previewContent');
-      this.textContent = '⏳';
-      this.disabled = true;
-
+    async function exportPanelToPng(preview, contentWrapper, suffix) {
       const originalStyles = {
         height: preview.style.height,
         maxHeight: preview.style.maxHeight,
@@ -3960,7 +3950,7 @@
           allowTaint: false,
           foreignObjectRendering: false,
           onclone: function(doc) {
-            const container = doc.getElementById('previewContainer');
+            const container = doc.getElementById(preview.id);
             if (container) {
               container.style.padding = '40px';
               container.style.background = '#ffffff';
@@ -3977,12 +3967,43 @@
 
         const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
 
-        const sanitizedName = 'chord-chart';
         const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
-        const fileName = `${sanitizedName}_${timestamp}.png`;
+        const fileName = `chord-chart_${suffix}_${timestamp}.png`;
 
         const result = await saveFileWithPicker(fileName, blob, 'image/png', 'PNG image');
-        if (result.cancelled) return;
+        return result;
+      } finally {
+        restoreStyles();
+      }
+    }
+
+    pngFloatToggle.addEventListener('click', async function() {
+      const hasLyrics = inputEl.value && inputEl.value.trim() !== '';
+      const hasChords = inputEl2.value && inputEl2.value.trim() !== '';
+      if (!hasLyrics && !hasChords) {
+        alert('Nothing to export. Both editors are empty.');
+        return;
+      }
+      this.textContent = '⏳';
+      this.disabled = true;
+
+      try {
+        if (hasLyrics) {
+          const result = await exportPanelToPng(previewContainer, previewContent, 'lyrics');
+          if (result && result.cancelled) {
+            this.textContent = '📷';
+            this.disabled = false;
+            return;
+          }
+        }
+        if (hasChords) {
+          const result = await exportPanelToPng(previewContainer2, previewContent2, 'chords');
+          if (result && result.cancelled) {
+            this.textContent = '📷';
+            this.disabled = false;
+            return;
+          }
+        }
 
         this.textContent = '✅';
         setTimeout(() => {
@@ -3996,8 +4017,6 @@
           this.textContent = '📷';
           this.disabled = false;
         }, 2000);
-      } finally {
-        restoreStyles();
       }
     });
 
