@@ -60,6 +60,8 @@
     }
     html { font-size: clamp(14px, 1.05vw + 8px, 18px); }
     html, body { height: 100%; overflow: hidden; }
+    html:fullscreen, html:-webkit-full-screen { overflow: visible; }
+    body:fullscreen, body:-webkit-full-screen { overflow: visible; }
     body { background: #d4c5a0; padding: 0; margin: 0; }
 
     .app {
@@ -519,7 +521,7 @@
       position: fixed;
       top: 10px;
       right: 10px;
-      z-index: 8000;
+      z-index: 2147483600;
       display: flex;
       flex-direction: row-reverse;
       align-items: flex-start;
@@ -772,7 +774,7 @@
       top: 58px;
       right: 10px;
       left: auto;
-      z-index: 8200;
+      z-index: 2147483600;
       width: max-content;
       min-width: 320px;
       max-width: calc(100vw - 20px);
@@ -1116,7 +1118,7 @@
       top: 58px;
       right: 10px;
       left: auto;
-      z-index: 8200;
+      z-index: 2147483600;
       width: 260px;
       max-width: calc(100vw - 20px);
       background: #f5ede0;
@@ -1256,7 +1258,7 @@
       top: 58px;
       right: 10px;
       left: auto;
-      z-index: 8200;
+      z-index: 2147483600;
       width: 300px;
       max-width: calc(100vw - 20px);
       max-height: calc(100vh - 72px);
@@ -1362,7 +1364,7 @@
       top: 58px;
       right: 10px;
       left: auto;
-      z-index: 8200;
+      z-index: 2147483600;
       width: 320px;
       max-width: calc(100vw - 20px);
       max-height: calc(100vh - 72px);
@@ -1529,7 +1531,7 @@
       top: 58px;
       right: 10px;
       left: auto;
-      z-index: 8200;
+      z-index: 2147483600;
       width: 320px;
       max-width: calc(100vw - 20px);
       max-height: calc(100vh - 72px);
@@ -1674,7 +1676,7 @@
       position: fixed;
       inset: 0;
       background: rgba(60, 40, 25, 0.5);
-      z-index: 6000;
+      z-index: 2147483640;
       align-items: center;
       justify-content: center;
       padding: 20px;
@@ -1730,7 +1732,7 @@
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
       font-size: 0.85rem;
       font-weight: 500;
-      z-index: 7000;
+      z-index: 2147483645;
       opacity: 0;
       transform: translateY(10px);
       transition: opacity 0.25s ease, transform 0.25s ease;
@@ -1746,7 +1748,7 @@
       position: fixed;
       inset: 0;
       background: rgba(60, 40, 25, 0.35);
-      z-index: 5000;
+      z-index: 2147483630;
       align-items: center;
       justify-content: center;
       padding: 20px;
@@ -3718,6 +3720,8 @@
       newHeight = Math.max(60, Math.min(window.innerHeight * 0.7, newHeight));
       activeResizeTarget.style.height = newHeight + 'px';
       activeResizeTarget.style.maxHeight = newHeight + 'px';
+      savedEditorHeight = newHeight;
+      try { localStorage.setItem(EDITOR_HEIGHT_KEY, String(newHeight)); } catch (e) {}
       clearTimeout(window._resizeTimeout);
       window._resizeTimeout = setTimeout(adjustChordSizes, 100);
     }
@@ -4235,13 +4239,27 @@
     }
 
     // ===== EDITOR TOGGLE =====
+    const EDITOR_HEIGHT_KEY = 'chordChartEditorHeight';
+    let savedEditorHeight = null;
+    try {
+      const stored = localStorage.getItem(EDITOR_HEIGHT_KEY);
+      if (stored !== null) {
+        const v = parseFloat(stored);
+        if (!isNaN(v) && v >= 60) savedEditorHeight = v;
+      }
+    } catch (e) {}
+
     function applyEditorState(hidden) {
       isEditorCollapsed = hidden;
 
-      // If the user ever dragged the resize handle, inline styles were written
-      // to inputArea.style.height and inputArea.style.maxHeight. Those inline
-      // styles beat the .collapsed class unless we clear them.
       if (hidden) {
+        // Capture the current open height before collapsing, so we can
+        // restore it exactly on reopen.
+        const h = inputArea.offsetHeight;
+        if (h && h >= 60) {
+          savedEditorHeight = h;
+          try { localStorage.setItem(EDITOR_HEIGHT_KEY, String(h)); } catch (e) {}
+        }
         inputArea.style.height = '';
         inputArea.style.maxHeight = '';
         inputArea2.style.height = '';
@@ -4251,13 +4269,20 @@
       inputArea.classList.toggle('collapsed', hidden);
       inputArea2.classList.toggle('collapsed', hidden);
 
-      // Belt-and-braces: force the geometry for the collapse direction, and
-      // let the .collapsed class alone handle it for the expand direction.
       if (hidden) {
         inputArea.style.height = '0px';
         inputArea.style.maxHeight = '0px';
         inputArea2.style.height = '0px';
         inputArea2.style.maxHeight = '0px';
+      } else {
+        // Restore the exact previous open height, clamped to the viewport.
+        if (savedEditorHeight && savedEditorHeight >= 60) {
+          const h = Math.max(60, Math.min(window.innerHeight * 0.7, savedEditorHeight));
+          inputArea.style.height = h + 'px';
+          inputArea.style.maxHeight = h + 'px';
+          inputArea2.style.height = h + 'px';
+          inputArea2.style.maxHeight = h + 'px';
+        }
       }
 
       editorFloatToggle.classList.toggle('active', hidden);
@@ -5616,6 +5641,7 @@
       chromeToggle.classList.toggle('active', isFirstRowHidden);
       chromeToggle.title = label;
       chromeToggle.setAttribute('aria-label', label);
+      applyEditorState(isFirstRowHidden);
     }
 
     chromeToggle.addEventListener('click', function(e) {
