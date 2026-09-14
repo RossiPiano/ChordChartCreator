@@ -773,7 +773,8 @@
       right: 10px;
       left: auto;
       z-index: 8200;
-      width: 280px;
+      width: max-content;
+      min-width: 320px;
       max-width: calc(100vw - 20px);
       background: #f5ede0;
       border: 1px solid #c4ad92;
@@ -808,6 +809,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-wrap: nowrap;
     }
     .autoscroll-btn {
       background: #dcc9b0;
@@ -816,10 +818,11 @@
       font-family: inherit;
       font-size: 1rem;
       line-height: 1;
-      padding: 6px 12px;
+      padding: 6px 10px;
       border-radius: 8px;
       cursor: pointer;
       transition: background 0.15s ease, border-color 0.15s ease;
+      flex: 0 0 auto;
     }
     .autoscroll-btn:hover { background: #c4ad92; border-color: #b0987a; }
     .autoscroll-btn.primary {
@@ -828,14 +831,53 @@
       color: #ffffff;
     }
     .autoscroll-btn.primary:hover { background: #7a5d3f; border-color: #6b4f35; }
-    .autoscroll-time {
+    .autoscroll-current {
+      flex: 0 0 62px;
+      width: 62px;
+      border: 1px solid #c4ad92;
+      border-radius: 6px;
+      padding: 4px 6px;
       font-family: Consolas, Menlo, Monaco, monospace;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 700;
       color: #3d2b1f;
-      margin-left: auto;
+      background: #ffffff;
+      outline: none;
+      text-align: center;
       letter-spacing: 0.02em;
+      margin-left: auto;
     }
+    .autoscroll-current:focus { border-color: #8b6b4a; box-shadow: 0 0 0 2px rgba(139, 107, 74, 0.2); }
+    .autoscroll-total {
+      flex: 0 0 auto;
+      font-family: Consolas, Menlo, Monaco, monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #3d2b1f;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      margin-left: 6px;
+    }
+    .autoscroll-src-toggle {
+      flex: 0 0 auto;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border-radius: 8px;
+      border: 1px solid #c4ad92;
+      background: #dcc9b0;
+      color: #3d2b1f;
+      font-size: 1rem;
+      line-height: 1;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+      font-family: inherit;
+    }
+    .autoscroll-src-toggle:hover { background: #c4ad92; border-color: #b0987a; }
+    .autoscroll-src-toggle:active { transform: scale(0.94); }
     .autoscroll-row label {
       font-size: 0.8rem;
       font-weight: 600;
@@ -881,6 +923,62 @@
       padding: 0 4px;
       font-family: Consolas, Menlo, Monaco, monospace;
       font-size: 0.7rem;
+    }
+    .autoscroll-hint.has-list {
+      padding: 0;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+    }
+    .autoscroll-hint-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      background: #ece0cf;
+      border: 1px solid #dcc9b0;
+      border-radius: 6px;
+      padding: 6px 8px;
+      max-height: 220px;
+      overflow-y: auto;
+      font-family: Consolas, Menlo, Monaco, monospace;
+      font-size: 0.72rem;
+      line-height: 1.7;
+      scrollbar-width: thin;
+      scrollbar-color: #c4ad92 #f5ede0;
+    }
+    .autoscroll-hint-list::-webkit-scrollbar { width: 8px; }
+    .autoscroll-hint-list::-webkit-scrollbar-track { background: #f5ede0; }
+    .autoscroll-hint-list::-webkit-scrollbar-thumb {
+      background: #c4ad92;
+      border-radius: 4px;
+      border: 1px solid #f5ede0;
+    }
+    .autoscroll-hint-list .autoscroll-hint-row {
+      display: flex;
+      gap: 6px;
+      white-space: nowrap;
+      color: #5c4033;
+      border-radius: 3px;
+      padding: 1px 3px;
+      cursor: pointer;
+    }
+    .autoscroll-hint-list .autoscroll-hint-row:hover {
+      background: #e3d3bb;
+    }
+    .autoscroll-hint-list .autoscroll-hint-time {
+      color: #8b6b4a;
+      font-weight: 700;
+      flex: 0 0 auto;
+    }
+    .autoscroll-hint-list .autoscroll-hint-sep {
+      color: #b0987a;
+      flex: 0 0 auto;
+    }
+    .autoscroll-hint-list .autoscroll-hint-part {
+      color: #5c4033;
+      font-weight: 500;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .editor-float-toggle {
@@ -1447,7 +1545,7 @@
       transition: opacity 0.15s ease;
     }
     .perf-panel.show { display: flex; }
-    .perf-panel.dragging { opacity: 0.35; }
+    .perf-panel.dragging { opacity: 0.72; }
     .perf-panel-header {
       display: flex;
       align-items: center;
@@ -1928,7 +2026,11 @@
     <div class="autoscroll-row">
       <button type="button" class="autoscroll-btn primary" id="autoscrollPlay" title="Play">▶️</button>
       <button type="button" class="autoscroll-btn" id="autoscrollStop" title="Stop and rewind">⏹️</button>
-      <span class="autoscroll-time" id="autoscrollTime">0:00 / 0:00</span>
+      <button type="button" class="autoscroll-btn" id="autoscrollPrev" title="Jump to previous timestamp">⏮️</button>
+      <button type="button" class="autoscroll-btn" id="autoscrollNext" title="Jump to next timestamp">⏭️</button>
+      <input type="text" class="autoscroll-current" id="autoscrollCurrent" value="0:00" spellcheck="false" aria-label="Current time">
+      <span class="autoscroll-total" id="autoscrollTotal">/ 0:00</span>
+      <button type="button" class="autoscroll-src-toggle" id="autoscrollSrcToggle" title="Source: chords editor (click for lyrics)">🎸</button>
     </div>
     <div class="autoscroll-row">
       <label for="autoscrollOffset">Offset</label>
@@ -3202,9 +3304,13 @@
       if (titleEl) titleEl.value = (typeof songTitle === 'string') ? songTitle : '';
 
       if (settingsSnapshot && typeof settingsSnapshot === 'object') {
+        // A .chordchart's own settings override the current global settings
+        // while this song is open. Size, spacing, fonts, margins — all of it.
+        // Use the snapshot's values, and for any key it doesn't have, keep
+        // whatever is currently set.
         const merged = Object.assign({}, settings);
         Object.keys(settingsSnapshot).forEach(k => {
-          if (TEMPLATE_SETTING_KEYS.indexOf(k) === -1) {
+          if (merged[k] !== undefined) {
             merged[k] = settingsSnapshot[k];
           }
         });
@@ -3820,13 +3926,160 @@
       return autoscroll.elapsedAtPause;
     }
 
+    // Returns a sorted, de-duplicated list of every timestamp across both
+    // gutters. Used by the Previous/Next buttons.
+    function autoscrollAllTimestamps() {
+      const all = [];
+      const seen = {};
+      for (const t of autoscroll.lyricsTimestamps) {
+        if (!seen[t.seconds]) { seen[t.seconds] = true; all.push(t.seconds); }
+      }
+      for (const t of autoscroll.chordsTimestamps) {
+        if (!seen[t.seconds]) { seen[t.seconds] = true; all.push(t.seconds); }
+      }
+      all.sort(function (a, b) { return a - b; });
+      return all;
+    }
+
+    function autoscrollJumpToNeighborTimestamp(direction) {
+      const list = autoscrollAllTimestamps();
+      if (list.length === 0) return;
+      const cur = autoscrollCurrentTime();
+      const EPS = 0.25;
+      let target = null;
+      if (direction > 0) {
+        for (let i = 0; i < list.length; i++) {
+          if (list[i] > cur + EPS) { target = list[i]; break; }
+        }
+        if (target === null) target = list[list.length - 1];
+      } else {
+        for (let i = list.length - 1; i >= 0; i--) {
+          if (list[i] < cur - EPS) { target = list[i]; break; }
+        }
+        if (target === null) target = list[0];
+      }
+      autoscrollSeekTo(target);
+    }
+
+    function autoscrollSeekTo(seconds) {
+      if (seconds == null || isNaN(seconds)) return;
+      if (autoscroll.playing) {
+        autoscroll.elapsedAtPause = seconds;
+        autoscroll.startWallClock = performance.now();
+      } else {
+        autoscroll.elapsedAtPause = seconds;
+      }
+      // Force the next tick to re-scroll both panes even if the target block
+      // was already active, so jumping always snaps the preview.
+      autoscroll.lastLyricsBlock = -1;
+      autoscroll.lastChordsBlock = -1;
+      // Update the readout and scroll once immediately for responsiveness.
+      const cur = seconds + autoscroll.offset;
+      const lb = findActiveBlock(autoscroll.lyricsTimestamps, cur);
+      const cb = findActiveBlock(autoscroll.chordsTimestamps, cur);
+      if (lb !== -1) {
+        autoscroll.lastLyricsBlock = lb;
+        scrollPreviewToBlock(previewContainer, previewContent, lb);
+      }
+      if (cb !== -1) {
+        autoscroll.lastChordsBlock = cb;
+        scrollPreviewToBlock(previewContainer2, previewContent2, cb);
+      }
+      autoscrollUpdateReadout();
+    }
+
     function autoscrollUpdateReadout() {
       const cur = autoscrollCurrentTime();
       const tot = autoscrollTotalDuration();
-      const readout = document.getElementById('autoscrollTime');
-      if (readout) {
-        readout.textContent = autoscrollFormatTime(cur) + ' / ' + autoscrollFormatTime(tot);
+      if (autoscrollTotalEl) {
+        autoscrollTotalEl.textContent = '/ ' + autoscrollFormatTime(tot);
       }
+      if (!autoscrollCurrentInput) return;
+      // Don't overwrite the box while the user is typing into it.
+      if (document.activeElement === autoscrollCurrentInput) return;
+      autoscrollCurrentInput.value = autoscrollFormatTime(cur);
+    }
+
+    // Reads the right-hand (chord) gutter and the chord editor line-for-line.
+    // Whenever a gutter row has a timestamp, we grab the same row of the chord
+    // editor and pull a human-readable section name out of it. A section line
+    // like "[Verse 1]" or "Verse 1" gives "Verse 1". A chord-only line gives
+    // the chord itself. A blank line gives "—".
+    function extractTimestampList(timeText, editorText) {
+      const out = [];
+      const editorLines = (editorText || '').split('\n');
+      const timeLines = (timeText || '').split('\n');
+      const total = Math.max(timeLines.length, editorLines.length);
+      for (let i = 0; i < total; i++) {
+        const rawTime = timeLines[i] !== undefined ? timeLines[i].trim() : '';
+        if (rawTime === '') continue;
+        const seconds = parseTimeString(rawTime);
+        if (seconds === null) continue;
+        const editorLine = editorLines[i] !== undefined ? editorLines[i].trim() : '';
+        out.push({
+          seconds: seconds,
+          label: editorLine === '' ? '—' : editorLine
+        });
+      }
+      return out;
+    }
+
+    // Strips bracket markup and reduces a chord-editor line to a short label
+    // suitable for the timestamp list.
+    function timestampLineLabel(line) {
+      if (!line) return '—';
+      let s = line.trim();
+      if (s === '') return '—';
+      // [Verse 1]  or  [Verse 1] extra → "Verse 1"
+      const br = s.match(/^\[(.*?)\]\s*(.*)$/);
+      if (br) {
+        const inside = br[1].trim();
+        const trailing = br[2].trim();
+        return trailing ? (inside + ' ' + trailing) : inside;
+      }
+      // "Verse 1", "Chorus 1", "Verse 1 (soft)" — keep up to 40 chars
+      if (s.length > 40) s = s.slice(0, 40) + '…';
+      return s;
+    }
+
+    function renderAutoscrollHintList(list) {
+      const hint = document.getElementById('autoscrollHint');
+      if (!hint) return;
+      if (!list || list.length === 0) {
+        hint.classList.remove('has-list');
+        hint.textContent = 'No timestamps found. Add 0:45 in the time column.';
+        return;
+      }
+      hint.classList.add('has-list');
+      hint.textContent = '';
+      const wrap = document.createElement('div');
+      wrap.className = 'autoscroll-hint-list';
+      list.forEach(function (entry) {
+        const row = document.createElement('div');
+        row.className = 'autoscroll-hint-row';
+        row.title = 'Jump to ' + autoscrollFormatTime(entry.seconds);
+
+        const time = document.createElement('span');
+        time.className = 'autoscroll-hint-time';
+        time.textContent = autoscrollFormatTime(entry.seconds);
+
+        const sep = document.createElement('span');
+        sep.className = 'autoscroll-hint-sep';
+        sep.textContent = '-';
+
+        const part = document.createElement('span');
+        part.className = 'autoscroll-hint-part';
+        part.textContent = timestampLineLabel(entry.label);
+
+        row.appendChild(time);
+        row.appendChild(sep);
+        row.appendChild(part);
+        row.addEventListener('click', function () {
+          autoscrollSeekTo(entry.seconds);
+        });
+        wrap.appendChild(row);
+      });
+      hint.appendChild(wrap);
     }
 
     function autoscrollRefreshTimestamps() {
@@ -3836,15 +4089,18 @@
       autoscroll.chordsTimestamps = extractTimestamps(rightTime ? rightTime.value : '', inputEl2.value);
       autoscroll.lastLyricsBlock = -1;
       autoscroll.lastChordsBlock = -1;
-      const hint = document.getElementById('autoscrollHint');
-      if (hint) {
-        const n = autoscroll.lyricsTimestamps.length + autoscroll.chordsTimestamps.length;
-        if (n === 0) {
-          hint.textContent = 'No timestamps found. Add 0:45 in the time column.';
-        } else {
-          hint.textContent = 'Found ' + n + ' timestamp' + (n === 1 ? '' : 's') + '.';
-        }
+
+      let listTimeText, listEditorText;
+      if (autoscrollSource === 'lyrics') {
+        listTimeText = leftTime ? leftTime.value : '';
+        listEditorText = inputEl ? inputEl.value : '';
+      } else {
+        listTimeText = rightTime ? rightTime.value : '';
+        listEditorText = inputEl2 ? inputEl2.value : '';
       }
+      const list = extractTimestampList(listTimeText, listEditorText);
+      renderAutoscrollHintList(list);
+
       autoscrollUpdateReadout();
     }
 
@@ -3910,6 +4166,7 @@
       if (playBtn) playBtn.textContent = '▶️';
       const toggle = document.getElementById('autoscrollFloatToggle');
       if (toggle) toggle.classList.remove('playing');
+      if (autoscrollCurrentInput) autoscrollCurrentInput.value = autoscrollFormatTime(0);
       autoscrollUpdateReadout();
       if (previewContainer) previewContainer.scrollTo({ top: 0, behavior: 'smooth' });
       if (previewContainer2) previewContainer2.scrollTo({ top: 0, behavior: 'smooth' });
@@ -4668,7 +4925,27 @@
     const autoscrollFloatClose = document.getElementById('autoscrollFloatClose');
     const autoscrollPlayBtn = document.getElementById('autoscrollPlay');
     const autoscrollStopBtn = document.getElementById('autoscrollStop');
+    const autoscrollPrevBtn = document.getElementById('autoscrollPrev');
+    const autoscrollNextBtn = document.getElementById('autoscrollNext');
+    const autoscrollCurrentInput = document.getElementById('autoscrollCurrent');
+    const autoscrollTotalEl = document.getElementById('autoscrollTotal');
+    const autoscrollSrcToggle = document.getElementById('autoscrollSrcToggle');
     const autoscrollOffsetInput = document.getElementById('autoscrollOffset');
+
+    // Which editor pair the timestamp list is sourced from.
+    // 'chords' = right side (🎸), 'lyrics' = left side (🎤).
+    let autoscrollSource = 'chords';
+
+    function applyAutoscrollSource() {
+      if (!autoscrollSrcToggle) return;
+      const isChords = autoscrollSource === 'chords';
+      autoscrollSrcToggle.textContent = isChords ? '🎸' : '🎤';
+      autoscrollSrcToggle.title = isChords
+        ? 'Source: chords editor (click for lyrics)'
+        : 'Source: lyrics editor (click for chords)';
+      autoscrollSrcToggle.setAttribute('aria-label', autoscrollSrcToggle.title);
+      autoscrollRefreshTimestamps();
+    }
 
     function toggleAutoscrollFloatPanel(open) {
       const next = (typeof open === 'boolean') ? open : !autoscrollFloatPanel.classList.contains('show');
@@ -4707,6 +4984,49 @@
       autoscrollStopBtn.addEventListener('click', function(e) {
         e.stopPropagation();
         autoscrollStop();
+      });
+    }
+    if (autoscrollCurrentInput) {
+      autoscrollCurrentInput.addEventListener('focus', function() {
+        try { this.select(); } catch (e) {}
+      });
+      autoscrollCurrentInput.addEventListener('input', function() {
+        const parsed = parseTimeString(this.value);
+        if (parsed !== null) autoscroll.elapsedAtPause = parsed;
+      });
+      autoscrollCurrentInput.addEventListener('blur', function() {
+        const parsed = parseTimeString(this.value);
+        if (parsed === null) {
+          this.value = autoscrollFormatTime(autoscroll.elapsedAtPause);
+        } else {
+          this.value = autoscrollFormatTime(parsed);
+          autoscroll.elapsedAtPause = parsed;
+        }
+        autoscroll.lastLyricsBlock = -1;
+        autoscroll.lastChordsBlock = -1;
+        autoscrollUpdateReadout();
+      });
+      autoscrollCurrentInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); this.blur(); }
+      });
+    }
+    if (autoscrollPrevBtn) {
+      autoscrollPrevBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        autoscrollJumpToNeighborTimestamp(-1);
+      });
+    }
+    if (autoscrollNextBtn) {
+      autoscrollNextBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        autoscrollJumpToNeighborTimestamp(1);
+      });
+    }
+    if (autoscrollSrcToggle) {
+      autoscrollSrcToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        autoscrollSource = (autoscrollSource === 'chords') ? 'lyrics' : 'chords';
+        applyAutoscrollSource();
       });
     }
     if (autoscrollOffsetInput) {
@@ -5347,6 +5667,7 @@
         }
       }
     } catch (e) {}
+    if (typeof applyAutoscrollSource === 'function') applyAutoscrollSource();
     if (typeof autoscrollRefreshTimestamps === 'function') autoscrollRefreshTimestamps();
 
     const titleInput = document.getElementById('titleInput');
