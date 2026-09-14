@@ -552,6 +552,11 @@
       flex: 1 1 auto;
       min-width: 0;
     }
+    /* Sticky column: sits immediately left of the fixed ☰/⛔ column
+       and never hides when first-row-hidden is active. */
+    .float-sticky-col {
+      flex: 0 0 auto;
+    }
 
     .old-settings-toggle,
     .perf-toggle,
@@ -574,16 +579,20 @@
     body.first-row-hidden .old-settings-toggle,
     body.first-row-hidden .perf-toggle,
     body.first-row-hidden .layout-float-toggle,
+    body.first-row-hidden .png-float-toggle,
+    body.first-row-hidden .save-float-toggle,
+    body.first-row-hidden .template-float-toggle {
+      opacity: 0;
+      pointer-events: none;
+    }
+    /* Keep the sticky 4 buttons visible and clickable in hide-everything mode. */
+    body.first-row-hidden .songs-float-toggle,
     body.first-row-hidden .key-float-toggle,
     body.first-row-hidden .split-float-toggle,
     body.first-row-hidden .autoscroll-float-toggle,
-    body.first-row-hidden .png-float-toggle,
-    body.first-row-hidden .save-float-toggle,
-    body.first-row-hidden .songs-float-toggle,
-    body.first-row-hidden .template-float-toggle,
     body.first-row-hidden .editor-float-toggle {
-      opacity: 0;
-      pointer-events: none;
+      opacity: 1;
+      pointer-events: auto;
     }
 
     /* (.chrome-toggle-2 rule removed with the ⋯ button.) */
@@ -1008,11 +1017,22 @@
       background: rgba(196, 173, 146, 0.95);
       transform: scale(1.05);
     }
-    .editor-float-toggle.active {
+    .editor-float-toggle:not(.active) {
       background: #5c4033;
       color: #ffffff;
       border-color: #4a3328;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+    .editor-float-toggle:not(.active):hover {
+      background: #6b4f3f;
+      border-color: #3d2b1f;
+      transform: scale(1.05);
+    }
+    .editor-float-toggle.active {
+      background: rgba(232, 220, 204, 0.85);
+      color: #3d2b1f;
+      border-color: #c4ad92;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
     }
 
     .save-float-toggle {
@@ -1973,12 +1993,14 @@
     <button class="chrome-toggle" id="chromeToggle" title="Collapse editor (focus mode)" aria-label="Collapse editor">☰</button>
     <button class="old-settings-toggle" id="oldSettingsToggle" title="Old Settings" aria-label="Old Settings">⛔</button>
   </div>
-  <div class="float-auto-col">
+  <div class="float-auto-col float-sticky-col">
     <button class="songs-float-toggle" id="songsFloatToggle" title="Songs" aria-label="Songs">🎵</button>
     <button class="key-float-toggle" id="keyFloatToggle" title="Key &amp; transpose" aria-label="Key and transpose">🔑</button>
     <button class="split-float-toggle" id="splitFloatToggle" title="Split view (left / center / right)" aria-label="Split view">⬛</button>
     <button class="autoscroll-float-toggle" id="autoscrollFloatToggle" title="Auto-scroll by timestamps" aria-label="Auto-scroll">⏱️</button>
     <button class="editor-float-toggle" id="editorFloatToggle" title="Hide both editors" aria-label="Hide both editors">✏️</button>
+  </div>
+  <div class="float-auto-col">
     <button class="template-float-toggle" id="templateFloatToggle" title="Templates (look &amp; feel presets)" aria-label="Templates">🎨</button>
     <button class="save-float-toggle" id="saveFloatToggle" title="Save Chord Chart" aria-label="Save Chord Chart">💾</button>
     <button class="png-float-toggle" id="pngFloatToggle" title="Export Chord Chart as PNG" aria-label="Export Chord Chart as PNG">📷</button>
