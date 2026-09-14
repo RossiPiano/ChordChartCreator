@@ -564,6 +564,7 @@
     .key-float-toggle,
     .split-float-toggle,
     .autoscroll-float-toggle,
+    .swap-float-toggle,
     .png-float-toggle,
     .save-float-toggle,
     .songs-float-toggle,
@@ -590,9 +591,18 @@
     body.first-row-hidden .key-float-toggle,
     body.first-row-hidden .split-float-toggle,
     body.first-row-hidden .autoscroll-float-toggle,
+    body.first-row-hidden .swap-float-toggle,
     body.first-row-hidden .editor-float-toggle {
       opacity: 1;
       pointer-events: auto;
+    }
+    body.first-row-hidden .title-bar {
+      pointer-events: auto;
+    }
+    body.first-row-hidden .title-bar .title-input {
+      pointer-events: auto;
+      user-select: text;
+      -webkit-user-select: text;
     }
 
     /* (.chrome-toggle-2 rule removed with the ⋯ button.) */
@@ -760,6 +770,38 @@
       transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
       font-family: inherit;
+    }
+
+    .swap-float-toggle {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border-radius: 10px;
+      border: 1px solid #c4ad92;
+      background: rgba(232, 220, 204, 0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: #3d2b1f;
+      font-size: 1.1rem;
+      line-height: 1;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      font-family: inherit;
+    }
+    .swap-float-toggle:hover {
+      background: rgba(196, 173, 146, 0.95);
+      transform: scale(1.05);
+    }
+    .swap-float-toggle.active {
+      background: #5c4033;
+      color: #ffffff;
+      border-color: #4a3328;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
     .autoscroll-float-toggle:hover {
       background: rgba(196, 173, 146, 0.95);
@@ -1997,6 +2039,7 @@
     <button class="songs-float-toggle" id="songsFloatToggle" title="Songs" aria-label="Songs">🎵</button>
     <button class="key-float-toggle" id="keyFloatToggle" title="Key &amp; transpose" aria-label="Key and transpose">🔑</button>
     <button class="split-float-toggle" id="splitFloatToggle" title="Split view (left / center / right)" aria-label="Split view">⬛</button>
+    <button class="swap-float-toggle" id="swapFloatToggle" title="Swap lyrics / chords sides" aria-label="Swap sides">↔️</button>
     <button class="autoscroll-float-toggle" id="autoscrollFloatToggle" title="Auto-scroll by timestamps" aria-label="Auto-scroll">⏱️</button>
     <button class="editor-float-toggle" id="editorFloatToggle" title="Hide both editors" aria-label="Hide both editors">✏️</button>
   </div>
@@ -2455,6 +2498,7 @@
     const oldSettingsToggle = document.getElementById('oldSettingsToggle');
     const editorFloatToggle = document.getElementById('editorFloatToggle');
     const splitFloatToggle = document.getElementById('splitFloatToggle');
+    const swapFloatToggle = document.getElementById('swapFloatToggle');
     const saveFloatToggle = document.getElementById('saveFloatToggle');
     const pngFloatToggle = document.getElementById('pngFloatToggle');
 
@@ -3762,8 +3806,13 @@
 
     function applyWallSplit(percent) {
       percent = Math.max(15, Math.min(85, percent));
-      panelWall.style.left = percent + '%';
-      editorWrapper.style.gridTemplateColumns = percent + '% 1fr';
+      if (isSwapped) {
+        panelWall.style.left = (100 - percent) + '%';
+        editorWrapper.style.gridTemplateColumns = '1fr ' + percent + '%';
+      } else {
+        panelWall.style.left = percent + '%';
+        editorWrapper.style.gridTemplateColumns = percent + '% 1fr';
+      }
       editorWrapper.style.gridTemplateRows = '1fr';
     }
 
@@ -4200,6 +4249,7 @@
 
     // ===== SPLIT VIEW TOGGLE (left / center / right) =====
     const SPLIT_STATE_KEY = 'chordChartSplitState';
+    const SWAP_STATE_KEY = 'chordChartSwappedSides';
     const SPLIT_ICONS = { center: '🎤🎸', left: '🎸', right: '🎤' };
     const SPLIT_TITLES = {
       center: 'Split view: both sides (tap for chords only)',
@@ -4207,19 +4257,69 @@
       right: 'Split view: lyrics only (tap for both)'
     };
 
+    let isSwapped = false;
+    try {
+      isSwapped = localStorage.getItem(SWAP_STATE_KEY) === 'true';
+    } catch (e) {}
+
+    function applySwapState(swapped) {
+      isSwapped = !!swapped;
+      const wrapper = document.getElementById('editorWrapper');
+      if (wrapper) {
+        const panel1 = document.getElementById('panel1');
+        const panel2 = document.getElementById('panel2');
+        const wall = document.getElementById('panelWall');
+        if (isSwapped) {
+          if (panel2 && panel1 && panel2.nextElementSibling !== panel1) {
+            wrapper.insertBefore(panel2, panel1);
+          }
+        } else {
+          if (panel1 && panel2 && panel1.nextElementSibling !== panel2) {
+            wrapper.insertBefore(panel1, panel2);
+          }
+        }
+        if (wall && panel1 && wrapper.firstChild !== wall) {
+          wrapper.insertBefore(wall, wrapper.firstChild);
+        }
+      }
+      if (swapFloatToggle) {
+        swapFloatToggle.classList.toggle('active', isSwapped);
+        swapFloatToggle.title = isSwapped
+          ? 'Swap back (chords left, lyrics right)'
+          : 'Swap lyrics / chords sides';
+        swapFloatToggle.setAttribute('aria-label', swapFloatToggle.title);
+      }
+      try { localStorage.setItem(SWAP_STATE_KEY, isSwapped ? 'true' : 'false'); } catch (e) {}
+      if (typeof applySplitState === 'function') applySplitState(splitState);
+      setTimeout(adjustChordSizes, 200);
+      setTimeout(adjustChordSizes, 400);
+    }
+
+    if (swapFloatToggle) {
+      swapFloatToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        applySwapState(!isSwapped);
+      });
+    }
+
     let splitState = 'center';
     function applySplitState(state) {
       if (state !== 'left' && state !== 'center' && state !== 'right') state = 'center';
       splitState = state;
 
+      const splitLeftPct = isSwapped ? '1fr 0%' : '0% 1fr';
+      const splitRightPct = isSwapped ? '0% 1fr' : '1fr 0%';
+      const splitLeftWall = isSwapped ? '100%' : '0%';
+      const splitRightWall = isSwapped ? '0%' : '100%';
+
       if (state === 'left') {
-        editorWrapper.style.gridTemplateColumns = '0% 1fr';
-        panelWall.style.left = '0%';
+        editorWrapper.style.gridTemplateColumns = splitLeftPct;
+        panelWall.style.left = splitLeftWall;
         editorWrapper.classList.add('split-left');
         editorWrapper.classList.remove('split-right');
       } else if (state === 'right') {
-        editorWrapper.style.gridTemplateColumns = '1fr 0%';
-        panelWall.style.left = '100%';
+        editorWrapper.style.gridTemplateColumns = splitRightPct;
+        panelWall.style.left = splitRightWall;
         editorWrapper.classList.add('split-right');
         editorWrapper.classList.remove('split-left');
       } else {
@@ -5664,6 +5764,11 @@
       chromeToggle.title = label;
       chromeToggle.setAttribute('aria-label', label);
       applyEditorState(isFirstRowHidden);
+      const titleEl = document.getElementById('titleInput');
+      if (titleEl) {
+        titleEl.readOnly = false;
+        titleEl.disabled = false;
+      }
     }
 
     chromeToggle.addEventListener('click', function(e) {
@@ -5733,6 +5838,7 @@
     applyMode(false);
     applyChromeCollapsed(false);
     applyFirstRowHidden(false);
+    applySwapState(isSwapped);
     if (typeof syncPerfPanel === 'function') syncPerfPanel();
 
     displayStoredSongs();
