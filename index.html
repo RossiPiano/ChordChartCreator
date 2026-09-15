@@ -2096,6 +2096,11 @@
       .panel-wall {
         display: none;
       }
+      /* The swap button is meaningless on phone: only one panel is ever
+         visible at a time, and its side is picked by the split button. */
+      .swap-float-toggle {
+        display: none !important;
+      }
       /* When the user has swapped sides, DOM order already handles it
          (applySwapState reorders the panels), so nothing extra needed
          here. */
