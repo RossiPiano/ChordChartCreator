@@ -602,6 +602,35 @@
                   box-shadow 0.15s ease;
     }
 
+    /* ===== SWITCHES — press-in animation only =====
+       These buttons hold a persistent .active (brown) state. On :active we
+       only add a little squash — the persistent brown state is untouched. */
+    .chrome-toggle:active,
+    .songs-float-toggle:active,
+    .key-float-toggle:active,
+    .autoscroll-float-toggle:active,
+    .editor-float-toggle:active,
+    .template-float-toggle:active,
+    .perf-toggle:active,
+    .old-settings-toggle:active {
+      transform: scale(0.92);
+      transition: transform 0.08s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    /* ===== MOMENTARIES — full press-in (brown + squash) =====
+       These buttons only act while held, so brown is the :active look. */
+    .split-float-toggle:active,
+    .swap-float-toggle:active,
+    .save-float-toggle:active,
+    .png-float-toggle:active {
+      background: #5c4033;
+      color: #ffffff;
+      border-color: #4a3328;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      transform: scale(0.92);
+      transition: transform 0.08s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    }
+
     /* When the hamburger is pressed, hide every button in the row.
        All are removed from the flex flow so no gaps remain. */
     body.first-row-hidden .songs-float-toggle,
@@ -780,6 +809,14 @@
       border-color: #4a3328;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
+    .split-float-toggle:active {
+      background: #5c4033;
+      color: #ffffff;
+      border-color: #4a3328;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      transform: scale(0.92);
+      transition: transform 0.08s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    }
 
     .autoscroll-float-toggle {
       width: 38px;
@@ -828,11 +865,13 @@
       background: rgba(196, 173, 146, 0.95);
       transform: scale(1.05);
     }
-    .swap-float-toggle.active {
+    .swap-float-toggle:active {
       background: #5c4033;
       color: #ffffff;
       border-color: #4a3328;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      transform: scale(0.92);
+      transition: transform 0.08s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
     }
     .autoscroll-float-toggle:hover {
       background: rgba(196, 173, 146, 0.95);
@@ -1139,6 +1178,14 @@
       border-color: #4a3328;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
+    .save-float-toggle:active {
+      background: #5c4033;
+      color: #ffffff;
+      border-color: #4a3328;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      transform: scale(0.92);
+      transition: transform 0.08s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    }
 
     .png-float-toggle {
       width: 38px;
@@ -1170,6 +1217,14 @@
       color: #ffffff;
       border-color: #4a3328;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+    .png-float-toggle:active {
+      background: #5c4033;
+      color: #ffffff;
+      border-color: #4a3328;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      transform: scale(0.92);
+      transition: transform 0.08s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
     }
 
     .key-float-toggle {
@@ -1837,43 +1892,173 @@
     .toast.show { opacity: 1; transform: translateY(0); }
 
     /* ===== OLD SETTINGS MODAL ===== */
-    .settings-overlay {
-      display: none;
+    .settings-float-panel {
       position: fixed;
-      inset: 0;
-      background: rgba(60, 40, 25, 0.35);
-      z-index: 2147483630;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .settings-overlay.show { display: flex; }
-    .settings-panel {
+      top: 58px;
+      left: 10px;
+      right: auto;
+      z-index: 2147483600;
+      width: 340px;
+      max-width: calc(100vw - 20px);
+      max-height: calc(100vh - 72px);
+      overflow-y: auto;
       background: #f5ede0;
-      border: 1px solid #dcc9b0;
-      border-radius: 16px;
-      box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.35);
-      width: 100%;
-      max-width: 640px;
-      max-height: 90vh;
-      display: flex;
+      border: 1px solid #c4ad92;
+      border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+      display: none;
       flex-direction: column;
-      overflow: hidden;
+      font-family: inherit;
+      color: #3d2b1f;
     }
-    .settings-header {
-      padding: 14px 20px;
-      background: #e8dccc;
-      border-bottom: 2px solid #dcc9b0;
+    .settings-float-panel.show { display: flex; }
+    .settings-float-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      flex-shrink: 0;
+      padding: 10px 14px;
+      background: #e8dccc;
+      border-bottom: 2px solid #dcc9b0;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #5c4033;
+      position: sticky;
+      top: 0;
+      z-index: 1;
     }
-    .settings-header h2 { font-size: 1rem; font-weight: 700; color: #5c4033; }
-    .settings-header .settings-lock-indicator { font-size: 0.9rem; margin-left: 8px; opacity: 0.75; }
-    .settings-close { background: none; border: none; font-size: 1.2rem; color: #8b6b4a; cursor: pointer; padding: 0 6px; line-height: 1; }
-    .settings-close:hover { color: #5c4033; }
-    .settings-body { padding: 16px 20px; overflow-y: auto; flex: 1; min-height: 0; }
+    .settings-float-header .settings-lock-indicator { font-size: 0.9rem; margin-left: 8px; opacity: 0.75; }
+    .settings-float-body { padding: 16px 20px; overflow-y: auto; flex: 1; min-height: 0; }
+    .settings-float-footer {
+      padding: 12px 20px;
+      border-top: 1px solid #dcc9b0;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      background: #f0e5d3;
+      flex-shrink: 0;
+      position: sticky;
+      bottom: 0;
+    }
+    .settings-float-footer .btn { padding: 6px 16px; font-size: 0.85rem; }
+    .settings-section { margin-bottom: 22px; }
+    .settings-section:last-child { margin-bottom: 4px; }
+    .settings-section h3 {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #b0987a;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #dcc9b0;
+    }
+    .settings-lock-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: #ece0cf;
+      border: 1px solid #dcc9b0;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .settings-lock-row input[type="checkbox"] {
+      accent-color: #8b6b4a;
+      cursor: pointer;
+      margin: 0;
+      flex: 0 0 auto;
+      width: 15px;
+      height: 15px;
+    }
+    .settings-lock-row label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #5c4033;
+      cursor: pointer;
+      flex: 1 1 auto;
+    }
+    .settings-lock-row:hover { background: #e3d3bb; }
+    .settings-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .settings-row label { font-size: 0.8rem; font-weight: 500; color: #5c4033; flex: 0 0 160px; }
+    .settings-row input[type="range"] { flex: 1; accent-color: #8b6b4a; cursor: pointer; min-width: 0; }
+    .settings-row input[type="text"] {
+      flex: 1;
+      border: 1px solid #c4ad92;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.8rem;
+      font-family: inherit;
+      color: #3d2b1f;
+      background: #ffffff;
+      outline: none;
+      min-width: 0;
+    }
+    .settings-row input[type="text"]:focus { border-color: #8b6b4a; box-shadow: 0 0 0 2px rgba(139, 107, 74, 0.2); }
+    .settings-row .settings-num-group {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: stretch;
+      border: 1px solid #c4ad92;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+    .settings-row .settings-num-group .settings-step-btn {
+      background: #e8dccc;
+      border: none;
+      color: #5c4033;
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      padding: 0 8px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.1s ease;
+      min-width: 22px;
+    }
+    .settings-row .settings-num-group .settings-step-btn:hover { background: #dcc9b0; }
+    .settings-row .settings-num-group .settings-step-btn:active { background: #c4ad92; }
+    .settings-row input[type="number"].settings-num {
+      flex: 0 0 auto;
+      width: 62px;
+      border: none;
+      border-left: 1px solid #c4ad92;
+      border-right: 1px solid #c4ad92;
+      border-radius: 0;
+      padding: 4px 6px;
+      font-size: 0.8rem;
+      font-family: inherit;
+      color: #3d2b1f;
+      background: #ffffff;
+      outline: none;
+      text-align: right;
+      -moz-appearance: textfield;
+    }
+    .settings-row input[type="number"].settings-num::-webkit-outer-spin-button,
+    .settings-row input[type="number"].settings-num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .settings-row input[type="number"].settings-num:focus { background: #f5ede0; }
+    .settings-row select {
+      flex: 1;
+      border: 1px solid #c4ad92;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.8rem;
+      font-family: inherit;
+      color: #3d2b1f;
+      background: #ffffff;
+      outline: none;
+      cursor: pointer;
+      min-width: 0;
+    }
+    .settings-row select:focus { border-color: #8b6b4a; }
+    .custom-font-field { display: none; }
+    .custom-font-field.show { display: flex; }
     .settings-section { margin-bottom: 22px; }
     .settings-section:last-child { margin-bottom: 4px; }
     .settings-section h3 {
@@ -2277,13 +2462,12 @@
 
 <div class="toast" id="toast"></div>
 
-<div class="settings-overlay" id="settingsOverlay">
-  <div class="settings-panel" id="settingsPanel">
-    <div class="settings-header">
-      <h2>⚙️ Old Settings<span class="settings-lock-indicator" id="settingsLockIndicator" style="display: none;">🔒</span></h2>
-      <button class="settings-close" id="settingsClose" title="Close">✕</button>
-    </div>
-    <div class="settings-body">
+<div class="settings-float-panel" id="settingsFloatPanel" role="dialog" aria-label="Old Settings">
+  <div class="settings-float-header">
+    <span>⚙️ Old Settings<span class="settings-lock-indicator" id="settingsLockIndicator" style="display: none;">🔒</span></span>
+    <button class="perf-close" id="settingsClose" title="Close">✕</button>
+  </div>
+  <div class="settings-float-body">
 
       <div class="settings-section">
         <h3>Lock</h3>
@@ -2435,11 +2619,11 @@
           <input type="number" class="settings-num" id="labelRadiusNum" min="0" max="20" step="0.5" value="4">
         </div>
       </div>
-    </div>
-    <div class="settings-footer">
-      <button class="btn btn-outline" id="settingsReset">↺ Reset to defaults</button>
-      <button class="btn btn-success" id="settingsDone">Done</button>
-    </div>
+
+  </div>
+  <div class="settings-float-footer">
+    <button class="btn btn-outline" id="settingsReset">↺ Reset to defaults</button>
+    <button class="btn btn-success" id="settingsDone">Done</button>
   </div>
 </div>
 
@@ -2500,8 +2684,8 @@
     const previewContainer = document.getElementById('previewContainer');
     const inputArea = document.getElementById('inputArea');
     const previewArea = document.getElementById('previewArea');
-    const settingsOverlay = document.getElementById('settingsOverlay');
-    const settingsPanel = document.getElementById('settingsPanel');
+    const settingsFloatPanel = document.getElementById('settingsFloatPanel');
+    const settingsPanel = settingsFloatPanel;
     const settingsClose = document.getElementById('settingsClose');
     const settingsDone = document.getElementById('settingsDone');
     const settingsReset = document.getElementById('settingsReset');
@@ -2938,14 +3122,19 @@
     });
     editorWidthNum.addEventListener('blur', function() { this.value = settings.editorWidth.toFixed(0); });
 
-    function openSettings() { syncSettingsUI(); settingsOverlay.classList.add('show'); }
-    function closeSettings() { settingsOverlay.classList.remove('show'); }
+    function openSettings() {
+      syncSettingsUI();
+      settingsFloatPanel.classList.add('show');
+      if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
+      if (typeof toggleSongsFloatPanel === 'function') toggleSongsFloatPanel(false);
+      if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
+      if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
+      if (typeof toggleAutoscrollFloatPanel === 'function') toggleAutoscrollFloatPanel(false);
+    }
+    function closeSettings() { settingsFloatPanel.classList.remove('show'); }
 
     settingsClose.addEventListener('click', closeSettings);
     settingsDone.addEventListener('click', closeSettings);
-    settingsOverlay.addEventListener('click', function(e) {
-      if (e.target === settingsOverlay) closeSettings();
-    });
 
     // ===== LOCK SYSTEM =====
     function applyLockState() {
@@ -5174,7 +5363,7 @@
         e.preventDefault();
         transposeDown();
       }
-      if (e.key === 'Escape' && settingsOverlay.classList.contains('show')) {
+      if (e.key === 'Escape' && settingsFloatPanel.classList.contains('show')) {
         closeSettings();
       }
     });
@@ -5880,6 +6069,11 @@
           !autoscrollFloatToggle.contains(e.target)) {
         toggleAutoscrollFloatPanel(false);
       }
+      if (settingsFloatPanel.classList.contains('show') &&
+          !settingsFloatPanel.contains(e.target) &&
+          !oldSettingsToggle.contains(e.target)) {
+        closeSettings();
+      }
     });
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && perfPanel.classList.contains('show')) togglePerfPanel(false);
@@ -5887,6 +6081,7 @@
       if (e.key === 'Escape' && keyFloatPanel.classList.contains('show')) toggleKeyFloatPanel(false);
       if (e.key === 'Escape' && templateFloatPanel.classList.contains('show')) toggleTemplateFloatPanel(false);
       if (e.key === 'Escape' && autoscrollFloatPanel.classList.contains('show')) toggleAutoscrollFloatPanel(false);
+      if (e.key === 'Escape' && settingsFloatPanel.classList.contains('show')) closeSettings();
     });
 
     // ===== CHROME COLLAPSE (focus mode) =====
@@ -5931,10 +6126,26 @@
       applyChromeHidden(!isChromeHidden);
     });
 
+    function toggleSettingsFloatPanel(open) {
+      const next = (typeof open === 'boolean') ? open : !settingsFloatPanel.classList.contains('show');
+      settingsFloatPanel.classList.toggle('show', next);
+      oldSettingsToggle.classList.toggle('active', next);
+      oldSettingsToggle.title = next ? 'Close settings' : 'Old Settings';
+      oldSettingsToggle.setAttribute('aria-label', oldSettingsToggle.title);
+      if (next) {
+        syncSettingsUI();
+        if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
+        if (typeof toggleSongsFloatPanel === 'function') toggleSongsFloatPanel(false);
+        if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
+        if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
+        if (typeof toggleAutoscrollFloatPanel === 'function') toggleAutoscrollFloatPanel(false);
+      }
+    }
+
     if (oldSettingsToggle) {
       oldSettingsToggle.addEventListener('click', function(e) {
         e.stopPropagation();
-        openSettings();
+        toggleSettingsFloatPanel();
       });
     }
 
