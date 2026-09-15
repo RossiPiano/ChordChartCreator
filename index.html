@@ -2096,33 +2096,6 @@
       .panel-wall {
         display: none;
       }
-      /* Mobile browsers apply :hover on tap and keep it stuck until you
-         tap elsewhere, which leaves the last-touched toolbar button with
-         a lingering darker vanilla background. Neutralize hover styling
-         on the toolbar buttons for phone-sized viewports so no button
-         ever appears "selected" just because it was the last one tapped. */
-      .chrome-toggle:hover,
-      .songs-float-toggle:hover,
-      .key-float-toggle:hover,
-      .split-float-toggle:hover,
-      .swap-float-toggle:hover,
-      .autoscroll-float-toggle:hover,
-      .editor-float-toggle:hover,
-      .template-float-toggle:hover,
-      .save-float-toggle:hover,
-      .png-float-toggle:hover,
-      .perf-toggle:hover {
-        background: rgba(232, 220, 204, 0.85);
-        color: #3d2b1f;
-        border-color: #c4ad92;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-        transform: none;
-      }
-      /* The swap button is meaningless on phone: only one panel is ever
-         visible at a time, and its side is picked by the split button. */
-      .swap-float-toggle {
-        display: none !important;
-      }
       /* When the user has swapped sides, DOM order already handles it
          (applySwapState reorders the panels), so nothing extra needed
          here. */
