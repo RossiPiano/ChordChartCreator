@@ -539,7 +539,7 @@
       position: fixed;
       top: 10px;
       left: 10px;
-      right: auto;
+      right: 10px;
       z-index: 2147483600;
       display: flex;
       flex-direction: row;
@@ -553,15 +553,17 @@
     .float-layer > * {
       pointer-events: auto;
     }
-    /* Auto row: lays the buttons out horizontally, in DOM order. */
+    /* Auto row: lays the buttons out horizontally, in DOM order.
+       If the viewport is too narrow, the buttons wrap onto a second row. */
     .float-auto-col {
       display: flex;
       flex-direction: row;
-      flex-wrap: nowrap;
-      justify-content: flex-star
+      flex-wrap: wrap;
+      justify-content: flex-start;
       align-items: flex-start;
+      align-content: flex-start;
       gap: 10px;
-      flex: 0 0 auto;
+      flex: 0 1 auto;
       min-width: 0;
     }
     /* Sticky column: never hides when first-row-hidden is active. */
