@@ -558,7 +558,7 @@
       display: flex;
       flex-direction: row;
       flex-wrap: nowrap;
-      justify-content: flex-start;
+      justify-content: flex-star
       align-items: flex-start;
       gap: 10px;
       flex: 0 0 auto;
@@ -840,8 +840,8 @@
     .autoscroll-float-panel {
       position: fixed;
       top: 58px;
-      right: 10px;
-      left: auto;
+      left: 10px;
+      right: auto;
       z-index: 2147483600;
       width: max-content;
       min-width: 320px;
@@ -1195,8 +1195,8 @@
     .key-float-panel {
       position: fixed;
       top: 58px;
-      right: 10px;
-      left: auto;
+      left: 10px;
+      right: auto;
       z-index: 2147483600;
       width: 260px;
       max-width: calc(100vw - 20px);
@@ -1335,8 +1335,8 @@
     .template-float-panel {
       position: fixed;
       top: 58px;
-      right: 10px;
-      left: auto;
+      left: 10px;
+      right: auto;
       z-index: 2147483600;
       width: 300px;
       max-width: calc(100vw - 20px);
@@ -1441,8 +1441,8 @@
     .songs-float-panel {
       position: fixed;
       top: 58px;
-      right: 10px;
-      left: auto;
+      left: 10px;
+      right: auto;
       z-index: 2147483600;
       width: 320px;
       max-width: calc(100vw - 20px);
@@ -1536,7 +1536,8 @@
     .subfolder-popup {
       display: none;
       position: absolute;
-      left: 100%;
+      right: 100%;
+      left: auto;
       top: -4px;
       background-color: #f5ede0;
       min-width: 200px;
@@ -1550,7 +1551,7 @@
       border: 1px solid #dcc9b0;
       z-index: 200;
       padding: 6px 0;
-      margin-left: 2px;
+      margin-right: 2px;
     }
     .subfolder-popup.show { display: block; }
     .subfolder-popup .dropdown-item {
@@ -1608,8 +1609,8 @@
     .perf-panel {
       position: fixed;
       top: 58px;
-      right: 10px;
-      left: auto;
+      left: 10px;
+      right: auto;
       z-index: 2147483600;
       width: 320px;
       max-width: calc(100vw - 20px);
@@ -3665,7 +3666,8 @@
             subFolderItem.addEventListener('mouseenter', function() {
               document.querySelectorAll('.subfolder-popup.show').forEach(p => { if (p !== subPopup) p.classList.remove('show'); });
               subPopup.style.top = '0px';
-              subPopup.style.left = '100%';
+              subPopup.style.left = 'auto';
+              subPopup.style.right = '100%';
               subPopup.classList.add('show');
             });
             subFolderItem.addEventListener('mouseleave', function() {
@@ -3683,7 +3685,8 @@
           folderItem.addEventListener('mouseenter', function() {
             document.querySelectorAll('.subfolder-popup.show').forEach(p => { if (p !== popup) p.classList.remove('show'); });
             popup.style.top = '0px';
-            popup.style.left = '100%';
+            popup.style.left = 'auto';
+            popup.style.right = '100%';
             popup.classList.add('show');
           });
           folderItem.addEventListener('mouseleave', function() {
@@ -5887,7 +5890,14 @@
       setTimeout(adjustChordSizes, 400);
     }
 
-    let isChromeHidden = false;
+    const CHROME_HIDDEN_KEY = 'chordChartChromeHidden';
+    let isChromeHidden = true;
+
+    try {
+      const storedHidden = localStorage.getItem(CHROME_HIDDEN_KEY);
+      if (storedHidden === 'true') isChromeHidden = true;
+      else if (storedHidden === 'false') isChromeHidden = false;
+    } catch (e) {}
 
     function applyChromeHidden(hidden) {
       isChromeHidden = !!hidden;
@@ -5901,6 +5911,7 @@
         titleEl.readOnly = false;
         titleEl.disabled = false;
       }
+      try { localStorage.setItem(CHROME_HIDDEN_KEY, isChromeHidden ? 'true' : 'false'); } catch (e) {}
     }
 
     chromeToggle.addEventListener('click', function(e) {
@@ -5969,7 +5980,7 @@
 
     applyMode(false);
     applyChromeCollapsed(false);
-    applyChromeHidden(false);
+    applyChromeHidden(isChromeHidden);
     applySwapState(isSwapped);
     if (typeof syncPerfPanel === 'function') syncPerfPanel();
 
