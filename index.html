@@ -5904,14 +5904,8 @@
       setTimeout(adjustChordSizes, 400);
     }
 
-    const CHROME_HIDDEN_KEY = 'chordChartChromeHidden';
     let isChromeHidden = false;
-
-    try {
-      const storedHidden = localStorage.getItem(CHROME_HIDDEN_KEY);
-      if (storedHidden === 'true') isChromeHidden = true;
-      else if (storedHidden === 'false') isChromeHidden = false;
-    } catch (e) {}
+    isEditorCollapsed = false;
 
     function applyChromeHidden(hidden) {
       isChromeHidden = !!hidden;
@@ -5925,12 +5919,11 @@
         titleEl.readOnly = false;
         titleEl.disabled = false;
       }
-      // When hiding the toolbar, also collapse the editors so the whole
-      // chrome goes away together. When showing the toolbar, also bring
-      // the editors back.
+      // The hamburger button controls the toolbar AND the editors together.
+      // Hiding it puts the whole app into focus mode; showing it brings
+      // the toolbar and the editors back. This state is intentionally NOT
+      // persisted — every fresh app open starts with everything visible.
       applyEditorState(isChromeHidden);
-      saveEditorHiddenState(isChromeHidden);
-      try { localStorage.setItem(CHROME_HIDDEN_KEY, isChromeHidden ? 'true' : 'false'); } catch (e) {}
     }
 
     chromeToggle.addEventListener('click', function(e) {
@@ -5999,7 +5992,7 @@
 
     applyMode(false);
     applyChromeCollapsed(false);
-    applyChromeHidden(isChromeHidden);
+    applyChromeHidden(false);
     applySwapState(isSwapped);
     if (typeof syncPerfPanel === 'function') syncPerfPanel();
 
