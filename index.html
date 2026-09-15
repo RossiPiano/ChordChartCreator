@@ -545,6 +545,7 @@
       flex-direction: row;
       align-items: flex-start;
       justify-content: flex-start;
+      flex-wrap: wrap;
       gap: 10px;
       pointer-events: none;
       max-width: calc(100vw - 20px);
@@ -563,12 +564,13 @@
       align-items: flex-start;
       align-content: flex-start;
       gap: 10px;
-      flex: 0 1 auto;
+      flex: 1 1 100%;
       min-width: 0;
     }
-    /* Sticky column: never hides when first-row-hidden is active. */
+    /* Sticky column: holds the auto-wrapping row of buttons. */
     .float-sticky-col {
-      flex: 0 0 auto;
+      flex: 1 1 100%;
+      min-width: 0;
     }
 
     .old-settings-toggle,
