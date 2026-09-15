@@ -538,40 +538,33 @@
     .float-layer {
       position: fixed;
       top: 10px;
-      right: 10px;
+      left: 10px;
+      right: auto;
       z-index: 2147483600;
       display: flex;
-      flex-direction: row-reverse;
+      flex-direction: row;
       align-items: flex-start;
+      justify-content: flex-start;
       gap: 10px;
       pointer-events: none;
       max-width: calc(100vw - 20px);
-      width: max-content;
+      width: auto;
     }
     .float-layer > * {
       pointer-events: auto;
     }
-    /* Fixed column: ☰ on top, ⛔ right below it. Right edge stays aligned. */
-    .float-fixed-col {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      flex: 0 0 auto;
-    }
-    /* Auto column: fills from the right, wraps to a new row when it hits
-       the left edge of the viewport. row-reverse puts the FIRST HTML child
-       on the RIGHTMOST position, so the visual order matches the DOM order. */
+    /* Auto row: lays the buttons out horizontally, in DOM order. */
     .float-auto-col {
       display: flex;
       flex-direction: row;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       justify-content: flex-start;
+      align-items: flex-start;
       gap: 10px;
-      flex: 1 1 auto;
+      flex: 0 0 auto;
       min-width: 0;
     }
-    /* Sticky column: sits immediately left of the fixed ☰/⛔ column
-       and never hides when first-row-hidden is active. */
+    /* Sticky column: never hides when first-row-hidden is active. */
     .float-sticky-col {
       flex: 0 0 auto;
     }
@@ -595,24 +588,30 @@
                   box-shadow 0.15s ease;
     }
 
+    /* When the hamburger is pressed, hide every button in the row.
+       All are removed from the flex flow so no gaps remain. */
+    body.first-row-hidden .songs-float-toggle,
+    body.first-row-hidden .key-float-toggle,
+    body.first-row-hidden .split-float-toggle,
+    body.first-row-hidden .swap-float-toggle,
+    body.first-row-hidden .autoscroll-float-toggle,
+    body.first-row-hidden .editor-float-toggle,
+    body.first-row-hidden .save-float-toggle,
     body.first-row-hidden .old-settings-toggle,
     body.first-row-hidden .perf-toggle,
     body.first-row-hidden .layout-float-toggle,
     body.first-row-hidden .png-float-toggle,
-    body.first-row-hidden .save-float-toggle,
     body.first-row-hidden .template-float-toggle {
       opacity: 0;
       pointer-events: none;
-    }
-    /* Keep the sticky 4 buttons visible and clickable in hide-everything mode. */
-    body.first-row-hidden .songs-float-toggle,
-    body.first-row-hidden .key-float-toggle,
-    body.first-row-hidden .split-float-toggle,
-    body.first-row-hidden .autoscroll-float-toggle,
-    body.first-row-hidden .swap-float-toggle,
-    body.first-row-hidden .editor-float-toggle {
-      opacity: 1;
-      pointer-events: auto;
+      height: 0 !important;
+      min-height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      gap: 0 !important;
+      flex-basis: 0 !important;
+      display: none !important;
     }
     body.first-row-hidden .title-bar {
       pointer-events: auto;
@@ -2049,23 +2048,19 @@
 </div>
 
 <div class="float-layer" id="floatLayer">
-  <div class="float-fixed-col">
-    <button class="chrome-toggle" id="chromeToggle" title="Collapse editor (focus mode)" aria-label="Collapse editor">☰</button>
-    <button class="old-settings-toggle" id="oldSettingsToggle" title="Old Settings" aria-label="Old Settings">⛔</button>
-  </div>
   <div class="float-auto-col float-sticky-col">
+    <button class="chrome-toggle" id="chromeToggle" title="Collapse editor (focus mode)" aria-label="Collapse editor">☰</button>
     <button class="songs-float-toggle" id="songsFloatToggle" title="Songs" aria-label="Songs">🎵</button>
     <button class="key-float-toggle" id="keyFloatToggle" title="Key &amp; transpose" aria-label="Key and transpose">🔑</button>
     <button class="split-float-toggle" id="splitFloatToggle" title="Split view (left / center / right)" aria-label="Split view">⬛</button>
     <button class="swap-float-toggle" id="swapFloatToggle" title="Swap lyrics / chords sides" aria-label="Swap sides">↔️</button>
     <button class="autoscroll-float-toggle" id="autoscrollFloatToggle" title="Auto-scroll by timestamps" aria-label="Auto-scroll">⏱️</button>
     <button class="editor-float-toggle" id="editorFloatToggle" title="Hide both editors" aria-label="Hide both editors">✏️</button>
-  </div>
-  <div class="float-auto-col">
     <button class="template-float-toggle" id="templateFloatToggle" title="Templates (look &amp; feel presets)" aria-label="Templates">🎨</button>
     <button class="save-float-toggle" id="saveFloatToggle" title="Save Chord Chart" aria-label="Save Chord Chart">💾</button>
     <button class="png-float-toggle" id="pngFloatToggle" title="Export Chord Chart as PNG" aria-label="Export Chord Chart as PNG">📷</button>
     <button class="perf-toggle" id="perfToggle" title="Open settings" aria-label="Open settings">⚙️</button>
+    <button class="old-settings-toggle" id="oldSettingsToggle" title="Old Settings" aria-label="Old Settings">⛔</button>
   </div>
 </div>
 
@@ -5892,16 +5887,15 @@
       setTimeout(adjustChordSizes, 400);
     }
 
-    let isFirstRowHidden = false;
+    let isChromeHidden = false;
 
-    function applyFirstRowHidden(hidden) {
-      isFirstRowHidden = !!hidden;
-      document.body.classList.toggle('first-row-hidden', isFirstRowHidden);
-      const label = isFirstRowHidden ? 'Show floating buttons' : 'Hide floating buttons';
-      chromeToggle.classList.toggle('active', isFirstRowHidden);
+    function applyChromeHidden(hidden) {
+      isChromeHidden = !!hidden;
+      document.body.classList.toggle('first-row-hidden', isChromeHidden);
+      const label = isChromeHidden ? 'Show buttons' : 'Hide buttons';
+      chromeToggle.classList.toggle('active', isChromeHidden);
       chromeToggle.title = label;
       chromeToggle.setAttribute('aria-label', label);
-      applyEditorState(isFirstRowHidden);
       const titleEl = document.getElementById('titleInput');
       if (titleEl) {
         titleEl.readOnly = false;
@@ -5911,7 +5905,7 @@
 
     chromeToggle.addEventListener('click', function(e) {
       e.stopPropagation();
-      applyFirstRowHidden(!isFirstRowHidden);
+      applyChromeHidden(!isChromeHidden);
     });
 
     if (oldSettingsToggle) {
@@ -5975,7 +5969,7 @@
 
     applyMode(false);
     applyChromeCollapsed(false);
-    applyFirstRowHidden(false);
+    applyChromeHidden(false);
     applySwapState(isSwapped);
     if (typeof syncPerfPanel === 'function') syncPerfPanel();
 
