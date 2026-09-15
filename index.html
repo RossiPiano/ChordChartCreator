@@ -5905,7 +5905,7 @@
     }
 
     const CHROME_HIDDEN_KEY = 'chordChartChromeHidden';
-    let isChromeHidden = true;
+    let isChromeHidden = false;
 
     try {
       const storedHidden = localStorage.getItem(CHROME_HIDDEN_KEY);
@@ -5925,6 +5925,11 @@
         titleEl.readOnly = false;
         titleEl.disabled = false;
       }
+      // When hiding the toolbar, also collapse the editors so the whole
+      // chrome goes away together. When showing the toolbar, also bring
+      // the editors back.
+      applyEditorState(isChromeHidden);
+      saveEditorHiddenState(isChromeHidden);
       try { localStorage.setItem(CHROME_HIDDEN_KEY, isChromeHidden ? 'true' : 'false'); } catch (e) {}
     }
 
