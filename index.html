@@ -588,10 +588,12 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
       font-family: inherit;
     }
-    .chrome-toggle:hover {
-      background: #6b4f3f;
-      border-color: #3d2b1f;
-      transform: scale(1.05);
+    @media (hover: hover) {
+      .chrome-toggle:hover {
+        background: #6b4f3f;
+        border-color: #3d2b1f;
+        transform: scale(1.05);
+      }
     }
     .chrome-toggle.active {
       background: rgba(232, 220, 204, 0.85);
@@ -755,9 +757,11 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
       font-family: inherit;
     }
-    .perf-toggle:hover {
-      background: rgba(196, 173, 146, 0.95);
-      transform: scale(1.05);
+    @media (hover: hover) {
+      .perf-toggle:hover {
+        background: rgba(196, 173, 146, 0.95);
+        transform: scale(1.05);
+      }
     }
     .perf-toggle.active {
       background: #5c4033;
@@ -787,9 +791,11 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
       font-family: inherit;
     }
-    .songs-float-toggle:hover {
-      background: rgba(196, 173, 146, 0.95);
-      transform: scale(1.05);
+    @media (hover: hover) {
+      .songs-float-toggle:hover {
+        background: rgba(196, 173, 146, 0.95);
+        transform: scale(1.05);
+      }
     }
     .songs-float-toggle.active {
       background: #5c4033;
@@ -830,9 +836,11 @@
       font-size: 0.78rem;
       letter-spacing: -0.05em;
     }
-    .split-float-toggle:hover {
-      background: rgba(196, 173, 146, 0.95);
-      transform: scale(1.05);
+    @media (hover: hover) {
+      .split-float-toggle:hover {
+        background: rgba(196, 173, 146, 0.95);
+        transform: scale(1.05);
+      }
     }
     .split-float-toggle.active {
       background: #5c4033;
@@ -892,9 +900,11 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
       font-family: inherit;
     }
-    .swap-float-toggle:hover {
-      background: rgba(196, 173, 146, 0.95);
-      transform: scale(1.05);
+    @media (hover: hover) {
+      .swap-float-toggle:hover {
+        background: rgba(196, 173, 146, 0.95);
+        transform: scale(1.05);
+      }
     }
     .swap-float-toggle:active {
       background: #5c4033;
@@ -904,9 +914,11 @@
       transform: scale(0.92);
       transition: transform 0.08s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
     }
-    .autoscroll-float-toggle:hover {
-      background: rgba(196, 173, 146, 0.95);
-      transform: scale(1.05);
+    @media (hover: hover) {
+      .autoscroll-float-toggle:hover {
+        background: rgba(196, 173, 146, 0.95);
+        transform: scale(1.05);
+      }
     }
     .autoscroll-float-toggle.active {
       background: #5c4033;
@@ -978,13 +990,17 @@
       transition: background 0.15s ease, border-color 0.15s ease;
       flex: 0 0 auto;
     }
-    .autoscroll-btn:hover { background: #c4ad92; border-color: #b0987a; }
+    @media (hover: hover) {
+      .autoscroll-btn:hover { background: #c4ad92; border-color: #b0987a; }
+    }
     .autoscroll-btn.primary {
       background: #8b6b4a;
       border-color: #7a5d3f;
       color: #ffffff;
     }
-    .autoscroll-btn.primary:hover { background: #7a5d3f; border-color: #6b4f35; }
+    @media (hover: hover) {
+      .autoscroll-btn.primary:hover { background: #7a5d3f; border-color: #6b4f35; }
+    }
     .autoscroll-current {
       flex: 0 0 62px;
       width: 62px;
@@ -1030,7 +1046,9 @@
       transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
       font-family: inherit;
     }
-    .autoscroll-src-toggle:hover { background: #c4ad92; border-color: #b0987a; }
+    @media (hover: hover) {
+      .autoscroll-src-toggle:hover { background: #c4ad92; border-color: #b0987a; }
+    }
     .autoscroll-src-toggle:active { transform: scale(0.94); }
     .autoscroll-row label {
       font-size: 0.8rem;
@@ -1116,8 +1134,10 @@
       padding: 1px 3px;
       cursor: pointer;
     }
-    .autoscroll-hint-list .autoscroll-hint-row:hover {
-      background: #e3d3bb;
+    @media (hover: hover) {
+      .autoscroll-hint-list .autoscroll-hint-row:hover {
+        background: #e3d3bb;
+      }
     }
     .autoscroll-hint-list .autoscroll-hint-time {
       color: #8b6b4a;
@@ -1156,9 +1176,11 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
       font-family: inherit;
     }
-    .editor-float-toggle:hover {
-      background: rgba(196, 173, 146, 0.95);
-      transform: scale(1.05);
+    @media (hover: hover) {
+      .editor-float-toggle:hover {
+        background: rgba(196, 173, 146, 0.95);
+        transform: scale(1.05);
+      }
     }
     .editor-float-toggle:not(.active) {
       background: #5c4033;
@@ -1166,10 +1188,12 @@
       border-color: #4a3328;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
-    .editor-float-toggle:not(.active):hover {
-      background: #6b4f3f;
-      border-color: #3d2b1f;
-      transform: scale(1.05);
+    @media (hover: hover) {
+      .editor-float-toggle:not(.active):hover {
+        background: #6b4f3f;
+        border-color: #3d2b1f;
+        transform: scale(1.05);
+      }
     }
     .editor-float-toggle.active {
       background: rgba(232, 220, 204, 0.85);
@@ -1199,9 +1223,11 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
       font-family: inherit;
     }
-    .save-float-toggle:hover {
-      background: rgba(196, 173, 146, 0.95);
-      transform: scale(1.05);
+    @media (hover: hover) {
+      .save-float-toggle:hover {
+        background: rgba(196, 173, 146, 0.95);
+        transform: scale(1.05);
+      }
     }
     .save-float-toggle.active {
       background: #5c4033;
@@ -1239,9 +1265,11 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
       font-family: inherit;
     }
-    .png-float-toggle:hover {
-      background: rgba(196, 173, 146, 0.95);
-      transform: scale(1.05);
+    @media (hover: hover) {
+      .png-float-toggle:hover {
+        background: rgba(196, 173, 146, 0.95);
+        transform: scale(1.05);
+      }
     }
     .png-float-toggle.active {
       background: #5c4033;
@@ -1279,11 +1307,13 @@
       box-shadow: 0 2px 6px rgba(200, 110, 20, 0.35);
       font-family: inherit;
     }
-    .key-float-toggle:hover {
-      background: rgba(220, 130, 30, 0.98);
-      border-color: #a8620e;
-      transform: scale(1.05);
-      box-shadow: 0 3px 10px rgba(200, 110, 20, 0.5);
+    @media (hover: hover) {
+      .key-float-toggle:hover {
+        background: rgba(220, 130, 30, 0.98);
+        border-color: #a8620e;
+        transform: scale(1.05);
+        box-shadow: 0 3px 10px rgba(200, 110, 20, 0.5);
+      }
     }
     .key-float-toggle.active {
       background: #a8620e;
@@ -1362,9 +1392,11 @@
       cursor: pointer;
       font-family: inherit;
     }
-    .key-float-row.key-float-transpose-row .btn-transpose:hover {
-      background: rgba(139, 107, 74, 0.15);
-      border: none;
+    @media (hover: hover) {
+      .key-float-row.key-float-transpose-row .btn-transpose:hover {
+        background: rgba(139, 107, 74, 0.15);
+        border: none;
+      }
     }
     .key-float-row.key-float-transpose-row .btn-transpose:active {
       background: rgba(139, 107, 74, 0.3);
@@ -1391,8 +1423,10 @@
       cursor: pointer;
       font-family: inherit;
     }
-    .btn-transpose:hover {
-      background: rgba(139, 107, 74, 0.15);
+    @media (hover: hover) {
+      .btn-transpose:hover {
+        background: rgba(139, 107, 74, 0.15);
+      }
     }
     .btn-transpose:active {
       background: rgba(139, 107, 74, 0.3);
@@ -1421,9 +1455,11 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
       font-family: inherit;
     }
-    .template-float-toggle:hover {
-      background: rgba(196, 173, 146, 0.95);
-      transform: scale(1.05);
+    @media (hover: hover) {
+      .template-float-toggle:hover {
+        background: rgba(196, 173, 146, 0.95);
+        transform: scale(1.05);
+      }
     }
     .template-float-toggle.active {
       background: #5c4033;
@@ -1500,13 +1536,17 @@
       cursor: pointer;
       transition: background 0.15s ease, border-color 0.15s ease;
     }
-    .template-float-btn:hover { background: #c4ad92; border-color: #b0987a; }
+    @media (hover: hover) {
+      .template-float-btn:hover { background: #c4ad92; border-color: #b0987a; }
+    }
     .template-float-btn.primary {
       background: #8b6b4a;
       border-color: #7a5d3f;
       color: #ffffff;
     }
-    .template-float-btn.primary:hover { background: #7a5d3f; border-color: #6b4f35; }
+    @media (hover: hover) {
+      .template-float-btn.primary:hover { background: #7a5d3f; border-color: #6b4f35; }
+    }
     .template-float-current {
       font-size: 0.72rem;
       color: #5c4033;
@@ -1535,7 +1575,9 @@
     }
     .template-float-default-label strong { font-weight: 700; color: #5c4033; opacity: 1; }
     .template-float-btn.danger { color: #a1402f; }
-    .template-float-btn.danger:hover { background: #e8cfc9; border-color: #c45a4a; }
+    @media (hover: hover) {
+      .template-float-btn.danger:hover { background: #e8cfc9; border-color: #c45a4a; }
+    }
 
     /* ===== FLOATING SONGS PANEL ===== */
     .songs-float-panel {
@@ -1588,7 +1630,9 @@
       text-overflow: ellipsis;
       position: relative;
     }
-    .dropdown-item:hover { background: #ece0cf; }
+    @media (hover: hover) {
+      .dropdown-item:hover { background: #ece0cf; }
+    }
     .dropdown-item.active { background: #5c4033; color: white; }
     .dropdown-item.song-item {
       padding-left: 6px;
@@ -1619,7 +1663,9 @@
       opacity: 0.6;
       flex: 0 0 auto;
     }
-    .dropdown-item.song-item .remove-btn:hover { opacity: 1; }
+    @media (hover: hover) {
+      .dropdown-item.song-item .remove-btn:hover { opacity: 1; }
+    }
     .dropdown-item.folder-item {
       padding-left: 10px;
       font-weight: 600;
@@ -1662,7 +1708,9 @@
       cursor: pointer;
       position: relative;
     }
-    .subfolder-popup .dropdown-item:hover { background: #ece0cf; }
+    @media (hover: hover) {
+      .subfolder-popup .dropdown-item:hover { background: #ece0cf; }
+    }
     .subfolder-popup .dropdown-item.song-item {
       padding-left: 6px;
       padding-right: 12px;
@@ -1691,7 +1739,9 @@
       opacity: 0.6;
       flex: 0 0 auto;
     }
-    .subfolder-popup .dropdown-item.song-item .remove-btn:hover { opacity: 1; }
+    @media (hover: hover) {
+      .subfolder-popup .dropdown-item.song-item .remove-btn:hover { opacity: 1; }
+    }
     .subfolder-popup .dropdown-item.folder-item {
       padding-left: 10px;
       font-weight: 600;
@@ -1753,7 +1803,9 @@
       padding: 0 4px;
       line-height: 1;
     }
-    .perf-close:hover { color: #5c4033; }
+    @media (hover: hover) {
+      .perf-close:hover { color: #5c4033; }
+    }
     .perf-panel-body { padding: 8px 12px 12px 12px; }
     .perf-section-label {
       font-size: 0.65rem;
@@ -1855,7 +1907,9 @@
       height: 18px;
       flex: 0 0 auto;
     }
-    .sizes-row-step:hover { background: #dcc9b0; }
+    @media (hover: hover) {
+      .sizes-row-step:hover { background: #dcc9b0; }
+    }
     .sizes-row-step:active { background: #c4ad92; }
 
     body.chrome-collapsed .input-area:not(.focus-visible) {
@@ -1914,11 +1968,17 @@
       white-space: nowrap;
       font-family: inherit;
     }
-    .btn:hover { background: #c4ad92; border-color: #b0987a; }
+    @media (hover: hover) {
+      .btn:hover { background: #c4ad92; border-color: #b0987a; }
+    }
     .btn-outline { background: transparent; border: 1px solid #c4ad92; color: #5c4033; }
-    .btn-outline:hover { background: #dcc9b0; border-color: #b0987a; }
+    @media (hover: hover) {
+      .btn-outline:hover { background: #dcc9b0; border-color: #b0987a; }
+    }
     .btn-success { background: #8b6b4a; border-color: #7a5d3f; color: white; }
-    .btn-success:hover { background: #7a5d3f; border-color: #6b4f35; }
+    @media (hover: hover) {
+      .btn-success:hover { background: #7a5d3f; border-color: #6b4f35; }
+    }
 
     /* ===== TOAST ===== */
     .toast {
@@ -1981,7 +2041,9 @@
       cursor: pointer;
       flex: 1 1 auto;
     }
-    .settings-lock-row:hover { background: #e3d3bb; }
+    @media (hover: hover) {
+      .settings-lock-row:hover { background: #e3d3bb; }
+    }
     .settings-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
     .settings-row label { font-size: 0.8rem; font-weight: 500; color: #5c4033; flex: 0 0 160px; }
     .settings-row input[type="range"] { flex: 1; accent-color: #8b6b4a; cursor: pointer; min-width: 0; }
@@ -2023,7 +2085,9 @@
       transition: background 0.1s ease;
       min-width: 22px;
     }
-    .settings-row .settings-num-group .settings-step-btn:hover { background: #dcc9b0; }
+    @media (hover: hover) {
+      .settings-row .settings-num-group .settings-step-btn:hover { background: #dcc9b0; }
+    }
     .settings-row .settings-num-group .settings-step-btn:active { background: #c4ad92; }
     .settings-row input[type="number"].settings-num {
       flex: 0 0 auto;
