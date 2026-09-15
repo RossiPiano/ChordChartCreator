@@ -298,6 +298,43 @@
       min-width: 0;
       padding-left: 10px;
     }
+    .editor-input-wrap {
+      flex: 1 1 auto;
+      min-width: 0;
+      position: relative;
+      display: flex;
+      align-items: stretch;
+    }
+    .editor-input-wrap > textarea {
+      width: 100%;
+    }
+    .editor-input-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 8px 12px 8px 10px;
+      font-size: calc(0.8rem * var(--editor-scale));
+      line-height: 1.5;
+      font-family: Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace;
+      color: #b0987a;
+      pointer-events: none;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .editor-input-overlay .hint-italic {
+      font-style: italic;
+    }
+    .editor-input-overlay .hint-emoji {
+      font-style: normal;
+    }
+    .editor-input-overlay.hidden {
+      display: none;
+    }
     textarea {
       width: 100%;
       flex: 1;
@@ -376,17 +413,21 @@
     }
     .chord-preview::-webkit-scrollbar-thumb:hover { background: #8b6b4a; }
 
-    .chord-preview .content-wrapper:empty::before {
-      content: "(Your nicely formatted lyrics or chords will appear here.)";
+    .chord-preview .content-wrapper .preview-hint {
       display: block;
       padding: 8px 4px;
       color: #b0987a;
-      font-style: italic;
       font-size: 0.85rem;
       line-height: 1.5;
       pointer-events: none;
       user-select: none;
       -webkit-user-select: none;
+    }
+    .chord-preview .content-wrapper .preview-hint .hint-italic {
+      font-style: italic;
+    }
+    .chord-preview .content-wrapper .preview-hint .hint-emoji {
+      font-style: normal;
     }
 
     .chord-line,
@@ -555,6 +596,9 @@
       box-sizing: border-box;
     }
     .float-layer > * {
+      pointer-events: none;
+    }
+    .float-layer > * > button {
       pointer-events: auto;
     }
     /* Auto row: lays the buttons out horizontally, in DOM order.
@@ -584,7 +628,6 @@
       min-width: 0;
     }
 
-    .old-settings-toggle,
     .perf-toggle,
     .layout-float-toggle,
     .key-float-toggle,
@@ -613,8 +656,7 @@
     .autoscroll-float-toggle:active:hover,
     .editor-float-toggle:active:hover,
     .template-float-toggle:active:hover,
-    .perf-toggle:active:hover,
-    .old-settings-toggle:active:hover {
+    .perf-toggle:active:hover {
       transform: scale(0.92);
       transition: transform 0.08s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
     }
@@ -642,7 +684,6 @@
     body.first-row-hidden .autoscroll-float-toggle,
     body.first-row-hidden .editor-float-toggle,
     body.first-row-hidden .save-float-toggle,
-    body.first-row-hidden .old-settings-toggle,
     body.first-row-hidden .perf-toggle,
     body.first-row-hidden .layout-float-toggle,
     body.first-row-hidden .png-float-toggle,
@@ -668,41 +709,6 @@
     }
 
     /* (.chrome-toggle-2 rule removed with the ⋯ button.) */
-
-    /* ===== FLOATING "OLD SETTINGS" TOGGLE (2nd row, below ☰) ===== */
-    .old-settings-toggle {
-      width: 38px;
-      height: 38px;
-      padding: 0;
-      border-radius: 10px;
-      border: 1px solid #b35c52;
-      background: rgba(200, 105, 95, 0.9);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      color: #ffffff;
-      font-size: 1.1rem;
-      line-height: 1;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
-      box-shadow: 0 2px 6px rgba(160, 60, 50, 0.25);
-      font-family: inherit;
-    }
-    .old-settings-toggle:hover {
-      background: rgba(180, 85, 75, 0.98);
-      border-color: #a04a40;
-      transform: scale(1.05);
-      box-shadow: 0 3px 10px rgba(160, 60, 50, 0.4);
-    }
-    .old-settings-toggle.active {
-      background: #8b3a30;
-      color: #ffffff;
-      border-color: #6b2a22;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
-    }
 
     /* ===== FLOATING PERFORMANCE BUTTON ===== */
     .perf-toggle {
@@ -1732,9 +1738,29 @@
       color: #b0987a;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      padding: 10px 2px 4px 2px;
-      border-bottom: 1px solid #ece0cf;
-      margin-bottom: 4px;
+      padding: 6px 8px;
+      border-top: 1px solid #ece0cf;
+      margin: 6px -6px 6px -6px;
+      border-radius: 4px;
+      background: #efe4d2;
+    }
+    .perf-section-label:nth-of-type(even) {
+      background: #e8dccc;
+    }
+    .perf-section-label:first-child {
+      border-top: none;
+      padding-top: 6px;
+    }
+
+    /* Visual breathing room between sub-groups inside a section */
+    .perf-spacer {
+      height: 14px;
+      margin: 0;
+    }
+
+    /* ===== Divider after the two SPACING sub-groups ===== */
+    #perfEmptyLine {
+      margin-bottom: 18px;
     }
     .perf-row {
       display: grid;
@@ -1893,57 +1919,7 @@
     }
     .toast.show { opacity: 1; transform: translateY(0); }
 
-    /* ===== OLD SETTINGS MODAL ===== */
-    .settings-float-panel {
-      position: fixed;
-      top: 58px;
-      left: 10px;
-      right: auto;
-      z-index: 2147483600;
-      width: 340px;
-      max-width: calc(100vw - 20px);
-      max-height: calc(100vh - 72px);
-      overflow-y: auto;
-      background: #f5ede0;
-      border: 1px solid #c4ad92;
-      border-radius: 12px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
-      display: none;
-      flex-direction: column;
-      font-family: inherit;
-      color: #3d2b1f;
-    }
-    .settings-float-panel.show { display: flex; }
-    .settings-float-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 14px;
-      background: #e8dccc;
-      border-bottom: 2px solid #dcc9b0;
-      border-top-left-radius: 12px;
-      border-top-right-radius: 12px;
-      font-weight: 700;
-      font-size: 0.85rem;
-      color: #5c4033;
-      position: sticky;
-      top: 0;
-      z-index: 1;
-    }
-    .settings-float-header .settings-lock-indicator { font-size: 0.9rem; margin-left: 8px; opacity: 0.75; }
-    .settings-float-body { padding: 16px 20px; overflow-y: auto; flex: 1; min-height: 0; }
-    .settings-float-footer {
-      padding: 12px 20px;
-      border-top: 1px solid #dcc9b0;
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      background: #f0e5d3;
-      flex-shrink: 0;
-      position: sticky;
-      bottom: 0;
-    }
-    .settings-float-footer .btn { padding: 6px 16px; font-size: 0.85rem; }
+    /* ===== SHARED SETTINGS ROW CLASSES (used by perfPanel) ===== */
     .settings-section { margin-bottom: 22px; }
     .settings-section:last-child { margin-bottom: 4px; }
     .settings-section h3 {
@@ -2061,45 +2037,6 @@
     .settings-row select:focus { border-color: #8b6b4a; }
     .custom-font-field { display: none; }
     .custom-font-field.show { display: flex; }
-    .settings-section { margin-bottom: 22px; }
-    .settings-section:last-child { margin-bottom: 4px; }
-    .settings-section h3 {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: #b0987a;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 10px;
-      padding-bottom: 4px;
-      border-bottom: 1px solid #dcc9b0;
-    }
-    .settings-lock-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 10px;
-      background: #ece0cf;
-      border: 1px solid #dcc9b0;
-      border-radius: 8px;
-      cursor: pointer;
-      user-select: none;
-    }
-    .settings-lock-row input[type="checkbox"] {
-      accent-color: #8b6b4a;
-      cursor: pointer;
-      margin: 0;
-      flex: 0 0 auto;
-      width: 15px;
-      height: 15px;
-    }
-    .settings-lock-row label {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: #5c4033;
-      cursor: pointer;
-      flex: 1 1 auto;
-    }
-    .settings-lock-row:hover { background: #e3d3bb; }
 
     .perf-panel .settings-lock-row {
       padding: 6px 8px;
@@ -2108,95 +2045,6 @@
     }
     .perf-panel .settings-lock-row input[type="checkbox"] { width: 13px; height: 13px; }
     .perf-panel .settings-lock-row label { font-size: 0.72rem; }
-
-    .settings-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-    .settings-row label { font-size: 0.8rem; font-weight: 500; color: #5c4033; flex: 0 0 160px; }
-    .settings-row input[type="range"] { flex: 1; accent-color: #8b6b4a; cursor: pointer; min-width: 0; }
-    .settings-row input[type="text"] {
-      flex: 1;
-      border: 1px solid #c4ad92;
-      border-radius: 6px;
-      padding: 4px 8px;
-      font-size: 0.8rem;
-      font-family: inherit;
-      color: #3d2b1f;
-      background: #ffffff;
-      outline: none;
-      min-width: 0;
-    }
-    .settings-row input[type="text"]:focus { border-color: #8b6b4a; box-shadow: 0 0 0 2px rgba(139, 107, 74, 0.2); }
-    .settings-row .settings-num-group {
-      flex: 0 0 auto;
-      display: inline-flex;
-      align-items: stretch;
-      border: 1px solid #c4ad92;
-      border-radius: 6px;
-      overflow: hidden;
-      background: #ffffff;
-    }
-    .settings-row .settings-num-group .settings-step-btn {
-      background: #e8dccc;
-      border: none;
-      color: #5c4033;
-      font-size: 0.95rem;
-      font-weight: 700;
-      font-family: inherit;
-      cursor: pointer;
-      padding: 0 8px;
-      line-height: 1;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.1s ease;
-      min-width: 22px;
-    }
-    .settings-row .settings-num-group .settings-step-btn:hover { background: #dcc9b0; }
-    .settings-row .settings-num-group .settings-step-btn:active { background: #c4ad92; }
-    .settings-row input[type="number"].settings-num {
-      flex: 0 0 auto;
-      width: 62px;
-      border: none;
-      border-left: 1px solid #c4ad92;
-      border-right: 1px solid #c4ad92;
-      border-radius: 0;
-      padding: 4px 6px;
-      font-size: 0.8rem;
-      font-family: inherit;
-      color: #3d2b1f;
-      background: #ffffff;
-      outline: none;
-      text-align: right;
-      -moz-appearance: textfield;
-    }
-    .settings-row input[type="number"].settings-num::-webkit-outer-spin-button,
-    .settings-row input[type="number"].settings-num::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    .settings-row input[type="number"].settings-num:focus { background: #f5ede0; }
-    .settings-row select {
-      flex: 1;
-      border: 1px solid #c4ad92;
-      border-radius: 6px;
-      padding: 4px 8px;
-      font-size: 0.8rem;
-      font-family: inherit;
-      color: #3d2b1f;
-      background: #ffffff;
-      outline: none;
-      cursor: pointer;
-      min-width: 0;
-    }
-    .settings-row select:focus { border-color: #8b6b4a; }
-    .settings-footer {
-      padding: 12px 20px;
-      border-top: 1px solid #dcc9b0;
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      background: #f0e5d3;
-      flex-shrink: 0;
-    }
-    .settings-footer .btn { padding: 6px 16px; font-size: 0.85rem; }
-    .custom-font-field { display: none; }
-    .custom-font-field.show { display: flex; }
 
     @media (max-width: 600px) {
       .settings-row { flex-wrap: wrap; }
@@ -2224,7 +2072,10 @@
           <div class="drop-message">📂 Drop a chord chart here</div>
           <div class="editor-with-gutter">
             <textarea id="timeInput" class="time-gutter" spellcheck="false" placeholder="0:00&#10;&#10;0:26&#10;&#10;&#10;&#10;1:28"></textarea>
-            <textarea id="chartInput" spellcheck="false" placeholder="(Type lyrics or chords here.)"></textarea>
+            <div class="editor-input-wrap">
+              <div class="editor-input-overlay" id="chartInputOverlay"><span class="hint-emoji">⌨️🎤</span> <span class="hint-italic">Type lyrics here!</span></div>
+              <textarea id="chartInput" spellcheck="false"></textarea>
+            </div>
           </div>
         </div>
       </div>
@@ -2241,7 +2092,10 @@
           <div class="drop-message">📂 Drop a chord chart here</div>
           <div class="editor-with-gutter">
             <textarea id="timeInput2" class="time-gutter" spellcheck="false" placeholder="0:00&#10;&#10;0:26&#10;&#10;&#10;&#10;1:28"></textarea>
-            <textarea id="chartInput2" spellcheck="false" placeholder="(Type lyrics or chords here.)"></textarea>
+            <div class="editor-input-wrap">
+              <div class="editor-input-overlay" id="chartInputOverlay2"><span class="hint-emoji">⌨️🎸</span> <span class="hint-italic">Type chords here!</span></div>
+              <textarea id="chartInput2" spellcheck="false"></textarea>
+            </div>
           </div>
         </div>
       </div>
@@ -2262,7 +2116,6 @@
     <button class="save-float-toggle" id="saveFloatToggle" title="Save Chord Chart" aria-label="Save Chord Chart">💾</button>
     <button class="png-float-toggle" id="pngFloatToggle" title="Export Chord Chart as PNG" aria-label="Export Chord Chart as PNG">📷</button>
     <button class="perf-toggle" id="perfToggle" title="Open settings" aria-label="Open settings">⚙️</button>
-    <button class="old-settings-toggle" id="oldSettingsToggle" title="Old Settings" aria-label="Old Settings">⛔</button>
   </div>
 </div>
 
@@ -2350,6 +2203,15 @@
       <label for="perfLockCheckbox">🔒 Lock all settings (protects while typing new text)</label>
     </div>
 
+    <div class="perf-section-label">UI DESIGN</div>
+    <div class="perf-row">
+      <label for="perfLabelRadius">Label Box Roundness</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfLabelRadius" title="Decrease">−</button>
+      <input type="range" id="perfLabelRadius" min="0" max="20" step="0.5" value="4">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfLabelRadius" title="Increase">+</button>
+      <input type="number" class="perf-readout" id="perfLabelRadiusReadout" min="0" max="20" step="0.5" value="4.0">
+    </div>
+
     <div class="perf-section-label">SIZES</div>
     <div class="perf-row">
       <label for="perfEverythingSize">EVERYTHING</label>
@@ -2379,6 +2241,21 @@
       <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfLyricSize" title="Increase">+</button>
       <input type="number" class="perf-readout" id="perfLyricSizeReadout" min="0.25" max="4" step="0.01" value="1.00">
     </div>
+    <div class="perf-spacer"></div>
+    <div class="perf-row">
+      <label for="perfSongNameSize">Song Name</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfSongNameSize" title="Decrease">−</button>
+      <input type="range" id="perfSongNameSize" min="0.5" max="2" step="0.05" value="0.8">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfSongNameSize" title="Increase">+</button>
+      <input type="number" class="perf-readout" id="perfSongNameSizeReadout" min="0.5" max="2" step="0.05" value="0.80">
+    </div>
+    <div class="perf-row">
+      <label for="perfEditorScale">Editor Text</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfEditorScale" title="Decrease">−</button>
+      <input type="range" id="perfEditorScale" min="0.7" max="2" step="0.05" value="1">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfEditorScale" title="Increase">+</button>
+      <input type="number" class="perf-readout" id="perfEditorScaleReadout" min="0.7" max="2" step="0.05" value="1.00">
+    </div>
 
     <div class="perf-section-label">SPACING</div>
     <div class="perf-row">
@@ -2402,6 +2279,7 @@
       <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfLyricSpacing" title="Increase">+</button>
       <input type="number" class="perf-readout" id="perfLyricSpacingReadout" min="-0.05" max="0.2" step="0.005" value="0.000">
     </div>
+    <div class="perf-spacer"></div>
     <div class="perf-row">
       <label for="perfEmptyLine">Empty Line</label>
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfEmptyLine" title="Decrease">−</button>
@@ -2463,172 +2341,6 @@
 </div>
 
 <div class="toast" id="toast"></div>
-
-<div class="settings-float-panel" id="settingsFloatPanel" role="dialog" aria-label="Old Settings">
-  <div class="settings-float-header">
-    <span>⚙️ Old Settings<span class="settings-lock-indicator" id="settingsLockIndicator" style="display: none;">🔒</span></span>
-    <button class="perf-close" id="settingsClose" title="Close">✕</button>
-  </div>
-  <div class="settings-float-body">
-
-      <div class="settings-section">
-        <h3>Lock</h3>
-        <div class="settings-lock-row" id="settingsLockRow">
-          <input type="checkbox" id="settingsLockCheckbox">
-          <label for="settingsLockCheckbox">🔒 Lock all settings (protects while typing new text)</label>
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <h3>Interface</h3>
-        <div class="settings-row">
-          <label for="uiScaleSlider">UI scale</label>
-          <input type="range" id="uiScaleSlider" min="0.7" max="1.6" step="0.05" value="1">
-          <input type="number" class="settings-num" id="uiScaleNum" min="0.7" max="1.6" step="0.05" value="1">
-        </div>
-        <div class="settings-row">
-          <label for="editorScaleSlider">Editor text size</label>
-          <input type="range" id="editorScaleSlider" min="0.7" max="2" step="0.05" value="1">
-          <input type="number" class="settings-num" id="editorScaleNum" min="0.7" max="2" step="0.05" value="1">
-        </div>
-        <div class="settings-row">
-          <label for="currentSongSizeSlider">Song name size</label>
-          <input type="range" id="currentSongSizeSlider" min="0.5" max="2" step="0.05" value="0.8">
-          <input type="number" class="settings-num" id="currentSongSizeNum" min="0.5" max="2" step="0.05" value="0.8">
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <h3>Layout</h3>
-        <div class="settings-row">
-          <label for="chordLineHeightSlider">Line spacing</label>
-          <input type="range" id="chordLineHeightSlider" min="1" max="3" step="0.05" value="1.9">
-          <input type="number" class="settings-num" id="chordLineHeightNum" min="1" max="3" step="0.05" value="1.9">
-        </div>
-        <div class="settings-row">
-          <label for="editorWidthSlider">Editor width</label>
-          <input type="range" id="editorWidthSlider" min="10" max="90" step="1" value="50">
-          <input type="number" class="settings-num" id="editorWidthNum" min="10" max="90" step="1" value="50">
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <h3>Character Spacing</h3>
-        <div class="settings-row">
-          <label for="chordLetterSpacingSlider">Chords &amp; barlines</label>
-          <input type="range" id="chordLetterSpacingSlider" min="-0.05" max="0.2" step="0.005" value="0">
-          <input type="number" class="settings-num" id="chordLetterSpacingNum" min="-0.05" max="0.2" step="0.005" value="0">
-        </div>
-        <div class="settings-row">
-          <label for="lyricLetterSpacingSlider">Lyrics</label>
-          <input type="range" id="lyricLetterSpacingSlider" min="-0.05" max="0.2" step="0.005" value="0">
-          <input type="number" class="settings-num" id="lyricLetterSpacingNum" min="-0.05" max="0.2" step="0.005" value="0">
-        </div>
-        <div class="settings-row">
-          <label for="labelLetterSpacingSlider">Section labels</label>
-          <input type="range" id="labelLetterSpacingSlider" min="-0.05" max="0.2" step="0.005" value="0">
-          <input type="number" class="settings-num" id="labelLetterSpacingNum" min="-0.05" max="0.2" step="0.005" value="0">
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <h3>Barline</h3>
-        <div class="settings-row">
-          <label for="pipeScaleSlider">Barline height</label>
-          <input type="range" id="pipeScaleSlider" min="1" max="5" step="0.05" value="2.25">
-          <input type="number" class="settings-num" id="pipeScaleNum" min="1" max="5" step="0.05" value="2.25">
-        </div>
-        <div class="settings-row">
-          <label for="pipeThicknessSlider">Barline thickness</label>
-          <input type="range" id="pipeThicknessSlider" min="0" max="0.15" step="0.005" value="0.03">
-          <input type="number" class="settings-num" id="pipeThicknessNum" min="0" max="0.15" step="0.005" value="0.03">
-        </div>
-        <div class="settings-row">
-          <label for="pipeValignSlider">Barline vertical position</label>
-          <input type="range" id="pipeValignSlider" min="-1" max="1" step="0.05" value="0.2">
-          <input type="number" class="settings-num" id="pipeValignNum" min="-1" max="1" step="0.05" value="0.2">
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <h3>Chord Font</h3>
-        <div class="settings-row">
-          <label for="chordFontSelect">Font family</label>
-          <select id="chordFontSelect">
-            <option value="Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace">System Monospace (recommended)</option>
-            <option value="'Courier New', Courier, monospace">Courier New</option>
-            <option value="Consolas, 'Courier New', monospace">Consolas</option>
-            <option value="Menlo, Monaco, 'Courier New', monospace">Menlo / Monaco</option>
-            <option value="'DejaVu Sans Mono', 'Liberation Mono', monospace">DejaVu Sans Mono</option>
-            <option value="'FC Home', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">FC Home</option>
-            <option value="'Fira Code', 'JetBrains Mono', 'Cascadia Code', Consolas, Menlo, Monaco, 'DejaVu Sans Mono', monospace">Fira Code (if installed)</option>
-            <option value="__custom__">Custom…</option>
-          </select>
-        </div>
-        <div class="settings-row custom-font-field" id="chordFontCustomRow">
-          <label for="chordFontCustom">Custom name</label>
-          <input type="text" id="chordFontCustom" placeholder="e.g. FC Home, Sarabun">
-        </div>
-        <div class="settings-row">
-          <label for="chordSizeSlider">Chord size</label>
-          <input type="range" id="chordSizeSlider" min="0" max="100" step="0.5" value="50">
-          <input type="number" class="settings-num" id="chordSizeNum" min="0.25" max="4" step="0.01" value="1">
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <h3>Lyrics Font</h3>
-        <div class="settings-row">
-          <label for="lyricFontSelect">Font family</label>
-          <select id="lyricFontSelect">
-            <option value="'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">Sarabun (Thai)</option>
-            <option value="Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace">System Monospace</option>
-            <option value="'Courier New', Courier, monospace">Courier New</option>
-            <option value="Consolas, 'Courier New', monospace">Consolas</option>
-            <option value="Menlo, Monaco, 'Courier New', monospace">Menlo / Monaco</option>
-            <option value="'DejaVu Sans Mono', 'Liberation Mono', monospace">DejaVu Sans Mono</option>
-            <option value="'FC Home', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">FC Home</option>
-            <option value="'IBM Plex Sans Thai', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">IBM Plex Sans Thai</option>
-            <option value="'Prompt', 'Sarabun', 'Noto Sans Thai', system-ui, sans-serif">Prompt (Thai)</option>
-            <option value="'Noto Sans Thai', 'Sarabun', system-ui, sans-serif">Noto Sans Thai</option>
-            <option value="'Kanit', 'Sarabun', system-ui, sans-serif">Kanit (Thai)</option>
-            <option value="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">System sans</option>
-            <option value="'Fira Code', 'JetBrains Mono', 'Cascadia Code', Consolas, Menlo, Monaco, 'DejaVu Sans Mono', monospace">Fira Code (if installed)</option>
-            <option value="__custom__">Custom…</option>
-          </select>
-        </div>
-        <div class="settings-row custom-font-field" id="lyricFontCustomRow">
-          <label for="lyricFontCustom">Custom name</label>
-          <input type="text" id="lyricFontCustom" placeholder="e.g. FC Home, Sarabun">
-        </div>
-        <div class="settings-row">
-          <label for="lyricSizeSlider">Lyric size</label>
-          <input type="range" id="lyricSizeSlider" min="0" max="100" step="0.5" value="50">
-          <input type="number" class="settings-num" id="lyricSizeNum" min="0.25" max="4" step="0.01" value="1">
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <h3>Section Labels</h3>
-        <div class="settings-row">
-          <label for="labelSizeSlider">Label size</label>
-          <input type="range" id="labelSizeSlider" min="0" max="100" step="0.5" value="50">
-          <input type="number" class="settings-num" id="labelSizeNum" min="0.25" max="4" step="0.01" value="1">
-        </div>
-        <div class="settings-row">
-          <label for="labelRadiusSlider">Corner roundness</label>
-          <input type="range" id="labelRadiusSlider" min="0" max="20" step="0.5" value="4">
-          <input type="number" class="settings-num" id="labelRadiusNum" min="0" max="20" step="0.5" value="4">
-        </div>
-      </div>
-
-  </div>
-  <div class="settings-float-footer">
-    <button class="btn btn-outline" id="settingsReset">↺ Reset to defaults</button>
-    <button class="btn btn-success" id="settingsDone">Done</button>
-  </div>
-</div>
-
 <script>
   (function() {
     'use strict';
@@ -2686,14 +2398,6 @@
     const previewContainer = document.getElementById('previewContainer');
     const inputArea = document.getElementById('inputArea');
     const previewArea = document.getElementById('previewArea');
-    const settingsFloatPanel = document.getElementById('settingsFloatPanel');
-    const settingsPanel = settingsFloatPanel;
-    const settingsClose = document.getElementById('settingsClose');
-    const settingsDone = document.getElementById('settingsDone');
-    const settingsReset = document.getElementById('settingsReset');
-    const settingsLockIndicator = document.getElementById('settingsLockIndicator');
-    const settingsLockRow = document.getElementById('settingsLockRow');
-    const settingsLockCheckbox = document.getElementById('settingsLockCheckbox');
     const perfLockRow = document.getElementById('perfLockRow');
     const perfLockCheckbox = document.getElementById('perfLockCheckbox');
     const editorWrapper = document.getElementById('editorWrapper');
@@ -2709,7 +2413,6 @@
     const confirmNo = document.getElementById('confirmNo');
 
     const chromeToggle = document.getElementById('chromeToggle');
-    const oldSettingsToggle = document.getElementById('oldSettingsToggle');
     const editorFloatToggle = document.getElementById('editorFloatToggle');
     const splitFloatToggle = document.getElementById('splitFloatToggle');
     const swapFloatToggle = document.getElementById('swapFloatToggle');
@@ -2842,45 +2545,6 @@
       setTimeout(function() { URL.revokeObjectURL(url); }, 1500);
       return { saved: true, usedPicker: false, name: safeName };
     }
-
-    // ===== SETTINGS ELEMENT REFERENCES =====
-    const uiScaleSlider = document.getElementById('uiScaleSlider');
-    const uiScaleNum = document.getElementById('uiScaleNum');
-    const editorScaleSlider = document.getElementById('editorScaleSlider');
-    const editorScaleNum = document.getElementById('editorScaleNum');
-    const currentSongSizeSlider = document.getElementById('currentSongSizeSlider');
-    const currentSongSizeNum = document.getElementById('currentSongSizeNum');
-    const chordLineHeightSlider = document.getElementById('chordLineHeightSlider');
-    const chordLineHeightNum = document.getElementById('chordLineHeightNum');
-    // emptyLineHeight controls now live in the ⚙️ perf panel as perfEmptyLine.
-    const editorWidthSlider = document.getElementById('editorWidthSlider');
-    const editorWidthNum = document.getElementById('editorWidthNum');
-    const chordLetterSpacingSlider = document.getElementById('chordLetterSpacingSlider');
-    const chordLetterSpacingNum = document.getElementById('chordLetterSpacingNum');
-    const lyricLetterSpacingSlider = document.getElementById('lyricLetterSpacingSlider');
-    const lyricLetterSpacingNum = document.getElementById('lyricLetterSpacingNum');
-    const labelLetterSpacingSlider = document.getElementById('labelLetterSpacingSlider');
-    const labelLetterSpacingNum = document.getElementById('labelLetterSpacingNum');
-    const pipeScaleSlider = document.getElementById('pipeScaleSlider');
-    const pipeScaleNum = document.getElementById('pipeScaleNum');
-    const pipeThicknessSlider = document.getElementById('pipeThicknessSlider');
-    const pipeThicknessNum = document.getElementById('pipeThicknessNum');
-    const pipeValignSlider = document.getElementById('pipeValignSlider');
-    const pipeValignNum = document.getElementById('pipeValignNum');
-    const chordFontSelect = document.getElementById('chordFontSelect');
-    const chordFontCustomRow = document.getElementById('chordFontCustomRow');
-    const chordFontCustom = document.getElementById('chordFontCustom');
-    const chordSizeSlider = document.getElementById('chordSizeSlider');
-    const chordSizeNum = document.getElementById('chordSizeNum');
-    const lyricFontSelect = document.getElementById('lyricFontSelect');
-    const lyricFontCustomRow = document.getElementById('lyricFontCustomRow');
-    const lyricFontCustom = document.getElementById('lyricFontCustom');
-    const lyricSizeSlider = document.getElementById('lyricSizeSlider');
-    const lyricSizeNum = document.getElementById('lyricSizeNum');
-    const labelSizeSlider = document.getElementById('labelSizeSlider');
-    const labelSizeNum = document.getElementById('labelSizeNum');
-    const labelRadiusSlider = document.getElementById('labelRadiusSlider');
-    const labelRadiusNum = document.getElementById('labelRadiusNum');
 
     // ===== NOTE TABLES =====
     const NOTE_MAP = {
@@ -3033,61 +2697,6 @@
       return snap;
     }
 
-    function syncSettingsUI() {
-      uiScaleSlider.value = settings.uiScale;
-      uiScaleNum.value = Number(settings.uiScale).toFixed(2);
-      editorScaleSlider.value = settings.editorScale;
-      editorScaleNum.value = Number(settings.editorScale).toFixed(2);
-      currentSongSizeSlider.value = settings.currentSongSize;
-      currentSongSizeNum.value = Number(settings.currentSongSize).toFixed(2);
-      chordLineHeightSlider.value = settings.chordLineHeight;
-      chordLineHeightNum.value = Number(settings.chordLineHeight).toFixed(2);
-      // emptyLineHeight is exposed via the perf panel's perfEmptyLine slider.
-      editorWidthSlider.value = settings.editorWidth;
-      editorWidthNum.value = Number(settings.editorWidth).toFixed(0);
-      chordLetterSpacingSlider.value = settings.chordLetterSpacing;
-      chordLetterSpacingNum.value = Number(settings.chordLetterSpacing).toFixed(3);
-      lyricLetterSpacingSlider.value = settings.lyricLetterSpacing;
-      lyricLetterSpacingNum.value = Number(settings.lyricLetterSpacing).toFixed(3);
-      labelLetterSpacingSlider.value = settings.labelLetterSpacing;
-      labelLetterSpacingNum.value = Number(settings.labelLetterSpacing).toFixed(3);
-      pipeScaleSlider.value = settings.pipeScale;
-      pipeScaleNum.value = Number(settings.pipeScale).toFixed(2);
-      pipeThicknessSlider.value = settings.pipeThickness;
-      pipeThicknessNum.value = Number(settings.pipeThickness).toFixed(3);
-      pipeValignSlider.value = settings.pipeVerticalAlign;
-      pipeValignNum.value = Number(settings.pipeVerticalAlign).toFixed(2);
-
-      const chordMatch = [...chordFontSelect.options].find(opt => opt.value === settings.chordFont);
-      if (chordMatch) {
-        chordFontSelect.value = settings.chordFont;
-        chordFontCustomRow.classList.remove('show');
-      } else {
-        chordFontSelect.value = '__custom__';
-        chordFontCustomRow.classList.add('show');
-      }
-      chordFontCustom.value = settings.chordFontCustom || '';
-      chordSizeSlider.value = ratioToSliderPos(internalToRatio(settings.chordSizeMult, BASE_CHORD_MULT));
-      chordSizeNum.value = internalToRatio(settings.chordSizeMult, BASE_CHORD_MULT).toFixed(2);
-
-      const lyricMatch = [...lyricFontSelect.options].find(opt => opt.value === settings.lyricFont);
-      if (lyricMatch) {
-        lyricFontSelect.value = settings.lyricFont;
-        lyricFontCustomRow.classList.remove('show');
-      } else {
-        lyricFontSelect.value = '__custom__';
-        lyricFontCustomRow.classList.add('show');
-      }
-      lyricFontCustom.value = settings.lyricFontCustom || '';
-      lyricSizeSlider.value = ratioToSliderPos(internalToRatio(settings.lyricSize, BASE_LYRIC_SIZE));
-      lyricSizeNum.value = internalToRatio(settings.lyricSize, BASE_LYRIC_SIZE).toFixed(2);
-
-      labelSizeSlider.value = ratioToSliderPos(internalToRatio(settings.labelSize, BASE_LABEL_SIZE));
-      labelSizeNum.value = internalToRatio(settings.labelSize, BASE_LABEL_SIZE).toFixed(2);
-      labelRadiusSlider.value = settings.labelRadius;
-      labelRadiusNum.value = Number(settings.labelRadius).toFixed(1);
-    }
-
     function setPreviewPaddingH(v) {
       v = clampNum(v, 0, 40);
       settings.previewPaddingH = v;
@@ -3109,56 +2718,11 @@
       applySettings();
     }
 
-    function setEditorWidth(v) {
-      v = clampNum(v, 10, 90);
-      settings.editorWidth = v;
-      editorWidthSlider.value = v;
-      if (document.activeElement !== editorWidthNum) editorWidthNum.value = v.toFixed(0);
-      saveSettings();
-      applySettings();
-    }
-    editorWidthSlider.addEventListener('input', function() { setEditorWidth(parseFloat(this.value)); });
-    editorWidthNum.addEventListener('input', function() {
-      const v = parseFloat(this.value);
-      if (!isNaN(v)) setEditorWidth(v);
-    });
-    editorWidthNum.addEventListener('blur', function() { this.value = settings.editorWidth.toFixed(0); });
-
-    function openSettings() {
-      syncSettingsUI();
-      settingsFloatPanel.classList.add('show');
-      if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
-      if (typeof toggleSongsFloatPanel === 'function') toggleSongsFloatPanel(false);
-      if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
-      if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
-      if (typeof toggleAutoscrollFloatPanel === 'function') toggleAutoscrollFloatPanel(false);
-    }
-    function closeSettings() { settingsFloatPanel.classList.remove('show'); }
-
-    settingsClose.addEventListener('click', closeSettings);
-    settingsDone.addEventListener('click', closeSettings);
-
     // ===== LOCK SYSTEM =====
     function applyLockState() {
-      if (settingsLockCheckbox) settingsLockCheckbox.checked = isLocked;
       if (perfLockCheckbox) perfLockCheckbox.checked = isLocked;
-      if (settingsPanel) settingsPanel.classList.toggle('locked', isLocked);
-      if (settingsLockIndicator) settingsLockIndicator.style.display = isLocked ? 'inline' : 'none';
     }
 
-    if (settingsLockCheckbox) {
-      settingsLockCheckbox.addEventListener('change', function() {
-        isLocked = this.checked;
-        applyLockState();
-      });
-    }
-    if (settingsLockRow) {
-      settingsLockRow.addEventListener('click', function(e) {
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL') return;
-        isLocked = !isLocked;
-        applyLockState();
-      });
-    }
     if (perfLockCheckbox) {
       perfLockCheckbox.addEventListener('change', function() {
         isLocked = this.checked;
@@ -3174,65 +2738,19 @@
     }
 
     // ===== SETTERS =====
-    function setUIScale(v) {
-      v = clampNum(v, 0.7, 1.6);
-      settings.uiScale = v;
-      uiScaleSlider.value = v;
-      if (document.activeElement !== uiScaleNum) uiScaleNum.value = v.toFixed(2);
-      saveSettings();
-      applySettings();
-    }
-    uiScaleSlider.addEventListener('input', function() { setUIScale(parseFloat(this.value)); });
-    uiScaleNum.addEventListener('input', function() {
-      const v = parseFloat(this.value);
-      if (!isNaN(v)) setUIScale(v);
-    });
-    uiScaleNum.addEventListener('blur', function() { this.value = settings.uiScale.toFixed(2); });
-
     function setEditorScale(v) {
       v = clampNum(v, 0.7, 2);
       settings.editorScale = v;
-      editorScaleSlider.value = v;
-      if (document.activeElement !== editorScaleNum) editorScaleNum.value = v.toFixed(2);
       saveSettings();
       applySettings();
     }
-    editorScaleSlider.addEventListener('input', function() { setEditorScale(parseFloat(this.value)); });
-    editorScaleNum.addEventListener('input', function() {
-      const v = parseFloat(this.value);
-      if (!isNaN(v)) setEditorScale(v);
-    });
-    editorScaleNum.addEventListener('blur', function() { this.value = settings.editorScale.toFixed(2); });
 
     function setCurrentSongSize(v) {
       v = clampNum(v, 0.5, 2);
       settings.currentSongSize = v;
-      currentSongSizeSlider.value = v;
-      if (document.activeElement !== currentSongSizeNum) currentSongSizeNum.value = v.toFixed(2);
       saveSettings();
       applySettings();
     }
-    currentSongSizeSlider.addEventListener('input', function() { setCurrentSongSize(parseFloat(this.value)); });
-    currentSongSizeNum.addEventListener('input', function() {
-      const v = parseFloat(this.value);
-      if (!isNaN(v)) setCurrentSongSize(v);
-    });
-    currentSongSizeNum.addEventListener('blur', function() { this.value = settings.currentSongSize.toFixed(2); });
-
-    function setChordLineHeight(v) {
-      v = clampNum(v, 1, 3);
-      settings.chordLineHeight = v;
-      chordLineHeightSlider.value = v;
-      if (document.activeElement !== chordLineHeightNum) chordLineHeightNum.value = v.toFixed(2);
-      saveSettings();
-      applySettings();
-    }
-    chordLineHeightSlider.addEventListener('input', function() { setChordLineHeight(parseFloat(this.value)); });
-    chordLineHeightNum.addEventListener('input', function() {
-      const v = parseFloat(this.value);
-      if (!isNaN(v)) setChordLineHeight(v);
-    });
-    chordLineHeightNum.addEventListener('blur', function() { this.value = settings.chordLineHeight.toFixed(2); });
 
     function setEmptyLineHeight(v) {
       v = clampNum(v, 0, 60);
@@ -3244,111 +2762,44 @@
     function setChordLetterSpacing(v) {
       v = clampNum(v, -0.05, 0.2);
       settings.chordLetterSpacing = v;
-      chordLetterSpacingSlider.value = v;
-      if (document.activeElement !== chordLetterSpacingNum) chordLetterSpacingNum.value = v.toFixed(3);
       saveSettings();
       applySettings();
     }
-    chordLetterSpacingSlider.addEventListener('input', function() { setChordLetterSpacing(parseFloat(this.value)); });
-    chordLetterSpacingNum.addEventListener('input', function() {
-      const v = parseFloat(this.value);
-      if (!isNaN(v)) setChordLetterSpacing(v);
-    });
-    chordLetterSpacingNum.addEventListener('blur', function() { this.value = settings.chordLetterSpacing.toFixed(3); });
 
     function setLyricLetterSpacing(v) {
       v = clampNum(v, -0.05, 0.2);
       settings.lyricLetterSpacing = v;
-      lyricLetterSpacingSlider.value = v;
-      if (document.activeElement !== lyricLetterSpacingNum) lyricLetterSpacingNum.value = v.toFixed(3);
       saveSettings();
       applySettings();
     }
-    lyricLetterSpacingSlider.addEventListener('input', function() { setLyricLetterSpacing(parseFloat(this.value)); });
-    lyricLetterSpacingNum.addEventListener('input', function() {
-      const v = parseFloat(this.value);
-      if (!isNaN(v)) setLyricLetterSpacing(v);
-    });
-    lyricLetterSpacingNum.addEventListener('blur', function() { this.value = settings.lyricLetterSpacing.toFixed(3); });
 
     function setLabelLetterSpacing(v) {
       v = clampNum(v, -0.05, 0.2);
       settings.labelLetterSpacing = v;
-      labelLetterSpacingSlider.value = v;
-      if (document.activeElement !== labelLetterSpacingNum) labelLetterSpacingNum.value = v.toFixed(3);
       saveSettings();
       applySettings();
     }
-    labelLetterSpacingSlider.addEventListener('input', function() { setLabelLetterSpacing(parseFloat(this.value)); });
-    labelLetterSpacingNum.addEventListener('input', function() {
-      const v = parseFloat(this.value);
-      if (!isNaN(v)) setLabelLetterSpacing(v);
-    });
-    labelLetterSpacingNum.addEventListener('blur', function() { this.value = settings.labelLetterSpacing.toFixed(3); });
 
     function setPipeScale(v) {
       v = clampNum(v, 1, 5);
       settings.pipeScale = v;
-      pipeScaleSlider.value = v;
-      if (document.activeElement !== pipeScaleNum) pipeScaleNum.value = v.toFixed(2);
       saveSettings();
       applySettings();
     }
-    pipeScaleSlider.addEventListener('input', function() { setPipeScale(parseFloat(this.value)); });
-    pipeScaleNum.addEventListener('input', function() {
-      const v = parseFloat(this.value);
-      if (!isNaN(v)) setPipeScale(v);
-    });
-    pipeScaleNum.addEventListener('blur', function() { this.value = settings.pipeScale.toFixed(2); });
 
     function setPipeThickness(v) {
       v = clampNum(v, 0, 0.15);
       settings.pipeThickness = v;
-      pipeThicknessSlider.value = v;
-      if (document.activeElement !== pipeThicknessNum) pipeThicknessNum.value = v.toFixed(3);
       saveSettings();
       applySettings();
     }
-    pipeThicknessSlider.addEventListener('input', function() { setPipeThickness(parseFloat(this.value)); });
-    pipeThicknessNum.addEventListener('input', function() {
-      const v = parseFloat(this.value);
-      if (!isNaN(v)) setPipeThickness(v);
-    });
-    pipeThicknessNum.addEventListener('blur', function() { this.value = settings.pipeThickness.toFixed(3); });
 
     function setPipeValign(v) {
       v = clampNum(v, -1, 1);
       settings.pipeVerticalAlign = v;
-      pipeValignSlider.value = v;
-      if (document.activeElement !== pipeValignNum) pipeValignNum.value = v.toFixed(2);
       saveSettings();
       applySettings();
     }
-    pipeValignSlider.addEventListener('input', function() { setPipeValign(parseFloat(this.value)); });
-    pipeValignNum.addEventListener('input', function() {
-      const v = parseFloat(this.value);
-      if (!isNaN(v)) setPipeValign(v);
-    });
-    pipeValignNum.addEventListener('blur', function() { this.value = settings.pipeVerticalAlign.toFixed(2); });
-
-    chordFontSelect.addEventListener('change', function() {
-      if (this.value === '__custom__') {
-        chordFontCustomRow.classList.add('show');
-        settings.chordFont = this.value;
-      } else {
-        chordFontCustomRow.classList.remove('show');
-        settings.chordFont = this.value;
-        settings.chordFontCustom = '';
-        chordFontCustom.value = '';
-      }
-      saveSettings();
-      applySettings();
-    });
-    chordFontCustom.addEventListener('input', function() {
-      settings.chordFontCustom = this.value;
-      saveSettings();
-      applySettings();
-    });
 
     function setMasterScale(v) {
       v = clampNum(v, RATIO_MIN, RATIO_MAX);
@@ -3361,99 +2812,32 @@
       ratio = clampNum(ratio, RATIO_MIN, RATIO_MAX);
       const internal = ratioToInternal(ratio, BASE_CHORD_MULT);
       settings.chordSizeMult = internal;
-      chordSizeSlider.value = ratioToSliderPos(ratio);
-      if (document.activeElement !== chordSizeNum) chordSizeNum.value = ratio.toFixed(2);
       saveSettings();
       applySettings();
     }
-    chordSizeSlider.addEventListener('input', function() { setChordSize(sliderPosToRatio(parseFloat(this.value))); });
-    chordSizeNum.addEventListener('input', function() {
-      const v = parseFloat(this.value);
-      if (!isNaN(v)) setChordSize(v);
-    });
-    chordSizeNum.addEventListener('blur', function() {
-      this.value = internalToRatio(settings.chordSizeMult, BASE_CHORD_MULT).toFixed(2);
-    });
-
-    lyricFontSelect.addEventListener('change', function() {
-      if (this.value === '__custom__') {
-        lyricFontCustomRow.classList.add('show');
-        settings.lyricFont = this.value;
-      } else {
-        lyricFontCustomRow.classList.remove('show');
-        settings.lyricFont = this.value;
-        settings.lyricFontCustom = '';
-        lyricFontCustom.value = '';
-      }
-      saveSettings();
-      applySettings();
-    });
-    lyricFontCustom.addEventListener('input', function() {
-      settings.lyricFontCustom = this.value;
-      saveSettings();
-      applySettings();
-    });
 
     function setLyricSize(ratio) {
       ratio = clampNum(ratio, RATIO_MIN, RATIO_MAX);
       const internal = ratioToInternal(ratio, BASE_LYRIC_SIZE);
       settings.lyricSize = internal;
-      lyricSizeSlider.value = ratioToSliderPos(ratio);
-      if (document.activeElement !== lyricSizeNum) lyricSizeNum.value = ratio.toFixed(2);
       saveSettings();
       applySettings();
     }
-    lyricSizeSlider.addEventListener('input', function() { setLyricSize(sliderPosToRatio(parseFloat(this.value))); });
-    lyricSizeNum.addEventListener('input', function() {
-      const v = parseFloat(this.value);
-      if (!isNaN(v)) setLyricSize(v);
-    });
-    lyricSizeNum.addEventListener('blur', function() {
-      this.value = internalToRatio(settings.lyricSize, BASE_LYRIC_SIZE).toFixed(2);
-    });
 
     function setLabelSize(ratio) {
       ratio = clampNum(ratio, RATIO_MIN, RATIO_MAX);
       const internal = ratioToInternal(ratio, BASE_LABEL_SIZE);
       settings.labelSize = internal;
-      labelSizeSlider.value = ratioToSliderPos(ratio);
-      if (document.activeElement !== labelSizeNum) labelSizeNum.value = ratio.toFixed(2);
       saveSettings();
       applySettings();
     }
-    labelSizeSlider.addEventListener('input', function() { setLabelSize(sliderPosToRatio(parseFloat(this.value))); });
-    labelSizeNum.addEventListener('input', function() {
-      const v = parseFloat(this.value);
-      if (!isNaN(v)) setLabelSize(v);
-    });
-    labelSizeNum.addEventListener('blur', function() {
-      this.value = internalToRatio(settings.labelSize, BASE_LABEL_SIZE).toFixed(2);
-    });
 
     function setLabelRadius(v) {
       v = clampNum(v, 0, 20);
       settings.labelRadius = v;
-      labelRadiusSlider.value = v;
-      if (document.activeElement !== labelRadiusNum) labelRadiusNum.value = v.toFixed(1);
       saveSettings();
       applySettings();
     }
-    labelRadiusSlider.addEventListener('input', function() { setLabelRadius(parseFloat(this.value)); });
-    labelRadiusNum.addEventListener('input', function() {
-      const v = parseFloat(this.value);
-      if (!isNaN(v)) setLabelRadius(v);
-    });
-    labelRadiusNum.addEventListener('blur', function() { this.value = settings.labelRadius.toFixed(1); });
-
-    settingsReset.addEventListener('click', function() {
-      showConfirm('Reset all settings to defaults?', function() {
-        settings = Object.assign({}, DEFAULT_SETTINGS);
-        saveSettings();
-        syncSettingsUI();
-        applySettings();
-        applyEditorState(isEditorCollapsed);
-      });
-    });
 
     // ===== TRANSPOSE =====
     function getCurrentKey() { return 'C'; }
@@ -3546,6 +2930,8 @@
       }
       updatePreview();
       updatePreview2();
+      syncEditorOverlay(inputEl, document.getElementById('chartInputOverlay'));
+      syncEditorOverlay(inputEl2, document.getElementById('chartInputOverlay2'));
     }
     const TRANSPOSE_MIN = 0;
     const TRANSPOSE_MAX = 11;
@@ -3603,7 +2989,6 @@
         });
         settings = merged;
         saveSettings();
-        syncSettingsUI();
         applySettings();
       }
 
@@ -3612,6 +2997,8 @@
       updatePreview();
       updatePreview2();
       if (typeof autoscrollRefreshTimestamps === 'function') autoscrollRefreshTimestamps();
+      syncEditorOverlay(inputEl, document.getElementById('chartInputOverlay'));
+      syncEditorOverlay(inputEl2, document.getElementById('chartInputOverlay2'));
     }
 
     // ===== DRAG & DROP =====
@@ -4923,7 +4310,7 @@
 
     function renderPreview(text) {
       if (!text || text.trim() === '') {
-        previewContent.innerHTML = '';
+        previewContent.innerHTML = '<span class="preview-hint"><span class="hint-emoji">👀🎤</span> <span class="hint-italic">Your nicely formatted lyrics will appear here.</span></span>';
         return;
       }
       let html = '';
@@ -5047,7 +4434,7 @@
 
     function renderPreview2(text) {
       if (!text || text.trim() === '') {
-        previewContent2.innerHTML = '';
+        previewContent2.innerHTML = '<span class="preview-hint"><span class="hint-emoji">👀🎸</span> <span class="hint-italic">Your nicely formatted chords will appear here.</span></span>';
         return;
       }
       let html = '';
@@ -5365,9 +4752,6 @@
         e.preventDefault();
         transposeDown();
       }
-      if (e.key === 'Escape' && settingsFloatPanel.classList.contains('show')) {
-        closeSettings();
-      }
     });
 
     window.addEventListener('beforeunload', function() {
@@ -5405,6 +4789,12 @@
     const perfMarginHReadout = document.getElementById('perfMarginHReadout');
     const perfMarginV = document.getElementById('perfMarginV');
     const perfMarginVReadout = document.getElementById('perfMarginVReadout');
+    const perfEditorScale = document.getElementById('perfEditorScale');
+    const perfEditorScaleReadout = document.getElementById('perfEditorScaleReadout');
+    const perfSongNameSize = document.getElementById('perfSongNameSize');
+    const perfSongNameSizeReadout = document.getElementById('perfSongNameSizeReadout');
+    const perfLabelRadius = document.getElementById('perfLabelRadius');
+    const perfLabelRadiusReadout = document.getElementById('perfLabelRadiusReadout');
 
     // ===== FLOATING AUTOSCROLL PANEL =====
     const AUTOSCROLL_OFFSET_KEY = 'chordChartAutoscrollOffset';
@@ -5524,6 +4914,7 @@
         if (v < -30) v = -30;
         if (v > 30) v = 30;
         autoscroll.offset = v;
+        this.value = String(v);
         try { localStorage.setItem(AUTOSCROLL_OFFSET_KEY, String(v)); } catch (e) {}
       });
       autoscrollOffsetInput.addEventListener('blur', function() {
@@ -5759,7 +5150,6 @@
             }
           });
           saveSettings();
-          syncSettingsUI();
           applySettings();
           applyEditorState(isEditorCollapsed);
           currentTemplateName = parsed.name || 'Untitled Template';
@@ -5901,6 +5291,15 @@
 
       perfMarginV.value = (settings.previewPaddingV != null ? settings.previewPaddingV : 8);
       perfMarginVReadout.value = Number(perfMarginV.value).toFixed(0);
+
+      perfEditorScale.value = settings.editorScale;
+      perfEditorScaleReadout.value = Number(settings.editorScale).toFixed(2);
+
+      perfSongNameSize.value = settings.currentSongSize;
+      perfSongNameSizeReadout.value = Number(settings.currentSongSize).toFixed(2);
+
+      perfLabelRadius.value = settings.labelRadius;
+      perfLabelRadiusReadout.value = Number(settings.labelRadius).toFixed(1);
     }
 
     perfEverythingSize.addEventListener('input', function() {
@@ -5969,6 +5368,22 @@
       const v = parseFloat(this.value);
       perfMarginVReadout.value = v.toFixed(0);
       setPreviewPaddingV(v);
+    });
+
+    perfEditorScale.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      perfEditorScaleReadout.value = v.toFixed(2);
+      setEditorScale(v);
+    });
+    perfSongNameSize.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      perfSongNameSizeReadout.value = v.toFixed(2);
+      setCurrentSongSize(v);
+    });
+    perfLabelRadius.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      perfLabelRadiusReadout.value = v.toFixed(1);
+      setLabelRadius(v);
     });
 
     const PERF_MULT_TARGETS = {
@@ -6071,11 +5486,6 @@
           !autoscrollFloatToggle.contains(e.target)) {
         toggleAutoscrollFloatPanel(false);
       }
-      if (settingsFloatPanel.classList.contains('show') &&
-          !settingsFloatPanel.contains(e.target) &&
-          !oldSettingsToggle.contains(e.target)) {
-        closeSettings();
-      }
     });
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && perfPanel.classList.contains('show')) togglePerfPanel(false);
@@ -6083,7 +5493,6 @@
       if (e.key === 'Escape' && keyFloatPanel.classList.contains('show')) toggleKeyFloatPanel(false);
       if (e.key === 'Escape' && templateFloatPanel.classList.contains('show')) toggleTemplateFloatPanel(false);
       if (e.key === 'Escape' && autoscrollFloatPanel.classList.contains('show')) toggleAutoscrollFloatPanel(false);
-      if (e.key === 'Escape' && settingsFloatPanel.classList.contains('show')) closeSettings();
     });
 
     // ===== CHROME COLLAPSE (focus mode) =====
@@ -6128,29 +5537,6 @@
       applyChromeHidden(!isChromeHidden);
     });
 
-    function toggleSettingsFloatPanel(open) {
-      const next = (typeof open === 'boolean') ? open : !settingsFloatPanel.classList.contains('show');
-      settingsFloatPanel.classList.toggle('show', next);
-      oldSettingsToggle.classList.toggle('active', next);
-      oldSettingsToggle.title = next ? 'Close settings' : 'Old Settings';
-      oldSettingsToggle.setAttribute('aria-label', oldSettingsToggle.title);
-      if (next) {
-        syncSettingsUI();
-        if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
-        if (typeof toggleSongsFloatPanel === 'function') toggleSongsFloatPanel(false);
-        if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
-        if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
-        if (typeof toggleAutoscrollFloatPanel === 'function') toggleAutoscrollFloatPanel(false);
-      }
-    }
-
-    if (oldSettingsToggle) {
-      oldSettingsToggle.addEventListener('click', function(e) {
-        e.stopPropagation();
-        toggleSettingsFloatPanel();
-      });
-    }
-
     // ===== INIT =====
     loadSettings();
 
@@ -6172,7 +5558,6 @@
       currentTemplateName = bootDefault.name || 'Untitled Template';
     }
 
-    syncSettingsUI();
     applySettings();
     applyLockState();
     applyLayout();
@@ -6221,6 +5606,7 @@
       }
       updatePreview();
       autoscrollRefreshTimestamps();
+      syncEditorOverlay(inputEl, document.getElementById('chartInputOverlay'));
     });
 
     inputEl2.addEventListener('input', function() {
@@ -6230,7 +5616,29 @@
       }
       updatePreview2();
       autoscrollRefreshTimestamps();
+      syncEditorOverlay(inputEl2, document.getElementById('chartInputOverlay2'));
     });
+
+    function syncEditorOverlay(textarea, overlay) {
+      if (!textarea || !overlay) return;
+      const empty = textarea.value === '';
+      overlay.classList.toggle('hidden', !empty);
+    }
+
+    (function wireEditorOverlays() {
+      const pairs = [
+        { ta: document.getElementById('chartInput'), ov: document.getElementById('chartInputOverlay') },
+        { ta: document.getElementById('chartInput2'), ov: document.getElementById('chartInputOverlay2') }
+      ];
+      pairs.forEach(function(p) {
+        if (!p.ta || !p.ov) return;
+        const sync = function() { syncEditorOverlay(p.ta, p.ov); };
+        p.ta.addEventListener('input', sync);
+        p.ta.addEventListener('focus', sync);
+        p.ta.addEventListener('blur', sync);
+        sync();
+      });
+    })();
 
     // Wire the two timestamp gutter textareas: on input, refresh timestamps.
     // On scroll of either textarea in a pair, sync the other.
