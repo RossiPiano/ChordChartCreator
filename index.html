@@ -2183,6 +2183,17 @@
       .resize-handle::before {
         height: 44px;
       }
+      /* On phone the handle is already 14px (finger-sized), so the
+         desktop 8px hover/active height would shrink it instead of
+         growing it, and any grow animation would shift the timestamp
+         row down while your finger is on it. Lock the height on phone:
+         no animation, no layout shift. */
+      .resize-handle:hover,
+      .resize-handle:active,
+      .editor-wrapper:has(.resize-handle:hover) .resize-handle,
+      .editor-wrapper:has(.resize-handle:active) .resize-handle {
+        height: 14px !important;
+      }
       .input-area {
         max-height: 70%;
       }
