@@ -2101,6 +2101,16 @@
       .input-area {
         max-height: 70%;
       }
+      /* On phone, only one panel is visible at a time. The split button
+         cycles between lyrics-only and chords-only. This replaces the
+         three-state "left/center/right" model, which depended on
+         grid-template-columns and does nothing in a flex column. */
+      .editor-wrapper.phone-split-lyrics > .panel#panel2 {
+        display: none;
+      }
+      .editor-wrapper.phone-split-chords > .panel#panel1 {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -3962,29 +3972,57 @@
     }
 
     let splitState = 'center';
+
+    function isPhoneLayout() {
+      return window.matchMedia('(max-width: 700px)').matches;
+    }
+
     function applySplitState(state) {
       if (state !== 'left' && state !== 'center' && state !== 'right') state = 'center';
       splitState = state;
 
-      const splitLeftPct = isSwapped ? '1fr 0%' : '0% 1fr';
-      const splitRightPct = isSwapped ? '0% 1fr' : '1fr 0%';
-      const splitLeftWall = isSwapped ? '100%' : '0%';
-      const splitRightWall = isSwapped ? '0%' : '100%';
-
-      if (state === 'left') {
-        editorWrapper.style.gridTemplateColumns = splitLeftPct;
-        panelWall.style.left = splitLeftWall;
-        editorWrapper.classList.add('split-left');
-        editorWrapper.classList.remove('split-right');
-      } else if (state === 'right') {
-        editorWrapper.style.gridTemplateColumns = splitRightPct;
-        panelWall.style.left = splitRightWall;
-        editorWrapper.classList.add('split-right');
-        editorWrapper.classList.remove('split-left');
+      if (isPhoneLayout()) {
+        // Phone: one panel at a time. 'left' means chords-only (panel2
+        // hidden), 'right' means lyrics-only (panel1 hidden). 'center'
+        // is not offered on phone; coerce it to 'left'.
+        if (state === 'center') {
+          splitState = 'left';
+          state = 'left';
+        }
+        editorWrapper.classList.remove('phone-split-lyrics', 'phone-split-chords');
+        if (splitState === 'right') {
+          editorWrapper.classList.add('phone-split-lyrics');
+        } else {
+          editorWrapper.classList.add('phone-split-chords');
+        }
+        // The wall is hidden on phone; clear any inline grid styles
+        // left over from a previous desktop session so they don't
+        // fight the flex column layout.
+        editorWrapper.style.gridTemplateColumns = '';
+        panelWall.style.left = '';
       } else {
-        editorWrapper.style.gridTemplateColumns = '50% 1fr';
-        panelWall.style.left = '50%';
-        editorWrapper.classList.remove('split-left', 'split-right');
+        // Desktop: restore the original three-state grid behaviour.
+        editorWrapper.classList.remove('phone-split-lyrics', 'phone-split-chords');
+        const splitLeftPct = isSwapped ? '1fr 0%' : '0% 1fr';
+        const splitRightPct = isSwapped ? '0% 1fr' : '1fr 0%';
+        const splitLeftWall = isSwapped ? '100%' : '0%';
+        const splitRightWall = isSwapped ? '0%' : '100%';
+
+        if (state === 'left') {
+          editorWrapper.style.gridTemplateColumns = splitLeftPct;
+          panelWall.style.left = splitLeftWall;
+          editorWrapper.classList.add('split-left');
+          editorWrapper.classList.remove('split-right');
+        } else if (state === 'right') {
+          editorWrapper.style.gridTemplateColumns = splitRightPct;
+          panelWall.style.left = splitRightWall;
+          editorWrapper.classList.add('split-right');
+          editorWrapper.classList.remove('split-left');
+        } else {
+          editorWrapper.style.gridTemplateColumns = '50% 1fr';
+          panelWall.style.left = '50%';
+          editorWrapper.classList.remove('split-left', 'split-right');
+        }
       }
 
       if (splitFloatToggle) {
@@ -4007,6 +4045,10 @@
     }
 
     function cycleSplitState() {
+      if (isPhoneLayout()) {
+        applySplitState(splitState === 'right' ? 'left' : 'right');
+        return;
+      }
       if (splitState === 'center') applySplitState('left');
       else if (splitState === 'left') applySplitState('right');
       else applySplitState('center');
