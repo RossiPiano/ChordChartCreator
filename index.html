@@ -153,8 +153,7 @@
     }
     .panel-wall:hover,
     .panel-wall:active {
-      background: #8b6b4a;
-      width: 6px;
+      width: 8px;
     }
     .editor-wrapper .panel {
       display: flex;
@@ -225,13 +224,16 @@
     }
     /* On desktop the two panels sit side by side, each with its own handle
        at the same Y (because the two editors are locked to equal height).
-       This removes the 3px gap caused by the panel-wall so the two handles
-       read as one continuous bar. On phone the rule is disabled because
-       the panels are stacked and only one handle is ever on screen. */
+       Extending each handle 2px inward removes the 3px gap caused by the
+       panel-wall so the two handles read as one continuous bar. On phone
+       the rule is disabled because the panels are stacked and only one
+       handle is ever on screen. */
     @media (min-width: 901px) {
-      .editor-wrapper:not(.split-left):not(.split-right) .resize-handle {
-        left: -2px;
+      .editor-wrapper:not(.split-left):not(.split-right) #resizeHandle {
         right: -2px;
+      }
+      .editor-wrapper:not(.split-left):not(.split-right) #resizeHandle2 {
+        left: -2px;
       }
     }
     .resize-handle::before {
@@ -247,8 +249,11 @@
     }
     .resize-handle:hover,
     .resize-handle:active {
-      background: #8b6b4a;
-      height: 12px;
+      height: 16px;
+    }
+    .editor-wrapper:has(.resize-handle:hover) .resize-handle,
+    .editor-wrapper:has(.resize-handle:active) .resize-handle {
+      height: 16px;
     }
 
     .drop-zone { flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative; }
@@ -3454,7 +3459,6 @@
       startResize(inputArea, inputArea2, e.touches[0].clientX, e.touches[0].clientY);
       e.preventDefault();
     }, { passive: false });
-
     if (resizeHandle2) {
       resizeHandle2.addEventListener('mousedown', function(e) {
         startResize(inputArea2, inputArea, e.clientX, e.clientY);
@@ -4001,10 +4005,6 @@
     }
 
     let splitState = 'center';
-
-    function isPhoneLayout() {
-      return window.matchMedia('(max-width: 900px)').matches;
-    }
 
     function applySplitState(state) {
       if (state !== 'left' && state !== 'center' && state !== 'right') state = 'center';
