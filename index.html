@@ -223,6 +223,17 @@
       pointer-events: auto;
       transition: background 0.15s ease, height 0.15s ease;
     }
+    /* On desktop the two panels sit side by side, each with its own handle
+       at the same Y (because the two editors are locked to equal height).
+       This removes the 3px gap caused by the panel-wall so the two handles
+       read as one continuous bar. On phone the rule is disabled because
+       the panels are stacked and only one handle is ever on screen. */
+    @media (min-width: 901px) {
+      .editor-wrapper:not(.split-left):not(.split-right) .resize-handle {
+        left: -2px;
+        right: -2px;
+      }
+    }
     .resize-handle::before {
       content: '';
       position: absolute;
@@ -3421,10 +3432,12 @@
     const resizeHandle2 = document.getElementById('resizeHandle2');
 
     let activeResizeTarget = null;
+    let activeResizeTarget2 = null;
 
-    function startResize(target, clientX, clientY) {
+    function startResize(target, target2, clientX, clientY) {
       isResizing = true;
       activeResizeTarget = target;
+      activeResizeTarget2 = target2 || null;
       startY = clientY;
       startX = clientX;
       startHeight = target.offsetHeight;
@@ -3433,23 +3446,23 @@
       document.body.style.userSelect = 'none';
     }
     resizeHandle.addEventListener('mousedown', function(e) {
-      startResize(inputArea, e.clientX, e.clientY);
+      startResize(inputArea, inputArea2, e.clientX, e.clientY);
       e.preventDefault();
     });
     resizeHandle.addEventListener('touchstart', function(e) {
       if (e.touches.length !== 1) return;
-      startResize(inputArea, e.touches[0].clientX, e.touches[0].clientY);
+      startResize(inputArea, inputArea2, e.touches[0].clientX, e.touches[0].clientY);
       e.preventDefault();
     }, { passive: false });
 
     if (resizeHandle2) {
       resizeHandle2.addEventListener('mousedown', function(e) {
-        startResize(inputArea2, e.clientX, e.clientY);
+        startResize(inputArea2, inputArea, e.clientX, e.clientY);
         e.preventDefault();
       });
       resizeHandle2.addEventListener('touchstart', function(e) {
         if (e.touches.length !== 1) return;
-        startResize(inputArea2, e.touches[0].clientX, e.touches[0].clientY);
+        startResize(inputArea2, inputArea, e.touches[0].clientX, e.touches[0].clientY);
         e.preventDefault();
       }, { passive: false });
     }
@@ -3459,8 +3472,10 @@
       const deltaY = startY - clientY;
       let newHeight = startHeight + deltaY;
       newHeight = Math.max(60, Math.min(window.innerHeight * 0.7, newHeight));
-      activeResizeTarget.style.height = newHeight + 'px';
-      activeResizeTarget.style.maxHeight = newHeight + 'px';
+      inputArea.style.height = newHeight + 'px';
+      inputArea.style.maxHeight = newHeight + 'px';
+      inputArea2.style.height = newHeight + 'px';
+      inputArea2.style.maxHeight = newHeight + 'px';
       savedEditorHeight = newHeight;
       try { localStorage.setItem(EDITOR_HEIGHT_KEY, String(newHeight)); } catch (e) {}
       clearTimeout(window._resizeTimeout);
@@ -3491,6 +3506,10 @@
       editorWrapper.style.gridTemplateRows = '1fr';
     }
 
+    function isPhoneLayout() {
+      return window.matchMedia('(max-width: 900px)').matches;
+    }
+
     function startWallResize(clientX) {
       isWallResizing = true;
       wallStartX = clientX;
@@ -3506,7 +3525,11 @@
       const wrapperWidth = editorWrapper.offsetWidth || 1;
       const deltaX = clientX - wallStartX;
       const deltaPercent = (deltaX / wrapperWidth) * 100;
-      applyWallSplit(wallStartPercent + deltaPercent);
+      if (isSwapped) {
+        applyWallSplit(wallStartPercent - deltaPercent);
+      } else {
+        applyWallSplit(wallStartPercent + deltaPercent);
+      }
       clearTimeout(window._wallResizeTimeout);
       window._wallResizeTimeout = setTimeout(adjustChordSizes, 100);
     }
