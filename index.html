@@ -2058,6 +2058,50 @@
       .settings-row label { flex: 0 0 100%; margin-bottom: 2px; }
       .settings-row input[type="number"].settings-num { flex: 0 0 70px; }
     }
+
+    /* ===== PHONE / NARROW VIEWPORT: STACK THE TWO PANELS ===== */
+    @media (max-width: 700px) {
+      /* The two-panel side-by-side layout squeezes each editor into half
+         the phone's width, which makes them unusable and makes the drag
+         handle un-grabbable. On narrow screens we stack them: the panels
+         become a single vertical column, each full width. The panel-wall
+         divider is horizontal-only, so we hide it here. */
+      .editor-wrapper {
+        display: flex;
+        flex-direction: column;
+        grid-template-columns: none;
+        grid-template-rows: none;
+      }
+      .editor-wrapper .panel {
+        flex: 1 1 50%;
+        min-height: 0;
+        width: 100%;
+      }
+      .panel-wall {
+        display: none;
+      }
+      /* When the user has swapped sides, DOM order already handles it
+         (applySwapState reorders the panels), so nothing extra needed
+         here. */
+      .editor-with-gutter {
+        flex-direction: row;
+      }
+      .editor-with-gutter .time-gutter {
+        flex: 0 0 56px;
+        width: 56px;
+      }
+      /* Give the drag handle a proper finger-sized target on touch. */
+      .resize-handle {
+        height: 14px;
+        touch-action: none;
+      }
+      .resize-handle::before {
+        height: 44px;
+      }
+      .input-area {
+        max-height: 70%;
+      }
+    }
   </style>
 </head>
 <body class="easy-mode">
