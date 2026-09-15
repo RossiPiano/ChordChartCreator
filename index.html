@@ -328,6 +328,11 @@
     }
     textarea::-webkit-scrollbar-thumb:hover { background: #8b6b4a; }
     textarea:focus { border: none; box-shadow: none; outline: none; }
+    textarea::placeholder {
+      color: #b0987a;
+      font-style: italic;
+      opacity: 1;
+    }
     .drop-zone .drop-message {
       display: none;
       position: absolute;
@@ -369,6 +374,19 @@
       border: 2px solid #f5ede0;
     }
     .chord-preview::-webkit-scrollbar-thumb:hover { background: #8b6b4a; }
+
+    .chord-preview .content-wrapper:empty::before {
+      content: "(Your nicely formatted lyrics or chords will appear here.)";
+      display: block;
+      padding: 8px 4px;
+      color: #b0987a;
+      font-style: italic;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
 
     .chord-line,
     .chord-line * {
@@ -2004,8 +2022,8 @@
         <div class="drop-zone" id="dropZone">
           <div class="drop-message">📂 Drop a chord chart here</div>
           <div class="editor-with-gutter">
-            <textarea id="timeInput" class="time-gutter" spellcheck="false" placeholder="0:00&#10;0:05&#10;0:10"></textarea>
-            <textarea id="chartInput" spellcheck="false"></textarea>
+            <textarea id="timeInput" class="time-gutter" spellcheck="false" placeholder="0:00&#10;&#10;0:26&#10;&#10;&#10;&#10;1:28"></textarea>
+            <textarea id="chartInput" spellcheck="false" placeholder="(Type lyrics or chords here.)"></textarea>
           </div>
         </div>
       </div>
@@ -2021,8 +2039,8 @@
         <div class="drop-zone" id="dropZone2">
           <div class="drop-message">📂 Drop a chord chart here</div>
           <div class="editor-with-gutter">
-            <textarea id="timeInput2" class="time-gutter" spellcheck="false" placeholder="0:00&#10;0:05&#10;0:10"></textarea>
-            <textarea id="chartInput2" spellcheck="false"></textarea>
+            <textarea id="timeInput2" class="time-gutter" spellcheck="false" placeholder="0:00&#10;&#10;0:26&#10;&#10;&#10;&#10;1:28"></textarea>
+            <textarea id="chartInput2" spellcheck="false" placeholder="(Type lyrics or chords here.)"></textarea>
           </div>
         </div>
       </div>
@@ -4583,6 +4601,86 @@
       return inner;
     }
 
+    // ===== COLOR DIRECTIVES =====
+    // A "color directive" is a hidden line that changes the tint applied to
+    // every chord/lyric line that follows it, until another directive (or
+    // "c0") changes it again. Two forms are accepted, both case-insensitive:
+    //   c1 .. c8  or  [c1] .. [c8]           (short form)
+    //   <Section>-color  or  [<Section>-color]  (long form)
+    // c0 (or [c0]) turns coloring off and restores the default text color.
+    const COLOR_SHORT_MAP = {
+      '1': 'section-intro',
+      '2': 'section-verse',
+      '3': 'section-pre-chorus',
+      '4': 'section-chorus',
+      '5': 'section-post-chorus',
+      '6': 'section-instrumental',
+      '7': 'section-bridge',
+      '8': 'section-outro'
+    };
+
+    function sectionNameToColorClass(name) {
+      const n = String(name || '').toLowerCase().trim();
+      if (!n) return null;
+      if (n.indexOf('pre-chorus') !== -1 || n.indexOf('prechorus') !== -1) return 'section-pre-chorus';
+      if (n.indexOf('post-chorus') !== -1 || n.indexOf('postchorus') !== -1) return 'section-post-chorus';
+      if (n.indexOf('chorus') !== -1) return 'section-chorus';
+      if (n.indexOf('verse') !== -1) return 'section-verse';
+      if (n.indexOf('intro') !== -1) return 'section-intro';
+      if (n.indexOf('instrumental') !== -1) return 'section-instrumental';
+      if (n.indexOf('bridge') !== -1) return 'section-bridge';
+      if (n.indexOf('outro') !== -1) return 'section-outro';
+      if (n.indexOf('tag') !== -1) return 'section-custom';
+      if (n.indexOf('ending') !== -1) return 'section-custom';
+      if (n.indexOf('coda') !== -1) return 'section-custom';
+      return null;
+    }
+
+    // Returns:
+    //   { colorClass: 'section-xxx' }  -> set this color
+    //   { colorClass: null }           -> clear color (c0)
+    //   null                           -> not a color directive line
+    function parseColorDirective(trimmedLine) {
+      if (!trimmedLine) return null;
+      let s = trimmedLine.trim();
+      if (!s) return null;
+
+      // Allow optional surrounding square brackets: [c4]  [Chorus-color]
+      let bracketed = false;
+      if (s.charAt(0) === '[' && s.charAt(s.length - 1) === ']') {
+        const inner = s.substring(1, s.length - 1).trim();
+        if (inner.indexOf(']') === -1 && inner.indexOf('[') === -1) {
+          s = inner;
+          bracketed = true;
+        }
+      }
+      void bracketed;
+
+      const lower = s.toLowerCase();
+
+      // c0 / [c0]  -> off
+      if (lower === 'c0') {
+        return { colorClass: null };
+      }
+
+      // c1 .. c8
+      const shortMatch = lower.match(/^c([1-8])$/);
+      if (shortMatch) {
+        const cls = COLOR_SHORT_MAP[shortMatch[1]];
+        if (cls) return { colorClass: cls };
+      }
+
+      // <Section>-color  (also accept "color-<Section>" just in case)
+      const longMatch = lower.match(/^(.+?)-color$/);
+      if (longMatch) {
+        const cls = sectionNameToColorClass(longMatch[1]);
+        if (cls) return { colorClass: cls };
+        return null;
+      }
+
+      return null;
+    }
+
     function escapeHtml(s) {
       return String(s)
         .replace(/&/g, '&amp;')
@@ -4628,6 +4726,7 @@
       let html = '';
       const lines = text.split('\n');
       currentSection = '';
+      let currentColorClass = null;
 
       for (let line of lines) {
         const rawTrimmed = line.trim();
@@ -4645,6 +4744,12 @@
         if (silentMarker !== null) {
           const expanded = expandSectionShortcut(silentMarker);
           currentSection = expanded;
+          continue;
+        }
+
+        const colorDirective = parseColorDirective(rawTrimmed);
+        if (colorDirective !== null) {
+          currentColorClass = colorDirective.colorClass;
           continue;
         }
 
@@ -4721,9 +4826,11 @@
 
         if (rawTrimmed.includes('|')) {
           let sectionClass = getSectionClass(currentSection);
+          if (!sectionClass) sectionClass = currentColorClass;
           html += renderChordLine(rawTrimmed, sectionClass);
         } else {
           let lyricSectionClass = getSectionClass(currentSection);
+          if (!lyricSectionClass) lyricSectionClass = currentColorClass;
           let lyricWrapClasses = 'lyrics-line';
           if (lyricSectionClass) lyricWrapClasses += ' ' + lyricSectionClass;
           html += `<div class="${lyricWrapClasses}"><span class="lyric-text">${escapeHtml(trimmed)}</span></div>`;
@@ -4743,6 +4850,7 @@
       let html = '';
       const lines = text.split('\n');
       currentSection = '';
+      let currentColorClass = null;
 
       for (let line of lines) {
         const rawTrimmed = line.trim();
@@ -4760,6 +4868,12 @@
         if (silentMarker !== null) {
           const expanded = expandSectionShortcut(silentMarker);
           currentSection = expanded;
+          continue;
+        }
+
+        const colorDirective = parseColorDirective(rawTrimmed);
+        if (colorDirective !== null) {
+          currentColorClass = colorDirective.colorClass;
           continue;
         }
 
@@ -4836,10 +4950,14 @@
 
         if (rawTrimmed.includes('|')) {
           let sectionClass = getSectionClass(currentSection);
-          if (currentSection === 'custom' || currentSection.toLowerCase().includes('custom')) sectionClass = 'section-custom';
+          if (!sectionClass) {
+            if (currentSection === 'custom' || currentSection.toLowerCase().includes('custom')) sectionClass = 'section-custom';
+            else sectionClass = currentColorClass;
+          }
           html += renderChordLine(rawTrimmed, sectionClass);
         } else {
           let lyricSectionClass = getSectionClass(currentSection);
+          if (!lyricSectionClass) lyricSectionClass = currentColorClass;
           let lyricWrapClasses = 'lyrics-line';
           if (lyricSectionClass) lyricWrapClasses += ' ' + lyricSectionClass;
           html += `<div class="${lyricWrapClasses}"><span class="lyric-text">${escapeHtml(trimmed)}</span></div>`;
@@ -4859,12 +4977,12 @@
         alert('Nothing to save. Both editors are empty.');
         return;
       }
-      const songName = 'chord-chart';
-      const sanitizedName = songName.replace(/[<>:"/\\|?*\x00-\x1f]/g, '').trim() || 'chord-chart';
-      const timestamp = new Date().toISOString().slice(0, 10);
-      const fileName = `${sanitizedName}_${timestamp}.chordchart`;
 
-      const titleText = (document.getElementById('titleInput') || {}).value || '';
+      const titleText = ((document.getElementById('titleInput') || {}).value || '').trim();
+      const songName = titleText || 'chord-chart';
+      const sanitizedName = songName.replace(/[<>:"/\\|?*\x00-\x1f]/g, '').trim() || 'chord-chart';
+      const fileName = `${sanitizedName}.chordchart`;
+
       const leftTime = (document.getElementById('timeInput') || {}).value || '';
       const rightTime = (document.getElementById('timeInput2') || {}).value || '';
       const payload = {
@@ -4883,6 +5001,26 @@
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
       const result = await saveFileWithPicker(fileName, blob, 'application/json', 'Chord chart');
       if (result.cancelled) return;
+
+      const storedSongs = loadStoredSongs() || [];
+      const existingIndex = storedSongs.findIndex(s => s.name === sanitizedName && (s.folder || '') === '');
+      const entry = {
+        name: sanitizedName,
+        title: titleText,
+        lyricText: lyricText,
+        chordText: chordText,
+        leftTimeText: leftTime,
+        rightTimeText: rightTime,
+        folder: ''
+      };
+      if (settings && typeof settings === 'object') entry.settings = Object.assign({}, settings);
+      if (existingIndex >= 0) {
+        storedSongs[existingIndex] = Object.assign({}, storedSongs[existingIndex], entry);
+      } else {
+        storedSongs.push(entry);
+      }
+      saveSongsToStorage(storedSongs);
+      displayStoredSongs();
 
       this.textContent = '✅';
       setTimeout(() => { this.textContent = '💾'; }, 1500);
