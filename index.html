@@ -304,9 +304,16 @@
       position: relative;
       display: flex;
       align-items: stretch;
+      min-height: 0;
+      align-self: stretch;
     }
-    .editor-input-wrap > textarea {
+    .editor-input-wrap > textarea#chartInput,
+    .editor-input-wrap > textarea#chartInput2 {
+      flex: 1 1 auto;
+      min-width: 0;
+      min-height: 0;
       width: 100%;
+      padding-left: 10px;
     }
     .editor-input-overlay {
       position: absolute;
