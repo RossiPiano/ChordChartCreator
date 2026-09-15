@@ -603,16 +603,17 @@
     }
 
     /* ===== SWITCHES — press-in animation only =====
-       These buttons hold a persistent .active (brown) state. On :active we
-       only add a little squash — the persistent brown state is untouched. */
-    .chrome-toggle:active,
-    .songs-float-toggle:active,
-    .key-float-toggle:active,
-    .autoscroll-float-toggle:active,
-    .editor-float-toggle:active,
-    .template-float-toggle:active,
-    .perf-toggle:active,
-    .old-settings-toggle:active {
+       Same squash as the momentaries. Uses :active:hover so it beats the
+       per-button :hover rule (which would otherwise win on source order
+       and keep the button at scale(1.05) while held). */
+    .chrome-toggle:active:hover,
+    .songs-float-toggle:active:hover,
+    .key-float-toggle:active:hover,
+    .autoscroll-float-toggle:active:hover,
+    .editor-float-toggle:active:hover,
+    .template-float-toggle:active:hover,
+    .perf-toggle:active:hover,
+    .old-settings-toggle:active:hover {
       transform: scale(0.92);
       transition: transform 0.08s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
     }
