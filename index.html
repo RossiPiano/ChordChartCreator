@@ -2060,7 +2060,7 @@
     }
 
     /* ===== PHONE / NARROW VIEWPORT: STACK THE TWO PANELS ===== */
-    @media (max-width: 700px) {
+    @media (max-width: 900px) {
       /* The two-panel side-by-side layout squeezes each editor into half
          the phone's width, which makes them unusable and makes the drag
          handle un-grabbable. On narrow screens we stack them: the panels
@@ -2105,11 +2105,17 @@
          cycles between lyrics-only and chords-only. This replaces the
          three-state "left/center/right" model, which depended on
          grid-template-columns and does nothing in a flex column. */
-      .editor-wrapper.phone-split-lyrics > .panel#panel2 {
-        display: none;
+      .editor-wrapper.phone-split-lyrics #panel2 {
+        display: none !important;
       }
-      .editor-wrapper.phone-split-chords > .panel#panel1 {
-        display: none;
+      .editor-wrapper.phone-split-chords #panel1 {
+        display: none !important;
+      }
+      .editor-wrapper.phone-split-lyrics #panel1,
+      .editor-wrapper.phone-split-chords #panel2 {
+        display: flex !important;
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
       }
     }
   </style>
@@ -3974,7 +3980,7 @@
     let splitState = 'center';
 
     function isPhoneLayout() {
-      return window.matchMedia('(max-width: 700px)').matches;
+      return window.matchMedia('(max-width: 900px)').matches;
     }
 
     function applySplitState(state) {
@@ -3995,6 +4001,10 @@
         } else {
           editorWrapper.classList.add('phone-split-chords');
         }
+        // Force a re-layout so the flex column recalculates now that
+        // one panel has been removed from the flow.
+        void editorWrapper.offsetHeight;
+        setTimeout(adjustChordSizes, 50);
         // The wall is hidden on phone; clear any inline grid styles
         // left over from a previous desktop session so they don't
         // fight the flex column layout.
