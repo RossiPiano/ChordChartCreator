@@ -1185,8 +1185,62 @@
     }
     @media (hover: hover) {
       .autoscroll-hint-list .autoscroll-hint-row:hover {
-        background: #e3d3bb;
+        background: #c9a87c;
       }
+    }
+    .autoscroll-hint-list .autoscroll-hint-row.active {
+      background: #f0e4d3;
+      color: #5c4033;
+    }
+    .autoscroll-hint-list .autoscroll-hint-row.active .autoscroll-hint-time,
+    .autoscroll-hint-list .autoscroll-hint-row.active .autoscroll-hint-sep,
+    .autoscroll-hint-list .autoscroll-hint-row.active .autoscroll-hint-part {
+      color: #5c4033;
+    }
+    @media (hover: hover) {
+      .autoscroll-hint-list .autoscroll-hint-row.active:hover {
+        background: #f0e4d3;
+      }
+    }
+
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-intro { background: #6a8caf; }
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-verse { background: #5a8a5a; }
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-pre-chorus { background: #d4953a; }
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-chorus { background: #c45a4a; }
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-post-chorus { background: #8b6b4a; }
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-bridge { background: #8a6a9a; }
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-instrumental { background: #5a5a5a; }
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-outro { background: #6a8caf; }
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-custom { background: #888888; }
+
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-intro .autoscroll-hint-time,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-intro .autoscroll-hint-sep,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-intro .autoscroll-hint-part,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-verse .autoscroll-hint-time,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-verse .autoscroll-hint-sep,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-verse .autoscroll-hint-part,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-pre-chorus .autoscroll-hint-time,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-pre-chorus .autoscroll-hint-sep,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-pre-chorus .autoscroll-hint-part,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-chorus .autoscroll-hint-time,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-chorus .autoscroll-hint-sep,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-chorus .autoscroll-hint-part,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-post-chorus .autoscroll-hint-time,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-post-chorus .autoscroll-hint-sep,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-post-chorus .autoscroll-hint-part,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-bridge .autoscroll-hint-time,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-bridge .autoscroll-hint-sep,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-bridge .autoscroll-hint-part,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-instrumental .autoscroll-hint-time,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-instrumental .autoscroll-hint-sep,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-instrumental .autoscroll-hint-part,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-outro .autoscroll-hint-time,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-outro .autoscroll-hint-sep,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-outro .autoscroll-hint-part,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-custom .autoscroll-hint-time,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-custom .autoscroll-hint-sep,
+    .autoscroll-hint-list .autoscroll-hint-row.active.section-custom .autoscroll-hint-part {
+      color: #ffffff;
     }
     .autoscroll-hint-list .autoscroll-hint-time {
       color: #8b6b4a;
@@ -2328,7 +2382,7 @@
     <button class="key-float-toggle" id="keyFloatToggle" title="Key &amp; transpose" aria-label="Key and transpose">🔑</button>
     <button class="split-float-toggle" id="splitFloatToggle" title="Split view (left / center / right)" aria-label="Split view">⬛</button>
     <button class="swap-float-toggle" id="swapFloatToggle" title="Swap lyrics / chords sides" aria-label="Swap sides">↔️</button>
-    <button class="autoscroll-float-toggle" id="autoscrollFloatToggle" title="Auto-scroll by timestamps" aria-label="Auto-scroll">⏱️</button>
+    <button class="autoscroll-float-toggle" id="autoscrollFloatToggle" title="Auto-scroll by timestamps" aria-label="Auto-scroll">⏯️</button>
     <button class="editor-float-toggle" id="editorFloatToggle" title="Hide both editors" aria-label="Hide both editors">✏️</button>
     <button class="template-float-toggle" id="templateFloatToggle" title="Templates (look &amp; feel presets)" aria-label="Templates">🎨</button>
     <button class="save-float-toggle" id="saveFloatToggle" title="Save Chord Chart" aria-label="Save Chord Chart">💾</button>
@@ -2364,7 +2418,7 @@
     <button class="perf-close" id="songsFloatClose" title="Close">✕</button>
   </div>
   <div class="songs-float-body">
-    <div class="dropdown-item" id="songsFloatOpenFile" style="color: #8b6b4a; font-weight: 600;">⬆️ Upload a Song</div>
+    <div class="dropdown-item" id="songsFloatOpenFile" style="color: #8b6b4a; font-weight: 600;">⬆️ Upload a Song...</div>
     <div class="dropdown-divider"></div>
     <div id="songsFloatList"></div>
   </div>
@@ -2372,7 +2426,7 @@
 
 <div class="autoscroll-float-panel" id="autoscrollFloatPanel" role="dialog" aria-label="Auto-scroll">
   <div class="autoscroll-float-header">
-    <span>⏱️ Auto-scroll</span>
+    <span>⏯️ Auto-scroll</span>
     <button class="perf-close" id="autoscrollFloatClose" title="Close">✕</button>
   </div>
   <div class="autoscroll-float-body">
@@ -2393,7 +2447,7 @@
     <div class="autoscroll-backing">
       <div class="autoscroll-backing-label">🎧 Backing Track</div>
       <div class="autoscroll-backing-now" id="backingTrackNow">Now playing: (none)</div>
-      <button type="button" class="autoscroll-backing-upload" id="backingTrackUpload">📂 Upload…</button>
+      <button type="button" class="autoscroll-backing-upload" id="backingTrackUpload">⬆️ Upload a Backing Track...</button>
     </div>
     <div class="autoscroll-hint" id="autoscrollHint">No timestamps found. Add <code>0:45</code> at the start of a line.</div>
   </div>
@@ -4061,6 +4115,22 @@
       autoscrollCurrentInput.value = autoscrollFormatTime(cur);
     }
 
+    function autoscrollUpdateActiveRow() {
+      const wrap = document.querySelector('.autoscroll-hint-list');
+      if (!wrap) return;
+      const cur = autoscrollCurrentTime() + autoscroll.offset;
+      const rows = wrap.querySelectorAll('.autoscroll-hint-row');
+      let activeRow = null;
+      for (let i = 0; i < rows.length; i++) {
+        const s = parseFloat(rows[i].dataset.seconds);
+        if (isFinite(s) && s <= cur) activeRow = rows[i];
+        else break;
+      }
+      for (let i = 0; i < rows.length; i++) {
+        rows[i].classList.toggle('active', rows[i] === activeRow);
+      }
+    }
+
     // Reads the right-hand (chord) gutter and the chord editor line-for-line.
     // Whenever a gutter row has a timestamp, we grab the same row of the chord
     // editor and pull a human-readable section name out of it. A section line
@@ -4118,6 +4188,9 @@
       list.forEach(function (entry) {
         const row = document.createElement('div');
         row.className = 'autoscroll-hint-row';
+        row.dataset.seconds = String(entry.seconds);
+        const rowSectionClass = getSectionClass(timestampLineLabel(entry.label));
+        if (rowSectionClass) row.classList.add(rowSectionClass);
         row.title = 'Jump to ' + autoscrollFormatTime(entry.seconds);
 
         const time = document.createElement('span');
@@ -4141,6 +4214,7 @@
         wrap.appendChild(row);
       });
       hint.appendChild(wrap);
+      autoscrollUpdateActiveRow();
     }
 
     function autoscrollRefreshTimestamps() {
@@ -4180,6 +4254,7 @@
       }
 
       autoscrollUpdateReadout();
+      autoscrollUpdateActiveRow();
 
       const total = autoscrollTotalDuration();
       if (total > 0 && autoscrollCurrentTime() > total + 5) {
