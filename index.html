@@ -5230,6 +5230,13 @@
         toggleAutoscrollFloatPanel();
       });
     }
+    document.addEventListener('click', function(e) {
+      if (!autoscrollFloatPanel.classList.contains('show')) return;
+      if (autoscrollFloatPanel.contains(e.target)) return;
+      if (autoscrollFloatToggle.contains(e.target)) return;
+      if (e.target.closest('.float-layer')) return;
+      toggleAutoscrollFloatPanel(false);
+    });
     if (autoscrollFloatClose) {
       autoscrollFloatClose.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -5325,6 +5332,7 @@
         if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
         if (typeof toggleSongsFloatPanel === 'function') toggleSongsFloatPanel(false);
         if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
+        if (typeof toggleAutoscrollFloatPanel === 'function') toggleAutoscrollFloatPanel(false);
       }
     }
     keyFloatToggle.addEventListener('click', function(e) {
@@ -5369,6 +5377,7 @@
         if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
         if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
         if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
+        if (typeof toggleAutoscrollFloatPanel === 'function') toggleAutoscrollFloatPanel(false);
       }
     }
     songsFloatToggle.addEventListener('click', function(e) {
@@ -5557,6 +5566,7 @@
         if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
         if (typeof toggleSongsFloatPanel === 'function') toggleSongsFloatPanel(false);
         if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
+        if (typeof toggleAutoscrollFloatPanel === 'function') toggleAutoscrollFloatPanel(false);
       }
     }
 
@@ -5628,6 +5638,7 @@
         if (typeof toggleSongsFloatPanel === 'function') toggleSongsFloatPanel(false);
         if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
         if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
+        if (typeof toggleAutoscrollFloatPanel === 'function') toggleAutoscrollFloatPanel(false);
       }
     }
     perfToggle.addEventListener('click', function(e) { e.stopPropagation(); togglePerfPanel(); });
