@@ -1778,11 +1778,29 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .dropdown-item.song-item .song-name::before {
-      content: attr(data-device) attr(data-icons);
-      padding-right: 0.35em;
-    }
+    .dropdown-item.song-item .song-name::before { content: none; }
     .dropdown-item.song-item .song-name::after { content: none; }
+    .dropdown-item.song-item .song-name .song-prefix {
+      display: inline-flex;
+      flex-direction: row;
+      align-items: center;
+      flex: 0 0 auto;
+      margin-right: 0.35em;
+      white-space: pre;
+    }
+    .dropdown-item.song-item .song-name .song-slot {
+      display: inline-block;
+      width: 1.15em;
+      text-align: center;
+      flex: 0 0 1.15em;
+    }
+    .dropdown-item.song-item .song-name .song-pipe {
+      display: inline-block;
+      width: 1.15em;
+      text-align: center;
+      flex: 0 0 1.15em;
+      opacity: 0.6;
+    }
     .dropdown-item.song-item .remove-btn {
       background: none;
       border: none;
@@ -1857,11 +1875,29 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .subfolder-popup .dropdown-item.song-item .song-name::before {
-      content: attr(data-device) attr(data-icons);
-      padding-right: 0.35em;
-    }
+    .subfolder-popup .dropdown-item.song-item .song-name::before { content: none; }
     .subfolder-popup .dropdown-item.song-item .song-name::after { content: none; }
+    .subfolder-popup .dropdown-item.song-item .song-name .song-prefix {
+      display: inline-flex;
+      flex-direction: row;
+      align-items: center;
+      flex: 0 0 auto;
+      margin-right: 0.35em;
+      white-space: pre;
+    }
+    .subfolder-popup .dropdown-item.song-item .song-name .song-slot {
+      display: inline-block;
+      width: 1.15em;
+      text-align: center;
+      flex: 0 0 1.15em;
+    }
+    .subfolder-popup .dropdown-item.song-item .song-name .song-pipe {
+      display: inline-block;
+      width: 1.15em;
+      text-align: center;
+      flex: 0 0 1.15em;
+      opacity: 0.6;
+    }
     .subfolder-popup .dropdown-item.song-item .remove-btn {
       background: none;
       border: none;
@@ -2496,6 +2532,7 @@
       <button type="button" class="btn-transpose" id="keyFloatTransposeDown" title="Transpose down a semitone">⬇️</button>
       <button type="button" class="btn-transpose" id="keyFloatTransposeUp" title="Transpose up a semitone">⬆️</button>
     </div>
+    <button type="button" class="template-float-btn" id="keyFloatBakeBtn">Set As The Original Key</button>
   </div>
 </div>
 
@@ -3242,6 +3279,7 @@
       updatePreview2();
       syncEditorOverlay(inputEl, document.getElementById('chartInputOverlay'));
       syncEditorOverlay(inputEl2, document.getElementById('chartInputOverlay2'));
+      syncCurrentSongTransposedFlag();
     }
     const TRANSPOSE_MIN = 0;
     const TRANSPOSE_MAX = 11;
@@ -3264,6 +3302,22 @@
       if (originalTextLeft) inputEl.value = originalTextLeft;
       updatePreview();
       updatePreview2();
+    }
+
+    // Reflects the currently-loaded song's live transpose state in the
+    // Songs list. Called whenever the transpose changes so the Key emoji
+    // appears/disappears in real time, without needing to save.
+    function syncCurrentSongTransposedFlag() {
+      const titleText = ((document.getElementById('titleInput') || {}).value || '').trim();
+      const sanitizedName = (titleText || 'chord-chart').replace(/[<>:"/\\|?*\x00-\x1f]/g, '').trim() || 'chord-chart';
+      const storedSongs = loadStoredSongs() || [];
+      const idx = storedSongs.findIndex(s => s.name === sanitizedName && (s.folder || '') === '');
+      if (idx < 0) return;
+      const nextVal = transposeSemitones !== 0;
+      if (!!storedSongs[idx].transposedKey === nextVal) return;
+      storedSongs[idx].transposedKey = nextVal;
+      saveSongsToStorage(storedSongs);
+      displayStoredSongs();
     }
 
     function loadSong(lyricText, chordText, fileName, settingsSnapshot, songTitle, leftTimeText, rightTimeText, backingTrackData) {
@@ -3479,7 +3533,8 @@
             rightTimeText: typeof parsed.rightTimeText === 'string' ? parsed.rightTimeText : '',
             settings: (parsed.settings && typeof parsed.settings === 'object') ? parsed.settings : null,
             backingTrackData: (parsed.backingTrackData && typeof parsed.backingTrackData === 'object') ? parsed.backingTrackData : null,
-            device: (parsed.device === 'phone' || parsed.device === 'desktop') ? parsed.device : null
+            device: (parsed.device === 'phone' || parsed.device === 'desktop') ? parsed.device : null,
+            transposedKey: parsed.transposedKey === true
           };
         }
         if (typeof parsed.songText === 'string') {
@@ -3491,7 +3546,8 @@
             rightTimeText: '',
             settings: (parsed.settings && typeof parsed.settings === 'object') ? parsed.settings : null,
             backingTrackData: (parsed.backingTrackData && typeof parsed.backingTrackData === 'object') ? parsed.backingTrackData : null,
-            device: (parsed.device === 'phone' || parsed.device === 'desktop') ? parsed.device : null
+            device: (parsed.device === 'phone' || parsed.device === 'desktop') ? parsed.device : null,
+            transposedKey: parsed.transposedKey === true
           };
         }
       }
@@ -3778,35 +3834,52 @@
 
       const nameSpan = document.createElement('span');
       nameSpan.className = 'song-name';
-      nameSpan.textContent = song.name;
 
-      let icons = '';
       const hasLyrics = typeof song.lyricText === 'string' && song.lyricText.trim() !== '';
       const hasChords = (typeof song.chordText === 'string' && song.chordText.trim() !== '')
                      || (typeof song.content === 'string' && song.content.trim() !== '');
-      if (hasLyrics) icons += '🎤';
-      if (hasChords) icons += '🎸';
 
-      function refreshDataset(trackPresent) {
-        let iconsFull = icons;
-        if (trackPresent) iconsFull += '🎧';
-        const deviceStr = deviceEmoji(song.device);
-        const hasDevice = !!deviceStr;
-        const hasIcons = !!iconsFull;
-        let prefix = '';
-        if (hasDevice) {
-          prefix = deviceStr;
-          if (hasIcons) prefix += ' | ';
-          else prefix += ' ';
-        }
-        if (hasIcons) prefix += iconsFull + ' ';
-        nameSpan.dataset.device = prefix;
-        nameSpan.dataset.icons = '';
-      }
+      // Build the fixed-width prefix: [device] [pipe] [🎤] [🎸] [🎧] [🔑]
+      // Every slot reserves its width even when empty, so names line up
+      // vertically across rows regardless of which icons a song has.
+      const prefixEl = document.createElement('span');
+      prefixEl.className = 'song-prefix';
 
-      refreshDataset(false);
+      const deviceSlot = document.createElement('span');
+      deviceSlot.className = 'song-slot';
+      deviceSlot.textContent = deviceEmoji(song.device) || '\u00A0';
+      prefixEl.appendChild(deviceSlot);
+
+      const pipeSlot = document.createElement('span');
+      pipeSlot.className = 'song-pipe';
+      pipeSlot.textContent = '|';
+      prefixEl.appendChild(pipeSlot);
+
+      const lyricsSlot = document.createElement('span');
+      lyricsSlot.className = 'song-slot';
+      lyricsSlot.textContent = hasLyrics ? '🎤' : '\u00A0';
+      prefixEl.appendChild(lyricsSlot);
+
+      const chordsSlot = document.createElement('span');
+      chordsSlot.className = 'song-slot';
+      chordsSlot.textContent = hasChords ? '🎸' : '\u00A0';
+      prefixEl.appendChild(chordsSlot);
+
+      const trackSlot = document.createElement('span');
+      trackSlot.className = 'song-slot';
+      trackSlot.textContent = '\u00A0';
+      prefixEl.appendChild(trackSlot);
+
+      const keySlot = document.createElement('span');
+      keySlot.className = 'song-slot';
+      keySlot.textContent = song.transposedKey === true ? '🔑' : '\u00A0';
+      prefixEl.appendChild(keySlot);
+
+      nameSpan.appendChild(prefixEl);
+      nameSpan.appendChild(document.createTextNode(song.name));
+
       idbGetTrack(song.name, song.folder || '').then(function(trackData) {
-        if (trackData && trackData.base64) refreshDataset(true);
+        if (trackData && trackData.base64) trackSlot.textContent = '🎧';
       });
 
       const removeBtn = document.createElement('button');
@@ -5159,6 +5232,7 @@
         savedAt: new Date().toISOString(),
         settings: Object.assign({}, settings),
         device: getCurrentDevice(),
+        transposedKey: transposeSemitones !== 0,
         title: titleText,
         lyricText: lyricText,
         chordText: chordText,
@@ -5188,6 +5262,7 @@
         leftTimeText: leftTime,
         rightTimeText: rightTime,
         device: getCurrentDevice(),
+        transposedKey: transposeSemitones !== 0,
         folder: ''
       };
       if (settings && typeof settings === 'object') entry.settings = Object.assign({}, settings);
@@ -5726,6 +5801,7 @@
 
     const keyFloatTransposeUp = document.getElementById('keyFloatTransposeUp');
     const keyFloatTransposeDown = document.getElementById('keyFloatTransposeDown');
+    const keyFloatBakeBtn = document.getElementById('keyFloatBakeBtn');
 
     if (keyFloatTransposeUp) {
       keyFloatTransposeUp.addEventListener('click', function(e) {
@@ -5737,6 +5813,18 @@
       keyFloatTransposeDown.addEventListener('click', function(e) {
         e.stopPropagation();
         transposeDown();
+      });
+    }
+
+    if (keyFloatBakeBtn) {
+      keyFloatBakeBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        originalText = inputEl2.value;
+        originalTextLeft = inputEl.value;
+        transposeSemitones = 0;
+        preferFlats = false;
+        syncCurrentSongTransposedFlag();
+        showToast('Current key is now the original.');
       });
     }
 
@@ -5795,6 +5883,7 @@
             leftTimeText: parsed.leftTimeText || '',
             rightTimeText: parsed.rightTimeText || '',
             device: parsed.device || null,
+            transposedKey: parsed.transposedKey === true,
             folder: folder
           };
           if (parsed.settings) entry.settings = parsed.settings;
