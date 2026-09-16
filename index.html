@@ -1001,6 +1001,11 @@
     @media (hover: hover) {
       .autoscroll-btn.primary:hover { background: #7a5d3f; border-color: #6b4f35; }
     }
+    .autoscroll-backing-upload:active {
+      background: #c4ad92;
+      border-color: #b0987a;
+      transform: scale(0.98);
+    }
     .autoscroll-current {
       flex: 0 0 62px;
       width: 62px;
@@ -1077,6 +1082,50 @@
       font-size: 0.75rem;
       color: #8b6b4a;
       font-weight: 600;
+    }
+    .autoscroll-backing {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-top: 8px;
+      border-top: 1px solid #dcc9b0;
+    }
+    .autoscroll-backing-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #5c4033;
+      letter-spacing: 0.02em;
+    }
+    .autoscroll-backing-now {
+      font-size: 0.72rem;
+      color: #8b6b4a;
+      line-height: 1.5;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .autoscroll-backing-upload {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 8px 12px;
+      background: #dcc9b0;
+      border: 1px solid #c4ad92;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #3d2b1f;
+      cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    @media (hover: hover) {
+      .autoscroll-backing-upload:hover {
+        background: #c4ad92;
+        border-color: #b0987a;
+      }
     }
     .autoscroll-hint {
       font-size: 0.72rem;
@@ -2165,6 +2214,12 @@
       .swap-float-toggle {
         display: none !important;
       }
+      /* On phone the backing-track upload button needs a finger-sized
+         touch target; 8px padding is too small. */
+      .autoscroll-backing-upload {
+        padding: 12px 14px;
+        font-size: 0.85rem;
+      }
       /* When the user has swapped sides, DOM order already handles it
          (applySwapState reorders the panels), so nothing extra needed
          here. */
@@ -2335,6 +2390,11 @@
       <input type="number" class="autoscroll-offset" id="autoscrollOffset" min="-30" max="30" step="1" value="0">
       <span class="autoscroll-unit">s</span>
     </div>
+    <div class="autoscroll-backing">
+      <div class="autoscroll-backing-label">🎧 Backing Track</div>
+      <div class="autoscroll-backing-now" id="backingTrackNow">Now playing: (none)</div>
+      <button type="button" class="autoscroll-backing-upload" id="backingTrackUpload">📂 Upload…</button>
+    </div>
     <div class="autoscroll-hint" id="autoscrollHint">No timestamps found. Add <code>0:45</code> at the start of a line.</div>
   </div>
 </div>
@@ -2503,6 +2563,7 @@
   </div>
 </div>
 
+<audio id="backingTrackAudio" preload="metadata"></audio>
 <div class="toast" id="toast"></div>
 <script>
   (function() {
@@ -3777,6 +3838,10 @@
     }
 
     function autoscrollCurrentTime() {
+      if (backingTrack.loaded && backingTrackAudio) {
+        const t = backingTrackAudio.currentTime;
+        if (isFinite(t)) return t;
+      }
       if (autoscroll.playing) {
         return autoscroll.elapsedAtPause + (performance.now() - autoscroll.startWallClock) / 1000;
       }
@@ -3826,6 +3891,12 @@
       } else {
         autoscroll.elapsedAtPause = seconds;
       }
+      // If a backing track is loaded, seek it too. Raw second shown in the
+      // timestamp list; Offset is not added on top (it only shifts which
+      // block is active, not where the audio plays from).
+      if (backingTrack.loaded && backingTrackAudio) {
+        backingTrackSeekTo(seconds);
+      }
       // Force the next tick to re-scroll both panes even if the target block
       // was already active, so jumping always snaps the preview.
       autoscroll.lastLyricsBlock = -1;
@@ -3847,7 +3918,10 @@
 
     function autoscrollUpdateReadout() {
       const cur = autoscrollCurrentTime();
-      const tot = autoscrollTotalDuration();
+      let tot = autoscrollTotalDuration();
+      if (backingTrack.loaded && backingTrackAudio && isFinite(backingTrackAudio.duration)) {
+        tot = backingTrackAudio.duration;
+      }
       if (autoscrollTotalEl) {
         autoscrollTotalEl.textContent = '/ ' + autoscrollFormatTime(tot);
       }
@@ -3990,6 +4064,11 @@
 
     function autoscrollPlay() {
       if (autoscroll.playing) return;
+      if (backingTrack.loaded && backingTrackAudio) {
+        backingTrackPlay();
+      } else {
+        showToast('No backing track loaded.');
+      }
       autoscroll.playing = true;
       autoscroll.startWallClock = performance.now();
       const playBtn = document.getElementById('autoscrollPlay');
@@ -4005,6 +4084,9 @@
       autoscroll.playing = false;
       if (autoscroll.rafId) cancelAnimationFrame(autoscroll.rafId);
       autoscroll.rafId = null;
+      if (backingTrack.loaded && backingTrackAudio) {
+        backingTrackPause();
+      }
       const playBtn = document.getElementById('autoscrollPlay');
       if (playBtn) playBtn.textContent = '▶️';
       const toggle = document.getElementById('autoscrollFloatToggle');
@@ -4019,6 +4101,9 @@
       autoscroll.elapsedAtPause = 0;
       autoscroll.lastLyricsBlock = -1;
       autoscroll.lastChordsBlock = -1;
+      if (backingTrack.loaded && backingTrackAudio) {
+        backingTrackStop();
+      }
       const playBtn = document.getElementById('autoscrollPlay');
       if (playBtn) playBtn.textContent = '▶️';
       const toggle = document.getElementById('autoscrollFloatToggle');
@@ -5015,6 +5100,100 @@
     const autoscrollTotalEl = document.getElementById('autoscrollTotal');
     const autoscrollSrcToggle = document.getElementById('autoscrollSrcToggle');
     const autoscrollOffsetInput = document.getElementById('autoscrollOffset');
+    const backingTrackAudio = document.getElementById('backingTrackAudio');
+    const backingTrackNow = document.getElementById('backingTrackNow');
+    const backingTrackUpload = document.getElementById('backingTrackUpload');
+    const BACKING_TRACK_FOLDER_KEY = 'chordChartBackingTrackFolder';
+
+    // ===== BACKING TRACK (audio) =====
+    // One transport, one clock: when a track is loaded, the audio element is
+    // the master clock for autoscroll. When no track is loaded, autoscroll
+    // runs on its internal clock as it always has.
+    const backingTrack = {
+      loaded: false,
+      fileName: ''
+    };
+
+    function backingTrackSetNowLabel(name) {
+      if (!backingTrackNow) return;
+      backingTrackNow.textContent = name ? ('Now playing: ' + name) : 'Now playing: (none)';
+    }
+
+    function backingTrackLoadFile(file) {
+      if (!file || !backingTrackAudio) return;
+      const url = URL.createObjectURL(file);
+      backingTrackAudio.src = url;
+      backingTrack.fileName = file.name;
+      backingTrack.loaded = true;
+      backingTrackSetNowLabel(file.name);
+      try {
+        const rel = file.webkitRelativePath || '';
+        const parts = rel.split('/');
+        parts.pop();
+        const folderHint = parts.join('/') || file.name;
+        localStorage.setItem(BACKING_TRACK_FOLDER_KEY, folderHint);
+      } catch (e) {}
+    }
+
+    function backingTrackClear() {
+      if (backingTrackAudio) {
+        try { backingTrackAudio.pause(); } catch (e) {}
+        backingTrackAudio.removeAttribute('src');
+        try { backingTrackAudio.load(); } catch (e) {}
+      }
+      backingTrack.loaded = false;
+      backingTrack.fileName = '';
+      backingTrackSetNowLabel('');
+    }
+
+    function backingTrackPlay() {
+      if (!backingTrack.loaded || !backingTrackAudio) return;
+      try { backingTrackAudio.play().catch(function() {}); } catch (e) {}
+    }
+
+    function backingTrackPause() {
+      if (!backingTrack.loaded || !backingTrackAudio) return;
+      try { backingTrackAudio.pause(); } catch (e) {}
+    }
+
+    function backingTrackStop() {
+      if (!backingTrack.loaded || !backingTrackAudio) return;
+      try { backingTrackAudio.pause(); backingTrackAudio.currentTime = 0; } catch (e) {}
+    }
+
+    function backingTrackSeekTo(seconds) {
+      if (!backingTrack.loaded || !backingTrackAudio) return false;
+      const dur = isFinite(backingTrackAudio.duration) ? backingTrackAudio.duration : null;
+      if (dur !== null && seconds > dur) {
+        try { backingTrackAudio.currentTime = dur; } catch (e) {}
+        showToast('Chart position is past the end of the track.');
+        return true;
+      }
+      try { backingTrackAudio.currentTime = seconds; } catch (e) {}
+      return true;
+    }
+
+    if (backingTrackUpload) {
+      backingTrackUpload.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.mp3,.wav,.flac,.ogg,.opus,.m4a,.aac,audio/*';
+        fileInput.onchange = function(ev) {
+          const file = ev.target.files && ev.target.files[0];
+          if (!file) return;
+          backingTrackLoadFile(file);
+        };
+        fileInput.click();
+      });
+    }
+
+    if (backingTrackAudio) {
+      backingTrackAudio.addEventListener('error', function() {
+        showToast("Couldn't play that file.");
+        backingTrackClear();
+      });
+    }
 
     // Which editor pair the timestamp list is sourced from.
     // 'chords' = right side (🎸), 'lyrics' = left side (🎤).
