@@ -3180,11 +3180,18 @@
       updatePreview2();
     }
 
-    function loadSong(lyricText, chordText, fileName, settingsSnapshot, songTitle, leftTimeText, rightTimeText) {
+    function loadSong(lyricText, chordText, fileName, settingsSnapshot, songTitle, leftTimeText, rightTimeText, backingTrackData) {
       inputEl.value = lyricText;
       inputEl2.value = chordText;
       originalText = inputEl2.value;
       originalTextLeft = inputEl.value;
+
+      if (backingTrackData && typeof backingTrackData === 'object') {
+        if (backingTrackLoadEmbedded(backingTrackData)) {
+          const embName = backingTrackData.fileName || 'embedded track';
+          showToast('Restored backing track: ' + embName);
+        }
+      }
 
       const leftTimeEl = document.getElementById('timeInput');
       const rightTimeEl = document.getElementById('timeInput2');
@@ -3282,7 +3289,13 @@
           }
           saveSongsToStorage(storedSongs);
 
-          loadSong(parsed.lyricText, parsed.chordText, fileName, parsed.settings, parsed.title, parsed.leftTimeText, parsed.rightTimeText);
+          if (parsed.backingTrackData) {
+            idbPutTrack(fileName, folder, parsed.backingTrackData);
+          } else {
+            idbDeleteTrack(fileName, folder);
+          }
+
+          loadSong(parsed.lyricText, parsed.chordText, fileName, parsed.settings, parsed.title, parsed.leftTimeText, parsed.rightTimeText, parsed.backingTrackData);
           if (parsed.settings) showToast('Loaded "' + fileName + '"');
           displayStoredSongs();
         };
@@ -3329,7 +3342,10 @@
             saveSongsToStorage(storedSongs);
             displayStoredSongs();
             if (firstParsed) {
-              loadSong(firstParsed.lyricText, firstParsed.chordText, firstFileName, firstParsed.settings, firstParsed.title, firstParsed.leftTimeText, firstParsed.rightTimeText);
+              if (firstParsed.backingTrackData) {
+                idbPutTrack(firstFileName, '', firstParsed.backingTrackData);
+              }
+              loadSong(firstParsed.lyricText, firstParsed.chordText, firstFileName, firstParsed.settings, firstParsed.title, firstParsed.leftTimeText, firstParsed.rightTimeText, firstParsed.backingTrackData);
               if (firstParsed.settings) showToast('Loaded "' + firstFileName + '"');
             }
           }
@@ -3363,7 +3379,8 @@
             chordText: typeof parsed.chordText === 'string' ? parsed.chordText : '',
             leftTimeText: typeof parsed.leftTimeText === 'string' ? parsed.leftTimeText : '',
             rightTimeText: typeof parsed.rightTimeText === 'string' ? parsed.rightTimeText : '',
-            settings: (parsed.settings && typeof parsed.settings === 'object') ? parsed.settings : null
+            settings: (parsed.settings && typeof parsed.settings === 'object') ? parsed.settings : null,
+            backingTrackData: (parsed.backingTrackData && typeof parsed.backingTrackData === 'object') ? parsed.backingTrackData : null
           };
         }
         if (typeof parsed.songText === 'string') {
@@ -3373,7 +3390,8 @@
             chordText: parsed.songText,
             leftTimeText: '',
             rightTimeText: '',
-            settings: (parsed.settings && typeof parsed.settings === 'object') ? parsed.settings : null
+            settings: (parsed.settings && typeof parsed.settings === 'object') ? parsed.settings : null,
+            backingTrackData: (parsed.backingTrackData && typeof parsed.backingTrackData === 'object') ? parsed.backingTrackData : null
           };
         }
       }
@@ -3393,6 +3411,113 @@
       catch (e) { console.log('Could not save songs'); }
     }
 
+    // ===== INDEXEDDB BACKING TRACK STORE =====
+    const IDB_NAME = 'chordChartAudio';
+    const IDB_STORE = 'tracks';
+    const IDB_VERSION = 1;
+    let idbPromise = null;
+
+    function idbOpen() {
+      if (idbPromise) return idbPromise;
+      idbPromise = new Promise(function(resolve, reject) {
+        const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+        req.onupgradeneeded = function() {
+          const db = req.result;
+          if (!db.objectStoreNames.contains(IDB_STORE)) {
+            db.createObjectStore(IDB_STORE, { keyPath: 'id' });
+          }
+        };
+        req.onsuccess = function() {
+          const db = req.result;
+          db.onclose = function() {
+            console.warn('[idb] connection closed by browser; will reopen on next use');
+            idbPromise = null;
+          };
+          db.onversionchange = function() {
+            console.warn('[idb] version change; closing');
+            try { db.close(); } catch (e) {}
+            idbPromise = null;
+          };
+          resolve(db);
+        };
+        req.onerror = function() { reject(req.error); };
+      });
+      return idbPromise;
+    }
+
+    function idbKey(name, folder) {
+      return (folder || '') + '\u0000' + (name || '');
+    }
+
+    function idbPutTrack(name, folder, data) {
+      return idbOpen().then(function(db) {
+        return new Promise(function(resolve, reject) {
+          let tx;
+          try {
+            tx = db.transaction(IDB_STORE, 'readwrite');
+          } catch (e) {
+            console.error('[idbPut] transaction threw:', e.name, e.message);
+            idbPromise = null;
+            reject(e);
+            return;
+          }
+          const store = tx.objectStore(IDB_STORE);
+          const req = store.put({ id: idbKey(name, folder), name: name, folder: folder || '', data: data });
+          req.onsuccess = function() {
+            console.log('[idbPut] request success for', name, 'data size ~', data && data.base64 ? data.base64.length : 0);
+          };
+          req.onerror = function() {
+            console.error('[idbPut] request error:', req.error && req.error.name, req.error && req.error.message);
+          };
+          tx.oncomplete = function() {
+            console.log('[idbPut] tx complete for', name);
+            resolve(true);
+          };
+          tx.onerror = function() {
+            console.error('[idbPut] tx error:', tx.error && tx.error.name, tx.error && tx.error.message);
+            reject(tx.error);
+          };
+          tx.onabort = function() {
+            console.error('[idbPut] tx ABORTED:', tx.error && tx.error.name, tx.error && tx.error.message);
+            reject(tx.error || new Error('transaction aborted'));
+          };
+        });
+      }).catch(function(e) {
+        console.warn('[idbPut] outer catch:', e && e.name, e && e.message);
+        return false;
+      });
+    }
+
+    function idbGetTrack(name, folder) {
+      return idbOpen().then(function(db) {
+        return new Promise(function(resolve, reject) {
+          const tx = db.transaction(IDB_STORE, 'readonly');
+          const store = tx.objectStore(IDB_STORE);
+          const req = store.get(idbKey(name, folder));
+          req.onsuccess = function() { resolve(req.result ? req.result.data : null); };
+          req.onerror = function() { reject(req.error); };
+        });
+      }).catch(function(e) {
+        console.warn('IndexedDB get failed:', e);
+        return null;
+      });
+    }
+
+    function idbDeleteTrack(name, folder) {
+      return idbOpen().then(function(db) {
+        return new Promise(function(resolve, reject) {
+          const tx = db.transaction(IDB_STORE, 'readwrite');
+          const store = tx.objectStore(IDB_STORE);
+          store.delete(idbKey(name, folder));
+          tx.oncomplete = function() { resolve(true); };
+          tx.onerror = function() { reject(tx.error); };
+        });
+      }).catch(function(e) {
+        console.warn('IndexedDB delete failed:', e);
+        return false;
+      });
+    }
+
     function removeSong(songName, songFolder) {
       const storedSongs = loadStoredSongs() || [];
       const index = storedSongs.findIndex(s => s.name === songName && s.folder === (songFolder || ''));
@@ -3400,6 +3525,7 @@
         showConfirm('Are you sure you want to remove "' + songName + '"?', function() {
           storedSongs.splice(index, 1);
           saveSongsToStorage(storedSongs);
+          idbDeleteTrack(songName, songFolder || '');
           displayStoredSongs();
         });
       }
@@ -3559,14 +3685,18 @@
         const chord = song.chordText != null ? song.chordText : (song.content || '');
         const leftTime = song.leftTimeText != null ? song.leftTimeText : '';
         const rightTime = song.rightTimeText != null ? song.rightTimeText : '';
-        loadSong(lyric, chord, song.name, song.settings || null, song.title || '', leftTime, rightTime);
-        if (song.settings && typeof song.settings === 'object') showToast('Loaded "' + song.name + '"');
-        if (typeof songsFloatPanel !== 'undefined' && songsFloatPanel) {
-          songsFloatPanel.classList.remove('show');
-          if (typeof songsFloatToggle !== 'undefined' && songsFloatToggle) songsFloatToggle.classList.remove('active');
-        }
-        document.querySelectorAll('.dropdown-item.song-item').forEach(el => el.classList.remove('active'));
-        songItem.classList.add('active');
+        const folder = song.folder || '';
+
+        idbGetTrack(song.name, folder).then(function(trackData) {
+          loadSong(lyric, chord, song.name, song.settings || null, song.title || '', leftTime, rightTime, trackData || null);
+          if (song.settings && typeof song.settings === 'object') showToast('Loaded "' + song.name + '"');
+          if (typeof songsFloatPanel !== 'undefined' && songsFloatPanel) {
+            songsFloatPanel.classList.remove('show');
+            if (typeof songsFloatToggle !== 'undefined' && songsFloatToggle) songsFloatToggle.classList.remove('active');
+          }
+          document.querySelectorAll('.dropdown-item.song-item').forEach(el => el.classList.remove('active'));
+          songItem.classList.add('active');
+        });
       });
 
       songItem.appendChild(removeBtn);
@@ -4879,6 +5009,14 @@
         rightTimeText: rightTime
       };
 
+      if (backingTrack.loaded && backingTrack.base64) {
+        payload.backingTrackData = {
+          fileName: backingTrack.fileName || '',
+          mimeType: backingTrack.mimeType || 'audio/mpeg',
+          base64: backingTrack.base64
+        };
+      }
+
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
       const result = await saveFileWithPicker(fileName, blob, 'application/json', 'Chord chart');
       if (result.cancelled) return;
@@ -4901,6 +5039,17 @@
         storedSongs.push(entry);
       }
       saveSongsToStorage(storedSongs);
+
+      if (backingTrack.loaded && backingTrack.base64) {
+        await idbPutTrack(sanitizedName, '', {
+          fileName: backingTrack.fileName || '',
+          mimeType: backingTrack.mimeType || 'audio/mpeg',
+          base64: backingTrack.base64
+        });
+      } else {
+        await idbDeleteTrack(sanitizedName, '');
+      }
+
       displayStoredSongs();
 
       this.textContent = '✅';
@@ -5111,7 +5260,9 @@
     // runs on its internal clock as it always has.
     const backingTrack = {
       loaded: false,
-      fileName: ''
+      fileName: '',
+      mimeType: '',
+      base64: ''
     };
 
     function backingTrackSetNowLabel(name) {
@@ -5119,30 +5270,88 @@
       backingTrackNow.textContent = name ? ('Now playing: ' + name) : 'Now playing: (none)';
     }
 
+    function blobToBase64(blob) {
+      return new Promise(function(resolve, reject) {
+        const reader = new FileReader();
+        reader.onload = function() {
+          const result = String(reader.result || '');
+          const comma = result.indexOf(',');
+          resolve(comma >= 0 ? result.substring(comma + 1) : result);
+        };
+        reader.onerror = function() { reject(reader.error); };
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    function base64ToBlob(base64, mimeType) {
+      const binary = atob(base64);
+      const len = binary.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
+      return new Blob([bytes], { type: mimeType || 'audio/mpeg' });
+    }
+
+    function backingTrackInstall(blob, fileName, mimeType, base64) {
+      if (!blob || !backingTrackAudio) return;
+      try { URL.revokeObjectURL(backingTrackAudio.src); } catch (e) {}
+      const url = URL.createObjectURL(blob);
+      backingTrack.fileName = fileName || '';
+      backingTrack.mimeType = mimeType || blob.type || '';
+      backingTrack.base64 = base64 || '';
+      backingTrack.loaded = true;
+      backingTrackSetNowLabel(fileName || '(embedded track)');
+      backingTrackAudio.src = url;
+      console.log('[backingTrackInstall] installed', fileName, 'blob size', blob.size, 'base64 len', base64 ? base64.length : 0);
+    }
+
     function backingTrackLoadFile(file) {
       if (!file || !backingTrackAudio) return;
-      const url = URL.createObjectURL(file);
-      backingTrackAudio.src = url;
-      backingTrack.fileName = file.name;
-      backingTrack.loaded = true;
-      backingTrackSetNowLabel(file.name);
+      const mime = file.type || 'audio/mpeg';
+      blobToBase64(file).then(function(b64) {
+        backingTrackInstall(file, file.name, mime, b64);
+        try {
+          const rel = file.webkitRelativePath || '';
+          const parts = rel.split('/');
+          parts.pop();
+          const folderHint = parts.join('/') || file.name;
+          localStorage.setItem(BACKING_TRACK_FOLDER_KEY, folderHint);
+        } catch (e) {}
+      }).catch(function() {
+        backingTrackInstall(file, file.name, mime, '');
+      });
+    }
+
+    function backingTrackLoadEmbedded(data) {
+      if (!data || typeof data.base64 !== 'string' || !data.base64) {
+        console.warn('[embedded] no data or no base64. data =', data);
+        return false;
+      }
       try {
-        const rel = file.webkitRelativePath || '';
-        const parts = rel.split('/');
-        parts.pop();
-        const folderHint = parts.join('/') || file.name;
-        localStorage.setItem(BACKING_TRACK_FOLDER_KEY, folderHint);
-      } catch (e) {}
+        console.log('[embedded] starting. base64 length =', data.base64.length, 'mime =', data.mimeType);
+        const mime = typeof data.mimeType === 'string' && data.mimeType ? data.mimeType : 'audio/mpeg';
+        const blob = base64ToBlob(data.base64, mime);
+        console.log('[embedded] blob created. size =', blob.size);
+        const name = (typeof data.fileName === 'string' && data.fileName) ? data.fileName : '(embedded track)';
+        backingTrackInstall(blob, name, mime, data.base64);
+        return true;
+      } catch (e) {
+        console.error('[embedded] FAILED:', e.name, e.message, e);
+        return false;
+      }
     }
 
     function backingTrackClear() {
+      console.trace('[backingTrackClear] called');
       if (backingTrackAudio) {
         try { backingTrackAudio.pause(); } catch (e) {}
+        try { URL.revokeObjectURL(backingTrackAudio.src); } catch (e) {}
         backingTrackAudio.removeAttribute('src');
         try { backingTrackAudio.load(); } catch (e) {}
       }
       backingTrack.loaded = false;
       backingTrack.fileName = '';
+      backingTrack.mimeType = '';
+      backingTrack.base64 = '';
       backingTrackSetNowLabel('');
     }
 
@@ -5190,6 +5399,10 @@
 
     if (backingTrackAudio) {
       backingTrackAudio.addEventListener('error', function() {
+        if (backingTrack.base64) {
+          console.warn('Backing track error event fired; keeping embedded track in memory.');
+          return;
+        }
         showToast("Couldn't play that file.");
         backingTrackClear();
       });
@@ -5401,6 +5614,8 @@
         reader.onload = function(event) {
           const raw = event.target.result;
           const parsed = parseChordChartFile(raw, file.name);
+          console.log('[upload] parsed =', parsed);
+          console.log('[upload] parsed.backingTrackData =', parsed.backingTrackData);
           const fileName = stripExtension(file.name);
           const folder = file.webkitRelativePath ? getFolderPath(file.webkitRelativePath) : '';
           const storedSongs = loadStoredSongs() || [];
@@ -5421,7 +5636,12 @@
             storedSongs.push(entry);
           }
           saveSongsToStorage(storedSongs);
-          loadSong(parsed.lyricText, parsed.chordText, fileName, parsed.settings, parsed.title, parsed.leftTimeText, parsed.rightTimeText);
+          if (parsed.backingTrackData) {
+            idbPutTrack(fileName, folder, parsed.backingTrackData);
+          } else {
+            idbDeleteTrack(fileName, folder);
+          }
+          loadSong(parsed.lyricText, parsed.chordText, fileName, parsed.settings, parsed.title, parsed.leftTimeText, parsed.rightTimeText, parsed.backingTrackData);
           if (parsed.settings) showToast('Applied settings from "' + fileName + '"');
           songsFloatPanel.classList.remove('show');
           songsFloatToggle.classList.remove('active');
@@ -6148,6 +6368,7 @@
 
     updatePreview();
     updatePreview2();
+    idbOpen();
     window.addEventListener('load', function() {
       setTimeout(adjustChordSizes, 500);
       setTimeout(adjustChordSizes, 1500);
