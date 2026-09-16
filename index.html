@@ -1772,8 +1772,11 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .dropdown-item.song-item .song-name::before { content: '🎵 '; }
-    .dropdown-item.song-item.has-settings .song-name::after { content: ' 🎚️'; opacity: 0.7; }
+    .dropdown-item.song-item .song-name::before {
+      content: attr(data-device) attr(data-icons);
+      padding-right: 0.35em;
+    }
+    .dropdown-item.song-item .song-name::after { content: none; }
     .dropdown-item.song-item .remove-btn {
       background: none;
       border: none;
@@ -1848,8 +1851,11 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .subfolder-popup .dropdown-item.song-item .song-name::before { content: '🎵 '; }
-    .subfolder-popup .dropdown-item.song-item.has-settings .song-name::after { content: ' 🎚️'; opacity: 0.7; }
+    .subfolder-popup .dropdown-item.song-item .song-name::before {
+      content: attr(data-device) attr(data-icons);
+      padding-right: 0.35em;
+    }
+    .subfolder-popup .dropdown-item.song-item .song-name::after { content: none; }
     .subfolder-popup .dropdown-item.song-item .remove-btn {
       background: none;
       border: none;
@@ -3453,7 +3459,8 @@
             leftTimeText: typeof parsed.leftTimeText === 'string' ? parsed.leftTimeText : '',
             rightTimeText: typeof parsed.rightTimeText === 'string' ? parsed.rightTimeText : '',
             settings: (parsed.settings && typeof parsed.settings === 'object') ? parsed.settings : null,
-            backingTrackData: (parsed.backingTrackData && typeof parsed.backingTrackData === 'object') ? parsed.backingTrackData : null
+            backingTrackData: (parsed.backingTrackData && typeof parsed.backingTrackData === 'object') ? parsed.backingTrackData : null,
+            device: (parsed.device === 'phone' || parsed.device === 'desktop') ? parsed.device : null
           };
         }
         if (typeof parsed.songText === 'string') {
@@ -3464,7 +3471,8 @@
             leftTimeText: '',
             rightTimeText: '',
             settings: (parsed.settings && typeof parsed.settings === 'object') ? parsed.settings : null,
-            backingTrackData: (parsed.backingTrackData && typeof parsed.backingTrackData === 'object') ? parsed.backingTrackData : null
+            backingTrackData: (parsed.backingTrackData && typeof parsed.backingTrackData === 'object') ? parsed.backingTrackData : null,
+            device: (parsed.device === 'phone' || parsed.device === 'desktop') ? parsed.device : null
           };
         }
       }
@@ -3610,6 +3618,16 @@
       return parts.join('/');
     }
 
+    function getCurrentDevice() {
+      return window.matchMedia('(max-width: 900px)').matches ? 'phone' : 'desktop';
+    }
+
+    function deviceEmoji(device) {
+      if (device === 'phone') return '📱';
+      if (device === 'desktop') return '💻';
+      return '';
+    }
+
     function renderSongsInto(container) {
       if (!container) return;
       const storedSongs = loadStoredSongs();
@@ -3742,6 +3760,35 @@
       const nameSpan = document.createElement('span');
       nameSpan.className = 'song-name';
       nameSpan.textContent = song.name;
+
+      let icons = '';
+      const hasLyrics = typeof song.lyricText === 'string' && song.lyricText.trim() !== '';
+      const hasChords = (typeof song.chordText === 'string' && song.chordText.trim() !== '')
+                     || (typeof song.content === 'string' && song.content.trim() !== '');
+      if (hasLyrics) icons += '🎤';
+      if (hasChords) icons += '🎸';
+
+      function refreshDataset(trackPresent) {
+        let iconsFull = icons;
+        if (trackPresent) iconsFull += '🎧';
+        const deviceStr = deviceEmoji(song.device);
+        const hasDevice = !!deviceStr;
+        const hasIcons = !!iconsFull;
+        let prefix = '';
+        if (hasDevice) {
+          prefix = deviceStr;
+          if (hasIcons) prefix += ' | ';
+          else prefix += ' ';
+        }
+        if (hasIcons) prefix += iconsFull + ' ';
+        nameSpan.dataset.device = prefix;
+        nameSpan.dataset.icons = '';
+      }
+
+      refreshDataset(false);
+      idbGetTrack(song.name, song.folder || '').then(function(trackData) {
+        if (trackData && trackData.base64) refreshDataset(true);
+      });
 
       const removeBtn = document.createElement('button');
       removeBtn.className = 'remove-btn';
@@ -5078,10 +5125,6 @@
     saveFloatToggle.addEventListener('click', async function() {
       const lyricText = inputEl.value;
       const chordText = inputEl2.value;
-      if ((!lyricText || lyricText.trim() === '') && (!chordText || chordText.trim() === '')) {
-        alert('Nothing to save. Both editors are empty.');
-        return;
-      }
 
       const titleText = ((document.getElementById('titleInput') || {}).value || '').trim();
       const songName = titleText || 'chord-chart';
@@ -5096,6 +5139,7 @@
         type: 'song',
         savedAt: new Date().toISOString(),
         settings: Object.assign({}, settings),
+        device: getCurrentDevice(),
         title: titleText,
         lyricText: lyricText,
         chordText: chordText,
@@ -5124,6 +5168,7 @@
         chordText: chordText,
         leftTimeText: leftTime,
         rightTimeText: rightTime,
+        device: getCurrentDevice(),
         folder: ''
       };
       if (settings && typeof settings === 'object') entry.settings = Object.assign({}, settings);
@@ -5721,6 +5766,7 @@
             chordText: parsed.chordText,
             leftTimeText: parsed.leftTimeText || '',
             rightTimeText: parsed.rightTimeText || '',
+            device: parsed.device || null,
             folder: folder
           };
           if (parsed.settings) entry.settings = parsed.settings;
