@@ -292,13 +292,6 @@
     .editor-with-gutter .time-gutter::-webkit-scrollbar {
       display: none;
     }
-    .editor-with-gutter .time-gutter:empty::before {
-      content: attr(data-placeholder);
-      color: #c9b8a0;
-      font-style: italic;
-      opacity: 0.7;
-      pointer-events: none;
-    }
     .editor-with-gutter .time-gutter::placeholder {
       color: #c9b8a0;
       font-style: italic;
@@ -2368,7 +2361,7 @@
         <div class="drop-zone" id="dropZone">
           <div class="drop-message">📂 Drop a chord chart here</div>
           <div class="editor-with-gutter">
-            <textarea id="timeInput" class="time-gutter" spellcheck="false" placeholder="0:00&#10;&#10;0:26&#10;&#10;&#10;&#10;1:28"></textarea>
+            <textarea id="timeInput" class="time-gutter is-empty" spellcheck="false" placeholder="0:00&#10;&#10;0:26&#10;&#10;&#10;&#10;1:28"></textarea>
             <div class="editor-input-wrap">
               <div class="editor-input-overlay" id="chartInputOverlay"><span class="hint-emoji">⌨️🎤</span> <span class="hint-italic">Type lyrics here!</span></div>
               <textarea id="chartInput" spellcheck="false"></textarea>
@@ -2388,7 +2381,7 @@
         <div class="drop-zone" id="dropZone2">
           <div class="drop-message">📂 Drop a chord chart here</div>
           <div class="editor-with-gutter">
-            <textarea id="timeInput2" class="time-gutter" spellcheck="false" placeholder="0:00&#10;&#10;0:26&#10;&#10;&#10;&#10;1:28"></textarea>
+            <textarea id="timeInput2" class="time-gutter is-empty" spellcheck="false" placeholder="0:00&#10;&#10;0:26&#10;&#10;&#10;&#10;1:28"></textarea>
             <div class="editor-input-wrap">
               <div class="editor-input-overlay" id="chartInputOverlay2"><span class="hint-emoji">⌨️🎸</span> <span class="hint-italic">Type chords here!</span></div>
               <textarea id="chartInput2" spellcheck="false"></textarea>
@@ -3276,6 +3269,10 @@
       const rightTimeEl = document.getElementById('timeInput2');
       if (leftTimeEl) leftTimeEl.value = (typeof leftTimeText === 'string') ? leftTimeText : '';
       if (rightTimeEl) rightTimeEl.value = (typeof rightTimeText === 'string') ? rightTimeText : '';
+      if (typeof window.__syncTimeGutterEmpty === 'function') {
+        window.__syncTimeGutterEmpty(leftTimeEl);
+        window.__syncTimeGutterEmpty(rightTimeEl);
+      }
 
       // Grow each gutter to the line count of its editor so it can scroll with it.
       if (typeof window.__padGutterToMatch === 'function') {
@@ -6424,6 +6421,12 @@
 
       function padGutterToMatch(gutterEl, editorEl) {
         if (!gutterEl || !editorEl) return;
+        if (gutterEl.value.trim() === '') {
+          if (gutterEl.value !== '') {
+            gutterEl.value = '';
+          }
+          return;
+        }
         const editorLines = lineCount(editorEl.value);
         const gutterText = gutterEl.value;
         const gutterLines = lineCount(gutterText);
@@ -6465,16 +6468,28 @@
         linkScrollPair(gutterEl, editorEl);
       }
 
+      function syncEmptyClass(el) {
+        if (!el) return;
+        const isEmpty = el.value.trim() === '';
+        el.classList.toggle('is-empty', isEmpty);
+      }
+
+      window.__syncTimeGutterEmpty = syncEmptyClass;
+
       if (timeLeft) {
         timeLeft.addEventListener('input', function() {
+          syncEmptyClass(timeLeft);
           autoscrollRefreshTimestamps();
         });
       }
       if (timeRight) {
         timeRight.addEventListener('input', function() {
+          syncEmptyClass(timeRight);
           autoscrollRefreshTimestamps();
         });
       }
+      syncEmptyClass(timeLeft);
+      syncEmptyClass(timeRight);
 
       syncPair(timeLeft, inputEl);
       syncPair(timeRight, inputEl2);
