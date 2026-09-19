@@ -4266,6 +4266,12 @@
       const children = contentEl.children;
       if (children.length === 0) return;
 
+      const readingZone = previewEl.clientHeight * 0.38;
+
+      // Give the very first block enough space above it so it can occupy
+      // the same reading-zone position as every later block.
+      contentEl.style.paddingTop = readingZone + 'px';
+
       const checkpoints = timestamps.filter(function (t) {
         return !t.currentLine;
       });
@@ -4292,7 +4298,6 @@
         const target = children[idx];
         if (!target) return previewEl.scrollTop;
 
-        const readingZone = previewEl.clientHeight * 0.38;
         const targetTop = target.offsetTop;
 
         const maxScroll = Math.max(
@@ -5338,7 +5343,22 @@
       requestAnimationFrame(() => { setTimeout(adjustChordSizes, 50); });
     }
 
-    function updatePreview() { renderPreview(inputEl.value); }
+    function updatePreviewTopSpace() {
+      const setTopSpace = function (previewEl, contentEl) {
+        if (!previewEl || !contentEl) return;
+
+        const readingZone = previewEl.clientHeight * 0.38;
+        contentEl.style.paddingTop = readingZone + 'px';
+      };
+
+      setTopSpace(previewContainer, previewContent);
+      setTopSpace(previewContainer2, previewContent2);
+    }
+
+    function updatePreview() {
+      renderPreview(inputEl.value);
+      updatePreviewTopSpace();
+    }
 
     function renderPreview2(text) {
       if (!text || text.trim() === '') {
@@ -5465,7 +5485,10 @@
       requestAnimationFrame(() => { setTimeout(adjustChordSizes, 50); });
     }
 
-    function updatePreview2() { renderPreview2(inputEl2.value); }
+    function updatePreview2() {
+      renderPreview2(inputEl2.value);
+      updatePreviewTopSpace();
+    }
 
     // ===== SAVE CHORD CHART =====
     saveFloatToggle.addEventListener('click', async function() {
