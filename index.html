@@ -93,23 +93,27 @@
       z-index: 500;
       position: relative;
     }
-    .title-bar .title-input {
-      width: 100%;
-      max-width: 900px;
+    .float-title-input {
+      flex: 1 1 360px;
+      width: 360px;
+      min-width: 180px;
+      max-width: 420px;
+      height: 38px;
       border: none;
       outline: none;
       background: transparent;
-      text-align: center;
+      color: #3d2b1f;
+      text-align: left;
       font-family: var(--font-lyric, Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace);
       font-size: 1.05rem;
       font-weight: 600;
       letter-spacing: 0.02em;
-      color: #3d2b1f;
       padding: 0;
-      line-height: 58px;
-      height: 58px;
+      line-height: 38px;
+      box-sizing: border-box;
+      pointer-events: auto;
     }
-    .title-bar .title-input::placeholder {
+    .float-title-input::placeholder {
       color: #b0987a;
       font-weight: 400;
       font-style: italic;
@@ -752,7 +756,7 @@
       top: 10px;
       left: 10px;
       right: 10px;
-      z-index: 2147483600;
+      z-index: 2147483646;
       display: flex;
       flex-direction: row;
       align-items: flex-start;
@@ -765,36 +769,73 @@
       box-sizing: border-box;
     }
     .float-layer > * {
+      position: relative;
+      z-index: 2147483647;
       pointer-events: none;
     }
-    .float-layer > * > button {
-      pointer-events: auto;
+
+    .float-layer .float-auto-col {
+      position: relative;
+      z-index: 2147483647;
+      flex: 0 0 100%;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
     }
-    /* Auto row: lays the buttons out horizontally, in DOM order.
-       If the viewport is too narrow, the buttons wrap onto a second row.
-       width: 100% forces the row to respect the parent's width so flex-wrap
-       actually kicks in on narrow screens instead of overflowing. */
-    .float-auto-col {
+
+    .float-sticky-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .float-top-row {
       display: flex;
       flex-direction: row;
-      flex-wrap: wrap;
-      justify-content: flex-start;
       align-items: flex-start;
-      align-content: flex-start;
       gap: 10px;
-      flex: 0 0 100%;
       width: 100%;
-      max-width: 100%;
-      box-sizing: border-box;
       min-width: 0;
     }
-    /* Sticky column: holds the auto-wrapping row of buttons. */
-    .float-sticky-col {
-      flex: 0 0 100%;
+
+    .float-menu-row {
+      display: none;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      align-content: flex-start;
+      justify-content: flex-start;
+      gap: 10px;
       width: 100%;
-      max-width: 100%;
-      box-sizing: border-box;
       min-width: 0;
+    }
+
+    .float-top-row > button,
+    .float-top-row > .float-title-input,
+    .float-menu-row > button {
+      pointer-events: auto;
+    }
+
+    .float-layer .float-auto-col .float-title-input {
+      position: relative;
+      left: auto;
+      top: auto;
+      z-index: 2147483647;
+      flex: 1 1 360px;
+      width: 360px;
+      min-width: 180px;
+      max-width: 420px;
+      margin: 0;
+      padding: 0;
+      overflow: visible;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    body.first-row-hidden .float-layer .float-menu-row {
+      display: flex;
     }
 
     .perf-toggle,
@@ -844,31 +885,11 @@
       transition: transform 0.08s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
     }
 
-    /* When the hamburger is pressed, hide every button in the floating
-       toolbar row. Buttons living inside .title-bar-actions are part of
-       the "unhidable" category and are explicitly exempt — they must
-       stay visible in focus mode for a fast workflow. */
-    body.first-row-hidden .float-layer .songs-float-toggle,
-    body.first-row-hidden .float-layer .key-float-toggle,
-    body.first-row-hidden .float-layer .split-float-toggle,
-    body.first-row-hidden .float-layer .swap-float-toggle,
-    body.first-row-hidden .float-layer .autoscroll-float-toggle,
-    body.first-row-hidden .float-layer .editor-float-toggle,
-    body.first-row-hidden .float-layer .save-float-toggle,
-    body.first-row-hidden .float-layer .perf-toggle,
-    body.first-row-hidden .float-layer .layout-float-toggle,
-    body.first-row-hidden .float-layer .png-float-toggle,
-    body.first-row-hidden .float-layer .template-float-toggle {
-      opacity: 0;
-      pointer-events: none;
-      height: 0 !important;
-      min-height: 0 !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      border: 0 !important;
-      gap: 0 !important;
-      flex-basis: 0 !important;
-      display: none !important;
+    /* Hamburger open: the menu row becomes visible.
+       The buttons keep all of their original individual styling. */
+    body.first-row-hidden .float-layer .float-menu-row {
+      display: flex;
+      pointer-events: auto;
     }
     /* Explicit "unhidable" guarantee: anything inside .title-bar-actions
        stays fully visible and clickable, no matter what focus mode does
@@ -2643,7 +2664,6 @@
 <body class="easy-mode">
 <div class="app">
   <div class="title-bar" id="titleBar">
-    <input type="text" class="title-input" id="titleInput" placeholder="Song Title — Artist" spellcheck="false" aria-label="Song title">
     <div class="title-bar-actions">
       <button class="songs-float-toggle" id="titleBarSongsBtn" title="Songs" aria-label="Songs">🎵</button>
       <button class="autoscroll-float-toggle" id="titleBarPlayBtn" title="Play (auto-scroll)" aria-label="Play auto-scroll">▶️</button>
@@ -2708,17 +2728,23 @@
 
 <div class="float-layer" id="floatLayer">
   <div class="float-auto-col float-sticky-col">
-    <button class="chrome-toggle" id="chromeToggle" title="Collapse editor (focus mode)" aria-label="Collapse editor">☰</button>
-    <button class="songs-float-toggle" id="songsFloatToggle" title="Songs" aria-label="Songs">🎵</button>
-    <button class="key-float-toggle" id="keyFloatToggle" title="Key &amp; transpose" aria-label="Key and transpose">🔑</button>
-    <button class="split-float-toggle" id="splitFloatToggle" title="Split view (left / center / right)" aria-label="Split view">⬛</button>
-    <button class="swap-float-toggle" id="swapFloatToggle" title="Swap lyrics / chords sides" aria-label="Swap sides">↔️</button>
-    <button class="autoscroll-float-toggle" id="autoscrollFloatToggle" title="Auto-scroll panel" aria-label="Auto-scroll panel">🔽</button>
-    <button class="editor-float-toggle" id="editorFloatToggle" title="Hide both editors" aria-label="Hide both editors">✏️</button>
-    <button class="template-float-toggle" id="templateFloatToggle" title="Templates (look &amp; feel presets)" aria-label="Templates">🎨</button>
-    <button class="save-float-toggle" id="saveFloatToggle" title="Save Chord Chart" aria-label="Save Chord Chart">💾</button>
-    <button class="png-float-toggle" id="pngFloatToggle" title="Export Chord Chart as PNG" aria-label="Export Chord Chart as PNG">📷</button>
-    <button class="perf-toggle" id="perfToggle" title="Open settings" aria-label="Open settings">⚙️</button>
+    <div class="float-top-row">
+      <button class="chrome-toggle" id="chromeToggle" title="Collapse editor (focus mode)" aria-label="Collapse editor">☰</button>
+      <input type="text" class="float-title-input" id="titleInput" placeholder="Song Title — Artist" spellcheck="false" aria-label="Song title">
+    </div>
+
+    <div class="float-menu-row">
+      <button class="songs-float-toggle" id="songsFloatToggle" title="Songs" aria-label="Songs">🎵</button>
+      <button class="key-float-toggle" id="keyFloatToggle" title="Key &amp; transpose" aria-label="Key and transpose">🔑</button>
+      <button class="split-float-toggle" id="splitFloatToggle" title="Split view (left / center / right)" aria-label="Split view">⬛</button>
+      <button class="swap-float-toggle" id="swapFloatToggle" title="Swap lyrics / chords sides" aria-label="Swap sides">↔️</button>
+      <button class="autoscroll-float-toggle" id="autoscrollFloatToggle" title="Auto-scroll panel" aria-label="Auto-scroll panel">🔽</button>
+      <button class="editor-float-toggle" id="editorFloatToggle" title="Hide both editors" aria-label="Hide both editors">✏️</button>
+      <button class="template-float-toggle" id="templateFloatToggle" title="Templates (look &amp; feel presets)" aria-label="Templates">🎨</button>
+      <button class="save-float-toggle" id="saveFloatToggle" title="Save Chord Chart" aria-label="Save Chord Chart">💾</button>
+      <button class="png-float-toggle" id="pngFloatToggle" title="Export Chord Chart as PNG" aria-label="Export Chord Chart as PNG">📷</button>
+      <button class="perf-toggle" id="perfToggle" title="Open settings" aria-label="Open settings">⚙️</button>
+    </div>
   </div>
 </div>
 
@@ -7647,7 +7673,7 @@
 
     applyMode(false);
     applyChromeCollapsed(false);
-    applyChromeHidden(true);
+    applyChromeHidden(false);
     applySwapState(isSwapped);
     if (typeof syncPerfPanel === 'function') syncPerfPanel();
 
