@@ -91,6 +91,7 @@
       padding: 0 12px;
       box-sizing: border-box;
       z-index: 500;
+      position: relative;
     }
     .title-bar .title-input {
       width: 100%;
@@ -112,6 +113,57 @@
       color: #b0987a;
       font-weight: 400;
       font-style: italic;
+    }
+    .title-bar .title-bar-actions {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 auto;
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .title-bar .title-bar-actions .songs-float-toggle,
+    .title-bar .title-bar-actions .autoscroll-float-toggle {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border-radius: 10px;
+      border: 1px solid #c4ad92;
+      background: rgba(232, 220, 204, 0.85);
+      color: #3d2b1f;
+      font-size: 1.1rem;
+      line-height: 1;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: inherit;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    @media (hover: hover) {
+      .title-bar .title-bar-actions .songs-float-toggle:hover,
+      .title-bar .title-bar-actions .autoscroll-float-toggle:hover {
+        background: rgba(196, 173, 146, 0.95);
+        transform: scale(1.05);
+      }
+    }
+    .title-bar .title-bar-actions .songs-float-toggle.active,
+    .title-bar .title-bar-actions .autoscroll-float-toggle.active {
+      background: #5c4033;
+      color: #ffffff;
+      border-color: #4a3328;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+    .title-bar .title-bar-actions .autoscroll-float-toggle.playing {
+      background: #2e7a3f;
+      color: #ffffff;
+      border-color: #245f31;
+      box-shadow: 0 4px 12px rgba(46, 122, 63, 0.35);
     }
 
     /* ===== EDITOR WRAPPER ===== */
@@ -731,19 +783,21 @@
       transition: transform 0.08s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
     }
 
-    /* When the hamburger is pressed, hide every button in the row.
-       All are removed from the flex flow so no gaps remain. */
-    body.first-row-hidden .songs-float-toggle,
-    body.first-row-hidden .key-float-toggle,
-    body.first-row-hidden .split-float-toggle,
-    body.first-row-hidden .swap-float-toggle,
-    body.first-row-hidden .autoscroll-float-toggle,
-    body.first-row-hidden .editor-float-toggle,
-    body.first-row-hidden .save-float-toggle,
-    body.first-row-hidden .perf-toggle,
-    body.first-row-hidden .layout-float-toggle,
-    body.first-row-hidden .png-float-toggle,
-    body.first-row-hidden .template-float-toggle {
+    /* When the hamburger is pressed, hide every button in the floating
+       toolbar row. Buttons living inside .title-bar-actions are part of
+       the "unhidable" category and are explicitly exempt — they must
+       stay visible in focus mode for a fast workflow. */
+    body.first-row-hidden .float-layer .songs-float-toggle,
+    body.first-row-hidden .float-layer .key-float-toggle,
+    body.first-row-hidden .float-layer .split-float-toggle,
+    body.first-row-hidden .float-layer .swap-float-toggle,
+    body.first-row-hidden .float-layer .autoscroll-float-toggle,
+    body.first-row-hidden .float-layer .editor-float-toggle,
+    body.first-row-hidden .float-layer .save-float-toggle,
+    body.first-row-hidden .float-layer .perf-toggle,
+    body.first-row-hidden .float-layer .layout-float-toggle,
+    body.first-row-hidden .float-layer .png-float-toggle,
+    body.first-row-hidden .float-layer .template-float-toggle {
       opacity: 0;
       pointer-events: none;
       height: 0 !important;
@@ -754,6 +808,17 @@
       gap: 0 !important;
       flex-basis: 0 !important;
       display: none !important;
+    }
+    /* Explicit "unhidable" guarantee: anything inside .title-bar-actions
+       stays fully visible and clickable, no matter what focus mode does
+       to the floating toolbar. Sizing, radius, and animation are left
+       to each button's own rules — we only re-assert visibility and
+       clickability here so shapes don't get mangled. */
+    body.first-row-hidden .title-bar .title-bar-actions,
+    body.first-row-hidden .title-bar .title-bar-actions * {
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
     }
     body.first-row-hidden .title-bar {
       pointer-events: auto;
@@ -2465,6 +2530,10 @@
 <div class="app">
   <div class="title-bar" id="titleBar">
     <input type="text" class="title-input" id="titleInput" placeholder="Song Title — Artist" spellcheck="false" aria-label="Song title">
+    <div class="title-bar-actions">
+      <button class="songs-float-toggle" id="titleBarSongsBtn" title="Songs" aria-label="Songs">🎵</button>
+      <button class="autoscroll-float-toggle" id="titleBarPlayBtn" title="Auto-scroll by timestamps" aria-label="Auto-scroll">⏯️</button>
+    </div>
   </div>
   <div class="editor-wrapper layout-desktop" id="editorWrapper">
     <div class="panel-wall" id="panelWall" title="Drag to resize panels"></div>
@@ -2834,6 +2903,8 @@
     const swapFloatToggle = document.getElementById('swapFloatToggle');
     const saveFloatToggle = document.getElementById('saveFloatToggle');
     const pngFloatToggle = document.getElementById('pngFloatToggle');
+    const titleBarSongsBtn = document.getElementById('titleBarSongsBtn');
+    const titleBarPlayBtn = document.getElementById('titleBarPlayBtn');
 
     const inputEl2 = document.getElementById('chartInput2');
     const previewContent2 = document.getElementById('previewContent2');
@@ -4825,6 +4896,7 @@
       if (playBtn) playBtn.textContent = '⏸️';
       const toggle = document.getElementById('autoscrollFloatToggle');
       if (toggle) toggle.classList.add('playing');
+      if (titleBarPlayBtn) titleBarPlayBtn.classList.add('playing');
       autoscroll.rafId = requestAnimationFrame(autoscrollTick);
     }
 
@@ -4841,6 +4913,7 @@
       if (playBtn) playBtn.textContent = '▶️';
       const toggle = document.getElementById('autoscrollFloatToggle');
       if (toggle) toggle.classList.remove('playing');
+      if (titleBarPlayBtn) titleBarPlayBtn.classList.remove('playing');
       autoscrollUpdateReadout();
     }
 
@@ -4858,6 +4931,7 @@
       if (playBtn) playBtn.textContent = '▶️';
       const toggle = document.getElementById('autoscrollFloatToggle');
       if (toggle) toggle.classList.remove('playing');
+      if (titleBarPlayBtn) titleBarPlayBtn.classList.remove('playing');
       if (autoscrollCurrentInput) autoscrollCurrentInput.value = autoscrollFormatTime(0);
       autoscrollUpdateReadout();
       if (previewContainer) previewContainer.scrollTo({ top: 0, behavior: 'smooth' });
@@ -6070,24 +6144,35 @@
       autoscrollRefreshTimestamps();
     }
 
-    function toggleAutoscrollFloatPanel(open) {
+    function toggleAutoscrollFloatPanel(open, anchorBtn) {
       const next = (typeof open === 'boolean') ? open : !autoscrollFloatPanel.classList.contains('show');
       autoscrollFloatPanel.classList.toggle('show', next);
       autoscrollFloatToggle.classList.toggle('active', next);
       autoscrollFloatToggle.title = next ? 'Close auto-scroll' : 'Auto-scroll by timestamps';
+      if (titleBarPlayBtn) {
+        titleBarPlayBtn.classList.toggle('active', next);
+        titleBarPlayBtn.classList.toggle('playing', autoscroll.playing);
+      }
       if (next) {
         autoscrollRefreshTimestamps();
         if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
         if (typeof toggleSongsFloatPanel === 'function') toggleSongsFloatPanel(false);
         if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
         if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
+        positionFloatPanel(autoscrollFloatPanel, anchorBtn || autoscrollFloatToggle);
       }
     }
 
     if (autoscrollFloatToggle) {
       autoscrollFloatToggle.addEventListener('click', function(e) {
         e.stopPropagation();
-        toggleAutoscrollFloatPanel();
+        toggleAutoscrollFloatPanel(undefined, autoscrollFloatToggle);
+      });
+    }
+    if (titleBarPlayBtn) {
+      titleBarPlayBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleAutoscrollFloatPanel(undefined, titleBarPlayBtn);
       });
     }
     document.addEventListener('click', function(e) {
@@ -6240,23 +6325,74 @@
     const songsFloatList = document.getElementById('songsFloatList');
     const songsFloatOpenFile = document.getElementById('songsFloatOpenFile');
 
-    function toggleSongsFloatPanel(open) {
+    function getTitleBarRightmostButton() {
+      const wrap = document.querySelector('.title-bar .title-bar-actions');
+      if (!wrap) return null;
+      const buttons = wrap.querySelectorAll('button');
+      if (buttons.length === 0) return null;
+      let rightmost = buttons[0];
+      let rightmostEdge = rightmost.getBoundingClientRect().right;
+      for (let i = 1; i < buttons.length; i++) {
+        const r = buttons[i].getBoundingClientRect().right;
+        if (r > rightmostEdge) {
+          rightmost = buttons[i];
+          rightmostEdge = r;
+        }
+      }
+      return rightmost;
+    }
+
+    function isInTitleBarActions(btn) {
+      if (!btn || !btn.closest) return false;
+      return !!btn.closest('.title-bar .title-bar-actions');
+    }
+
+    function positionFloatPanel(panelEl, anchorBtn) {
+      if (!panelEl || !anchorBtn) return;
+      // If the clicked button lives in the title bar's right-side strip,
+      // align the panel to the rightmost title-bar action button so it
+      // opens flush under the right edge of the strip. Otherwise (button
+      // lives in the floating toolbar), align the panel to the left of
+      // that button so it opens under it as before.
+      let effectiveAnchor = anchorBtn;
+      if (isInTitleBarActions(anchorBtn)) {
+        effectiveAnchor = getTitleBarRightmostButton() || anchorBtn;
+      }
+      const rect = effectiveAnchor.getBoundingClientRect();
+      const panelWidth = panelEl.offsetWidth;
+      const desiredLeft = rect.right - panelWidth;
+      const minLeft = 10;
+      const maxLeft = window.innerWidth - panelWidth - 10;
+      const clampedLeft = Math.max(minLeft, Math.min(maxLeft, desiredLeft));
+      panelEl.style.left = clampedLeft + 'px';
+      panelEl.style.right = 'auto';
+    }
+
+    function toggleSongsFloatPanel(open, anchorBtn) {
       const next = (typeof open === 'boolean') ? open : !songsFloatPanel.classList.contains('show');
       songsFloatPanel.classList.toggle('show', next);
       songsFloatToggle.classList.toggle('active', next);
       songsFloatToggle.title = next ? 'Close songs' : 'Songs';
+      if (titleBarSongsBtn) titleBarSongsBtn.classList.toggle('active', next);
       if (next) {
         renderSongsInto(songsFloatList);
         if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
         if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
         if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
         if (typeof toggleAutoscrollFloatPanel === 'function') toggleAutoscrollFloatPanel(false);
+        positionFloatPanel(songsFloatPanel, anchorBtn || songsFloatToggle);
       }
     }
     songsFloatToggle.addEventListener('click', function(e) {
       e.stopPropagation();
-      toggleSongsFloatPanel();
+      toggleSongsFloatPanel(undefined, songsFloatToggle);
     });
+    if (titleBarSongsBtn) {
+      titleBarSongsBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleSongsFloatPanel(undefined, titleBarSongsBtn);
+      });
+    }
     songsFloatClose.addEventListener('click', function(e) {
       e.stopPropagation();
       toggleSongsFloatPanel(false);
