@@ -351,8 +351,8 @@
       align-items: stretch;
     }
     .editor-with-gutter .time-gutter {
-      flex: 0 0 72px;
-      width: 72px;
+      flex: 0 0 100px;
+      width: 100px;
       min-width: 0;
       border-right: 1px solid #dcc9b0;
       background: #faf5ec;
@@ -2510,8 +2510,8 @@
         flex-direction: row;
       }
       .editor-with-gutter .time-gutter {
-        flex: 0 0 56px;
-        width: 56px;
+        flex: 0 0 84px;
+        width: 84px;
       }
       /* Give the drag handle a proper finger-sized target on touch. */
       .resize-handle {
@@ -2564,7 +2564,8 @@
       <button class="autoscroll-float-toggle" id="titleBarStopBtn" title="Stop and rewind" aria-label="Stop and rewind">⏹️</button>
       <button class="autoscroll-float-toggle" id="titleBarPrevBtn" title="Jump to previous timestamp" aria-label="Jump to previous timestamp">⏮️</button>
       <button class="autoscroll-float-toggle" id="titleBarNextBtn" title="Jump to next timestamp" aria-label="Jump to next timestamp">⏭️</button>
-      <button class="autoscroll-float-toggle" id="titleBarRecordBtn" title="Record the current time on the current section's line" aria-label="Record timestamp">⏺️</button>
+      <button class="autoscroll-float-toggle" id="titleBarRecordBtn" title="Record a Song Part timestamp (P) at the current time" aria-label="Record Song Part timestamp">📑</button>
+      <button class="autoscroll-float-toggle" id="titleBarLineBtn" title="Mark the current line (highlight only)" aria-label="Mark current line">🖍️</button>
       <input type="text" class="autoscroll-current" id="titleBarCurrent" value="0:00" spellcheck="false" aria-label="Current time">
       <span class="autoscroll-total" id="titleBarTotal">/ 0:00</span>
     </div>
@@ -2582,7 +2583,7 @@
         <div class="drop-zone" id="dropZone">
           <div class="drop-message">📂 Drop a chord chart here</div>
           <div class="editor-with-gutter">
-            <textarea id="timeInput" class="time-gutter is-empty" spellcheck="false" placeholder="0:00&#10;&#10;0:26&#10;&#10;&#10;&#10;1:28.53"></textarea>
+            <textarea id="timeInput" class="time-gutter is-empty" spellcheck="false" placeholder="P 0:07.10&#10;L 0:07.11&#10;L 0:13.58&#10;L 0:19.98&#10;L 0:26.40"></textarea>
             <div class="editor-input-wrap">
               <div class="editor-input-overlay" id="chartInputOverlay"><span class="hint-emoji">⌨️🎤</span> <span class="hint-italic">Type lyrics here!</span></div>
               <textarea id="chartInput" spellcheck="false"></textarea>
@@ -2602,7 +2603,7 @@
         <div class="drop-zone" id="dropZone2">
           <div class="drop-message">📂 Drop a chord chart here</div>
           <div class="editor-with-gutter">
-            <textarea id="timeInput2" class="time-gutter is-empty" spellcheck="false" placeholder="0:00&#10;&#10;0:26&#10;&#10;&#10;&#10;1:28.53"></textarea>
+            <textarea id="timeInput2" class="time-gutter is-empty" spellcheck="false" placeholder="P 0:07.10&#10;L 0:07.11&#10;L 0:13.58&#10;L 0:19.98&#10;L 0:26.40"></textarea>
             <div class="editor-input-wrap">
               <div class="editor-input-overlay" id="chartInputOverlay2"><span class="hint-emoji">⌨️🎸</span> <span class="hint-italic">Type chords here!</span></div>
               <textarea id="chartInput2" spellcheck="false"></textarea>
@@ -2943,6 +2944,7 @@
     const titleBarPrevBtn = document.getElementById('titleBarPrevBtn');
     const titleBarNextBtn = document.getElementById('titleBarNextBtn');
     const titleBarRecordBtn = document.getElementById('titleBarRecordBtn');
+    const titleBarLineBtn = document.getElementById('titleBarLineBtn');
     const titleBarCurrent = document.getElementById('titleBarCurrent');
     const titleBarTotal = document.getElementById('titleBarTotal');
 
@@ -3525,6 +3527,10 @@
       const rightTimeEl = document.getElementById('timeInput2');
       if (leftTimeEl) leftTimeEl.value = (typeof leftTimeText === 'string') ? leftTimeText : '';
       if (rightTimeEl) rightTimeEl.value = (typeof rightTimeText === 'string') ? rightTimeText : '';
+      if (typeof normalizeGutterTimestampLines === 'function') {
+        normalizeGutterTimestampLines(leftTimeEl);
+        normalizeGutterTimestampLines(rightTimeEl);
+      }
       if (typeof window.__syncTimeGutterEmpty === 'function') {
         window.__syncTimeGutterEmpty(leftTimeEl);
         window.__syncTimeGutterEmpty(rightTimeEl);
@@ -4253,7 +4259,7 @@
       if (!s) return null;
 
       const m = s.trim()
-        .replace(/^[SL]\s+/i, '')
+        .replace(/^[PL]\s+/i, '')
         .match(/^(\d{1,2}):([0-5]\d)(?:\.([0-9]{1,3}))?(?::([0-5]\d)(?:\.([0-9]{1,3}))?)?$/);
 
       if (!m) return null;
@@ -4687,6 +4693,56 @@
       return line;
     }
 
+    function normalizeGutterTimestampLines(gutterEl) {
+      if (!gutterEl) return;
+      const original = gutterEl.value;
+      if (!original) return;
+
+      let changed = false;
+      const lines = original.split('\n');
+      for (let i = 0; i < lines.length; i++) {
+        const raw = lines[i];
+        const trimmed = raw.trim();
+        if (!trimmed) continue;
+
+        const m = trimmed.match(/^([PL]\s+)?(\d{1,3}):([0-5]\d)(?:\.([0-9]{1,3}))?(?::([0-5]\d)(?:\.([0-9]{1,3}))?)?$/i);
+        if (!m) continue;
+
+        const prefix = m[1] ? m[1].replace(/\s+$/, '') + ' ' : '';
+        const a = m[2];
+        const b = m[3];
+        const frac1 = m[4];
+        const c = m[5];
+        const frac2 = m[6];
+
+        let rebuilt;
+        if (c === undefined) {
+          const frac = frac1 !== undefined ? frac1.padEnd(2, '0').slice(0, 2) : '00';
+          rebuilt = prefix + a + ':' + b + '.' + frac;
+        } else {
+          const frac = frac2 !== undefined ? frac2.padEnd(2, '0').slice(0, 2) : '00';
+          rebuilt = prefix + a + ':' + b + ':' + c + '.' + frac;
+        }
+
+        if (rebuilt !== raw) {
+          lines[i] = rebuilt;
+          changed = true;
+        }
+      }
+
+      if (!changed) return;
+
+      const isFocused = document.activeElement === gutterEl;
+      const selStart = isFocused ? gutterEl.selectionStart : null;
+      const selEnd = isFocused ? gutterEl.selectionEnd : null;
+      const scrollTopBefore = gutterEl.scrollTop;
+      gutterEl.value = lines.join('\n');
+      gutterEl.scrollTop = scrollTopBefore;
+      if (isFocused && selStart !== null && selEnd !== null) {
+        try { gutterEl.setSelectionRange(selStart, selEnd); } catch (e) {}
+      }
+    }
+
     function gutterLineStartOffset(gutterEl, lineIndex) {
       const lines = gutterEl.value.split('\n');
       let offset = 0;
@@ -4708,6 +4764,45 @@
       try { gutterEl.setSelectionRange(offset, offset); } catch (e) {}
       lastTimeGutterCaretStart = offset;
       lastTimeGutterCaretEnd = offset;
+    }
+
+    function autoscrollRemoveTimestamp() {
+      const leftTimeEl = document.getElementById('timeInput');
+      const rightTimeEl = document.getElementById('timeInput2');
+
+      let target = lastFocusedTimeGutter;
+      if (!target || (target !== leftTimeEl && target !== rightTimeEl)) {
+        target = leftTimeEl || rightTimeEl;
+      }
+      if (!target) return;
+
+      const lineIndex = gutterCaretLineIndex(target);
+      const lines = target.value.split('\n');
+      if (lineIndex < 0 || lineIndex >= lines.length) return;
+
+      const originalLine = lines[lineIndex];
+      if (originalLine.trim() === '') {
+        showToast('Nothing to remove on this line.');
+        return;
+      }
+
+      lines.splice(lineIndex, 1);
+      target.value = lines.join('\n');
+
+      if (typeof window.__syncTimeGutterEmpty === 'function') {
+        window.__syncTimeGutterEmpty(target);
+      }
+      const editorEl = (target === leftTimeEl) ? inputEl : inputEl2;
+      if (editorEl && typeof window.__padGutterToMatch === 'function') {
+        window.__padGutterToMatch(target, editorEl);
+      }
+
+      target.focus();
+      const nextLine = Math.min(lineIndex, lines.length - 1);
+      setGutterCaretAtLineEnd(target, nextLine);
+
+      autoscrollRefreshTimestamps();
+      showToast('Timestamp removed: ' + originalLine.trim());
     }
 
     function autoscrollRecordTimestamp(highlightOnly) {
@@ -4732,12 +4827,12 @@
         lines[lineIndex] = 'L ' + stamp;
         highlightLineOffset = 1;
       } else {
-        // F1: two lines. Current line = S-prefixed. Next line = L-prefixed.
+        // F1: two lines. Current line = P-prefixed. Next line = L-prefixed.
         // The L-line time is bumped by +0.01s so its value differs from the
-        // S line above. Identical adjacent timestamps collapse in the parser
+        // P line above. Identical adjacent timestamps collapse in the parser
         // and the L-highlight on the section's first line disappears.
         const highlightStamp = autoscrollFormatTimeMs(seconds + 0.01);
-        lines[lineIndex] = 'S ' + stamp;
+        lines[lineIndex] = 'P ' + stamp;
         lines[lineIndex + 1] = 'L ' + highlightStamp;
         highlightLineOffset = 2;
       }
@@ -4757,7 +4852,7 @@
       setGutterCaretAtLineEnd(target, caretLine);
 
       autoscrollRefreshTimestamps();
-      showToast('Timestamp recorded: ' + (highlightOnly ? 'L ' + stamp : 'S ' + stamp));
+      showToast('Timestamp recorded: ' + (highlightOnly ? 'L ' + stamp : 'P ' + stamp));
     }
 
     function autoscrollJumpToNeighborTimestamp(direction) {
@@ -6146,6 +6241,10 @@
         e.preventDefault();
         autoscrollRecordTimestamp(true);
       }
+      if (e.key === 'F4' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        autoscrollRemoveTimestamp();
+      }
     });
 
     window.addEventListener('beforeunload', function() {
@@ -6435,7 +6534,13 @@
     if (titleBarRecordBtn) {
       titleBarRecordBtn.addEventListener('click', function(e) {
         e.stopPropagation();
-        autoscrollRecordTimestamp();
+        autoscrollRecordTimestamp(false);
+      });
+    }
+    if (titleBarLineBtn) {
+      titleBarLineBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        autoscrollRecordTimestamp(true);
       });
     }
     if (titleBarCurrent) {
@@ -7392,7 +7497,18 @@
         g.addEventListener('click', function () { rememberTimeGutterCaret(g); });
         g.addEventListener('select', function () { rememberTimeGutterCaret(g); });
         g.addEventListener('input', function () { rememberTimeGutterCaret(g); });
+        g.addEventListener('blur', function () {
+          normalizeGutterTimestampLines(g);
+          syncEmptyClassForGutter(g);
+          autoscrollRefreshTimestamps();
+        });
       });
+
+      function syncEmptyClassForGutter(el) {
+        if (!el) return;
+        const isEmpty = el.value.trim() === '';
+        el.classList.toggle('is-empty', isEmpty);
+      }
 
       function linkScrollPair(a, b) {
         if (!a || !b) return;
