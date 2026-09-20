@@ -2650,6 +2650,7 @@
       <button class="autoscroll-float-toggle" id="titleBarStopBtn" title="Stop and rewind" aria-label="Stop and rewind">⏹️</button>
       <button class="autoscroll-float-toggle" id="titleBarPrevBtn" title="Jump to previous timestamp" aria-label="Jump to previous timestamp">⏮️</button>
       <button class="autoscroll-float-toggle" id="titleBarNextBtn" title="Jump to next timestamp" aria-label="Jump to next timestamp">⏭️</button>
+      <button class="split-float-toggle" id="titleBarSplitBtn" title="Split view (left / center / right)" aria-label="Split view">⬛</button>
       <button class="editor-float-toggle" id="titleBarEditorBtn" title="Hide both editors" aria-label="Hide both editors">✏️</button>
       <button class="editor-float-toggle" id="titleBarCaretUpBtn" title="Move caret up one line" aria-label="Move caret up one line">🔼</button>
       <button class="editor-float-toggle" id="titleBarCaretDownBtn" title="Move caret down one line" aria-label="Move caret down one line">🔽</button>
@@ -3033,6 +3034,7 @@
     const titleBarStopBtn = document.getElementById('titleBarStopBtn');
     const titleBarPrevBtn = document.getElementById('titleBarPrevBtn');
     const titleBarNextBtn = document.getElementById('titleBarNextBtn');
+    const titleBarSplitBtn = document.getElementById('titleBarSplitBtn');
     const titleBarRecordBtn = document.getElementById('titleBarRecordBtn');
     const titleBarLineBtn = document.getElementById('titleBarLineBtn');
     const titleBarEditorBtn = document.getElementById('titleBarEditorBtn');
@@ -5488,6 +5490,19 @@
         splitFloatToggle.classList.remove('active');
       }
 
+      if (titleBarSplitBtn) {
+        const iconText = SPLIT_ICONS[state];
+        const isPair = Array.from(iconText).length > 1;
+        titleBarSplitBtn.textContent = '';
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'split-icon' + (isPair ? ' pair' : '');
+        iconSpan.textContent = iconText;
+        titleBarSplitBtn.appendChild(iconSpan);
+        titleBarSplitBtn.title = SPLIT_TITLES[state];
+        titleBarSplitBtn.setAttribute('aria-label', SPLIT_TITLES[state]);
+        titleBarSplitBtn.classList.remove('active');
+      }
+
       try { localStorage.setItem(SPLIT_STATE_KEY, state); } catch (e) {}
 
       setTimeout(adjustChordSizes, 200);
@@ -5506,6 +5521,12 @@
 
     if (splitFloatToggle) {
       splitFloatToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        cycleSplitState();
+      });
+    }
+    if (titleBarSplitBtn) {
+      titleBarSplitBtn.addEventListener('click', function(e) {
         e.stopPropagation();
         cycleSplitState();
       });
