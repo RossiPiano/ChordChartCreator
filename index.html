@@ -2474,6 +2474,42 @@
       .settings-row input[type="number"].settings-num { flex: 0 0 70px; }
     }
 
+    /* On narrow viewports, the title bar's right-side action strip can't
+       stay a single right-anchored row: its buttons are 38px each and
+       they simply can't fit next to the title input. Force the strip to
+       a definite full width inside the title bar so flex-wrap has an
+       inline size to wrap against, and let its buttons wrap and
+       right-align, mirroring the left floating toolbar's behavior. */
+    @media (max-width: 900px) {
+      .title-bar {
+        align-items: flex-start;
+        height: auto;
+        min-height: 58px;
+        padding: 4px 12px;
+        flex-wrap: wrap;
+      }
+      .title-bar .title-input {
+        max-width: 100%;
+        line-height: 34px;
+        height: 34px;
+        font-size: 1rem;
+      }
+      .title-bar .title-bar-actions {
+        position: static;
+        transform: none;
+        top: auto;
+        right: auto;
+        width: 100%;
+        max-width: 100%;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        row-gap: 6px;
+      }
+      .title-bar .title-bar-actions .autoscroll-current {
+        margin-left: 0;
+      }
+    }
+
     /* ===== PHONE / NARROW VIEWPORT: STACK THE TWO PANELS ===== */
     @media (max-width: 900px) {
       /* The two-panel side-by-side layout squeezes each editor into half
