@@ -1679,6 +1679,7 @@
       border-color: #8a3528;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
+    .template-float-panel {
       flex-direction: column;
       font-family: inherit;
       color: #3d2b1f;
@@ -6670,6 +6671,13 @@
       chromeToggle.classList.toggle('active', isChromeHidden);
       chromeToggle.title = label;
       chromeToggle.setAttribute('aria-label', label);
+      if (isChromeHidden) {
+        if (typeof toggleAutoscrollFloatPanel === 'function') toggleAutoscrollFloatPanel(false);
+        if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
+        if (typeof toggleSongsFloatPanel === 'function') toggleSongsFloatPanel(false);
+        if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
+        if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
+      }
       const titleEl = document.getElementById('titleInput');
       if (titleEl) {
         titleEl.readOnly = false;
