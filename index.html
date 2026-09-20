@@ -130,7 +130,8 @@
     }
     .title-bar .title-bar-actions #titleBarRecordBtn,
     .title-bar .title-bar-actions #titleBarLineBtn,
-    .title-bar .title-bar-actions #titleBarCaretDown2Btn {
+    .title-bar .title-bar-actions #titleBarCaretDown2Btn,
+    .title-bar .title-bar-actions #titleBarTimestampDeleteBtn {
       background: rgba(196, 90, 74, 0.26);
       border-color: rgba(196, 90, 74, 0.55);
       color: #ffffff;
@@ -2654,6 +2655,7 @@
       <button class="editor-float-toggle" id="titleBarCaretDownBtn" title="Move caret down one line" aria-label="Move caret down one line">🔽</button>
       <button class="autoscroll-float-toggle" id="titleBarRecordBtn" title="Record a Song Part timestamp (P) at the current time" aria-label="Record Song Part timestamp">📑</button>
       <button class="autoscroll-float-toggle" id="titleBarLineBtn" title="Mark the current line (highlight only)" aria-label="Mark current line">🖍️</button>
+      <button class="autoscroll-float-toggle" id="titleBarTimestampDeleteBtn" title="Delete timestamp line (F4)" aria-label="Delete timestamp line">❌</button>
       <input type="text" class="autoscroll-current" id="titleBarCurrent" value="0:00" spellcheck="false" aria-label="Current time">
       <span class="autoscroll-total" id="titleBarTotal">/ 0:00</span>
     </div>
@@ -3036,6 +3038,7 @@
     const titleBarEditorBtn = document.getElementById('titleBarEditorBtn');
     const titleBarCaretUpBtn = document.getElementById('titleBarCaretUpBtn');
     const titleBarCaretDownBtn = document.getElementById('titleBarCaretDownBtn');
+    const titleBarTimestampDeleteBtn = document.getElementById('titleBarTimestampDeleteBtn');
     const titleBarCurrent = document.getElementById('titleBarCurrent');
     const titleBarTotal = document.getElementById('titleBarTotal');
 
@@ -4189,6 +4192,7 @@
           if (typeof songsFloatPanel !== 'undefined' && songsFloatPanel) {
             songsFloatPanel.classList.remove('show');
             if (typeof songsFloatToggle !== 'undefined' && songsFloatToggle) songsFloatToggle.classList.remove('active');
+          if (typeof titleBarSongsBtn !== 'undefined' && titleBarSongsBtn) titleBarSongsBtn.classList.remove('active');
           }
           document.querySelectorAll('.dropdown-item.song-item').forEach(el => el.classList.remove('active'));
           songItem.classList.add('active');
@@ -4887,6 +4891,9 @@
       }
       if (!target) return;
 
+      const savedScrollTop = target.scrollTop;
+      const savedScrollLeft = target.scrollLeft;
+
       const lineIndex = gutterCaretLineIndex(target);
       const lines = target.value.split('\n');
       if (lineIndex < 0 || lineIndex >= lines.length) return;
@@ -4897,7 +4904,7 @@
         return;
       }
 
-      lines.splice(lineIndex, 1);
+      lines[lineIndex] = '';
       target.value = lines.join('\n');
 
       if (typeof window.__syncTimeGutterEmpty === 'function') {
@@ -4908,12 +4915,24 @@
         window.__padGutterToMatch(target, editorEl);
       }
 
-      target.focus();
-      const nextLine = Math.min(lineIndex, lines.length - 1);
-      setGutterCaretAtLineEnd(target, nextLine);
+      try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
+
+      setGutterCaretAtLineEnd(target, lineIndex);
+
+      target.scrollTop = savedScrollTop;
+      target.scrollLeft = savedScrollLeft;
 
       autoscrollRefreshTimestamps();
-      showToast('Timestamp removed: ' + originalLine.trim());
+
+      target.scrollTop = savedScrollTop;
+      target.scrollLeft = savedScrollLeft;
+
+      requestAnimationFrame(function() {
+        target.scrollTop = savedScrollTop;
+        target.scrollLeft = savedScrollLeft;
+      });
+
+      showToast('Timestamp cleared: ' + originalLine.trim());
     }
 
     function autoscrollRecordTimestamp(highlightOnly) {
@@ -6362,7 +6381,7 @@
       }
       if (e.key === 'F1' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
         e.preventDefault();
-        autoscrollRecordTimestamp(false);
+        if (titleBarRecordBtn) titleBarRecordBtn.click();
       }
       if (e.key === 'F2' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
         e.preventDefault();
@@ -6731,6 +6750,12 @@
       titleBarCaretDownBtn.addEventListener('click', function(e) {
         e.stopPropagation();
         moveCaretLine(1);
+      });
+    }
+    if (titleBarTimestampDeleteBtn) {
+      titleBarTimestampDeleteBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        autoscrollRemoveTimestamp();
       });
     }
     if (titleBarCurrent) {
