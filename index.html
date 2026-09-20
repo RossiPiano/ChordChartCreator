@@ -119,7 +119,7 @@
       font-style: italic;
     }
     .title-bar .title-bar-actions {
-      display: flex;
+      display: none;
       flex-direction: row;
       align-items: center;
       justify-content: flex-end;
@@ -131,6 +131,13 @@
       top: 50%;
       transform: translateY(-50%);
       max-width: calc(100vw - 24px);
+    }
+    body.right-strip-open .title-bar .title-bar-actions {
+      display: flex;
+    }
+    .float-top-row > .chrome-toggle-right {
+      flex: 0 0 auto;
+      margin-left: auto;
     }
     .title-bar .title-bar-actions #titleBarRecordBtn,
     .title-bar .title-bar-actions #titleBarLineBtn,
@@ -787,17 +794,101 @@
     .float-sticky-col {
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
+      align-items: stretch;
       gap: 10px;
     }
 
     .float-top-row {
       display: flex;
       flex-direction: row;
-      align-items: flex-start;
+      align-items: center;
       gap: 10px;
       width: 100%;
       min-width: 0;
+      justify-content: space-between;
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+    }
+    .float-top-row > .float-title-input {
+      flex: 1 1 auto;
+    }
+    .float-top-row > .autoscroll-current {
+      flex: 0 0 62px;
+      width: 62px;
+      border: 1px solid #c4ad92;
+      border-radius: 6px;
+      padding: 4px 6px;
+      font-family: Consolas, Menlo, Monaco, monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #3d2b1f;
+      background: #ffffff;
+      outline: none;
+      text-align: center;
+      letter-spacing: 0.02em;
+      pointer-events: auto;
+    }
+    .float-top-row > .autoscroll-current:focus {
+      border-color: #8b6b4a;
+      box-shadow: 0 0 0 2px rgba(139, 107, 74, 0.2);
+    }
+    .float-top-row > .autoscroll-total {
+      flex: 0 0 auto;
+      font-family: Consolas, Menlo, Monaco, monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #3d2b1f;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      pointer-events: auto;
+    }
+    .float-menu-pair-row {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      width: 100%;
+      min-width: 0;
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+    }
+    body.right-strip-open .float-menu-pair-row {
+      padding-right: 0;
+      margin-right: 0;
+    }
+
+    .float-right-menu-row {
+      display: none;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      align-content: flex-start;
+      justify-content: flex-end;
+      gap: 10px;
+      flex: 1 1 50%;
+      min-width: 0;
+      max-width: 50%;
+      margin-left: auto;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body.right-strip-open .float-right-menu-row {
+      display: flex;
+    }
+    .float-right-menu-row > .title-bar-actions {
+      position: static;
+      transform: none;
+      top: auto;
+      right: auto;
+      width: 100%;
+      max-width: 100%;
+      justify-content: flex-end;
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
     }
 
     .float-menu-row {
@@ -808,8 +899,14 @@
       align-content: flex-start;
       justify-content: flex-start;
       gap: 10px;
-      width: 100%;
+      flex: 1 1 50%;
       min-width: 0;
+      max-width: 50%;
+    }
+    body.first-row-hidden .float-layer .float-menu-row {
+      flex: 1 1 50%;
+      min-width: 0;
+      max-width: 50%;
     }
 
     .float-top-row > button,
@@ -2677,8 +2774,6 @@
       <button class="autoscroll-float-toggle" id="titleBarRecordBtn" title="Record a Song Part timestamp (P) at the current time" aria-label="Record Song Part timestamp">📑</button>
       <button class="autoscroll-float-toggle" id="titleBarLineBtn" title="Mark the current line (highlight only)" aria-label="Mark current line">🖍️</button>
       <button class="autoscroll-float-toggle" id="titleBarTimestampDeleteBtn" title="Delete timestamp line (F4)" aria-label="Delete timestamp line">❌</button>
-      <input type="text" class="autoscroll-current" id="titleBarCurrent" value="0:00" spellcheck="false" aria-label="Current time">
-      <span class="autoscroll-total" id="titleBarTotal">/ 0:00</span>
     </div>
   </div>
   <div class="editor-wrapper layout-desktop" id="editorWrapper">
@@ -2729,11 +2824,15 @@
 <div class="float-layer" id="floatLayer">
   <div class="float-auto-col float-sticky-col">
     <div class="float-top-row">
-      <button class="chrome-toggle" id="chromeToggle" title="Collapse editor (focus mode)" aria-label="Collapse editor">☰</button>
+      <button class="chrome-toggle" id="chromeToggle" title="Collapse toolbar" aria-label="Collapse toolbar">☰</button>
       <input type="text" class="float-title-input" id="titleInput" placeholder="Song Title — Artist" spellcheck="false" aria-label="Song title">
+      <input type="text" class="autoscroll-current" id="titleBarCurrent" value="0:00" spellcheck="false" aria-label="Current time">
+      <span class="autoscroll-total" id="titleBarTotal">/ 0:00</span>
+      <button class="chrome-toggle" id="chromeToggleRight" title="Collapse title bar strip" aria-label="Collapse title bar strip">☰</button>
     </div>
 
-    <div class="float-menu-row">
+    <div class="float-menu-pair-row">
+      <div class="float-menu-row">
       <button class="songs-float-toggle" id="songsFloatToggle" title="Songs" aria-label="Songs">🎵</button>
       <button class="key-float-toggle" id="keyFloatToggle" title="Key &amp; transpose" aria-label="Key and transpose">🔑</button>
       <button class="split-float-toggle" id="splitFloatToggle" title="Split view (left / center / right)" aria-label="Split view">⬛</button>
@@ -2743,7 +2842,10 @@
       <button class="template-float-toggle" id="templateFloatToggle" title="Templates (look &amp; feel presets)" aria-label="Templates">🎨</button>
       <button class="save-float-toggle" id="saveFloatToggle" title="Save Chord Chart" aria-label="Save Chord Chart">💾</button>
       <button class="png-float-toggle" id="pngFloatToggle" title="Export Chord Chart as PNG" aria-label="Export Chord Chart as PNG">📷</button>
-      <button class="perf-toggle" id="perfToggle" title="Open settings" aria-label="Open settings">⚙️</button>
+        <button class="perf-toggle" id="perfToggle" title="Open settings" aria-label="Open settings">⚙️</button>
+      </div>
+
+      <div class="float-right-menu-row" id="floatRightMenuRow"></div>
     </div>
   </div>
 </div>
@@ -3050,6 +3152,7 @@
     const confirmNo = document.getElementById('confirmNo');
 
     const chromeToggle = document.getElementById('chromeToggle');
+    const chromeToggleRight = document.getElementById('chromeToggleRight');
     const editorFloatToggle = document.getElementById('editorFloatToggle');
     const splitFloatToggle = document.getElementById('splitFloatToggle');
     const swapFloatToggle = document.getElementById('swapFloatToggle');
@@ -7590,7 +7693,7 @@
     function applyChromeHidden(hidden) {
       isChromeHidden = !!hidden;
       document.body.classList.toggle('first-row-hidden', isChromeHidden);
-      const label = isChromeHidden ? 'Show buttons' : 'Hide buttons';
+      const label = isChromeHidden ? 'Show left toolbar' : 'Hide left toolbar';
       chromeToggle.classList.toggle('active', isChromeHidden);
       chromeToggle.title = label;
       chromeToggle.setAttribute('aria-label', label);
@@ -7619,6 +7722,42 @@
       e.stopPropagation();
       applyChromeHidden(!isChromeHidden);
     });
+
+    let isRightStripOpen = true;
+    function applyRightStripOpen(open) {
+      isRightStripOpen = !!open;
+      document.body.classList.toggle('right-strip-open', isRightStripOpen);
+      if (chromeToggleRight) {
+        chromeToggleRight.title = isRightStripOpen ? 'Collapse title bar strip' : 'Expand title bar strip';
+        chromeToggleRight.setAttribute('aria-label', chromeToggleRight.title);
+      }
+      setTimeout(adjustChordSizes, 200);
+    }
+    if (chromeToggleRight) {
+      chromeToggleRight.addEventListener('click', function(e) {
+        e.stopPropagation();
+        applyRightStripOpen(!isRightStripOpen);
+      });
+    }
+
+    (function relocateRightStrip() {
+      const strip = document.querySelector('.title-bar-actions');
+      const rightMenuRow = document.getElementById('floatRightMenuRow');
+      if (!strip || !rightMenuRow) return;
+      rightMenuRow.appendChild(strip);
+      strip.style.position = 'static';
+      strip.style.transform = 'none';
+      strip.style.top = 'auto';
+      strip.style.right = 'auto';
+      strip.style.maxWidth = '100%';
+      strip.style.justifyContent = 'flex-end';
+      strip.style.display = 'flex';
+      strip.style.flexWrap = 'wrap';
+      strip.style.gap = '8px';
+      strip.style.alignItems = 'center';
+      strip.style.width = '100%';
+      strip.style.boxSizing = 'border-box';
+    })();
 
     // ===== INIT =====
     loadSettings();
@@ -7673,7 +7812,8 @@
 
     applyMode(false);
     applyChromeCollapsed(false);
-    applyChromeHidden(false);
+    applyChromeHidden(true);
+    applyRightStripOpen(true);
     applySwapState(isSwapped);
     if (typeof syncPerfPanel === 'function') syncPerfPanel();
 
