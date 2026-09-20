@@ -4261,6 +4261,122 @@
       previewEl.scrollTo({ top: Math.max(0, newScroll), behavior: 'smooth' });
     }
 
+    const manualScrollState = {
+      lyrics: { userActive: false, settleTimer: null, releaseTimer: null, lastSeconds: null },
+      chords: { userActive: false, settleTimer: null, releaseTimer: null, lastSeconds: null }
+    };
+
+    function readingZoneSeconds(previewEl, contentEl, timestamps) {
+      if (!previewEl || !contentEl || !timestamps || timestamps.length === 0) return null;
+      const children = contentEl.children;
+      if (children.length === 0) return null;
+
+      const zoneY = previewEl.scrollTop + previewEl.clientHeight * 0.38;
+      let bestBlock = -1;
+      let bestDist = Infinity;
+      for (let i = 0; i < children.length; i++) {
+        const el = children[i];
+        const top = el.offsetTop;
+        const bottom = top + el.offsetHeight;
+        const mid = (top + bottom) * 0.5;
+        const dist = Math.abs(mid - zoneY);
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestBlock = i;
+        }
+      }
+      if (bestBlock < 0) return null;
+
+      let candidate = null;
+      for (let i = 0; i < timestamps.length; i++) {
+        if (timestamps[i].blockIndex <= bestBlock) candidate = timestamps[i];
+        else break;
+      }
+      return candidate ? candidate.seconds : null;
+    }
+
+    function applyManualScrollSeek(seconds) {
+      if (seconds == null || isNaN(seconds)) return;
+      const cur = autoscrollCurrentTime();
+      if (Math.abs(cur - seconds) < 0.35) return;
+      if (autoscroll.playing) {
+        autoscroll.elapsedAtPause = seconds;
+        autoscroll.startWallClock = performance.now();
+      } else {
+        autoscroll.elapsedAtPause = seconds;
+      }
+      if (backingTrack.loaded && backingTrackAudio) {
+        backingTrackSeekTo(seconds);
+      }
+      autoscroll.lastLyricsBlock = -1;
+      autoscroll.lastChordsBlock = -1;
+      autoscrollUpdateReadout();
+    }
+
+    function commitManualScroll(which) {
+      const st = manualScrollState[which];
+      if (!st) return;
+      const previewEl = which === 'lyrics' ? previewContainer : previewContainer2;
+      const contentEl = which === 'lyrics' ? previewContent : previewContent2;
+      const timestamps = which === 'lyrics' ? autoscroll.lyricsTimestamps : autoscroll.chordsTimestamps;
+      const seconds = readingZoneSeconds(previewEl, contentEl, timestamps);
+      if (seconds != null && st.lastSeconds !== seconds) {
+        st.lastSeconds = seconds;
+        applyManualScrollSeek(seconds);
+      }
+      // Release the engine so it re-locks to whatever section the user landed on.
+      autoscroll.lastLyricsBlock = -1;
+      autoscroll.lastChordsBlock = -1;
+      st.userActive = false;
+    }
+
+    function scheduleManualScrollCommit(which) {
+      const st = manualScrollState[which];
+      if (!st) return;
+      if (st.settleTimer) clearTimeout(st.settleTimer);
+      st.settleTimer = setTimeout(function () {
+        st.settleTimer = null;
+        if (!st.userActive) return;
+        commitManualScroll(which);
+      }, 220);
+    }
+
+    function markUserScrollActive(which) {
+      const st = manualScrollState[which];
+      if (!st) return;
+      st.userActive = true;
+      if (st.releaseTimer) clearTimeout(st.releaseTimer);
+      // Safety net: if we never see a natural settle (e.g. touch cancel),
+      // release the engine after a short grace period so autoplay isn't
+      // frozen forever.
+      st.releaseTimer = setTimeout(function () {
+        st.releaseTimer = null;
+        if (st.userActive) commitManualScroll(which);
+      }, 1200);
+      scheduleManualScrollCommit(which);
+    }
+
+    function wireManualScroll(which, previewEl) {
+      if (!previewEl) return;
+      previewEl.addEventListener('wheel', function () {
+        markUserScrollActive(which);
+      }, { passive: true });
+      previewEl.addEventListener('touchstart', function () {
+        markUserScrollActive(which);
+      }, { passive: true });
+      previewEl.addEventListener('touchmove', function () {
+        markUserScrollActive(which);
+      }, { passive: true });
+      previewEl.addEventListener('pointerdown', function () {
+        markUserScrollActive(which);
+      }, { passive: true });
+      previewEl.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'PageUp' || e.key === 'PageDown' || e.key === 'Home' || e.key === 'End' || e.key === ' ') {
+          markUserScrollActive(which);
+        }
+      });
+    }
+
     function autoscrollContinuousScroll(previewEl, contentEl, timestamps, timeSeconds) {
       if (!previewEl || !contentEl || !timestamps || timestamps.length === 0) return;
 
@@ -4643,6 +4759,17 @@
       const cur = autoscrollCurrentTime() + autoscroll.offset;
       const lb = findActiveBlock(autoscroll.lyricsTimestamps, cur);
       const cb = findActiveBlock(autoscroll.chordsTimestamps, cur);
+
+      if (manualScrollState.lyrics.userActive) {
+        if (autoscroll.rafId) cancelAnimationFrame(autoscroll.rafId);
+        autoscroll.rafId = requestAnimationFrame(autoscrollTick);
+        return;
+      }
+      if (manualScrollState.chords.userActive) {
+        if (autoscroll.rafId) cancelAnimationFrame(autoscroll.rafId);
+        autoscroll.rafId = requestAnimationFrame(autoscrollTick);
+        return;
+      }
 
       if (lb !== -1 && lb !== autoscroll.lastLyricsBlock) {
         autoscroll.lastLyricsBlock = lb;
@@ -6954,6 +7081,9 @@
       wire(previewContainer);
       wire(previewContainer2);
     })();
+
+    wireManualScroll('lyrics', previewContainer);
+    wireManualScroll('chords', previewContainer2);
 
     updatePreview();
     updatePreview2();
