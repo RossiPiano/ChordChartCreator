@@ -5243,14 +5243,8 @@
 
     // ===== EDITOR TOGGLE =====
     const EDITOR_HEIGHT_KEY = 'chordChartEditorHeight';
-    let savedEditorHeight = null;
-    try {
-      const stored = localStorage.getItem(EDITOR_HEIGHT_KEY);
-      if (stored !== null) {
-        const v = parseFloat(stored);
-        if (!isNaN(v) && v >= 60) savedEditorHeight = v;
-      }
-    } catch (e) {}
+    const DEFAULT_EDITOR_HEIGHT = 200;
+    let savedEditorHeight = DEFAULT_EDITOR_HEIGHT;
 
     function applyEditorState(hidden) {
       isEditorCollapsed = hidden;
@@ -7238,9 +7232,7 @@
 
     requestAnimationFrame(function() {
       requestAnimationFrame(function() {
-        const targetH = (typeof savedEditorHeight === 'number' && savedEditorHeight >= 60)
-          ? Math.max(60, Math.min(window.innerHeight * 0.7, savedEditorHeight))
-          : 200;
+        const targetH = Math.max(60, Math.min(window.innerHeight * 0.7, DEFAULT_EDITOR_HEIGHT));
         inputArea.style.transition = '';
         inputArea2.style.transition = '';
         inputArea.style.height = targetH + 'px';
