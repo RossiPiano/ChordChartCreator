@@ -139,13 +139,19 @@
       flex: 0 0 auto;
       margin-left: auto;
     }
-    .title-bar .title-bar-actions #titleBarRecordBtn,
-    .title-bar .title-bar-actions #titleBarLineBtn,
-    .title-bar .title-bar-actions #titleBarCaretDown2Btn,
-    .title-bar .title-bar-actions #titleBarTimestampDeleteBtn {
-      background: rgba(196, 90, 74, 0.26);
-      border-color: rgba(196, 90, 74, 0.55);
+    #titleBarRecordBtn,
+    #titleBarLineBtn {
+      background: rgba(196, 90, 74, 0.55);
+      border-color: rgba(196, 90, 74, 0.45);
       color: #ffffff;
+    }
+    @media (hover: hover) {
+      #titleBarRecordBtn:hover,
+      #titleBarLineBtn:hover {
+        background: rgba(196, 90, 74, 0.72);
+        border-color: rgba(196, 90, 74, 0.6);
+        color: #ffffff;
+      }
     }
     .title-bar .title-bar-actions #titleBarCaretDown2Btn .caret2-icon {
       display: flex;
@@ -809,29 +815,32 @@
       padding: 0;
       margin: 0;
       box-sizing: border-box;
+      pointer-events: none;
+    }
+    .float-top-row > * {
+      pointer-events: auto;
     }
     .float-top-row > .float-title-input {
-      flex: 1 1 auto;
+      flex: 0 1 auto;
+      min-width: 120px;
+    }
+    .float-top-row > .playback-readout {
+      flex: 0 0 auto;
+      margin-left: auto;
     }
     .float-top-row > .autoscroll-current {
-      flex: 0 0 62px;
-      width: 62px;
-      border: 1px solid #c4ad92;
-      border-radius: 6px;
-      padding: 4px 6px;
+      flex: 0 0 auto;
       font-family: Consolas, Menlo, Monaco, monospace;
       font-size: 0.82rem;
       font-weight: 700;
       color: #3d2b1f;
-      background: #ffffff;
-      outline: none;
-      text-align: center;
+      background: transparent;
+      border: none;
+      border-radius: 0;
+      padding: 0;
       letter-spacing: 0.02em;
-      pointer-events: auto;
-    }
-    .float-top-row > .autoscroll-current:focus {
-      border-color: #8b6b4a;
-      box-shadow: 0 0 0 2px rgba(139, 107, 74, 0.2);
+      white-space: nowrap;
+      pointer-events: none;
     }
     .float-top-row > .autoscroll-total {
       flex: 0 0 auto;
@@ -841,7 +850,28 @@
       color: #3d2b1f;
       letter-spacing: 0.02em;
       white-space: nowrap;
-      pointer-events: auto;
+      pointer-events: none;
+    }
+    .float-top-row > .autoscroll-slash {
+      flex: 0 0 auto;
+      font-family: Consolas, Menlo, Monaco, monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #3d2b1f;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .float-top-row > .playback-readout {
+      flex: 0 0 auto;
+      font-family: Consolas, Menlo, Monaco, monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #3d2b1f;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      pointer-events: none;
     }
     .float-menu-pair-row {
       display: flex;
@@ -877,6 +907,10 @@
     }
     body.right-strip-open .float-right-menu-row {
       display: flex;
+    }
+    .float-right-menu-row,
+    .float-right-menu-row * {
+      pointer-events: auto;
     }
     .float-right-menu-row > .title-bar-actions {
       position: static;
@@ -920,15 +954,16 @@
       left: auto;
       top: auto;
       z-index: 2147483647;
-      flex: 1 1 360px;
-      width: 360px;
-      min-width: 180px;
+      flex: 0 1 auto;
+      width: auto;
+      min-width: 120px;
       max-width: 420px;
       margin: 0;
       padding: 0;
       overflow: visible;
       opacity: 1;
       pointer-events: auto;
+      text-align: left;
     }
 
     body.first-row-hidden .float-layer .float-menu-row {
@@ -1306,7 +1341,15 @@
       color: #3d2b1f;
       letter-spacing: 0.02em;
       white-space: nowrap;
-      margin-left: 6px;
+    }
+    .autoscroll-slash {
+      flex: 0 0 auto;
+      font-family: Consolas, Menlo, Monaco, monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #3d2b1f;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
     }
     .autoscroll-src-toggle {
       flex: 0 0 auto;
@@ -1591,14 +1634,6 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
 
-    .title-bar .title-bar-actions #titleBarCaretUpBtn,
-    .title-bar .title-bar-actions #titleBarCaretDownBtn {
-      background: rgba(196, 90, 74, 0.26);
-      color: #ffffff;
-      border-color: rgba(196, 90, 74, 0.55);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-    }
-
     @media (hover: hover) {
       .title-bar .title-bar-actions #titleBarCaretUpBtn:hover,
       .title-bar .title-bar-actions #titleBarCaretDownBtn:hover {
@@ -1641,6 +1676,21 @@
       transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
       font-family: inherit;
+    }
+    #titleBarCaretUpBtn,
+    #titleBarCaretDownBtn,
+    #titleBarTimestampDeleteBtn {
+      background: #5c4033;
+      color: #ffffff;
+      border-color: #4a3328;
+    }
+    @media (hover: hover) {
+      #titleBarCaretUpBtn:hover,
+      #titleBarCaretDownBtn:hover,
+      #titleBarTimestampDeleteBtn:hover {
+        background: #6b4f3f;
+        border-color: #3d2b1f;
+      }
     }
     @media (hover: hover) {
       .save-float-toggle:hover {
@@ -2669,10 +2719,7 @@
         margin-right: 0 !important;
       }
       .float-top-row > .autoscroll-current {
-        flex: 0 0 50px;
-        width: 50px;
         font-size: 0.75rem;
-        padding: 3px 4px;
       }
       .float-top-row > .autoscroll-total {
         font-size: 0.75rem;
@@ -2793,8 +2840,8 @@
       <button class="autoscroll-float-toggle" id="titleBarNextBtn" title="Jump to next timestamp" aria-label="Jump to next timestamp">⏭️</button>
       <button class="split-float-toggle" id="titleBarSplitBtn" title="Split view (left / center / right)" aria-label="Split view">⬛</button>
       <button class="editor-float-toggle" id="titleBarEditorBtn" title="Hide both editors" aria-label="Hide both editors">✏️</button>
-      <button class="editor-float-toggle" id="titleBarCaretUpBtn" title="Move caret up one line" aria-label="Move caret up one line">🔼</button>
-      <button class="editor-float-toggle" id="titleBarCaretDownBtn" title="Move caret down one line" aria-label="Move caret down one line">🔽</button>
+      <button class="save-float-toggle" id="titleBarCaretUpBtn" title="Move caret up one line" aria-label="Move caret up one line">🔼</button>
+      <button class="save-float-toggle" id="titleBarCaretDownBtn" title="Move caret down one line" aria-label="Move caret down one line">🔽</button>
       <button class="autoscroll-float-toggle" id="titleBarRecordBtn" title="Record a Song Part timestamp (P) at the current time" aria-label="Record Song Part timestamp">📑</button>
       <button class="autoscroll-float-toggle" id="titleBarLineBtn" title="Mark the current line (highlight only)" aria-label="Mark current line">🖍️</button>
       <button class="autoscroll-float-toggle" id="titleBarTimestampDeleteBtn" title="Delete timestamp line (F4)" aria-label="Delete timestamp line">❌</button>
@@ -2850,8 +2897,7 @@
     <div class="float-top-row">
       <button class="chrome-toggle" id="chromeToggle" title="Collapse toolbar" aria-label="Collapse toolbar">☰</button>
       <input type="text" class="float-title-input" id="titleInput" placeholder="Song Title — Artist" spellcheck="false" aria-label="Song title">
-      <input type="text" class="autoscroll-current" id="titleBarCurrent" value="0:00" spellcheck="false" aria-label="Current time">
-      <span class="autoscroll-total" id="titleBarTotal">/ 0:00</span>
+      <span class="playback-readout" id="playbackReadout">0:00 / 0:00</span>
       <button class="chrome-toggle" id="chromeToggleRight" title="Collapse title bar strip" aria-label="Collapse title bar strip">☰</button>
     </div>
 
@@ -2919,7 +2965,8 @@
       <button type="button" class="autoscroll-btn" id="autoscrollPrev" title="Jump to previous timestamp">⏮️</button>
       <button type="button" class="autoscroll-btn" id="autoscrollNext" title="Jump to next timestamp">⏭️</button>
       <input type="text" class="autoscroll-current" id="autoscrollCurrent" value="0:00" spellcheck="false" aria-label="Current time">
-      <span class="autoscroll-total" id="autoscrollTotal">/ 0:00</span>
+      <span class="autoscroll-slash" id="autoscrollSlash">/</span>
+      <span class="autoscroll-total" id="autoscrollTotal">0:00</span>
       <button type="button" class="autoscroll-src-toggle" id="autoscrollSrcToggle" title="Source: chords editor (click for lyrics)">🎸</button>
     </div>
     <div class="autoscroll-row">
@@ -3196,6 +3243,7 @@
     const titleBarTimestampDeleteBtn = document.getElementById('titleBarTimestampDeleteBtn');
     const titleBarCurrent = document.getElementById('titleBarCurrent');
     const titleBarTotal = document.getElementById('titleBarTotal');
+    const playbackReadout = document.getElementById('playbackReadout');
 
     const inputEl2 = document.getElementById('chartInput2');
     const previewContent2 = document.getElementById('previewContent2');
@@ -5032,8 +5080,10 @@
       if (lineIndex < 0) lineIndex = 0;
       if (lineIndex > lines.length - 1) lineIndex = lines.length - 1;
 
-      try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
-      setGutterCaretAtLineEnd(target, lineIndex);
+      requestAnimationFrame(function() {
+        try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
+        setGutterCaretAtLineEnd(target, lineIndex);
+      });
     }
 
     function autoscrollRemoveTimestamp() {
@@ -5200,10 +5250,14 @@
         tot = backingTrackAudio.duration;
       }
       if (autoscrollTotalEl) {
-        autoscrollTotalEl.textContent = '/ ' + autoscrollFormatTime(tot);
+        autoscrollTotalEl.textContent = autoscrollFormatTime(tot);
       }
       if (titleBarTotal) {
-        titleBarTotal.textContent = '/ ' + autoscrollFormatTime(tot);
+        titleBarTotal.textContent = autoscrollFormatTime(tot);
+      }
+      if (playbackReadout) {
+        playbackReadout.textContent =
+          autoscrollFormatTime(cur) + ' / ' + autoscrollFormatTime(tot);
       }
       if (autoscrollCurrentInput && document.activeElement !== autoscrollCurrentInput) {
         autoscrollCurrentInput.value = autoscrollFormatTime(cur);
@@ -6915,13 +6969,15 @@
       titleBarEditorBtn.setAttribute('aria-label', titleBarEditorBtn.title);
     }
     if (titleBarCaretUpBtn) {
-      titleBarCaretUpBtn.addEventListener('click', function(e) {
+      titleBarCaretUpBtn.addEventListener('mousedown', function(e) {
+        e.preventDefault();
         e.stopPropagation();
         moveCaretLine(-1);
       });
     }
     if (titleBarCaretDownBtn) {
-      titleBarCaretDownBtn.addEventListener('click', function(e) {
+      titleBarCaretDownBtn.addEventListener('mousedown', function(e) {
+        e.preventDefault();
         e.stopPropagation();
         moveCaretLine(1);
       });
@@ -7059,6 +7115,7 @@
         if (typeof toggleSongsFloatPanel === 'function') toggleSongsFloatPanel(false);
         if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
         if (typeof toggleAutoscrollFloatPanel === 'function') toggleAutoscrollFloatPanel(false);
+        positionFloatPanel(keyFloatPanel, keyFloatToggle);
       }
     }
     keyFloatToggle.addEventListener('click', function(e) {
@@ -7123,30 +7180,58 @@
       return rightmost;
     }
 
+    const RIGHT_STRIP_BTN_IDS = [
+      'titleBarSongsBtn',
+      'titleBarPlayBtn',
+      'titleBarStopBtn',
+      'titleBarPrevBtn',
+      'titleBarNextBtn',
+      'titleBarSplitBtn',
+      'titleBarEditorBtn',
+      'titleBarCaretUpBtn',
+      'titleBarCaretDownBtn',
+      'titleBarRecordBtn',
+      'titleBarLineBtn',
+      'titleBarTimestampDeleteBtn'
+    ];
+
     function isInTitleBarActions(btn) {
-      if (!btn || !btn.closest) return false;
-      return !!btn.closest('.title-bar .title-bar-actions');
+      if (!btn || !btn.id) return false;
+      return RIGHT_STRIP_BTN_IDS.indexOf(btn.id) !== -1;
     }
 
     function positionFloatPanel(panelEl, anchorBtn) {
       if (!panelEl || !anchorBtn) return;
-      // If the clicked button lives in the title bar's right-side strip,
-      // align the panel to the rightmost title-bar action button so it
-      // opens flush under the right edge of the strip. Otherwise (button
-      // lives in the floating toolbar), align the panel to the left of
-      // that button so it opens under it as before.
-      let effectiveAnchor = anchorBtn;
-      if (isInTitleBarActions(anchorBtn)) {
-        effectiveAnchor = getTitleBarRightmostButton() || anchorBtn;
-      }
-      const rect = effectiveAnchor.getBoundingClientRect();
+      const isRightSide = isInTitleBarActions(anchorBtn);
+
+      const leftHamburger = document.getElementById('chromeToggle');
+      const rightHamburger = document.getElementById('chromeToggleRight');
+
       const panelWidth = panelEl.offsetWidth;
-      const desiredLeft = rect.right - panelWidth;
       const minLeft = 10;
       const maxLeft = window.innerWidth - panelWidth - 10;
+
+      let desiredLeft;
+      if (isRightSide) {
+        const anchorEl = rightHamburger || anchorBtn;
+        const rect = anchorEl.getBoundingClientRect();
+        desiredLeft = rect.right - panelWidth;
+      } else {
+        const anchorEl = leftHamburger || anchorBtn;
+        const rect = anchorEl.getBoundingClientRect();
+        desiredLeft = rect.left;
+      }
+
       const clampedLeft = Math.max(minLeft, Math.min(maxLeft, desiredLeft));
       panelEl.style.left = clampedLeft + 'px';
       panelEl.style.right = 'auto';
+
+      const menuRow = document.querySelector('.float-menu-pair-row');
+      if (menuRow) {
+        const menuRect = menuRow.getBoundingClientRect();
+        const topY = menuRect.bottom + 10;
+        panelEl.style.top = topY + 'px';
+      }
     }
 
     function toggleSongsFloatPanel(open, anchorBtn) {
@@ -7372,6 +7457,7 @@
         if (typeof toggleSongsFloatPanel === 'function') toggleSongsFloatPanel(false);
         if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
         if (typeof toggleAutoscrollFloatPanel === 'function') toggleAutoscrollFloatPanel(false);
+        positionFloatPanel(templateFloatPanel, templateFloatToggle);
       }
     }
 
@@ -7444,6 +7530,7 @@
         if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
         if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
         if (typeof toggleAutoscrollFloatPanel === 'function') toggleAutoscrollFloatPanel(false);
+        positionFloatPanel(perfPanel, perfToggle);
       }
     }
     perfToggle.addEventListener('click', function(e) { e.stopPropagation(); togglePerfPanel(); });
