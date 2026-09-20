@@ -2603,6 +2603,7 @@
       <button class="autoscroll-float-toggle" id="titleBarStopBtn" title="Stop and rewind" aria-label="Stop and rewind">⏹️</button>
       <button class="autoscroll-float-toggle" id="titleBarPrevBtn" title="Jump to previous timestamp" aria-label="Jump to previous timestamp">⏮️</button>
       <button class="autoscroll-float-toggle" id="titleBarNextBtn" title="Jump to next timestamp" aria-label="Jump to next timestamp">⏭️</button>
+      <button class="editor-float-toggle" id="titleBarEditorBtn" title="Hide both editors" aria-label="Hide both editors">✏️</button>
       <button class="autoscroll-float-toggle" id="titleBarRecordBtn" title="Record a Song Part timestamp (P) at the current time" aria-label="Record Song Part timestamp">📑</button>
       <button class="autoscroll-float-toggle" id="titleBarLineBtn" title="Mark the current line (highlight only)" aria-label="Mark current line">🖍️</button>
       <input type="text" class="autoscroll-current" id="titleBarCurrent" value="0:00" spellcheck="false" aria-label="Current time">
@@ -2984,6 +2985,7 @@
     const titleBarNextBtn = document.getElementById('titleBarNextBtn');
     const titleBarRecordBtn = document.getElementById('titleBarRecordBtn');
     const titleBarLineBtn = document.getElementById('titleBarLineBtn');
+    const titleBarEditorBtn = document.getElementById('titleBarEditorBtn');
     const titleBarCurrent = document.getElementById('titleBarCurrent');
     const titleBarTotal = document.getElementById('titleBarTotal');
 
@@ -5489,13 +5491,29 @@
       setTimeout(adjustChordSizes, 350);
     }
 
-    editorFloatToggle.addEventListener('click', function(e) {
-      e.stopPropagation();
+    function toggleEditorsFromButton(btn) {
       const newHidden = !isEditorCollapsed;
       applyEditorState(newHidden);
       saveEditorHiddenState(newHidden);
       syncFocusModeEditorVisibility();
+      if (titleBarEditorBtn) {
+        titleBarEditorBtn.classList.toggle('active', newHidden);
+        titleBarEditorBtn.title = newHidden ? 'Show both editors' : 'Hide both editors';
+        titleBarEditorBtn.setAttribute('aria-label', titleBarEditorBtn.title);
+      }
+    }
+
+    editorFloatToggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      toggleEditorsFromButton(editorFloatToggle);
     });
+
+    if (titleBarEditorBtn) {
+      titleBarEditorBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleEditorsFromButton(titleBarEditorBtn);
+      });
+    }
 
     function applyMode(advanced) {
       isAdvancedMode = advanced;
@@ -6582,6 +6600,11 @@
         autoscrollRecordTimestamp(true);
       });
     }
+    if (titleBarEditorBtn) {
+      titleBarEditorBtn.classList.toggle('active', isEditorCollapsed);
+      titleBarEditorBtn.title = isEditorCollapsed ? 'Show both editors' : 'Hide both editors';
+      titleBarEditorBtn.setAttribute('aria-label', titleBarEditorBtn.title);
+    }
     if (titleBarCurrent) {
       titleBarCurrent.addEventListener('focus', function() {
         try { this.select(); } catch (e) {}
@@ -7377,11 +7400,13 @@
         titleEl.readOnly = false;
         titleEl.disabled = false;
       }
-      // The hamburger button controls the toolbar AND the editors together.
-      // Hiding it puts the whole app into focus mode; showing it brings
-      // the toolbar and the editors back. This state is intentionally NOT
-      // persisted — every fresh app open starts with everything visible.
-      applyEditorState(isChromeHidden);
+      // The hamburger button controls the toolbar only. The editors are now
+      // toggled exclusively by their own two buttons (floating ✏️ and the
+      // title-bar ✏️). Focus mode still hides the floating toolbar buttons,
+      // but leaves the editors alone so the title-bar ✏️ can still control
+      // them, and so closing the toolbar doesn't fight the user's last
+      // editor-state choice.
+      syncFocusModeEditorVisibility();
     }
 
     chromeToggle.addEventListener('click', function(e) {
