@@ -4888,7 +4888,7 @@
         window.__padGutterToMatch(target, editorEl);
       }
 
-      target.focus();
+      try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
       const caretLine = lineIndex + highlightLineOffset;
       setGutterCaretAtLineEnd(target, caretLine);
 
