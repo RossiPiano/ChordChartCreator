@@ -165,6 +165,34 @@
       border-color: #245f31;
       box-shadow: 0 4px 12px rgba(46, 122, 63, 0.35);
     }
+    .title-bar .title-bar-actions .autoscroll-current {
+      flex: 0 0 62px;
+      width: 62px;
+      border: 1px solid #c4ad92;
+      border-radius: 6px;
+      padding: 4px 6px;
+      font-family: Consolas, Menlo, Monaco, monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #3d2b1f;
+      background: #ffffff;
+      outline: none;
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+    .title-bar .title-bar-actions .autoscroll-current:focus {
+      border-color: #8b6b4a;
+      box-shadow: 0 0 0 2px rgba(139, 107, 74, 0.2);
+    }
+    .title-bar .title-bar-actions .autoscroll-total {
+      flex: 0 0 auto;
+      font-family: Consolas, Menlo, Monaco, monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #3d2b1f;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
 
     /* ===== EDITOR WRAPPER ===== */
     .editor-wrapper {
@@ -1090,12 +1118,12 @@
       .autoscroll-btn:hover { background: #c4ad92; border-color: #b0987a; }
     }
     .autoscroll-btn.primary {
-      background: #8b6b4a;
-      border-color: #7a5d3f;
-      color: #ffffff;
+      background: #dcc9b0;
+      border-color: #c4ad92;
+      color: #3d2b1f;
     }
     @media (hover: hover) {
-      .autoscroll-btn.primary:hover { background: #7a5d3f; border-color: #6b4f35; }
+      .autoscroll-btn.primary:hover { background: #c4ad92; border-color: #b0987a; }
     }
     .autoscroll-backing-upload:active {
       background: #c4ad92;
@@ -2532,7 +2560,13 @@
     <input type="text" class="title-input" id="titleInput" placeholder="Song Title — Artist" spellcheck="false" aria-label="Song title">
     <div class="title-bar-actions">
       <button class="songs-float-toggle" id="titleBarSongsBtn" title="Songs" aria-label="Songs">🎵</button>
-      <button class="autoscroll-float-toggle" id="titleBarPlayBtn" title="Auto-scroll by timestamps" aria-label="Auto-scroll">⏯️</button>
+      <button class="autoscroll-float-toggle" id="titleBarPlayBtn" title="Play (auto-scroll)" aria-label="Play auto-scroll">▶️</button>
+      <button class="autoscroll-float-toggle" id="titleBarStopBtn" title="Stop and rewind" aria-label="Stop and rewind">⏹️</button>
+      <button class="autoscroll-float-toggle" id="titleBarPrevBtn" title="Jump to previous timestamp" aria-label="Jump to previous timestamp">⏮️</button>
+      <button class="autoscroll-float-toggle" id="titleBarNextBtn" title="Jump to next timestamp" aria-label="Jump to next timestamp">⏭️</button>
+      <button class="autoscroll-float-toggle" id="titleBarRecordBtn" title="Record the current time on the current section's line" aria-label="Record timestamp">⏺️</button>
+      <input type="text" class="autoscroll-current" id="titleBarCurrent" value="0:00" spellcheck="false" aria-label="Current time">
+      <span class="autoscroll-total" id="titleBarTotal">/ 0:00</span>
     </div>
   </div>
   <div class="editor-wrapper layout-desktop" id="editorWrapper">
@@ -2548,7 +2582,7 @@
         <div class="drop-zone" id="dropZone">
           <div class="drop-message">📂 Drop a chord chart here</div>
           <div class="editor-with-gutter">
-            <textarea id="timeInput" class="time-gutter is-empty" spellcheck="false" placeholder="0:00&#10;&#10;0:26&#10;&#10;&#10;&#10;1:28"></textarea>
+            <textarea id="timeInput" class="time-gutter is-empty" spellcheck="false" placeholder="0:00&#10;&#10;0:26&#10;&#10;&#10;&#10;1:28.53"></textarea>
             <div class="editor-input-wrap">
               <div class="editor-input-overlay" id="chartInputOverlay"><span class="hint-emoji">⌨️🎤</span> <span class="hint-italic">Type lyrics here!</span></div>
               <textarea id="chartInput" spellcheck="false"></textarea>
@@ -2568,7 +2602,7 @@
         <div class="drop-zone" id="dropZone2">
           <div class="drop-message">📂 Drop a chord chart here</div>
           <div class="editor-with-gutter">
-            <textarea id="timeInput2" class="time-gutter is-empty" spellcheck="false" placeholder="0:00&#10;&#10;0:26&#10;&#10;&#10;&#10;1:28"></textarea>
+            <textarea id="timeInput2" class="time-gutter is-empty" spellcheck="false" placeholder="0:00&#10;&#10;0:26&#10;&#10;&#10;&#10;1:28.53"></textarea>
             <div class="editor-input-wrap">
               <div class="editor-input-overlay" id="chartInputOverlay2"><span class="hint-emoji">⌨️🎸</span> <span class="hint-italic">Type chords here!</span></div>
               <textarea id="chartInput2" spellcheck="false"></textarea>
@@ -2587,7 +2621,7 @@
     <button class="key-float-toggle" id="keyFloatToggle" title="Key &amp; transpose" aria-label="Key and transpose">🔑</button>
     <button class="split-float-toggle" id="splitFloatToggle" title="Split view (left / center / right)" aria-label="Split view">⬛</button>
     <button class="swap-float-toggle" id="swapFloatToggle" title="Swap lyrics / chords sides" aria-label="Swap sides">↔️</button>
-    <button class="autoscroll-float-toggle" id="autoscrollFloatToggle" title="Auto-scroll by timestamps" aria-label="Auto-scroll">⏯️</button>
+    <button class="autoscroll-float-toggle" id="autoscrollFloatToggle" title="Auto-scroll panel" aria-label="Auto-scroll panel">🔽</button>
     <button class="editor-float-toggle" id="editorFloatToggle" title="Hide both editors" aria-label="Hide both editors">✏️</button>
     <button class="template-float-toggle" id="templateFloatToggle" title="Templates (look &amp; feel presets)" aria-label="Templates">🎨</button>
     <button class="save-float-toggle" id="saveFloatToggle" title="Save Chord Chart" aria-label="Save Chord Chart">💾</button>
@@ -2636,7 +2670,7 @@
   </div>
   <div class="autoscroll-float-body">
     <div class="autoscroll-row">
-      <button type="button" class="autoscroll-btn primary" id="autoscrollPlay" title="Play">▶️</button>
+      <button type="button" class="autoscroll-btn" id="autoscrollPlay" title="Play">▶️</button>
       <button type="button" class="autoscroll-btn" id="autoscrollStop" title="Stop and rewind">⏹️</button>
       <button type="button" class="autoscroll-btn" id="autoscrollPrev" title="Jump to previous timestamp">⏮️</button>
       <button type="button" class="autoscroll-btn" id="autoscrollNext" title="Jump to next timestamp">⏭️</button>
@@ -2905,6 +2939,12 @@
     const pngFloatToggle = document.getElementById('pngFloatToggle');
     const titleBarSongsBtn = document.getElementById('titleBarSongsBtn');
     const titleBarPlayBtn = document.getElementById('titleBarPlayBtn');
+    const titleBarStopBtn = document.getElementById('titleBarStopBtn');
+    const titleBarPrevBtn = document.getElementById('titleBarPrevBtn');
+    const titleBarNextBtn = document.getElementById('titleBarNextBtn');
+    const titleBarRecordBtn = document.getElementById('titleBarRecordBtn');
+    const titleBarCurrent = document.getElementById('titleBarCurrent');
+    const titleBarTotal = document.getElementById('titleBarTotal');
 
     const inputEl2 = document.getElementById('chartInput2');
     const previewContent2 = document.getElementById('previewContent2');
@@ -4014,7 +4054,7 @@
                         || (typeof song.rightTimeText === 'string' && song.rightTimeText.trim() !== '');
       const timeSlot = document.createElement('span');
       timeSlot.className = 'song-slot';
-      timeSlot.textContent = hasTimestamps ? '⏱️' : '\u00A0';
+      timeSlot.textContent = hasTimestamps ? '🔽' : '\u00A0';
       prefixEl.appendChild(timeSlot);
 
       const keySlot = document.createElement('span');
@@ -4548,11 +4588,30 @@
       return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
     }
 
+    function autoscrollFormatTimeMs(seconds) {
+      if (seconds == null || isNaN(seconds)) seconds = 0;
+      seconds = Math.max(0, seconds);
+      const total = Math.floor(seconds);
+      const h = Math.floor(total / 3600);
+      const m = Math.floor((total % 3600) / 60);
+      const s = total % 60;
+      const cs = Math.round((seconds - total) * 100);
+      const pad2 = n => String(n).padStart(2, '0');
+      return h > 0 ? `${h}:${pad2(m)}:${pad2(s)}.${pad2(cs)}` : `${m}:${pad2(s)}.${pad2(cs)}`;
+    }
+
     function autoscrollTotalDuration() {
       let max = 0;
       for (const t of autoscroll.lyricsTimestamps) if (t.seconds > max) max = t.seconds;
       for (const t of autoscroll.chordsTimestamps) if (t.seconds > max) max = t.seconds;
       return max;
+    }
+
+    function autoscrollPlaybackEndSeconds() {
+      if (backingTrack.loaded && backingTrackAudio && isFinite(backingTrackAudio.duration)) {
+        return backingTrackAudio.duration;
+      }
+      return null;
     }
 
     function autoscrollCurrentTime() {
@@ -4579,6 +4638,81 @@
       }
       all.sort(function (a, b) { return a - b; });
       return all;
+    }
+
+    // Inserts the current playback time (with millisecond precision) at the
+    // caret position of the timestamp gutter the user most recently focused.
+    // Clicking the Record button blurs the gutter before the click handler
+    // runs, so we can't rely on document.activeElement here; we track the
+    // last-focused gutter explicitly instead.
+    let lastFocusedTimeGutter = null;
+    let lastTimeGutterCaretStart = null;
+    let lastTimeGutterCaretEnd = null;
+
+    function rememberTimeGutterFocus(gutterEl) {
+      lastFocusedTimeGutter = gutterEl;
+    }
+
+    function rememberTimeGutterCaret(gutterEl) {
+      if (document.activeElement !== gutterEl) return;
+      try {
+        lastTimeGutterCaretStart = gutterEl.selectionStart;
+        lastTimeGutterCaretEnd = gutterEl.selectionEnd;
+      } catch (e) {
+        lastTimeGutterCaretStart = null;
+        lastTimeGutterCaretEnd = null;
+      }
+    }
+
+    function autoscrollRecordTimestamp() {
+      const seconds = autoscrollCurrentTime() + autoscroll.offset;
+      const stamp = autoscrollFormatTimeMs(seconds);
+
+      const leftTimeEl = document.getElementById('timeInput');
+      const rightTimeEl = document.getElementById('timeInput2');
+
+      console.log('[record] activeElement =', document.activeElement && document.activeElement.id);
+      console.log('[record] lastFocusedTimeGutter =', lastFocusedTimeGutter && lastFocusedTimeGutter.id);
+      console.log('[record] leftTimeEl =', leftTimeEl && leftTimeEl.id, 'rightTimeEl =', rightTimeEl && rightTimeEl.id);
+
+      let target = lastFocusedTimeGutter;
+      if (!target || (target !== leftTimeEl && target !== rightTimeEl)) {
+        target = leftTimeEl || rightTimeEl;
+      }
+      console.log('[record] chosen target =', target && target.id);
+      if (!target) return;
+
+      let start, end;
+      if (target === lastFocusedTimeGutter && lastTimeGutterCaretStart !== null) {
+        start = lastTimeGutterCaretStart;
+        end = lastTimeGutterCaretEnd !== null ? lastTimeGutterCaretEnd : start;
+        if (start > target.value.length) start = target.value.length;
+        if (end > target.value.length) end = target.value.length;
+      } else {
+        start = (typeof target.selectionStart === 'number') ? target.selectionStart : target.value.length;
+        end = (typeof target.selectionEnd === 'number') ? target.selectionEnd : start;
+      }
+
+      const before = target.value.slice(0, start);
+      const after = target.value.slice(end);
+      target.value = before + stamp + after;
+
+      const caret = start + stamp.length;
+      try { target.setSelectionRange(caret, caret); } catch (e) {}
+      lastTimeGutterCaretStart = caret;
+      lastTimeGutterCaretEnd = caret;
+      target.focus();
+
+      if (typeof window.__syncTimeGutterEmpty === 'function') {
+        window.__syncTimeGutterEmpty(target);
+      }
+      const editorEl = (target === leftTimeEl) ? inputEl : inputEl2;
+      if (editorEl && typeof window.__padGutterToMatch === 'function') {
+        window.__padGutterToMatch(target, editorEl);
+      }
+
+      autoscrollRefreshTimestamps();
+      showToast('Timestamp recorded: ' + stamp);
     }
 
     function autoscrollJumpToNeighborTimestamp(direction) {
@@ -4643,10 +4777,15 @@
       if (autoscrollTotalEl) {
         autoscrollTotalEl.textContent = '/ ' + autoscrollFormatTime(tot);
       }
-      if (!autoscrollCurrentInput) return;
-      // Don't overwrite the box while the user is typing into it.
-      if (document.activeElement === autoscrollCurrentInput) return;
-      autoscrollCurrentInput.value = autoscrollFormatTime(cur);
+      if (titleBarTotal) {
+        titleBarTotal.textContent = '/ ' + autoscrollFormatTime(tot);
+      }
+      if (autoscrollCurrentInput && document.activeElement !== autoscrollCurrentInput) {
+        autoscrollCurrentInput.value = autoscrollFormatTime(cur);
+      }
+      if (titleBarCurrent && document.activeElement !== titleBarCurrent) {
+        titleBarCurrent.value = autoscrollFormatTime(cur);
+      }
     }
 
     function autoscrollUpdateActiveRow() {
@@ -4869,10 +5008,16 @@
       autoscrollUpdateReadout();
       autoscrollUpdateActiveRow();
 
-      const total = autoscrollTotalDuration();
-      if (total > 0 && autoscrollCurrentTime() > total + 5) {
-        autoscrollStop();
-        return;
+      const playbackEnd = autoscrollPlaybackEndSeconds();
+      if (playbackEnd !== null) {
+        if (backingTrackAudio && backingTrackAudio.ended) {
+          autoscrollStop();
+          return;
+        }
+        if (autoscrollCurrentTime() >= playbackEnd - 0.05) {
+          autoscrollStop();
+          return;
+        }
       }
 
       updateAutoscrollCurrentLine(previewContent, autoscroll.lyricsTimestamps, lb);
@@ -4887,8 +5032,6 @@
       if (autoscroll.playing) return;
       if (backingTrack.loaded && backingTrackAudio) {
         backingTrackPlay();
-      } else {
-        showToast('No backing track loaded.');
       }
       autoscroll.playing = true;
       autoscroll.startWallClock = performance.now();
@@ -4896,7 +5039,12 @@
       if (playBtn) playBtn.textContent = '⏸️';
       const toggle = document.getElementById('autoscrollFloatToggle');
       if (toggle) toggle.classList.add('playing');
-      if (titleBarPlayBtn) titleBarPlayBtn.classList.add('playing');
+      if (titleBarPlayBtn) {
+        titleBarPlayBtn.classList.add('playing');
+        titleBarPlayBtn.textContent = '⏸️';
+        titleBarPlayBtn.title = 'Pause (auto-scroll)';
+        titleBarPlayBtn.setAttribute('aria-label', 'Pause auto-scroll');
+      }
       autoscroll.rafId = requestAnimationFrame(autoscrollTick);
     }
 
@@ -4913,7 +5061,12 @@
       if (playBtn) playBtn.textContent = '▶️';
       const toggle = document.getElementById('autoscrollFloatToggle');
       if (toggle) toggle.classList.remove('playing');
-      if (titleBarPlayBtn) titleBarPlayBtn.classList.remove('playing');
+      if (titleBarPlayBtn) {
+        titleBarPlayBtn.classList.remove('playing');
+        titleBarPlayBtn.textContent = '▶️';
+        titleBarPlayBtn.title = 'Play (auto-scroll)';
+        titleBarPlayBtn.setAttribute('aria-label', 'Play auto-scroll');
+      }
       autoscrollUpdateReadout();
     }
 
@@ -4931,7 +5084,12 @@
       if (playBtn) playBtn.textContent = '▶️';
       const toggle = document.getElementById('autoscrollFloatToggle');
       if (toggle) toggle.classList.remove('playing');
-      if (titleBarPlayBtn) titleBarPlayBtn.classList.remove('playing');
+      if (titleBarPlayBtn) {
+        titleBarPlayBtn.classList.remove('playing');
+        titleBarPlayBtn.textContent = '▶️';
+        titleBarPlayBtn.title = 'Play (auto-scroll)';
+        titleBarPlayBtn.setAttribute('aria-label', 'Play auto-scroll');
+      }
       if (autoscrollCurrentInput) autoscrollCurrentInput.value = autoscrollFormatTime(0);
       autoscrollUpdateReadout();
       if (previewContainer) previewContainer.scrollTo({ top: 0, behavior: 'smooth' });
@@ -5546,15 +5704,18 @@
     }
 
     function updatePreviewTopSpace() {
-      const setTopSpace = function (previewEl, contentEl) {
+      const setTopSpace = function (previewEl, contentEl, isEmpty) {
         if (!previewEl || !contentEl) return;
 
         const readingZone = previewEl.clientHeight * 0.38;
-        contentEl.style.paddingTop = readingZone + 'px';
+        contentEl.style.paddingTop = (isEmpty ? 0 : readingZone) + 'px';
       };
 
-      setTopSpace(previewContainer, previewContent);
-      setTopSpace(previewContainer2, previewContent2);
+      const leftEmpty = !inputEl.value || inputEl.value.trim() === '';
+      const rightEmpty = !inputEl2.value || inputEl2.value.trim() === '';
+
+      setTopSpace(previewContainer, previewContent, leftEmpty);
+      setTopSpace(previewContainer2, previewContent2, rightEmpty);
     }
 
     function updatePreview() {
@@ -6148,11 +6309,7 @@
       const next = (typeof open === 'boolean') ? open : !autoscrollFloatPanel.classList.contains('show');
       autoscrollFloatPanel.classList.toggle('show', next);
       autoscrollFloatToggle.classList.toggle('active', next);
-      autoscrollFloatToggle.title = next ? 'Close auto-scroll' : 'Auto-scroll by timestamps';
-      if (titleBarPlayBtn) {
-        titleBarPlayBtn.classList.toggle('active', next);
-        titleBarPlayBtn.classList.toggle('playing', autoscroll.playing);
-      }
+      autoscrollFloatToggle.title = next ? 'Close auto-scroll panel' : 'Auto-scroll panel';
       if (next) {
         autoscrollRefreshTimestamps();
         if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
@@ -6172,7 +6329,56 @@
     if (titleBarPlayBtn) {
       titleBarPlayBtn.addEventListener('click', function(e) {
         e.stopPropagation();
-        toggleAutoscrollFloatPanel(undefined, titleBarPlayBtn);
+        if (autoscroll.playing) autoscrollPause();
+        else autoscrollPlay();
+      });
+    }
+    if (titleBarStopBtn) {
+      titleBarStopBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        autoscrollStop();
+      });
+    }
+    if (titleBarPrevBtn) {
+      titleBarPrevBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        autoscrollJumpToNeighborTimestamp(-1);
+      });
+    }
+    if (titleBarNextBtn) {
+      titleBarNextBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        autoscrollJumpToNeighborTimestamp(1);
+      });
+    }
+    if (titleBarRecordBtn) {
+      titleBarRecordBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        autoscrollRecordTimestamp();
+      });
+    }
+    if (titleBarCurrent) {
+      titleBarCurrent.addEventListener('focus', function() {
+        try { this.select(); } catch (e) {}
+      });
+      titleBarCurrent.addEventListener('input', function() {
+        const parsed = parseTimeString(this.value);
+        if (parsed !== null) autoscroll.elapsedAtPause = parsed;
+      });
+      titleBarCurrent.addEventListener('blur', function() {
+        const parsed = parseTimeString(this.value);
+        if (parsed === null) {
+          this.value = autoscrollFormatTime(autoscroll.elapsedAtPause);
+        } else {
+          this.value = autoscrollFormatTime(parsed);
+          autoscroll.elapsedAtPause = parsed;
+        }
+        autoscroll.lastLyricsBlock = -1;
+        autoscroll.lastChordsBlock = -1;
+        autoscrollUpdateReadout();
+      });
+      titleBarCurrent.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); this.blur(); }
       });
     }
     document.addEventListener('click', function(e) {
@@ -7095,6 +7301,19 @@
     (function wireTimeGutters() {
       const timeLeft = document.getElementById('timeInput');
       const timeRight = document.getElementById('timeInput2');
+
+      [timeLeft, timeRight].forEach(function (g) {
+        if (!g) return;
+        g.addEventListener('focus', function () {
+          rememberTimeGutterFocus(g);
+          rememberTimeGutterCaret(g);
+        });
+        g.addEventListener('keyup', function () { rememberTimeGutterCaret(g); });
+        g.addEventListener('mouseup', function () { rememberTimeGutterCaret(g); });
+        g.addEventListener('click', function () { rememberTimeGutterCaret(g); });
+        g.addEventListener('select', function () { rememberTimeGutterCaret(g); });
+        g.addEventListener('input', function () { rememberTimeGutterCaret(g); });
+      });
 
       function linkScrollPair(a, b) {
         if (!a || !b) return;
