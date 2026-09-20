@@ -771,8 +771,8 @@
       flex-wrap: wrap;
       gap: 10px;
       pointer-events: none;
-      width: auto;
-      max-width: none;
+      width: calc(100vw - 20px);
+      max-width: calc(100vw - 20px);
       box-sizing: border-box;
     }
     .float-layer > * {
@@ -2647,7 +2647,7 @@
        right-align, mirroring the left floating toolbar's behavior. */
     @media (max-width: 900px) {
       .float-menu-pair-row {
-        padding-right: 10px;
+        padding-right: 6px;
       }
       .title-bar {
         align-items: flex-start;
