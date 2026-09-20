@@ -4253,7 +4253,7 @@
       if (!s) return null;
 
       const m = s.trim()
-        .replace(/^c\s+/i, '')
+        .replace(/^[SL]\s+/i, '')
         .match(/^(\d{1,2}):([0-5]\d)(?:\.([0-9]{1,3}))?(?::([0-5]\d)(?:\.([0-9]{1,3}))?)?$/);
 
       if (!m) return null;
@@ -4292,7 +4292,7 @@
           const parsed = parseTimeString(raw);
           if (parsed !== null) {
             lastSeconds = parsed;
-            lineCurrentMarkers[i] = /^c\s+/i.test(raw);
+            lineCurrentMarkers[i] = /^L\s+/i.test(raw);
           }
         }
         lineTimestamps[i] = lastSeconds;
@@ -4494,7 +4494,16 @@
       const children = contentEl.children;
       if (children.length === 0) return;
 
-      const readingZone = previewEl.clientHeight * 0.38;
+      const which = previewEl === previewContainer ? 'lyrics' : 'chords';
+      let readingZone;
+      if (!isEditorCollapsed && rememberedReadingZone[which] == null) {
+        readingZone = computeCurrentReadingZone(previewEl);
+        rememberedReadingZone[which] = readingZone;
+      } else {
+        readingZone = rememberedReadingZone[which] != null
+          ? rememberedReadingZone[which]
+          : computeCurrentReadingZone(previewEl);
+      }
 
       // Give the very first block enough space above it so it can occupy
       // the same reading-zone position as every later block.
@@ -4625,15 +4634,18 @@
       return autoscroll.elapsedAtPause;
     }
 
-    // Returns a sorted, de-duplicated list of every timestamp across both
-    // gutters. Used by the Previous/Next buttons.
+    // Returns a sorted, de-duplicated list of every Section (S) timestamp
+    // across both gutters. Line (L) timestamps are excluded — the
+    // Previous/Next buttons should only jump between section checkpoints.
     function autoscrollAllTimestamps() {
       const all = [];
       const seen = {};
       for (const t of autoscroll.lyricsTimestamps) {
+        if (t.currentLine) continue;
         if (!seen[t.seconds]) { seen[t.seconds] = true; all.push(t.seconds); }
       }
       for (const t of autoscroll.chordsTimestamps) {
+        if (t.currentLine) continue;
         if (!seen[t.seconds]) { seen[t.seconds] = true; all.push(t.seconds); }
       }
       all.sort(function (a, b) { return a - b; });
@@ -4664,44 +4676,73 @@
       }
     }
 
-    function autoscrollRecordTimestamp() {
+    function gutterCaretLineIndex(gutterEl) {
+      if (!gutterEl) return 0;
+      let caret = (typeof gutterEl.selectionStart === 'number') ? gutterEl.selectionStart : gutterEl.value.length;
+      const before = gutterEl.value.slice(0, caret);
+      let line = 0;
+      for (let i = 0; i < before.length; i++) {
+        if (before.charCodeAt(i) === 10) line++;
+      }
+      return line;
+    }
+
+    function gutterLineStartOffset(gutterEl, lineIndex) {
+      const lines = gutterEl.value.split('\n');
+      let offset = 0;
+      for (let i = 0; i < lineIndex && i < lines.length; i++) {
+        offset += lines[i].length + 1;
+      }
+      return offset;
+    }
+
+    function setGutterCaretAtLineEnd(gutterEl, lineIndex) {
+      const lines = gutterEl.value.split('\n');
+      if (lineIndex < 0) lineIndex = 0;
+      if (lineIndex > lines.length - 1) lineIndex = lines.length - 1;
+      let offset = 0;
+      for (let i = 0; i < lineIndex; i++) {
+        offset += lines[i].length + 1;
+      }
+      offset += lines[lineIndex].length;
+      try { gutterEl.setSelectionRange(offset, offset); } catch (e) {}
+      lastTimeGutterCaretStart = offset;
+      lastTimeGutterCaretEnd = offset;
+    }
+
+    function autoscrollRecordTimestamp(highlightOnly) {
       const seconds = autoscrollCurrentTime() + autoscroll.offset;
       const stamp = autoscrollFormatTimeMs(seconds);
 
       const leftTimeEl = document.getElementById('timeInput');
       const rightTimeEl = document.getElementById('timeInput2');
 
-      console.log('[record] activeElement =', document.activeElement && document.activeElement.id);
-      console.log('[record] lastFocusedTimeGutter =', lastFocusedTimeGutter && lastFocusedTimeGutter.id);
-      console.log('[record] leftTimeEl =', leftTimeEl && leftTimeEl.id, 'rightTimeEl =', rightTimeEl && rightTimeEl.id);
-
       let target = lastFocusedTimeGutter;
       if (!target || (target !== leftTimeEl && target !== rightTimeEl)) {
         target = leftTimeEl || rightTimeEl;
       }
-      console.log('[record] chosen target =', target && target.id);
       if (!target) return;
 
-      let start, end;
-      if (target === lastFocusedTimeGutter && lastTimeGutterCaretStart !== null) {
-        start = lastTimeGutterCaretStart;
-        end = lastTimeGutterCaretEnd !== null ? lastTimeGutterCaretEnd : start;
-        if (start > target.value.length) start = target.value.length;
-        if (end > target.value.length) end = target.value.length;
+      const lineIndex = gutterCaretLineIndex(target);
+      const lines = target.value.split('\n');
+
+      let highlightLineOffset;
+      if (highlightOnly) {
+        // F2: single line, L-prefixed, overwrite that line.
+        lines[lineIndex] = 'L ' + stamp;
+        highlightLineOffset = 1;
       } else {
-        start = (typeof target.selectionStart === 'number') ? target.selectionStart : target.value.length;
-        end = (typeof target.selectionEnd === 'number') ? target.selectionEnd : start;
+        // F1: two lines. Current line = S-prefixed. Next line = L-prefixed.
+        // The L-line time is bumped by +0.01s so its value differs from the
+        // S line above. Identical adjacent timestamps collapse in the parser
+        // and the L-highlight on the section's first line disappears.
+        const highlightStamp = autoscrollFormatTimeMs(seconds + 0.01);
+        lines[lineIndex] = 'S ' + stamp;
+        lines[lineIndex + 1] = 'L ' + highlightStamp;
+        highlightLineOffset = 2;
       }
 
-      const before = target.value.slice(0, start);
-      const after = target.value.slice(end);
-      target.value = before + stamp + after;
-
-      const caret = start + stamp.length;
-      try { target.setSelectionRange(caret, caret); } catch (e) {}
-      lastTimeGutterCaretStart = caret;
-      lastTimeGutterCaretEnd = caret;
-      target.focus();
+      target.value = lines.join('\n');
 
       if (typeof window.__syncTimeGutterEmpty === 'function') {
         window.__syncTimeGutterEmpty(target);
@@ -4711,8 +4752,12 @@
         window.__padGutterToMatch(target, editorEl);
       }
 
+      target.focus();
+      const caretLine = lineIndex + highlightLineOffset;
+      setGutterCaretAtLineEnd(target, caretLine);
+
       autoscrollRefreshTimestamps();
-      showToast('Timestamp recorded: ' + stamp);
+      showToast('Timestamp recorded: ' + (highlightOnly ? 'L ' + stamp : 'S ' + stamp));
     }
 
     function autoscrollJumpToNeighborTimestamp(direction) {
@@ -5247,7 +5292,14 @@
     let savedEditorHeight = DEFAULT_EDITOR_HEIGHT;
 
     function applyEditorState(hidden) {
+      const wasCollapsed = isEditorCollapsed;
       isEditorCollapsed = hidden;
+
+      // Snapshot the reading zone while the editors are still open, so
+      // closing them doesn't cause the preview to slide.
+      if (!hidden && wasCollapsed) {
+        rememberReadingZones();
+      }
 
       if (hidden) {
         // Capture the current open height before collapsing, so we can
@@ -5697,19 +5749,46 @@
       requestAnimationFrame(() => { setTimeout(adjustChordSizes, 50); });
     }
 
+    const rememberedReadingZone = {
+      lyrics: null,
+      chords: null
+    };
+
+    function computeCurrentReadingZone(previewEl) {
+      if (!previewEl) return 0;
+      return previewEl.clientHeight * 0.38;
+    }
+
+    function rememberReadingZones() {
+      rememberedReadingZone.lyrics = computeCurrentReadingZone(previewContainer);
+      rememberedReadingZone.chords = computeCurrentReadingZone(previewContainer2);
+    }
+
     function updatePreviewTopSpace() {
-      const setTopSpace = function (previewEl, contentEl, isEmpty) {
+      const setTopSpace = function (previewEl, contentEl, isEmpty, which) {
         if (!previewEl || !contentEl) return;
 
-        const readingZone = previewEl.clientHeight * 0.38;
-        contentEl.style.paddingTop = (isEmpty ? 0 : readingZone) + 'px';
+        // While the editors are open, the natural reading zone is fine and
+        // we keep it as the "remembered" value. While they are closed, use
+        // the remembered value so the preview doesn't slide up/down when
+        // the editor opens or closes.
+        if (!isEditorCollapsed) {
+          const readingZone = computeCurrentReadingZone(previewEl);
+          rememberedReadingZone[which] = readingZone;
+          contentEl.style.paddingTop = (isEmpty ? 0 : readingZone) + 'px';
+        } else {
+          const readingZone = rememberedReadingZone[which] != null
+            ? rememberedReadingZone[which]
+            : computeCurrentReadingZone(previewEl);
+          contentEl.style.paddingTop = (isEmpty ? 0 : readingZone) + 'px';
+        }
       };
 
       const leftEmpty = !inputEl.value || inputEl.value.trim() === '';
       const rightEmpty = !inputEl2.value || inputEl2.value.trim() === '';
 
-      setTopSpace(previewContainer, previewContent, leftEmpty);
-      setTopSpace(previewContainer2, previewContent2, rightEmpty);
+      setTopSpace(previewContainer, previewContent, leftEmpty, 'lyrics');
+      setTopSpace(previewContainer2, previewContent2, rightEmpty, 'chords');
     }
 
     function updatePreview() {
@@ -6058,6 +6137,14 @@
       if (e.ctrlKey && e.shiftKey && (e.key === 'ArrowDown' || e.key === '-' || e.key === '_')) {
         e.preventDefault();
         transposeDown();
+      }
+      if (e.key === 'F1' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        autoscrollRecordTimestamp(false);
+      }
+      if (e.key === 'F2' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        autoscrollRecordTimestamp(true);
       }
     });
 
