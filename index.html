@@ -733,8 +733,8 @@
       flex: 0 0 auto;
       padding: 0;
       border-radius: 10px;
-      border: 1px solid #4a3328;
-      background: #5c4033;
+      border: 1px solid #6b93a3;
+      background: #82aec0;
       backdrop-filter: blur(6px);
       -webkit-backdrop-filter: blur(6px);
       color: #ffffff;
@@ -746,21 +746,33 @@
       align-items: center;
       justify-content: center;
       transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
       font-family: inherit;
     }
     @media (hover: hover) {
       .chrome-toggle:hover {
-        background: #6b4f3f;
-        border-color: #3d2b1f;
+        background: #94bccc;
+        border-color: #7aa2b2;
         transform: scale(1.05);
       }
     }
     .chrome-toggle.active {
-      background: rgba(232, 220, 204, 0.85);
-      color: #3d2b1f;
-      border-color: #c4ad92;
+      background: #82aec0;
+      color: #ffffff;
+      border-color: #6b93a3;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    }
+    #chromeToggleRight {
+      background: #ff9800;
+      color: #ffffff;
+      border-color: #d97e00;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    }
+    @media (hover: hover) {
+      #chromeToggleRight:hover {
+        background: #ffa726;
+        border-color: #e08a00;
+      }
     }
 
     /* ===== FLOATING BUTTON LAYER (auto-arranging) ===== */
@@ -1103,7 +1115,7 @@
     }
     @media (hover: hover) {
       .songs-float-toggle:hover {
-        background: rgba(196, 173, 146, 0.95);
+        background: rgba(180, 160, 130, 0.95);
         transform: scale(1.05);
       }
     }
@@ -1692,6 +1704,7 @@
         border-color: #3d2b1f;
       }
     }
+
     @media (hover: hover) {
       .save-float-toggle:hover {
         background: rgba(196, 173, 146, 0.95);
@@ -1787,6 +1800,27 @@
       color: #ffffff;
       border-color: #4a3328;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+    #titleBarKeyBtn.active {
+      background: #5c4033;
+      color: #ffffff;
+      border-color: #4a3328;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+    @media (hover: hover) {
+      #titleBarKeyBtn:hover {
+        background: rgba(196, 173, 146, 0.95);
+        transform: scale(1.05);
+      }
+      #titleBarKeyBtn.active:hover {
+        background: #6b4f3f;
+        border-color: #3d2b1f;
+        transform: scale(1.05);
+      }
+    }
+    #titleBarKeyBtn:active:hover {
+      transform: scale(0.92);
+      transition: transform 0.08s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
     }
 
     .key-float-panel {
@@ -2834,6 +2868,7 @@
   <div class="title-bar" id="titleBar">
     <div class="title-bar-actions">
       <button class="songs-float-toggle" id="titleBarSongsBtn" title="Songs" aria-label="Songs">🎵</button>
+      <button class="key-float-toggle" id="titleBarKeyBtn" title="Key &amp; transpose" aria-label="Key and transpose">🔑</button>
       <button class="autoscroll-float-toggle" id="titleBarPlayBtn" title="Play (auto-scroll)" aria-label="Play auto-scroll">▶️</button>
       <button class="autoscroll-float-toggle" id="titleBarStopBtn" title="Stop and rewind" aria-label="Stop and rewind">⏹️</button>
       <button class="autoscroll-float-toggle" id="titleBarPrevBtn" title="Jump to previous timestamp" aria-label="Jump to previous timestamp">⏮️</button>
@@ -2903,12 +2938,8 @@
 
     <div class="float-menu-pair-row">
       <div class="float-menu-row">
-      <button class="songs-float-toggle" id="songsFloatToggle" title="Songs" aria-label="Songs">🎵</button>
-      <button class="key-float-toggle" id="keyFloatToggle" title="Key &amp; transpose" aria-label="Key and transpose">🔑</button>
-      <button class="split-float-toggle" id="splitFloatToggle" title="Split view (left / center / right)" aria-label="Split view">⬛</button>
       <button class="swap-float-toggle" id="swapFloatToggle" title="Swap lyrics / chords sides" aria-label="Swap sides">↔️</button>
       <button class="autoscroll-float-toggle" id="autoscrollFloatToggle" title="Auto-scroll panel" aria-label="Auto-scroll panel">🔽</button>
-      <button class="editor-float-toggle" id="editorFloatToggle" title="Hide both editors" aria-label="Hide both editors">✏️</button>
       <button class="template-float-toggle" id="templateFloatToggle" title="Templates (look &amp; feel presets)" aria-label="Templates">🎨</button>
       <button class="save-float-toggle" id="saveFloatToggle" title="Save Chord Chart" aria-label="Save Chord Chart">💾</button>
       <button class="png-float-toggle" id="pngFloatToggle" title="Export Chord Chart as PNG" aria-label="Export Chord Chart as PNG">📷</button>
@@ -3224,12 +3255,11 @@
 
     const chromeToggle = document.getElementById('chromeToggle');
     const chromeToggleRight = document.getElementById('chromeToggleRight');
-    const editorFloatToggle = document.getElementById('editorFloatToggle');
-    const splitFloatToggle = document.getElementById('splitFloatToggle');
     const swapFloatToggle = document.getElementById('swapFloatToggle');
     const saveFloatToggle = document.getElementById('saveFloatToggle');
     const pngFloatToggle = document.getElementById('pngFloatToggle');
     const titleBarSongsBtn = document.getElementById('titleBarSongsBtn');
+    const titleBarKeyBtn = document.getElementById('titleBarKeyBtn');
     const titleBarPlayBtn = document.getElementById('titleBarPlayBtn');
     const titleBarStopBtn = document.getElementById('titleBarStopBtn');
     const titleBarPrevBtn = document.getElementById('titleBarPrevBtn');
@@ -5684,19 +5714,6 @@
         }
       }
 
-      if (splitFloatToggle) {
-        const iconText = SPLIT_ICONS[state];
-        const isPair = Array.from(iconText).length > 1;
-        splitFloatToggle.textContent = '';
-        const iconSpan = document.createElement('span');
-        iconSpan.className = 'split-icon' + (isPair ? ' pair' : '');
-        iconSpan.textContent = iconText;
-        splitFloatToggle.appendChild(iconSpan);
-        splitFloatToggle.title = SPLIT_TITLES[state];
-        splitFloatToggle.setAttribute('aria-label', SPLIT_TITLES[state]);
-        splitFloatToggle.classList.remove('active');
-      }
-
       if (titleBarSplitBtn) {
         const iconText = SPLIT_ICONS[state];
         const isPair = Array.from(iconText).length > 1;
@@ -5726,12 +5743,6 @@
       else applySplitState('center');
     }
 
-    if (splitFloatToggle) {
-      splitFloatToggle.addEventListener('click', function(e) {
-        e.stopPropagation();
-        cycleSplitState();
-      });
-    }
     if (titleBarSplitBtn) {
       titleBarSplitBtn.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -5787,9 +5798,11 @@
         }
       }
 
-      editorFloatToggle.classList.toggle('active', hidden);
-      editorFloatToggle.title = hidden ? 'Show both editors' : 'Hide both editors';
-      editorFloatToggle.setAttribute('aria-label', editorFloatToggle.title);
+      if (titleBarEditorBtn) {
+        titleBarEditorBtn.classList.toggle('active', hidden);
+        titleBarEditorBtn.title = hidden ? 'Show both editors' : 'Hide both editors';
+        titleBarEditorBtn.setAttribute('aria-label', titleBarEditorBtn.title);
+      }
       setTimeout(adjustChordSizes, 350);
     }
 
@@ -5819,11 +5832,6 @@
         titleBarEditorBtn.setAttribute('aria-label', titleBarEditorBtn.title);
       }
     }
-
-    editorFloatToggle.addEventListener('click', function(e) {
-      e.stopPropagation();
-      toggleEditorsFromButton(editorFloatToggle);
-    });
 
     if (titleBarEditorBtn) {
       titleBarEditorBtn.addEventListener('click', function(e) {
@@ -7101,27 +7109,22 @@
     }
 
     // ===== FLOATING KEY PANEL =====
-    const keyFloatToggle = document.getElementById('keyFloatToggle');
     const keyFloatPanel = document.getElementById('keyFloatPanel');
     const keyFloatClose = document.getElementById('keyFloatClose');
 
-    function toggleKeyFloatPanel(open) {
+    function toggleKeyFloatPanel(open, anchorBtn) {
       const next = (typeof open === 'boolean') ? open : !keyFloatPanel.classList.contains('show');
       keyFloatPanel.classList.toggle('show', next);
-      keyFloatToggle.classList.toggle('active', next);
-      keyFloatToggle.title = next ? 'Close key' : 'Key & transpose';
+      const activeBtn = anchorBtn || titleBarKeyBtn;
+      if (titleBarKeyBtn) titleBarKeyBtn.classList.toggle('active', next && activeBtn === titleBarKeyBtn);
       if (next) {
         if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
         if (typeof toggleSongsFloatPanel === 'function') toggleSongsFloatPanel(false);
         if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
         if (typeof toggleAutoscrollFloatPanel === 'function') toggleAutoscrollFloatPanel(false);
-        positionFloatPanel(keyFloatPanel, keyFloatToggle);
+        positionFloatPanel(keyFloatPanel, activeBtn);
       }
     }
-    keyFloatToggle.addEventListener('click', function(e) {
-      e.stopPropagation();
-      toggleKeyFloatPanel();
-    });
     keyFloatClose.addEventListener('click', function(e) {
       e.stopPropagation();
       toggleKeyFloatPanel(false);
@@ -7157,7 +7160,6 @@
     }
 
     // ===== FLOATING SONGS PANEL =====
-    const songsFloatToggle = document.getElementById('songsFloatToggle');
     const songsFloatPanel = document.getElementById('songsFloatPanel');
     const songsFloatClose = document.getElementById('songsFloatClose');
     const songsFloatList = document.getElementById('songsFloatList');
@@ -7182,6 +7184,7 @@
 
     const RIGHT_STRIP_BTN_IDS = [
       'titleBarSongsBtn',
+      'titleBarKeyBtn',
       'titleBarPlayBtn',
       'titleBarStopBtn',
       'titleBarPrevBtn',
@@ -7237,14 +7240,10 @@
     function toggleSongsFloatPanel(open, anchorBtn) {
       const next = (typeof open === 'boolean') ? open : !songsFloatPanel.classList.contains('show');
       songsFloatPanel.classList.toggle('show', next);
-      songsFloatToggle.classList.toggle('active', next);
-      songsFloatToggle.title = next ? 'Close songs' : 'Songs';
       if (titleBarSongsBtn) titleBarSongsBtn.classList.toggle('active', next);
 
       if (!next) {
-        songsFloatToggle.classList.remove('active');
         if (titleBarSongsBtn) titleBarSongsBtn.classList.remove('active');
-        songsFloatToggle.title = 'Songs';
         return;
       }
 
@@ -7253,16 +7252,19 @@
       if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
       if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
       if (typeof toggleAutoscrollFloatPanel === 'function') toggleAutoscrollFloatPanel(false);
-      positionFloatPanel(songsFloatPanel, anchorBtn || songsFloatToggle);
+      positionFloatPanel(songsFloatPanel, anchorBtn || titleBarSongsBtn);
     }
-    songsFloatToggle.addEventListener('click', function(e) {
-      e.stopPropagation();
-      toggleSongsFloatPanel(undefined, songsFloatToggle);
-    });
+
     if (titleBarSongsBtn) {
       titleBarSongsBtn.addEventListener('click', function(e) {
         e.stopPropagation();
         toggleSongsFloatPanel(undefined, titleBarSongsBtn);
+      });
+    }
+    if (titleBarKeyBtn) {
+      titleBarKeyBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        toggleKeyFloatPanel(undefined, titleBarKeyBtn);
       });
     }
     songsFloatClose.addEventListener('click', function(e) {
@@ -7805,7 +7807,7 @@
       isChromeHidden = !!hidden;
       document.body.classList.toggle('first-row-hidden', isChromeHidden);
       const label = isChromeHidden ? 'Show left toolbar' : 'Hide left toolbar';
-      chromeToggle.classList.toggle('active', isChromeHidden);
+      chromeToggle.classList.remove('active');
       chromeToggle.title = label;
       chromeToggle.setAttribute('aria-label', label);
       if (isChromeHidden) {
@@ -7923,8 +7925,8 @@
 
     applyMode(false);
     applyChromeCollapsed(false);
-    applyChromeHidden(true);
-    applyRightStripOpen(true);
+    applyChromeHidden(false);
+    applyRightStripOpen(false);
     applySwapState(isSwapped);
     if (typeof syncPerfPanel === 'function') syncPerfPanel();
 
