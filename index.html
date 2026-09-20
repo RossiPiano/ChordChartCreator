@@ -771,8 +771,8 @@
       flex-wrap: wrap;
       gap: 10px;
       pointer-events: none;
-      width: calc(100vw - 20px);
-      max-width: calc(100vw - 20px);
+      width: auto;
+      max-width: none;
       box-sizing: border-box;
     }
     .float-layer > * {
@@ -2657,12 +2657,16 @@
         flex-wrap: wrap;
       }
       .float-top-row {
+        position: relative;
         gap: 6px;
-        padding-right: 0 !important;
+        padding-right: 48px !important;
       }
       .float-top-row > #chromeToggleRight {
+        position: absolute !important;
+        right: 10px !important;
+        top: 0;
         flex: 0 0 auto;
-        margin-right: 10px !important;
+        margin-right: 0 !important;
       }
       .float-top-row > .autoscroll-current {
         flex: 0 0 50px;
