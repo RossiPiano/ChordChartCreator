@@ -155,10 +155,7 @@
     @media (hover: hover) {
       .title-bar .title-bar-actions #titleBarRecordBtn:hover,
       .title-bar .title-bar-actions #titleBarLineBtn:hover,
-      .title-bar .title-bar-actions #titleBarCaretDown2Btn:hover {
-        background: rgba(180, 70, 55, 0.98);
-        border-color: #a1402f;
-      }
+
     }
     .title-bar .title-bar-actions .songs-float-toggle,
     .title-bar .title-bar-actions .autoscroll-float-toggle {
@@ -1474,6 +1471,23 @@
       border-color: #4a3328;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     }
+
+    .title-bar .title-bar-actions #titleBarCaretUpBtn,
+    .title-bar .title-bar-actions #titleBarCaretDownBtn {
+      background: rgba(196, 90, 74, 0.26);
+      color: #ffffff;
+      border-color: rgba(196, 90, 74, 0.55);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    }
+
+    @media (hover: hover) {
+      .title-bar .title-bar-actions #titleBarCaretUpBtn:hover,
+      .title-bar .title-bar-actions #titleBarCaretDownBtn:hover {
+        background: rgba(196, 90, 74, 0.38);
+        border-color: rgba(196, 90, 74, 0.65);
+        transform: scale(1.05);
+      }
+    }
     @media (hover: hover) {
       .editor-float-toggle:not(.active):hover {
         background: #6b4f3f;
@@ -2640,7 +2654,6 @@
       <button class="editor-float-toggle" id="titleBarCaretDownBtn" title="Move caret down one line" aria-label="Move caret down one line">🔽</button>
       <button class="autoscroll-float-toggle" id="titleBarRecordBtn" title="Record a Song Part timestamp (P) at the current time" aria-label="Record Song Part timestamp">📑</button>
       <button class="autoscroll-float-toggle" id="titleBarLineBtn" title="Mark the current line (highlight only)" aria-label="Mark current line">🖍️</button>
-      <button class="editor-float-toggle" id="titleBarCaretDown2Btn" title="Move caret down two lines" aria-label="Move caret down two lines"><span class="caret2-icon"><span class="caret2-a">🖍️</span><span class="caret2-b">&nbsp;⏬</span></span></button>
       <input type="text" class="autoscroll-current" id="titleBarCurrent" value="0:00" spellcheck="false" aria-label="Current time">
       <span class="autoscroll-total" id="titleBarTotal">/ 0:00</span>
     </div>
@@ -3023,7 +3036,6 @@
     const titleBarEditorBtn = document.getElementById('titleBarEditorBtn');
     const titleBarCaretUpBtn = document.getElementById('titleBarCaretUpBtn');
     const titleBarCaretDownBtn = document.getElementById('titleBarCaretDownBtn');
-    const titleBarCaretDown2Btn = document.getElementById('titleBarCaretDown2Btn');
     const titleBarCurrent = document.getElementById('titleBarCurrent');
     const titleBarTotal = document.getElementById('titleBarTotal');
 
@@ -4865,62 +4877,6 @@
       setGutterCaretAtLineEnd(target, lineIndex);
     }
 
-    function moveCaretDown2OrAppend() {
-      const leftTimeEl = document.getElementById('timeInput');
-      const rightTimeEl = document.getElementById('timeInput2');
-
-      let target = lastFocusedTimeGutter;
-      if (!target || (target !== leftTimeEl && target !== rightTimeEl)) {
-        target = leftTimeEl || rightTimeEl;
-      }
-      if (!target) return;
-
-      const lines = target.value.split('\n');
-      let lineIndex = gutterCaretLineIndex(target);
-      const lastIndex = lines.length - 1;
-      const linesBelow = lastIndex - lineIndex;
-
-      if (linesBelow >= 2) {
-        try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
-        setGutterCaretAtLineEnd(target, lineIndex + 2);
-        return;
-      }
-
-      if (linesBelow === 1) {
-        // Land on the last existing line, then append one blank line.
-        try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
-        setGutterCaretAtLineEnd(target, lastIndex);
-        const endOfLast = target.value.length;
-        try { target.setSelectionRange(endOfLast, endOfLast); } catch (e) {}
-        document.execCommand('insertText', false, '\n');
-        setGutterCaretAtLineEnd(target, lastIndex + 1);
-        finishMoveCaretDown2(target);
-        return;
-      }
-
-      // linesBelow === 0: append two blank lines at the end.
-      try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
-      const endOfAll = target.value.length;
-      try { target.setSelectionRange(endOfAll, endOfAll); } catch (e) {}
-      document.execCommand('insertText', false, '\n');
-      document.execCommand('insertText', false, '\n');
-      const newLines = target.value.split('\n');
-      setGutterCaretAtLineEnd(target, newLines.length - 1);
-      finishMoveCaretDown2(target);
-    }
-
-    function finishMoveCaretDown2(gutterEl) {
-      if (typeof window.__syncTimeGutterEmpty === 'function') {
-        window.__syncTimeGutterEmpty(gutterEl);
-      }
-      const leftTimeEl = document.getElementById('timeInput');
-      const editorEl = (gutterEl === leftTimeEl) ? inputEl : inputEl2;
-      if (editorEl && typeof window.__padGutterToMatch === 'function') {
-        window.__padGutterToMatch(gutterEl, editorEl);
-      }
-      autoscrollRefreshTimestamps();
-    }
-
     function autoscrollRemoveTimestamp() {
       const leftTimeEl = document.getElementById('timeInput');
       const rightTimeEl = document.getElementById('timeInput2');
@@ -6705,6 +6661,52 @@
     if (titleBarRecordBtn) {
       titleBarRecordBtn.addEventListener('click', function(e) {
         e.stopPropagation();
+
+        const leftTimeEl = document.getElementById('timeInput');
+        const rightTimeEl = document.getElementById('timeInput2');
+
+        let target = lastFocusedTimeGutter;
+        if (!target || (target !== leftTimeEl && target !== rightTimeEl)) {
+          target = leftTimeEl || rightTimeEl;
+        }
+
+        if (target) {
+          let start = lastTimeGutterCaretStart;
+          let end = lastTimeGutterCaretEnd;
+
+          if (!isFinite(start) || !isFinite(end)) {
+            start = target.selectionStart;
+            end = target.selectionEnd;
+          }
+
+          if (!isFinite(start) || !isFinite(end)) {
+            start = target.value.length;
+            end = start;
+          }
+
+          // Do not press Enter when the caret is already on the very first line.
+          const textBeforeCaret = target.value.slice(0, start);
+          const isFirstLine = !textBeforeCaret.includes('\n');
+
+          if (!isFirstLine) {
+            target.value =
+              target.value.slice(0, start) +
+              '\n' +
+              target.value.slice(end);
+
+            const newCaret = start + 1;
+
+            try { target.focus({ preventScroll: true }); } catch (e) { target.focus(); }
+            target.setSelectionRange(newCaret, newCaret);
+
+            lastFocusedTimeGutter = target;
+            lastTimeGutterCaretStart = newCaret;
+            lastTimeGutterCaretEnd = newCaret;
+
+            target.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        }
+
         autoscrollRecordTimestamp(false);
       });
     }
@@ -6728,13 +6730,6 @@
     if (titleBarCaretDownBtn) {
       titleBarCaretDownBtn.addEventListener('click', function(e) {
         e.stopPropagation();
-        moveCaretLine(1);
-      });
-    }
-    if (titleBarCaretDown2Btn) {
-      titleBarCaretDown2Btn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        autoscrollRecordTimestamp(true);
         moveCaretLine(1);
       });
     }
@@ -6961,14 +6956,20 @@
       songsFloatToggle.classList.toggle('active', next);
       songsFloatToggle.title = next ? 'Close songs' : 'Songs';
       if (titleBarSongsBtn) titleBarSongsBtn.classList.toggle('active', next);
-      if (next) {
-        renderSongsInto(songsFloatList);
-        if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
-        if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
-        if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
-        if (typeof toggleAutoscrollFloatPanel === 'function') toggleAutoscrollFloatPanel(false);
-        positionFloatPanel(songsFloatPanel, anchorBtn || songsFloatToggle);
+
+      if (!next) {
+        songsFloatToggle.classList.remove('active');
+        if (titleBarSongsBtn) titleBarSongsBtn.classList.remove('active');
+        songsFloatToggle.title = 'Songs';
+        return;
       }
+
+      renderSongsInto(songsFloatList);
+      if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
+      if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
+      if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
+      if (typeof toggleAutoscrollFloatPanel === 'function') toggleAutoscrollFloatPanel(false);
+      positionFloatPanel(songsFloatPanel, anchorBtn || songsFloatToggle);
     }
     songsFloatToggle.addEventListener('click', function(e) {
       e.stopPropagation();
