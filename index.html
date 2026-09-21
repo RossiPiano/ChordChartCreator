@@ -610,6 +610,7 @@
       transform-origin: center;
       vertical-align: var(--pipe-vertical-align, 0.2em);
       font-size: var(--chord-base-size, 0.85rem);
+      opacity: var(--barline-opacity, 1);
     }
     .chord-line .space { display: inline-block; width: var(--space-width, 0.6em); height: 1em; vertical-align: baseline; }
 
@@ -3130,6 +3131,10 @@
 
     <div class="perf-section-label">BARLINES</div>
     <div class="perf-row">
+      <label for="perfHideBarlines">Hide Barlines</label>
+      <input type="checkbox" id="perfHideBarlines">
+    </div>
+    <div class="perf-row">
       <label for="perfPipeScale">Height</label>
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfPipeScale" title="Decrease">−</button>
       <input type="range" id="perfPipeScale" min="1" max="5" step="0.05" value="2.25">
@@ -3189,7 +3194,7 @@
     const TEMPLATE_SETTING_KEYS = [
       'masterScale','uiScale','editorScale','currentSongSize',
       'chordLineHeight','emptyLineHeight','chordLetterSpacing','lyricLetterSpacing','labelLetterSpacing',
-      'pipeScale','pipeThickness','pipeVerticalAlign','editorWidth','chordFont','chordFontCustom','lyricFont','lyricFontCustom',
+      'hideBarlines','pipeScale','pipeThickness','pipeVerticalAlign','editorWidth','chordFont','chordFontCustom','lyricFont','lyricFontCustom',
       'chordSizeMult','lyricSize','labelSize','labelRadius','previewPaddingH','previewPaddingV'
     ];
 
@@ -3454,6 +3459,7 @@
       chordLetterSpacing: 0,
       lyricLetterSpacing: 0,
       labelLetterSpacing: 0,
+      hideBarlines: false,
       pipeScale: 2.25,
       pipeThickness: 0.03,
       pipeVerticalAlign: 0.2,
@@ -3532,6 +3538,7 @@
       root.style.setProperty('--lyric-letter-spacing', lls + 'em');
       root.style.setProperty('--label-letter-spacing', bls + 'em');
       root.style.setProperty('--space-width', 'calc(0.6em + ' + cls + 'em)');
+      root.style.setProperty('--barline-opacity', settings.hideBarlines ? '0' : '1');
       root.style.setProperty('--pipe-scale', settings.pipeScale);
       root.style.setProperty('--pipe-thickness', settings.pipeThickness + 'em');
       root.style.setProperty('--pipe-vertical-align', settings.pipeVerticalAlign + 'em');
@@ -6642,6 +6649,7 @@
     const perfEverythingSizeReadout = document.getElementById('perfEverythingSizeReadout');
     const perfChordSize = document.getElementById('perfChordSize');
     const perfChordSizeReadout = document.getElementById('perfChordSizeReadout');
+    const perfHideBarlines = document.getElementById('perfHideBarlines');
     const perfPipeScale = document.getElementById('perfPipeScale');
     const perfPipeScaleReadout = document.getElementById('perfPipeScaleReadout');
     const perfPipeThickness = document.getElementById('perfPipeThickness');
@@ -7547,6 +7555,8 @@
       perfChordSize.value = ratioToSliderPos(chR);
       perfChordSizeReadout.value = chR.toFixed(2);
 
+      perfHideBarlines.checked = !!settings.hideBarlines;
+
       perfPipeScale.value = settings.pipeScale;
       perfPipeScaleReadout.value = Number(settings.pipeScale).toFixed(2);
 
@@ -7602,6 +7612,18 @@
       perfChordSizeReadout.value = ratio.toFixed(2);
       setChordSize(ratio);
     });
+    perfHideBarlines.addEventListener('change', function() {
+      document.documentElement.style.setProperty(
+        '--barline-opacity',
+        this.checked ? '0' : '1'
+      );
+    });
+    perfHideBarlines.addEventListener('change', function() {
+      settings.hideBarlines = this.checked;
+      saveSettings();
+      applySettings();
+    });
+
     perfPipeScale.addEventListener('input', function() {
       const v = parseFloat(this.value);
       perfPipeScaleReadout.value = v.toFixed(2);
