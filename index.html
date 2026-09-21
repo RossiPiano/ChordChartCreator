@@ -6233,7 +6233,7 @@
 
     function computeCurrentReadingZone(previewEl) {
       if (!previewEl) return 0;
-      return previewEl.clientHeight * 0.38;
+      return previewEl.clientHeight * 1;
     }
 
     function rememberReadingZones() {
@@ -7926,7 +7926,7 @@
     applyMode(false);
     applyChromeCollapsed(false);
     applyChromeHidden(false);
-    applyRightStripOpen(false);
+    applyRightStripOpen(true);
     applySwapState(isSwapped);
     if (typeof syncPerfPanel === 'function') syncPerfPanel();
 
