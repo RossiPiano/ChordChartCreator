@@ -44,6 +44,8 @@
       --lyric-size: 0.85rem;
       --label-size: 1rem;
       --label-radius: 4px;
+      --current-line-radius: 4px;
+      --underscore-vertical-position: -10px;
       --ui-scale: 1;
       --editor-scale: 1;
       --current-song-size: 0.8rem;
@@ -596,9 +598,13 @@
       word-spacing: 0;
       font-family: var(--font-chord, Consolas, Menlo, Monaco, 'DejaVu Sans Mono', 'Liberation Mono', 'Courier New', monospace);
     }
-    .chord-line { display: block; width: 100%; padding: 2px 0; white-space: nowrap; }
+    .chord-line { display: block; width: 100%; padding: 2px 0.5em; white-space: nowrap; box-sizing: border-box; }
     .chord-line .chord-token { display: inline; padding: 0; font-weight: 700; white-space: pre; font-size: var(--chord-base-size, 0.85rem); vertical-align: baseline; }
-    .chord-line .chord-token.empty { font-weight: 700; }
+    .chord-line .chord-token.empty {
+      font-weight: 700;
+      position: relative;
+      top: var(--underscore-vertical-position, 0px);
+    }
     .chord-line .pipe {
       color: #c0c0c0;
       font-weight: 700;
@@ -614,7 +620,7 @@
     }
     .chord-line .space { display: inline-block; width: var(--space-width, 0.6em); height: 1em; vertical-align: baseline; }
 
-    .lyrics-line { display: block; width: 100%; padding: 1px 0; }
+    .lyrics-line { display: block; width: 100%; padding: 1px 0.5em; box-sizing: border-box; }
     .lyrics-line .lyric-text {
       display: block;
       padding: 1px 2px;
@@ -640,22 +646,42 @@
     .hr-line .hr { display: block; width: 100%; height: 0; border: none; border-top: 2px solid #dcc9b0; }
     .empty-line { display: block; width: 100%; padding: 4px 0; height: var(--empty-line-height, 24px); }
 
-    .autoscroll-current-line.section-intro,
-    .autoscroll-current-line:has(.section-intro) { background: rgba(106, 140, 175, 0.14); }
-    .autoscroll-current-line.section-verse,
-    .autoscroll-current-line:has(.section-verse) { background: rgba(90, 138, 90, 0.14); }
-    .autoscroll-current-line.section-pre-chorus,
-    .autoscroll-current-line:has(.section-pre-chorus) { background: rgba(212, 149, 58, 0.14); }
-    .autoscroll-current-line.section-chorus,
-    .autoscroll-current-line:has(.section-chorus) { background: rgba(196, 90, 74, 0.14); }
-    .autoscroll-current-line.section-post-chorus,
-    .autoscroll-current-line:has(.section-post-chorus) { background: rgba(139, 107, 74, 0.14); }
-    .autoscroll-current-line.section-bridge,
-    .autoscroll-current-line:has(.section-bridge) { background: rgba(138, 106, 154, 0.14); }
-    .autoscroll-current-line.section-instrumental,
-    .autoscroll-current-line:has(.section-instrumental) { background: rgba(90, 90, 90, 0.10); }
-    .autoscroll-current-line.section-outro,
-    .autoscroll-current-line:has(.section-outro) { background: rgba(106, 140, 175, 0.14); }
+    .autoscroll-current-line {
+      position: relative;
+      border-radius: var(--current-line-radius, 4px);
+      transition: border-radius 0.1s ease;
+      background: transparent !important;
+      z-index: 0;
+    }
+
+    .autoscroll-current-line::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 3px;
+      bottom: -1px;
+      border-radius: var(--current-line-radius, 4px);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .autoscroll-current-line.section-intro::before,
+    .autoscroll-current-line:has(.section-intro)::before { background: rgba(106, 140, 175, 0.14); }
+    .autoscroll-current-line.section-verse::before,
+    .autoscroll-current-line:has(.section-verse)::before { background: rgba(90, 138, 90, 0.14); }
+    .autoscroll-current-line.section-pre-chorus::before,
+    .autoscroll-current-line:has(.section-pre-chorus)::before { background: rgba(212, 149, 58, 0.14); }
+    .autoscroll-current-line.section-chorus::before,
+    .autoscroll-current-line:has(.section-chorus)::before { background: rgba(196, 90, 74, 0.14); }
+    .autoscroll-current-line.section-post-chorus::before,
+    .autoscroll-current-line:has(.section-post-chorus)::before { background: rgba(139, 107, 74, 0.14); }
+    .autoscroll-current-line.section-bridge::before,
+    .autoscroll-current-line:has(.section-bridge)::before { background: rgba(138, 106, 154, 0.14); }
+    .autoscroll-current-line.section-instrumental::before,
+    .autoscroll-current-line:has(.section-instrumental)::before { background: rgba(90, 90, 90, 0.10); }
+    .autoscroll-current-line.section-outro::before,
+    .autoscroll-current-line:has(.section-outro)::before { background: rgba(106, 140, 175, 0.14); }
 
     .section-block {
       margin: 3px 0 2px 0;
@@ -3053,6 +3079,14 @@
       <input type="number" class="perf-readout" id="perfLabelRadiusReadout" min="0" max="20" step="0.5" value="4.0">
     </div>
 
+    <div class="perf-row">
+      <label for="perfCurrentLineRadius">Current Line Curve</label>
+      <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfCurrentLineRadius" title="Decrease">−</button>
+      <input type="range" id="perfCurrentLineRadius" min="0" max="20" step="0.5" value="4">
+      <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfCurrentLineRadius" title="Increase">+</button>
+      <input type="number" class="perf-readout" id="perfCurrentLineRadiusReadout" min="0" max="20" step="0.5" value="4.0">
+    </div>
+
     <div class="perf-section-label">SIZES</div>
     <div class="perf-row">
       <label for="perfEverythingSize">EVERYTHING</label>
@@ -3195,7 +3229,7 @@
       'masterScale','uiScale','editorScale','currentSongSize',
       'chordLineHeight','emptyLineHeight','chordLetterSpacing','lyricLetterSpacing','labelLetterSpacing',
       'hideBarlines','pipeScale','pipeThickness','pipeVerticalAlign','editorWidth','chordFont','chordFontCustom','lyricFont','lyricFontCustom',
-      'chordSizeMult','lyricSize','labelSize','labelRadius','previewPaddingH','previewPaddingV'
+      'chordSizeMult','lyricSize','labelSize','labelRadius','currentLineRadius','previewPaddingH','previewPaddingV'
     ];
 
     // ===== AUTO-WRAP NUMBER INPUTS WITH ± BUTTONS =====
@@ -3472,11 +3506,16 @@
       lyricSize: 1.71,
       labelSize: 1.71,
       labelRadius: 4,
+      currentLineRadius: 4,
       previewPaddingH: 8,
       previewPaddingV: 8
     };
 
     let settings = Object.assign({}, DEFAULT_SETTINGS);
+
+    if (typeof settings.currentLineRadius !== 'number') {
+      settings.currentLineRadius = 4;
+    }
 
     function clampNum(v, min, max) {
       if (isNaN(v)) return min;
@@ -3489,6 +3528,9 @@
         if (stored) {
           const parsed = JSON.parse(stored);
           settings = Object.assign({}, DEFAULT_SETTINGS, parsed);
+          if (typeof settings.currentLineRadius !== 'number') {
+            settings.currentLineRadius = 4;
+          }
         }
       } catch (e) { console.log('Could not load settings, using defaults'); }
     }
@@ -3529,6 +3571,7 @@
       root.style.setProperty('--lyric-size', (settings.lyricSize * ms) + 'rem');
       root.style.setProperty('--label-size', (settings.labelSize * ms) + 'rem');
       root.style.setProperty('--label-radius', settings.labelRadius + 'px');
+      root.style.setProperty('--current-line-radius', settings.currentLineRadius + 'px');
       root.style.setProperty('--ui-scale', settings.uiScale);
       root.style.setProperty('--editor-scale', settings.editorScale);
       root.style.setProperty('--current-song-size', settings.currentSongSize + 'rem');
@@ -3698,6 +3741,13 @@
     function setLabelRadius(v) {
       v = clampNum(v, 0, 20);
       settings.labelRadius = v;
+      saveSettings();
+      applySettings();
+    }
+
+    function setCurrentLineRadius(v) {
+      v = clampNum(v, 0, 20);
+      settings.currentLineRadius = v;
       saveSettings();
       applySettings();
     }
@@ -6678,6 +6728,8 @@
     const perfSongNameSizeReadout = document.getElementById('perfSongNameSizeReadout');
     const perfLabelRadius = document.getElementById('perfLabelRadius');
     const perfLabelRadiusReadout = document.getElementById('perfLabelRadiusReadout');
+    const perfCurrentLineRadius = document.getElementById('perfCurrentLineRadius');
+    const perfCurrentLineRadiusReadout = document.getElementById('perfCurrentLineRadiusReadout');
 
     // ===== FLOATING AUTOSCROLL PANEL =====
     const AUTOSCROLL_OFFSET_KEY = 'chordChartAutoscrollOffset';
@@ -7600,6 +7652,9 @@
 
       perfLabelRadius.value = settings.labelRadius;
       perfLabelRadiusReadout.value = Number(settings.labelRadius).toFixed(1);
+
+      perfCurrentLineRadius.value = settings.currentLineRadius;
+      perfCurrentLineRadiusReadout.value = Number(settings.currentLineRadius).toFixed(1);
     }
 
     perfEverythingSize.addEventListener('input', function() {
@@ -7696,6 +7751,11 @@
       const v = parseFloat(this.value);
       perfLabelRadiusReadout.value = v.toFixed(1);
       setLabelRadius(v);
+    });
+    perfCurrentLineRadius.addEventListener('input', function() {
+      const v = parseFloat(this.value);
+      perfCurrentLineRadiusReadout.value = v.toFixed(1);
+      setCurrentLineRadius(v);
     });
 
     const PERF_MULT_TARGETS = {
