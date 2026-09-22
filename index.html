@@ -3093,7 +3093,7 @@
       <button type="button" class="sizes-row-step" data-perf-step="-1" data-perf-target="perfEverythingSize" title="Decrease">−</button>
       <input type="range" id="perfEverythingSize" min="0" max="100" step="0.5" value="50">
       <button type="button" class="sizes-row-step" data-perf-step="1" data-perf-target="perfEverythingSize" title="Increase">+</button>
-      <input type="number" class="perf-readout" id="perfEverythingSizeReadout" min="0.25" max="4" step="0.01" value="1.00">
+      <input type="number" class="perf-readout" id="perfEverythingSizeReadout" min="0.01" max="4" step="0.01" value="0.01">
     </div>
     <div class="perf-row">
       <label for="perfLabelSize">Labels</label>
@@ -7764,7 +7764,7 @@
       perfLyricSize: true,
       perfLabelSize: true
     };
-    const PERF_MULT_STEP = 1.05;
+    const PERF_MULT_STEP = 1.01;
 
     function wirePerfStepButtons() {
       perfPanel.querySelectorAll('button[data-perf-target]').forEach(btn => {
@@ -8008,7 +8008,7 @@
     applyMode(false);
     applyChromeCollapsed(false);
     applyChromeHidden(false);
-    applyRightStripOpen(true);
+    applyRightStripOpen(false);
     applySwapState(isSwapped);
     if (typeof syncPerfPanel === 'function') syncPerfPanel();
 
