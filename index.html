@@ -4141,6 +4141,682 @@
     const IDB_NAME = 'chordChartAudio';
     const IDB_STORE = 'tracks';
     const IDB_VERSION = 1;
+
+    // ===== MIDI LIBRARY STORE =====
+    const MIDI_IDB_NAME = 'chordChartMidi';
+    const MIDI_IDB_STORE = 'files';
+    const MIDI_IDB_VERSION = 1;
+    let midiIdbPromise = null;
+
+    function midiIdbOpen() {
+      if (midiIdbPromise) return midiIdbPromise;
+
+      midiIdbPromise = new Promise(function(resolve, reject) {
+        const req = indexedDB.open(MIDI_IDB_NAME, MIDI_IDB_VERSION);
+
+        req.onupgradeneeded = function() {
+          const db = req.result;
+          if (!db.objectStoreNames.contains(MIDI_IDB_STORE)) {
+            db.createObjectStore(MIDI_IDB_STORE, { keyPath: 'id' });
+          }
+        };
+
+        req.onsuccess = function() {
+          const db = req.result;
+
+          db.onclose = function() {
+            console.warn('[midi-idb] connection closed; will reopen on next use');
+            midiIdbPromise = null;
+          };
+
+          db.onversionchange = function() {
+            console.warn('[midi-idb] version change; closing');
+            try { db.close(); } catch (e) {}
+            midiIdbPromise = null;
+          };
+
+          resolve(db);
+        };
+
+        req.onerror = function() {
+          midiIdbPromise = null;
+          reject(req.error);
+        };
+      });
+
+      return midiIdbPromise;
+    }
+
+    function midiIdbSave(record) {
+      return midiIdbOpen().then(function(db) {
+        return new Promise(function(resolve, reject) {
+          const tx = db.transaction(MIDI_IDB_STORE, 'readwrite');
+          tx.objectStore(MIDI_IDB_STORE).put(record);
+
+          tx.oncomplete = function() {
+            resolve(true);
+          };
+
+          tx.onerror = function() {
+            reject(tx.error);
+          };
+
+          tx.onabort = function() {
+            reject(tx.error || new Error('MIDI storage transaction aborted'));
+          };
+        });
+      });
+    }
+
+    function midiIdbGetAll() {
+      return midiIdbOpen().then(function(db) {
+        return new Promise(function(resolve, reject) {
+          const tx = db.transaction(MIDI_IDB_STORE, 'readonly');
+          const req = tx.objectStore(MIDI_IDB_STORE).getAll();
+
+          req.onsuccess = function() {
+            resolve(req.result || []);
+          };
+
+          req.onerror = function() {
+            reject(req.error);
+          };
+        });
+      });
+    }
+
+    function midiIdbDelete(id) {
+      return midiIdbOpen().then(function(db) {
+        return new Promise(function(resolve, reject) {
+          const tx = db.transaction(MIDI_IDB_STORE, 'readwrite');
+          tx.objectStore(MIDI_IDB_STORE).delete(id);
+
+          tx.oncomplete = function() {
+            resolve(true);
+          };
+
+          tx.onerror = function() {
+            reject(tx.error);
+          };
+
+          tx.onabort = function() {
+            reject(tx.error || new Error('MIDI storage transaction aborted'));
+          };
+        });
+      });
+    }
+
+    // ===== SF2 SOUND FONT LIBRARY =====
+    const SF2_IDB_NAME = 'chordChartSoundFonts';
+    const SF2_IDB_STORE = 'files';
+    const SF2_IDB_VERSION = 1;
+    const SF2_ACTIVE_KEY = 'chordChartActiveSf2Id';
+    let sf2IdbPromise = null;
+
+    function sf2IdbOpen() {
+      if (sf2IdbPromise) return sf2IdbPromise;
+
+      sf2IdbPromise = new Promise(function(resolve, reject) {
+        const req = indexedDB.open(SF2_IDB_NAME, SF2_IDB_VERSION);
+
+        req.onupgradeneeded = function() {
+          const db = req.result;
+
+          if (!db.objectStoreNames.contains(SF2_IDB_STORE)) {
+            db.createObjectStore(SF2_IDB_STORE, { keyPath: 'id' });
+          }
+        };
+
+        req.onsuccess = function() {
+          const db = req.result;
+
+          db.onclose = function() {
+            sf2IdbPromise = null;
+          };
+
+          db.onversionchange = function() {
+            try { db.close(); } catch (e) {}
+            sf2IdbPromise = null;
+          };
+
+          resolve(db);
+        };
+
+        req.onerror = function() {
+          sf2IdbPromise = null;
+          reject(req.error);
+        };
+      });
+
+      return sf2IdbPromise;
+    }
+
+    function sf2IdbSave(record) {
+      return sf2IdbOpen().then(function(db) {
+        return new Promise(function(resolve, reject) {
+          const tx = db.transaction(SF2_IDB_STORE, 'readwrite');
+          tx.objectStore(SF2_IDB_STORE).put(record);
+
+          tx.oncomplete = function() {
+            resolve(true);
+          };
+
+          tx.onerror = function() {
+            reject(tx.error);
+          };
+
+          tx.onabort = function() {
+            reject(tx.error || new Error('SF2 storage transaction aborted'));
+          };
+        });
+      });
+    }
+
+    function sf2IdbGet(id) {
+      return sf2IdbOpen().then(function(db) {
+        return new Promise(function(resolve, reject) {
+          const tx = db.transaction(SF2_IDB_STORE, 'readonly');
+          const req = tx.objectStore(SF2_IDB_STORE).get(id);
+
+          req.onsuccess = function() {
+            resolve(req.result || null);
+          };
+
+          req.onerror = function() {
+            reject(req.error);
+          };
+        });
+      });
+    }
+
+    function sf2CreateId() {
+      return 'sf2-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+    }
+
+    function sf2SaveFile(file) {
+      if (!file) return Promise.resolve(false);
+
+      return file.arrayBuffer().then(function(buffer) {
+        const record = {
+          id: sf2CreateId(),
+          name: file.name || 'Untitled SF2',
+          type: file.type || 'audio/sf2',
+          size: file.size || buffer.byteLength,
+          data: buffer,
+          savedAt: new Date().toISOString()
+        };
+
+        return sf2IdbSave(record).then(function() {
+          try {
+            localStorage.setItem(SF2_ACTIVE_KEY, record.id);
+          } catch (e) {}
+
+          showToast('SF2 saved: ' + record.name);
+          return true;
+        });
+      }).catch(function(error) {
+        console.error('[sf2] Could not save SoundFont:', error);
+        showToast('Could not save SF2 file.');
+        return false;
+      });
+    }
+
+    function sf2OpenFilePicker() {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.sf2,application/octet-stream,audio/sf2';
+
+      fileInput.onchange = function(ev) {
+        const file = ev.target.files && ev.target.files[0];
+        if (!file) return;
+
+        sf2SaveFile(file);
+      };
+
+      fileInput.click();
+    }
+
+    // ===== SF2 SYNTH ENGINE =====
+    const SF2_SYNTH_LIB_URL = 'https://esm.sh/spessasynth_lib@4.3.14?bundle';
+    const SF2_SYNTH_PROCESSOR_URL = 'https://unpkg.com/spessasynth_lib@4.3.14/dist/spessasynth_processor.min.js';
+
+    let sf2AudioContext = null;
+    let sf2Synth = null;
+    let sf2SynthReady = false;
+    let sf2SynthInitPromise = null;
+
+    async function sf2EnsureSynth() {
+      if (sf2SynthReady && sf2Synth) return sf2Synth;
+
+      if (sf2SynthInitPromise) {
+        return sf2SynthInitPromise;
+      }
+
+      sf2SynthInitPromise = (async function() {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+
+        if (!AudioContextClass) {
+          throw new Error('Web Audio API is not available.');
+        }
+
+        if (!sf2AudioContext) {
+          sf2AudioContext = new AudioContextClass();
+        }
+
+        if (sf2AudioContext.state === 'suspended') {
+          await sf2AudioContext.resume();
+        }
+
+        const module = await import(SF2_SYNTH_LIB_URL);
+        const WorkletSynthesizer = module.WorkletSynthesizer;
+
+        if (!WorkletSynthesizer) {
+          throw new Error('WorkletSynthesizer is not available.');
+        }
+
+        await sf2AudioContext.audioWorklet.addModule(SF2_SYNTH_PROCESSOR_URL);
+
+        sf2Synth = new WorkletSynthesizer(sf2AudioContext);
+
+        sf2Synth.connect(sf2AudioContext.destination);
+
+        const activeId = localStorage.getItem(SF2_ACTIVE_KEY);
+
+        if (!activeId) {
+          throw new Error('No SF2 SoundFont has been uploaded yet.');
+        }
+
+        const record = await sf2IdbGet(activeId);
+
+        if (!record || !record.data) {
+          throw new Error('The active SF2 file could not be found.');
+        }
+
+        await sf2Synth.soundBankManager.addSoundBank(record.data, 'main');
+
+        while (!sf2Synth.isReady) {
+          await new Promise(function(resolve) {
+            setTimeout(resolve, 50);
+          });
+        }
+
+        sf2SynthReady = true;
+
+        console.log('[sf2] Synth ready:', record.name || 'Untitled SF2');
+
+        return sf2Synth;
+      })();
+
+      try {
+        return await sf2SynthInitPromise;
+      } catch (error) {
+        sf2SynthReady = false;
+        sf2Synth = null;
+        console.error('[sf2] Synth initialization failed:', error);
+        throw error;
+      } finally {
+        sf2SynthInitPromise = null;
+      }
+    }
+
+    function sf2ResetSynth() {
+      sf2SynthReady = false;
+
+      if (sf2Synth) {
+        try {
+          sf2Synth.stopAll();
+        } catch (e) {}
+      }
+
+      sf2Synth = null;
+    }
+
+    // ===== KEYBOARD SHORTCUTS =====
+    document.addEventListener('keydown', function(e) {
+      if (e.ctrlKey && e.shiftKey && (e.key === 'ArrowUp' || e.key === '=' || e.key === '+')) {
+        e.preventDefault();
+        transposeUp();
+      }
+      if (e.ctrlKey && e.shiftKey && (e.key === 'ArrowDown' || e.key === '-' || e.key === '_')) {
+        e.preventDefault();
+        transposeDown();
+      }
+      if (e.key === 'F1' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        if (titleBarRecordBtn) titleBarRecordBtn.click();
+      }
+      if (e.key === 'F2' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        autoscrollRecordTimestamp(true);
+      }
+      if (e.key === 'F4' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        autoscrollRemoveTimestamp();
+      }
+      if (e.key === 'F9' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        midiOpenFilePicker();
+      }
+      if (e.key === 'F5' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+
+        if (!midiPlayback.parsed) {
+          showToast('No MIDI loaded.');
+          return;
+        }
+
+        midiStartPlayback(midiPlayback.parsed).catch(function(error) {
+          console.error('[midi] Could not start MIDI playback:', error);
+          showToast('Could not play MIDI: ' + (error.message || error));
+        });
+        return;
+      }
+
+      if (e.key === 'F6' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        midiStopPlayback();
+        return;
+      }
+
+      if (e.key === 'F10' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        sf2OpenFilePicker();
+      }
+      if (e.key === 'F11' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        midiPlayback.bpm = Math.max(5, midiPlayback.bpm - 5);
+        console.log('[midi] BPM:', midiPlayback.bpm);
+
+        if (metronomeEnabled && metronomeAudioContext) {
+          metronomeNextBeatTime = metronomeAudioContext.currentTime + 0.02;
+        }
+      }
+      if (e.key === 'F12' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        midiPlayback.bpm += 5;
+        console.log('[midi] BPM:', midiPlayback.bpm);
+
+        if (metronomeEnabled && metronomeAudioContext) {
+          metronomeNextBeatTime = metronomeAudioContext.currentTime + 0.02;
+        }
+      }
+    });
+
+    // ===== MIDI FILE IMPORT =====
+    function midiCreateId() {
+      return 'midi-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+    }
+
+    function midiSaveFile(file) {
+      if (!file) return Promise.resolve(false);
+
+      return file.arrayBuffer().then(function(buffer) {
+        const record = {
+          id: midiCreateId(),
+          name: file.name || 'Untitled MIDI',
+          type: file.type || 'audio/midi',
+          size: file.size || buffer.byteLength,
+          data: buffer,
+          savedAt: new Date().toISOString()
+        };
+
+        return midiIdbSave(record).then(function() {
+          try {
+            localStorage.setItem('chordChartActiveMidiId', record.id);
+
+            const parsed = midiParse(record.data);
+            midiPlayback.parsed = parsed;
+
+            console.log('[midi] parsed:', parsed);
+            showToast('MIDI saved: ' + record.name);
+          } catch (parseError) {
+            console.error('[midi] Could not parse MIDI:', parseError);
+            showToast('MIDI saved, but could not parse it yet.');
+          }
+          return true;
+        });
+      }).catch(function(error) {
+        console.error('[midi] Could not save MIDI file:', error);
+        showToast('Could not save MIDI file.');
+        return false;
+      });
+    }
+
+    function midiOpenFilePicker() {
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.accept = '.mid,.midi,audio/midi,audio/x-midi';
+
+      fileInput.onchange = function(ev) {
+        const file = ev.target.files && ev.target.files[0];
+        if (!file) return;
+        midiSaveFile(file);
+      };
+
+      fileInput.click();
+    }
+
+    // ===== MIDI PARSER =====
+    function midiReadUint16(view, offset) {
+      return view.getUint16(offset, false);
+    }
+
+    function midiReadUint32(view, offset) {
+      return view.getUint32(offset, false);
+    }
+
+    function midiReadVarLen(view, offset) {
+      let value = 0;
+      let bytes = 0;
+
+      while (offset + bytes < view.byteLength) {
+        const b = view.getUint8(offset + bytes);
+        value = (value << 7) | (b & 0x7f);
+        bytes++;
+        if (!(b & 0x80)) {
+          return { value: value, bytes: bytes };
+        }
+        if (bytes >= 4) break;
+      }
+
+      throw new Error('Invalid MIDI variable-length value.');
+    }
+
+    function midiParse(buffer) {
+      const view = new DataView(buffer);
+
+      if (view.byteLength < 14) {
+        throw new Error('MIDI file is too small.');
+      }
+
+      function midiChunkId(offset) {
+        return String.fromCharCode(
+          view.getUint8(offset),
+          view.getUint8(offset + 1),
+          view.getUint8(offset + 2),
+          view.getUint8(offset + 3)
+        );
+      }
+
+      if (midiChunkId(0) !== 'MThd') {
+        throw new Error('Invalid MIDI header.');
+      }
+
+      const headerLength = midiReadUint32(view, 4);
+      if (headerLength < 6 || 8 + headerLength > view.byteLength) {
+        throw new Error('Invalid MIDI header length.');
+      }
+
+      const format = midiReadUint16(view, 8);
+      const trackCount = midiReadUint16(view, 10);
+      const division = midiReadUint16(view, 12);
+
+      if (division & 0x8000) {
+        throw new Error('SMPTE MIDI timing is not supported yet.');
+      }
+
+      const ticksPerQuarter = division & 0x7fff;
+      if (!ticksPerQuarter) {
+        throw new Error('Invalid MIDI ticks-per-quarter value.');
+      }
+
+      const tracks = [];
+      let offset = 8 + headerLength;
+
+      for (let trackIndex = 0; trackIndex < trackCount; trackIndex++) {
+        if (offset + 8 > view.byteLength) {
+          throw new Error('Unexpected end of MIDI file.');
+        }
+
+        if (midiChunkId(offset) !== 'MTrk') {
+          throw new Error('Expected MIDI track chunk.');
+        }
+
+        const trackLength = midiReadUint32(view, offset + 4);
+        const trackStart = offset + 8;
+        const trackEnd = trackStart + trackLength;
+
+        if (trackEnd > view.byteLength) {
+          throw new Error('MIDI track extends beyond the file.');
+        }
+
+        let pos = trackStart;
+        let tick = 0;
+        let runningStatus = null;
+        const events = [];
+
+        while (pos < trackEnd) {
+          const delta = midiReadVarLen(view, pos);
+          pos += delta.bytes;
+          tick += delta.value;
+
+          if (pos >= trackEnd) break;
+
+          let status = view.getUint8(pos);
+
+          if (status < 0x80) {
+            if (runningStatus === null) {
+              throw new Error('Invalid MIDI running status.');
+            }
+            status = runningStatus;
+          } else {
+            pos++;
+            if (status < 0xf0) {
+              runningStatus = status;
+            } else if (status !== 0xf7) {
+              runningStatus = null;
+            }
+          }
+
+          if (status >= 0x80 && status <= 0xef) {
+            const command = status & 0xf0;
+            const channel = status & 0x0f;
+            const dataLength = (command === 0xc0 || command === 0xd0) ? 1 : 2;
+
+            if (view.byteLength < pos + dataLength || pos + dataLength > trackEnd) {
+              throw new Error('Unexpected end of MIDI event.');
+            }
+
+            const data1 = view.getUint8(pos);
+            pos++;
+
+            let data2 = null;
+            if (dataLength === 2) {
+              data2 = view.getUint8(pos);
+              pos++;
+            }
+
+            if (command === 0x80 || command === 0x90) {
+              events.push({
+                tick: tick,
+                type: command === 0x90 && data2 !== 0 ? 'noteOn' : 'noteOff',
+                channel: channel,
+                note: data1,
+                velocity: data2 === null ? 0 : data2
+              });
+            } else if (command === 0xb0) {
+              if (data1 === 0 || data1 === 32) {
+                events.push({
+                  tick: tick,
+                  type: data1 === 0 ? 'bankSelectMSB' : 'bankSelectLSB',
+                  channel: channel,
+                  value: data2 === null ? 0 : data2
+                });
+              } else {
+                events.push({
+                  tick: tick,
+                  type: 'controlChange',
+                  channel: channel,
+                  controller: data1,
+                  value: data2 === null ? 0 : data2
+                });
+              }
+            } else if (command === 0xc0) {
+              events.push({
+                tick: tick,
+                type: 'programChange',
+                channel: channel,
+                program: data1
+              });
+            }
+
+            continue;
+          }
+
+          if (status === 0xff) {
+            if (pos >= trackEnd) throw new Error('Invalid MIDI meta event.');
+
+            const metaType = view.getUint8(pos++);
+            const length = midiReadVarLen(view, pos);
+            pos += length.bytes;
+
+            if (pos + length.value > trackEnd) {
+              throw new Error('MIDI meta event extends beyond track.');
+            }
+
+            if (metaType === 0x51 && length.value === 3) {
+              const microsecondsPerQuarter =
+                (view.getUint8(pos) << 16) |
+                (view.getUint8(pos + 1) << 8) |
+                view.getUint8(pos + 2);
+
+              events.push({
+                tick: tick,
+                type: 'tempo',
+                microsecondsPerQuarter: microsecondsPerQuarter
+              });
+            }
+
+            pos += length.value;
+            continue;
+          }
+
+          if (status === 0xf0 || status === 0xf7) {
+            const length = midiReadVarLen(view, pos);
+            pos += length.bytes + length.value;
+
+            if (pos > trackEnd) {
+              throw new Error('Invalid MIDI system-exclusive event.');
+            }
+
+            continue;
+          }
+
+          throw new Error('Unsupported MIDI event.');
+        }
+
+        tracks.push(events);
+        offset = trackEnd;
+      }
+
+      return {
+        format: format,
+        trackCount: trackCount,
+        ticksPerQuarter: ticksPerQuarter,
+        tracks: tracks
+      };
+    }
+
     let idbPromise = null;
 
     function idbOpen() {
@@ -4394,6 +5070,101 @@
     function displayStoredSongs() {
       if (songsFloatPanel && songsFloatPanel.classList.contains('show')) {
         renderSongsInto(songsFloatList);
+        midiRenderLibrary(songsFloatList);
+      }
+    }
+
+    async function midiRenderLibrary(container) {
+      if (!container) return;
+
+      try {
+        const midiFiles = await midiIdbGetAll();
+        if (!midiFiles || !midiFiles.length) return;
+
+        const divider = document.createElement('div');
+        divider.className = 'dropdown-divider';
+        container.appendChild(divider);
+
+        const heading = document.createElement('div');
+        heading.className = 'dropdown-item';
+        heading.style.cssText = 'color: #8b6b4a; font-weight: 700; cursor: default;';
+        heading.textContent = '🎹 MIDI Files';
+        container.appendChild(heading);
+
+        midiFiles.sort(function(a, b) {
+          return String(a.name || '').localeCompare(String(b.name || ''), 'th', { sensitivity: 'base' });
+        });
+
+        midiFiles.forEach(function(midi) {
+          const item = document.createElement('div');
+          item.className = 'dropdown-item song-item';
+
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'song-name';
+          nameSpan.textContent = '🎹 ' + (midi.name || 'Untitled MIDI');
+
+          const removeBtn = document.createElement('button');
+          removeBtn.className = 'remove-btn';
+          removeBtn.textContent = '✕';
+          removeBtn.title = 'Remove MIDI file';
+
+          removeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+
+            midiIdbDelete(midi.id).then(function() {
+              showToast('MIDI removed: ' + (midi.name || 'Untitled MIDI'));
+              displayStoredSongs();
+            }).catch(function(error) {
+              console.error('[midi] Could not delete MIDI:', error);
+              showToast('Could not remove MIDI file.');
+            });
+          });
+
+          nameSpan.addEventListener('click', function(e) {
+            e.stopPropagation();
+
+            midiIdbOpen().then(function(db) {
+              return new Promise(function(resolve, reject) {
+                const tx = db.transaction(MIDI_IDB_STORE, 'readonly');
+                const req = tx.objectStore(MIDI_IDB_STORE).get(midi.id);
+
+                req.onsuccess = function() {
+                  resolve(req.result || null);
+                };
+
+                req.onerror = function() {
+                  reject(req.error);
+                };
+              });
+            }).then(function(record) {
+              if (!record || !record.data) {
+                showToast('Could not load MIDI file.');
+                return;
+              }
+
+              try {
+                const parsed = midiParse(record.data);
+                midiPlayback.parsed = parsed;
+                localStorage.setItem('chordChartActiveMidiId', midi.id);
+
+                console.log('[midi] loaded:', parsed);
+                showToast('MIDI loaded: ' + (record.name || 'Untitled MIDI'));
+              } catch (error) {
+                console.error('[midi] Could not parse loaded MIDI:', error);
+                showToast('Could not parse MIDI file.');
+              }
+            }).catch(function(error) {
+              console.error('[midi] Could not load MIDI:', error);
+              showToast('Could not load MIDI file.');
+            });
+          });
+
+          item.appendChild(removeBtn);
+          item.appendChild(nameSpan);
+          container.appendChild(item);
+        });
+      } catch (error) {
+        console.error('[midi] Could not render MIDI library:', error);
       }
     }
 
@@ -6662,6 +7433,429 @@
       }
     });
 
+    // ===== MIDI PLAYBACK =====
+    let midiPlayback = {
+      parsed: null,
+      playing: false,
+      startTime: 0,
+      timer: null,
+      activeNotes: [],
+      bpm: 100
+    };
+
+    function midiFlattenEvents(parsed) {
+      if (!parsed || !Array.isArray(parsed.tracks)) return [];
+
+      const events = [];
+
+      parsed.tracks.forEach(function(track) {
+        if (!Array.isArray(track)) return;
+
+        track.forEach(function(event) {
+          if (!event || typeof event.tick !== 'number') return;
+
+          if (
+            event.type === 'noteOn' ||
+            event.type === 'noteOff' ||
+            event.type === 'programChange' ||
+            event.type === 'bankSelectMSB' ||
+            event.type === 'bankSelectLSB' ||
+            event.type === 'controlChange'
+          ) {
+            events.push({
+              tick: event.tick,
+              type: event.type,
+              channel: event.channel,
+              note: event.note,
+              velocity: event.velocity || 0,
+              program: event.program,
+              value: event.value
+            });
+          }
+        });
+      });
+
+      events.sort(function(a, b) {
+        if (a.tick !== b.tick) return a.tick - b.tick;
+        if (a.type === b.type) return 0;
+        return a.type === 'noteOff' ? -1 : 1;
+      });
+
+      return events;
+    }
+
+    function midiStopPlayback() {
+      midiPlayback.playing = false;
+
+      if (midiPlayback.timer) {
+        clearTimeout(midiPlayback.timer);
+        midiPlayback.timer = null;
+      }
+
+      if (sf2Synth) {
+        try {
+          sf2Synth.stopAll();
+        } catch (e) {
+          console.warn('[midi] Could not stop all SF2 voices:', e);
+        }
+      }
+
+      midiPlayback.activeNotes = [];
+    }
+
+    async function midiStartPlayback(parsed) {
+      if (!parsed) {
+        throw new Error('No MIDI data loaded.');
+      }
+
+      const synth = await sf2EnsureSynth();
+      const events = midiFlattenEvents(parsed);
+
+      if (!events.length) {
+        throw new Error('No MIDI note events were found.');
+      }
+
+      midiStopPlayback();
+
+      midiPlayback.parsed = parsed;
+      midiPlayback.playing = true;
+      midiPlayback.startTime = performance.now();
+
+      let eventIndex = 0;
+
+      const tempoEvents = [];
+
+      parsed.tracks.forEach(function(track) {
+        if (!Array.isArray(track)) return;
+
+        track.forEach(function(event) {
+          if (
+            event &&
+            event.type === 'tempo' &&
+            typeof event.tick === 'number' &&
+            typeof event.microsecondsPerQuarter === 'number'
+          ) {
+            tempoEvents.push({
+              tick: event.tick,
+              microsecondsPerQuarter: event.microsecondsPerQuarter
+            });
+          }
+        });
+      });
+
+      tempoEvents.sort(function(a, b) {
+        return a.tick - b.tick;
+      });
+
+      if (!tempoEvents.length || tempoEvents[0].tick > 0) {
+        tempoEvents.unshift({
+          tick: 0,
+          microsecondsPerQuarter: 600000
+        });
+      }
+
+      function midiTickToSeconds(targetTick) {
+        let seconds = 0;
+        let previousTick = 0;
+        let microsecondsPerQuarter =
+          tempoEvents[0].microsecondsPerQuarter;
+
+        for (let i = 0; i < tempoEvents.length; i++) {
+          const tempoEvent = tempoEvents[i];
+
+          if (tempoEvent.tick > targetTick) break;
+
+          if (tempoEvent.tick > previousTick) {
+            seconds +=
+              (tempoEvent.tick - previousTick) *
+              (microsecondsPerQuarter / 1000000) /
+              parsed.ticksPerQuarter;
+
+            previousTick = tempoEvent.tick;
+          }
+
+          microsecondsPerQuarter =
+            tempoEvent.microsecondsPerQuarter;
+        }
+
+        if (targetTick > previousTick) {
+          seconds +=
+            (targetTick - previousTick) *
+            (microsecondsPerQuarter / 1000000) /
+            parsed.ticksPerQuarter;
+        }
+
+        return seconds;
+      }
+
+      const sourceBpm =
+        60000000 / tempoEvents[0].microsecondsPerQuarter;
+
+      midiPlayback.bpm = sourceBpm;
+
+      if (metronomeEnabled && metronomeAudioContext) {
+        metronomeNextBeatTime =
+          metronomeAudioContext.currentTime + 0.02;
+      }
+
+      const timedEvents = events.map(function(event) {
+        return {
+          event: event,
+          sourceSeconds: midiTickToSeconds(event.tick)
+        };
+      });
+
+      function scheduleNext() {
+        if (!midiPlayback.playing) return;
+
+        const elapsedSeconds =
+          (performance.now() - midiPlayback.startTime) / 1000;
+
+        if (metronomeEnabled && metronomeAudioContext) {
+          metronomeNextBeatTime = Math.max(
+            metronomeNextBeatTime,
+            metronomeAudioContext.currentTime
+          );
+        }
+
+        const speedScale =
+          sourceBpm / midiPlayback.bpm;
+
+        let currentSourceTempo = sourceBpm;
+
+        for (let i = 0; i < tempoEvents.length; i++) {
+          const tempoEvent = tempoEvents[i];
+          if (tempoEvent.tick > 0) {
+            const tempoSeconds = midiTickToSeconds(tempoEvent.tick);
+            if (tempoSeconds * speedScale <= elapsedSeconds) {
+              currentSourceTempo =
+                60000000 / tempoEvent.microsecondsPerQuarter;
+            } else {
+              break;
+            }
+          }
+        }
+
+        if (
+          currentSourceTempo !== sourceBpm &&
+          Number.isFinite(currentSourceTempo) &&
+          currentSourceTempo > 0
+        ) {
+          const tempoRatio =
+            currentSourceTempo / sourceBpm;
+
+          midiPlayback.bpm =
+            sourceBpm * tempoRatio;
+
+          if (metronomeEnabled && metronomeAudioContext) {
+            metronomeNextBeatTime =
+              metronomeAudioContext.currentTime + 0.02;
+          }
+        }
+
+        if (metronomeEnabled && metronomeAudioContext) {
+          const currentBpm = midiPlayback.bpm;
+          if (
+            typeof currentBpm === 'number' &&
+            Number.isFinite(currentBpm) &&
+            currentBpm > 0
+          ) {
+            metronomeNextBeatTime =
+              Math.max(
+                metronomeNextBeatTime,
+                metronomeAudioContext.currentTime
+              );
+          }
+        }
+
+        while (
+          eventIndex < timedEvents.length &&
+          timedEvents[eventIndex].sourceSeconds * speedScale <= elapsedSeconds
+        ) {
+          const event = events[eventIndex++];
+
+          try {
+            if (event.type === 'bankSelectMSB') {
+              synth.controllerChange(
+                event.channel,
+                0,
+                event.value
+              );
+            } else if (event.type === 'bankSelectLSB') {
+              synth.controllerChange(
+                event.channel,
+                32,
+                event.value
+              );
+            } else if (event.type === 'programChange') {
+              synth.programChange(
+                event.channel,
+                event.program
+              );
+            } else if (event.type === 'controlChange') {
+              synth.controllerChange(
+                event.channel,
+                event.controller,
+                event.value
+              );
+            } else if (event.type === 'noteOn' && event.velocity > 0) {
+              synth.noteOn(
+                event.channel,
+                event.note,
+                event.velocity
+              );
+
+              midiPlayback.activeNotes.push({
+                channel: event.channel,
+                note: event.note
+              });
+            } else {
+              synth.noteOff(
+                event.channel,
+                event.note
+              );
+            }
+          } catch (error) {
+            console.error('[midi] MIDI note event failed:', error);
+          }
+        }
+
+        if (eventIndex >= events.length) {
+          midiStopPlayback();
+          return;
+        }
+
+        midiPlayback.timer = setTimeout(scheduleNext, 8);
+      }
+
+      scheduleNext();
+    }
+
+    // ===== MIDI STARTUP RESTORE =====
+    async function midiRestoreActive() {
+      const activeId = localStorage.getItem('chordChartActiveMidiId');
+      if (!activeId) return;
+
+      try {
+        const db = await midiIdbOpen();
+
+        const record = await new Promise(function(resolve, reject) {
+          const tx = db.transaction(MIDI_IDB_STORE, 'readonly');
+          const req = tx.objectStore(MIDI_IDB_STORE).get(activeId);
+
+          req.onsuccess = function() {
+            resolve(req.result || null);
+          };
+
+          req.onerror = function() {
+            reject(req.error);
+          };
+        });
+
+        if (!record || !record.data) {
+          localStorage.removeItem('chordChartActiveMidiId');
+          return;
+        }
+
+        midiPlayback.parsed = midiParse(record.data);
+
+        console.log('[midi] Restored:', record.name || 'Untitled MIDI');
+      } catch (error) {
+        console.error('[midi] Could not restore active MIDI:', error);
+      }
+    }
+
+    midiRestoreActive();
+
+    // ===== METRONOME =====
+    const METRONOME_BPM = 100;
+    const METRONOME_BEAT_SECONDS = 60 / METRONOME_BPM;
+    let metronomeEnabled = false;
+    let metronomeAudioContext = null;
+    let metronomeTimer = null;
+    let metronomeNextBeatTime = 0;
+
+    function metronomeEnsureAudioContext() {
+      if (!metronomeAudioContext) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return false;
+        metronomeAudioContext = new AudioContextClass();
+      }
+
+      if (metronomeAudioContext.state === 'suspended') {
+        metronomeAudioContext.resume().catch(function() {});
+      }
+
+      return true;
+    }
+
+    function metronomeClick(when) {
+      if (!metronomeAudioContext) return;
+
+      const oscillator = metronomeAudioContext.createOscillator();
+      const gain = metronomeAudioContext.createGain();
+
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(1000, when);
+
+      gain.gain.setValueAtTime(0.0001, when);
+      gain.gain.exponentialRampToValueAtTime(0.22, when + 0.002);
+      gain.gain.exponentialRampToValueAtTime(0.0001, when + 0.055);
+
+      oscillator.connect(gain);
+      gain.connect(metronomeAudioContext.destination);
+
+      oscillator.start(when);
+      oscillator.stop(when + 0.06);
+    }
+
+    function metronomeSchedule() {
+      if (!metronomeEnabled || !metronomeAudioContext) return;
+
+      const scheduleAhead = 0.1;
+
+      while (metronomeNextBeatTime < metronomeAudioContext.currentTime + scheduleAhead) {
+        metronomeClick(metronomeNextBeatTime);
+        metronomeNextBeatTime += 60 / (
+  typeof midiPlayback !== 'undefined' &&
+  midiPlayback &&
+  typeof midiPlayback.bpm === 'number' &&
+  Number.isFinite(midiPlayback.bpm) &&
+  midiPlayback.bpm > 0
+    ? midiPlayback.bpm
+    : 100
+);
+      }
+    }
+
+    function metronomeStart() {
+      if (!metronomeEnsureAudioContext()) return;
+
+      metronomeEnabled = true;
+      metronomeNextBeatTime = metronomeAudioContext.currentTime + 0.02;
+
+      if (metronomeTimer) clearInterval(metronomeTimer);
+      metronomeSchedule();
+      metronomeTimer = setInterval(metronomeSchedule, 25);
+    }
+
+    function metronomeStop() {
+      metronomeEnabled = false;
+
+      if (metronomeTimer) {
+        clearInterval(metronomeTimer);
+        metronomeTimer = null;
+      }
+    }
+
+    function metronomeToggle() {
+      if (metronomeEnabled) {
+        metronomeStop();
+      } else {
+        metronomeStart();
+      }
+    }
+
     // ===== KEYBOARD SHORTCUTS =====
     document.addEventListener('keydown', function(e) {
       if (e.ctrlKey && e.shiftKey && (e.key === 'ArrowUp' || e.key === '=' || e.key === '+')) {
@@ -6680,6 +7874,18 @@
         e.preventDefault();
         autoscrollRecordTimestamp(true);
       }
+      if (e.key === 'F3' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        metronomeToggle();
+        return;
+      }
+
+      if (e.key === 'F3' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        metronomeToggle();
+        return;
+      }
+
       if (e.key === 'F4' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
         e.preventDefault();
         autoscrollRemoveTimestamp();
@@ -7308,6 +8514,7 @@
       }
 
       renderSongsInto(songsFloatList);
+      midiRenderLibrary(songsFloatList);
       if (typeof togglePerfPanel === 'function') togglePerfPanel(false);
       if (typeof toggleKeyFloatPanel === 'function') toggleKeyFloatPanel(false);
       if (typeof toggleTemplateFloatPanel === 'function') toggleTemplateFloatPanel(false);
@@ -7383,6 +8590,15 @@
       };
       fileInput.click();
     });
+
+    const songsFloatOpenMidi = document.getElementById('songsFloatOpenMidi');
+
+    if (songsFloatOpenMidi) {
+      songsFloatOpenMidi.addEventListener('click', function(e) {
+        e.stopPropagation();
+        midiOpenFilePicker();
+      });
+    }
 
     // ===== TEMPLATE SYSTEM =====
     const TEMPLATE_APP_ID = 'chord-chart-creator';
