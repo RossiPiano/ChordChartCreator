@@ -863,9 +863,13 @@
       flex: 0 1 auto;
       min-width: 120px;
     }
-    .float-top-row > .playback-readout {
+    .float-top-row > .playback-times {
       flex: 0 0 auto;
       margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
     }
     .float-top-row > .autoscroll-current {
       flex: 0 0 auto;
@@ -902,14 +906,27 @@
       pointer-events: none;
     }
 
-    .float-top-row > .playback-readout {
-      flex: 0 0 auto;
+    .playback-readout {
       font-family: Consolas, Menlo, Monaco, monospace;
       font-size: 0.82rem;
       font-weight: 700;
       color: #3d2b1f;
       letter-spacing: 0.02em;
       white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .midi-filename-readout {
+      max-width: 32ch;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .playback-separator {
+      font-family: Consolas, Menlo, Monaco, monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #777777;
       pointer-events: none;
     }
     .float-menu-pair-row {
@@ -2959,7 +2976,15 @@
     <div class="float-top-row">
       <button class="chrome-toggle" id="chromeToggle" title="Collapse toolbar" aria-label="Collapse toolbar">☰</button>
       <input type="text" class="float-title-input" id="titleInput" placeholder="Song Title — Artist" spellcheck="false" aria-label="Song title">
-      <span class="playback-readout" id="playbackReadout">0:00 / 0:00</span>
+      <span class="playback-times">
+        <span class="playback-readout midi-filename-readout" id="midiFilenameReadout">MIDI: —</span>
+<span class="playback-separator" aria-hidden="true">│</span>
+<span class="playback-readout midi-bpm-readout" id="midiBpmReadout">BPM: ?</span>
+        <span class="playback-separator" aria-hidden="true">│</span>
+        <span class="playback-readout midi-playback-readout" id="midiPlaybackReadout">MIDI: 0:00 / 0:00</span>
+        <span class="playback-separator" aria-hidden="true">│</span>
+        <span class="playback-readout" id="playbackReadout">Audio: 0:00 / 0:00</span>
+      </span>
       <button class="chrome-toggle" id="chromeToggleRight" title="Collapse title bar strip" aria-label="Collapse title bar strip">☰</button>
     </div>
 
@@ -3313,6 +3338,9 @@
     const titleBarCurrent = document.getElementById('titleBarCurrent');
     const titleBarTotal = document.getElementById('titleBarTotal');
     const playbackReadout = document.getElementById('playbackReadout');
+    const midiPlaybackReadout = document.getElementById('midiPlaybackReadout');
+    const midiBpmReadout = document.getElementById('midiBpmReadout');
+    const midiFilenameReadout = document.getElementById('midiFilenameReadout');
 
     const inputEl2 = document.getElementById('chartInput2');
     const previewContent2 = document.getElementById('previewContent2');
@@ -4497,8 +4525,13 @@
         e.preventDefault();
         midiOpenFilePicker();
       }
-      if (e.key === 'F5' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+      if (e.key === 'F6' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
         e.preventDefault();
+
+        if (midiPlayback.playing) {
+          midiStopPlayback();
+          return;
+        }
 
         if (!midiPlayback.parsed) {
           showToast('No MIDI loaded.');
@@ -4512,33 +4545,191 @@
         return;
       }
 
-      if (e.key === 'F6' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
-        e.preventDefault();
-        midiStopPlayback();
-        return;
-      }
-
       if (e.key === 'F10' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
         e.preventDefault();
         sf2OpenFilePicker();
       }
-      if (e.key === 'F11' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+      if (
+        (e.key === 'F7' || e.key === 'F8') &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.altKey &&
+        !e.shiftKey
+      ) {
         e.preventDefault();
-        midiPlayback.bpm = Math.max(5, midiPlayback.bpm - 5);
-        console.log('[midi] BPM:', midiPlayback.bpm);
 
-        if (metronomeEnabled && metronomeAudioContext) {
-          metronomeNextBeatTime = metronomeAudioContext.currentTime + 0.02;
+        const now = performance.now();
+
+        if (
+          midiPlayback.playing &&
+          typeof midiPlayback.sourceBpm === 'number' &&
+          Number.isFinite(midiPlayback.sourceBpm) &&
+          midiPlayback.sourceBpm > 0 &&
+          typeof midiPlayback.bpm === 'number' &&
+          Number.isFinite(midiPlayback.bpm) &&
+          midiPlayback.bpm > 0
+        ) {
+          const oldSpeedScale =
+            midiPlayback.sourceBpm / midiPlayback.bpm;
+
+          const sourceElapsedSeconds =
+            ((now - midiPlayback.startTime) / 1000) /
+            oldSpeedScale;
+
+          if (e.key === 'F7') {
+            midiPlayback.bpm =
+              Math.max(5, midiPlayback.bpm - 5);
+          } else {
+            midiPlayback.bpm += 5;
+          }
+
+          const newSpeedScale =
+            midiPlayback.sourceBpm / midiPlayback.bpm;
+
+          midiPlayback.startTime =
+            now -
+            sourceElapsedSeconds *
+            newSpeedScale *
+            1000;
+
+          if (
+            metronomeEnabled &&
+            metronomeAudioContext &&
+            typeof midiPlayback.currentSourceBpm === 'number' &&
+            Number.isFinite(midiPlayback.currentSourceBpm) &&
+            midiPlayback.currentSourceBpm > 0
+          ) {
+            const beatDuration =
+              60 / midiPlayback.currentSourceBpm;
+
+            const nextBeatSourceSeconds =
+              Math.ceil(
+                sourceElapsedSeconds / beatDuration
+              ) * beatDuration;
+
+            const secondsUntilNextBeat =
+              Math.max(
+                0,
+                (nextBeatSourceSeconds - sourceElapsedSeconds) *
+                newSpeedScale
+              );
+
+            metronomeNextBeatTime =
+              metronomeAudioContext.currentTime +
+              Math.max(0.02, secondsUntilNextBeat);
+          }
+        } else {
+          if (e.key === 'F7') {
+            midiPlayback.bpm =
+              Math.max(5, midiPlayback.bpm - 5);
+          } else {
+            midiPlayback.bpm += 5;
+          }
         }
+
+        if (!midiPlayback.sourceBpmKnown) {
+          midiPlayback.bpmAdjustment =
+            midiPlayback.bpm - midiPlayback.sourceBpm;
+        }
+
+        midiUpdateBpmReadout();
+
+        if (!midiPlayback.sourceBpmKnown) {
+          midiPlayback.bpmAdjustment =
+            midiPlayback.bpm - midiPlayback.sourceBpm;
+        }
+
+        midiUpdateBpmReadout();
+
+        console.log('[midi] BPM:', midiPlayback.bpm);
       }
-      if (e.key === 'F12' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
-        e.preventDefault();
-        midiPlayback.bpm += 5;
-        console.log('[midi] BPM:', midiPlayback.bpm);
 
-        if (metronomeEnabled && metronomeAudioContext) {
-          metronomeNextBeatTime = metronomeAudioContext.currentTime + 0.02;
+      if (
+        (e.key === 'F11' || e.key === 'F12') &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.altKey &&
+        !e.shiftKey
+      ) {
+        e.preventDefault();
+
+        const now = performance.now();
+
+        if (
+          midiPlayback.playing &&
+          typeof midiPlayback.sourceBpm === 'number' &&
+          Number.isFinite(midiPlayback.sourceBpm) &&
+          midiPlayback.sourceBpm > 0 &&
+          typeof midiPlayback.bpm === 'number' &&
+          Number.isFinite(midiPlayback.bpm) &&
+          midiPlayback.bpm > 0
+        ) {
+          const oldSpeedScale =
+            midiPlayback.sourceBpm / midiPlayback.bpm;
+
+          const sourceElapsedSeconds =
+            ((now - midiPlayback.startTime) / 1000) /
+            oldSpeedScale;
+
+          if (e.key === 'F11') {
+            midiPlayback.bpm =
+              Math.max(5, midiPlayback.bpm - 5);
+          } else {
+            midiPlayback.bpm += 5;
+          }
+
+          const newSpeedScale =
+            midiPlayback.sourceBpm / midiPlayback.bpm;
+
+          midiPlayback.startTime =
+            now -
+            sourceElapsedSeconds *
+            newSpeedScale *
+            1000;
+
+          if (
+            metronomeEnabled &&
+            metronomeAudioContext &&
+            typeof midiPlayback.currentSourceBpm === 'number' &&
+            Number.isFinite(midiPlayback.currentSourceBpm) &&
+            midiPlayback.currentSourceBpm > 0
+          ) {
+            const beatDuration =
+              60 / midiPlayback.currentSourceBpm;
+
+            const nextBeatSourceSeconds =
+              Math.ceil(
+                sourceElapsedSeconds / beatDuration
+              ) * beatDuration;
+
+            const secondsUntilNextBeat =
+              Math.max(
+                0,
+                (nextBeatSourceSeconds - sourceElapsedSeconds) *
+                newSpeedScale
+              );
+
+            metronomeNextBeatTime =
+              metronomeAudioContext.currentTime +
+              Math.max(0.02, secondsUntilNextBeat);
+          }
+        } else {
+          if (e.key === 'F11') {
+            midiPlayback.bpm =
+              Math.max(5, midiPlayback.bpm - 5);
+          } else {
+            midiPlayback.bpm += 5;
+          }
         }
+
+        if (!midiPlayback.sourceBpmKnown) {
+          midiPlayback.bpmAdjustment =
+            midiPlayback.bpm - midiPlayback.sourceBpm;
+        }
+
+        midiUpdateBpmReadout();
+
+        console.log('[midi] BPM:', midiPlayback.bpm);
       }
     });
 
@@ -4548,6 +4739,11 @@
     }
 
     function midiSaveFile(file) {
+      if (midiFilenameReadout) {
+        midiFilenameReadout.textContent = file && file.name
+          ? file.name
+          : 'MIDI: —';
+      }
       if (!file) return Promise.resolve(false);
 
       return file.arrayBuffer().then(function(buffer) {
@@ -4566,6 +4762,43 @@
 
             const parsed = midiParse(record.data);
             midiPlayback.parsed = parsed;
+
+            const importedTempoEvents = [];
+
+            parsed.tracks.forEach(function(track) {
+              if (!Array.isArray(track)) return;
+
+              track.forEach(function(event) {
+                if (
+                  event &&
+                  event.type === 'tempo' &&
+                  typeof event.tick === 'number' &&
+                  typeof event.microsecondsPerQuarter === 'number'
+                ) {
+                  importedTempoEvents.push(event);
+                }
+              });
+            });
+
+            importedTempoEvents.sort(function(a, b) {
+              return a.tick - b.tick;
+            });
+
+            midiPlayback.sourceBpmKnown =
+              importedTempoEvents.length > 0 &&
+              importedTempoEvents[0].tick === 0;
+
+            midiPlayback.sourceBpm =
+              importedTempoEvents.length > 0 &&
+              importedTempoEvents[0].tick === 0
+                ? 60000000 / importedTempoEvents[0].microsecondsPerQuarter
+                : 100;
+
+            midiPlayback.currentSourceBpm = midiPlayback.sourceBpm;
+            midiPlayback.bpm = midiPlayback.sourceBpm;
+            midiPlayback.bpmAdjustment = 0;
+
+            midiUpdateBpmReadout();
 
             console.log('[midi] parsed:', parsed);
             showToast('MIDI saved: ' + record.name);
@@ -5140,6 +5373,11 @@
               if (!record || !record.data) {
                 showToast('Could not load MIDI file.');
                 return;
+              }
+
+              if (midiFilenameReadout) {
+                midiFilenameReadout.textContent =
+                  record.name || 'MIDI: —';
               }
 
               try {
@@ -6115,6 +6353,7 @@
       }
       if (playbackReadout) {
         playbackReadout.textContent =
+          'Audio: ' +
           autoscrollFormatTime(cur) + ' / ' + autoscrollFormatTime(tot);
       }
       if (autoscrollCurrentInput && document.activeElement !== autoscrollCurrentInput) {
@@ -7440,7 +7679,11 @@
       startTime: 0,
       timer: null,
       activeNotes: [],
-      bpm: 100
+      bpm: 100,
+      sourceBpm: 100,
+      currentSourceBpm: 100,
+      sourceBpmKnown: false,
+      bpmAdjustment: 0
     };
 
     function midiFlattenEvents(parsed) {
@@ -7484,6 +7727,39 @@
       return events;
     }
 
+    function midiUpdateBpmReadout() {
+      if (!midiBpmReadout) return;
+
+      if (midiPlayback.sourceBpmKnown) {
+        const effectiveBpm =
+          typeof midiPlayback.currentSourceBpm === 'number' &&
+          Number.isFinite(midiPlayback.currentSourceBpm) &&
+          midiPlayback.currentSourceBpm > 0 &&
+          typeof midiPlayback.sourceBpm === 'number' &&
+          Number.isFinite(midiPlayback.sourceBpm) &&
+          midiPlayback.sourceBpm > 0
+            ? midiPlayback.currentSourceBpm *
+              midiPlayback.bpm /
+              midiPlayback.sourceBpm
+            : midiPlayback.bpm;
+
+        midiBpmReadout.textContent =
+          'BPM: ' + Math.round(effectiveBpm);
+        return;
+      }
+
+      const adjustment = midiPlayback.bpmAdjustment || 0;
+
+      if (adjustment === 0) {
+        midiBpmReadout.textContent = 'BPM: ?';
+      } else {
+        midiBpmReadout.textContent =
+          'BPM: ? ' +
+          (adjustment > 0 ? '+' : '') +
+          adjustment;
+      }
+    }
+
     function midiStopPlayback() {
       midiPlayback.playing = false;
 
@@ -7501,6 +7777,11 @@
       }
 
       midiPlayback.activeNotes = [];
+
+      if (midiPlaybackReadout) {
+        midiPlaybackReadout.textContent =
+          'MIDI: 0:00 / 0:00';
+      }
     }
 
     async function midiStartPlayback(parsed) {
@@ -7547,12 +7828,28 @@
         return a.tick - b.tick;
       });
 
+      midiPlayback.sourceBpmKnown =
+        tempoEvents.length > 0 &&
+        tempoEvents[0].tick === 0;
+
       if (!tempoEvents.length || tempoEvents[0].tick > 0) {
         tempoEvents.unshift({
           tick: 0,
           microsecondsPerQuarter: 600000
         });
       }
+
+      midiPlayback.currentSourceBpm =
+        60000000 / tempoEvents[0].microsecondsPerQuarter;
+
+      const tempoEventSeconds = tempoEvents.map(function(tempoEvent) {
+        return {
+          sourceSeconds: midiTickToSeconds(tempoEvent.tick),
+          bpm: 60000000 / tempoEvent.microsecondsPerQuarter
+        };
+      });
+
+      let tempoEventIndex = 0;
 
       function midiTickToSeconds(targetTick) {
         let seconds = 0;
@@ -7591,7 +7888,18 @@
       const sourceBpm =
         60000000 / tempoEvents[0].microsecondsPerQuarter;
 
-      midiPlayback.bpm = sourceBpm;
+      midiPlayback.sourceBpm = sourceBpm;
+      midiPlayback.currentSourceBpm = sourceBpm;
+
+      if (midiPlayback.sourceBpmKnown) {
+        midiPlayback.bpm = sourceBpm;
+        midiPlayback.bpmAdjustment = 0;
+      } else {
+        midiPlayback.bpm =
+          sourceBpm + (midiPlayback.bpmAdjustment || 0);
+      }
+
+      midiUpdateBpmReadout();
 
       if (metronomeEnabled && metronomeAudioContext) {
         metronomeNextBeatTime =
@@ -7605,53 +7913,84 @@
         };
       });
 
+      const midiDurationSeconds =
+        timedEvents.length
+          ? timedEvents[timedEvents.length - 1].sourceSeconds
+          : 0;
+
+      if (midiPlaybackReadout) {
+        midiPlaybackReadout.textContent =
+          'MIDI: 0:00 / ' +
+          autoscrollFormatTime(midiDurationSeconds);
+      }
+
       function scheduleNext() {
         if (!midiPlayback.playing) return;
 
         const elapsedSeconds =
           (performance.now() - midiPlayback.startTime) / 1000;
 
-        if (metronomeEnabled && metronomeAudioContext) {
-          metronomeNextBeatTime = Math.max(
-            metronomeNextBeatTime,
-            metronomeAudioContext.currentTime
-          );
-        }
-
         const speedScale =
-          sourceBpm / midiPlayback.bpm;
+          midiPlayback.sourceBpm / midiPlayback.bpm;
 
-        let currentSourceTempo = sourceBpm;
+        const sourceElapsedSeconds =
+          elapsedSeconds / speedScale;
 
-        for (let i = 0; i < tempoEvents.length; i++) {
-          const tempoEvent = tempoEvents[i];
-          if (tempoEvent.tick > 0) {
-            const tempoSeconds = midiTickToSeconds(tempoEvent.tick);
-            if (tempoSeconds * speedScale <= elapsedSeconds) {
-              currentSourceTempo =
-                60000000 / tempoEvent.microsecondsPerQuarter;
-            } else {
-              break;
-            }
-          }
+        if (midiPlaybackReadout) {
+          midiPlaybackReadout.textContent =
+            'MIDI: ' +
+            autoscrollFormatTime(
+              Math.min(
+                sourceElapsedSeconds,
+                midiDurationSeconds
+              )
+            ) +
+            ' / ' +
+            autoscrollFormatTime(midiDurationSeconds);
         }
+
+        while (
+          tempoEventIndex + 1 < tempoEventSeconds.length &&
+          tempoEventSeconds[tempoEventIndex + 1].sourceSeconds <= sourceElapsedSeconds
+        ) {
+          tempoEventIndex++;
+        }
+
+        const previousSourceBpm =
+          midiPlayback.currentSourceBpm;
+
+        midiPlayback.currentSourceBpm =
+          tempoEventSeconds.length
+            ? tempoEventSeconds[tempoEventIndex].bpm
+            : midiPlayback.sourceBpm;
 
         if (
-          currentSourceTempo !== sourceBpm &&
-          Number.isFinite(currentSourceTempo) &&
-          currentSourceTempo > 0
+          midiPlayback.currentSourceBpm !== previousSourceBpm
         ) {
-          const tempoRatio =
-            currentSourceTempo / sourceBpm;
+          window.__midiBpmDebug = {
+            previousSourceBpm: previousSourceBpm,
+            currentSourceBpm: midiPlayback.currentSourceBpm,
+            sourceBpm: midiPlayback.sourceBpm,
+            bpm: midiPlayback.bpm,
+            sourceBpmKnown: midiPlayback.sourceBpmKnown,
+            bpmAdjustment: midiPlayback.bpmAdjustment,
+            readout: document.getElementById('midiBpmReadout')
+              ? document.getElementById('midiBpmReadout').textContent
+              : '(no element)'
+          };
 
-          midiPlayback.bpm =
-            sourceBpm * tempoRatio;
+          midiUpdateBpmReadout();
 
-          if (metronomeEnabled && metronomeAudioContext) {
+          if (
+            metronomeEnabled &&
+            metronomeAudioContext
+          ) {
             metronomeNextBeatTime =
               metronomeAudioContext.currentTime + 0.02;
           }
         }
+
+        // Metronome timing is controlled by the effective MIDI tempo below.
 
         if (metronomeEnabled && metronomeAudioContext) {
           const currentBpm = midiPlayback.bpm;
@@ -7759,6 +8098,48 @@
 
         midiPlayback.parsed = midiParse(record.data);
 
+        if (midiFilenameReadout) {
+          midiFilenameReadout.textContent =
+            record.name || 'MIDI: —';
+        }
+
+        const restoredTempoEvents = [];
+
+        midiPlayback.parsed.tracks.forEach(function(track) {
+          if (!Array.isArray(track)) return;
+
+          track.forEach(function(event) {
+            if (
+              event &&
+              event.type === 'tempo' &&
+              typeof event.tick === 'number' &&
+              typeof event.microsecondsPerQuarter === 'number'
+            ) {
+              restoredTempoEvents.push(event);
+            }
+          });
+        });
+
+        restoredTempoEvents.sort(function(a, b) {
+          return a.tick - b.tick;
+        });
+
+        midiPlayback.sourceBpmKnown =
+          restoredTempoEvents.length > 0 &&
+          restoredTempoEvents[0].tick === 0;
+
+        midiPlayback.sourceBpm =
+          restoredTempoEvents.length > 0 &&
+          restoredTempoEvents[0].tick === 0
+            ? 60000000 / restoredTempoEvents[0].microsecondsPerQuarter
+            : 100;
+
+        midiPlayback.currentSourceBpm = midiPlayback.sourceBpm;
+        midiPlayback.bpm = midiPlayback.sourceBpm;
+        midiPlayback.bpmAdjustment = 0;
+
+        midiUpdateBpmReadout();
+
         console.log('[midi] Restored:', record.name || 'Untitled MIDI');
       } catch (error) {
         console.error('[midi] Could not restore active MIDI:', error);
@@ -7799,11 +8180,14 @@
       oscillator.frequency.setValueAtTime(1000, when);
 
       gain.gain.setValueAtTime(0.0001, when);
-      gain.gain.exponentialRampToValueAtTime(0.22, when + 0.002);
+      gain.gain.exponentialRampToValueAtTime(0.45, when + 0.002);
       gain.gain.exponentialRampToValueAtTime(0.0001, when + 0.055);
 
       oscillator.connect(gain);
       gain.connect(metronomeAudioContext.destination);
+
+      gain.gain.setValueAtTime(0.18, when);
+      gain.gain.exponentialRampToValueAtTime(0.001, when + 0.06);
 
       oscillator.start(when);
       oscillator.stop(when + 0.06);
@@ -7816,15 +8200,24 @@
 
       while (metronomeNextBeatTime < metronomeAudioContext.currentTime + scheduleAhead) {
         metronomeClick(metronomeNextBeatTime);
-        metronomeNextBeatTime += 60 / (
-  typeof midiPlayback !== 'undefined' &&
-  midiPlayback &&
-  typeof midiPlayback.bpm === 'number' &&
-  Number.isFinite(midiPlayback.bpm) &&
-  midiPlayback.bpm > 0
-    ? midiPlayback.bpm
-    : 100
-);
+        const metronomeBpm =
+          typeof midiPlayback !== 'undefined' &&
+          midiPlayback &&
+          typeof midiPlayback.currentSourceBpm === 'number' &&
+          Number.isFinite(midiPlayback.currentSourceBpm) &&
+          midiPlayback.currentSourceBpm > 0 &&
+          typeof midiPlayback.sourceBpm === 'number' &&
+          Number.isFinite(midiPlayback.sourceBpm) &&
+          midiPlayback.sourceBpm > 0 &&
+          typeof midiPlayback.bpm === 'number' &&
+          Number.isFinite(midiPlayback.bpm) &&
+          midiPlayback.bpm > 0
+            ? midiPlayback.currentSourceBpm *
+              midiPlayback.bpm /
+              midiPlayback.sourceBpm
+            : 100;
+
+        metronomeNextBeatTime += 60 / metronomeBpm;
       }
     }
 
@@ -7832,7 +8225,44 @@
       if (!metronomeEnsureAudioContext()) return;
 
       metronomeEnabled = true;
-      metronomeNextBeatTime = metronomeAudioContext.currentTime + 0.02;
+
+      if (
+        midiPlayback &&
+        midiPlayback.playing &&
+        typeof midiPlayback.currentSourceBpm === 'number' &&
+        Number.isFinite(midiPlayback.currentSourceBpm) &&
+        midiPlayback.currentSourceBpm > 0
+      ) {
+        const elapsedSeconds =
+          (performance.now() - midiPlayback.startTime) / 1000;
+
+        const speedScale =
+          midiPlayback.sourceBpm / midiPlayback.bpm;
+
+        const sourceElapsedSeconds =
+          elapsedSeconds / speedScale;
+
+        const beatDuration =
+          60 / midiPlayback.currentSourceBpm;
+
+        const nextBeatSourceSeconds =
+          Math.ceil(sourceElapsedSeconds / beatDuration) *
+          beatDuration;
+
+        const secondsUntilNextBeat =
+          Math.max(
+            0,
+            (nextBeatSourceSeconds - sourceElapsedSeconds) *
+            speedScale
+          );
+
+        metronomeNextBeatTime =
+          metronomeAudioContext.currentTime +
+          Math.max(0.02, secondsUntilNextBeat);
+      } else {
+        metronomeNextBeatTime =
+          metronomeAudioContext.currentTime + 0.02;
+      }
 
       if (metronomeTimer) clearInterval(metronomeTimer);
       metronomeSchedule();
@@ -7865,6 +8295,22 @@
       if (e.ctrlKey && e.shiftKey && (e.key === 'ArrowDown' || e.key === '-' || e.key === '_')) {
         e.preventDefault();
         transposeDown();
+      }
+
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'f') {
+        e.preventDefault();
+
+        if (document.fullscreenElement) {
+          document.exitFullscreen().catch(function(error) {
+            console.error('[fullscreen] Could not exit fullscreen:', error);
+          });
+        } else if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(function(error) {
+            console.error('[fullscreen] Could not enter fullscreen:', error);
+          });
+        }
+
+        return;
       }
       if (e.key === 'F1' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
         e.preventDefault();
