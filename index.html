@@ -805,6 +805,23 @@ function selectCell(id, beat, focus = false) {
         event.stopPropagation();
       }
     });
+    // Android IME fallback: some phone keyboards (including Samsung Keyboard)
+    // do not consistently expose Space/Enter through keydown. Keep the desktop
+    // keyboard path above unchanged; only use beforeinput fallback on Android.
+    if (/Android/i.test(navigator.userAgent || "")) {
+      input.addEventListener("beforeinput", event => {
+        if (!editState || editState.input !== input || readingMode) return;
+        const isSpace = event.inputType === "insertText" && event.data === " ";
+        const isEnter = event.inputType === "insertLineBreak" ||
+                        event.inputType === "insertParagraph" ||
+                        (event.inputType === "insertText" && (event.data === "\n" || event.data === "\r"));
+        if (!isSpace && !isEnter) return;
+        event.preventDefault();
+        event.stopPropagation();
+        if (isSpace) advanceCellAfterSpace();
+        else advanceCellAfterEnter();
+      });
+    }
     input.addEventListener("blur", () => {
       if (editState && editState.input === input) commitEdit();
     });
