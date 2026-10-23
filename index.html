@@ -212,7 +212,7 @@ body.reading #fitButton { display:inline-block !important; position:fixed; top:6
     if (!root) return { base: mainChord, superscript: "", bass };
     const suffix = root[2];
     // Chord quality and extensions from 7 onward are raised; sus/add/omit/alterations are also raised.
-    const marker = suffix.search(/(?:7|sus|add|omit|\(|[♯♭]\d)/i);
+    const marker = suffix.search(/(?:13|11|9|7|5|sus|add|omit|\(|[♯♭]\d)/i);
     if (marker < 0) return { base: mainChord, superscript: "", bass };
     return { base: root[1] + suffix.slice(0, marker), superscript: suffix.slice(marker), bass };
   }
