@@ -48,7 +48,8 @@
   .section-cell { background:var(--section-color,#ec4899); color:#fff; font-size:.82rem; font-weight:800; letter-spacing:.07em; text-transform:none; padding:5px 6px; height:34px; }
   .section-editor { width:100%; border:0; outline:0; padding:0; background:transparent; color:#fff; font-weight:inherit; letter-spacing:inherit; text-transform:none; }
   .section-editor::selection, .cell-editor::selection { background:#64748b; color:#fff; }
-  .section-row.row-selected > td { box-shadow:inset 0 0 0 2px #fff; }
+  .section-row.row-selected > td { box-shadow:none !important; }
+  .image-row.row-selected > td { box-shadow:inset 0 0 0 2px #9ca3af; }
   .image-cell { padding:2px; background:var(--cell-bg); }
   .image-cell img { display:block; width:100%; height:auto; }
   .image-caption { width:100%; display:block; border:0; border-top:1px solid var(--section-color,#ec4899); padding:3px; color:#fff; background:var(--cell-bg); font-size:.75rem; outline:0; }
@@ -116,7 +117,7 @@ body.reading #fitButton { display:inline-block !important; position:fixed; top:6
         <tr><th>PageDown</th><td>⬇️ Add 1 row below</td></tr>
         <tr><th>PageUp</th><td>⬆️ Add 1 row above</td></tr>
         <tr><th>Ctrl + L</th><td>➖ Toggle thick/thin line below the selected row</td></tr>
-        <tr><th>Home</th><td>🏷️ Add section</td></tr>
+        <tr><th>Ctrl + Enter</th><td>🏷️ Add section</td></tr>
         <tr><th>Ctrl + H</th><td>❓ Open this Help window</td></tr>
         <tr><th>Ctrl + I</th><td>🖼️ Insert image</td></tr>
         <tr><th>Ctrl + Delete</th><td>🗑️ Delete the selected chord row</td></tr>
@@ -307,7 +308,6 @@ function selectCell(id, beat, focus = false) {
     if (item.type === "bar") {
       const nextBeat = Math.max(0, Math.min(3, beat));
       selectCell(item.id, nextBeat, true);
-      if (keepCellEditing) beginEdit(currentCell(), null, false);
       return true;
     }
     selectRow(item.id);
@@ -458,6 +458,29 @@ function selectCell(id, beat, focus = false) {
     selectCell(bar.id, 0, true);
   }
 
+  function advanceCellAfterShiftEnter() {
+    if (!editState || readingMode) return;
+    const sourceId = editState.id;
+    const sourceBeat = editState.beat;
+    // Save the chord first, then toggle its bottom line, then explicitly focus the
+    // destination editor. This avoids losing the caret during the line update.
+    commitEdit();
+    toggleThickLineForRow(sourceId);
+    selectedRange = [];
+    rangeAnchor = { id: sourceId, beat: sourceBeat };
+    const index = itemIndex(sourceId);
+    for (let i = index + 1; i < items.length; i++) {
+      if (items[i].type === "bar") {
+        selectCell(items[i].id, 0, true);
+        return;
+      }
+    }
+    const bar = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
+    items.push(bar);
+    render();
+    selectCell(bar.id, 0, true);
+  }
+
   function setGroupStyles(row, color, position) {
     row.style.setProperty("--section-color", color);
     row.classList.add("group-" + position);
@@ -589,6 +612,7 @@ function selectCell(id, beat, focus = false) {
       });
       tr.addEventListener("click", event => { if (!event.target.closest(".chord-cell")) selectRow(item.id); });
     } else if (item.type === "image") {
+      tr.classList.add("image-row");
       const td = document.createElement("td");
       td.className = "image-cell";
       td.colSpan = 4;
@@ -597,33 +621,72 @@ function selectCell(id, beat, focus = false) {
       td.addEventListener("focus", () => selectRow(item.id));
       td.addEventListener("keydown", event => {
         if (readingMode) { event.preventDefault(); return; }
+        const index = itemIndex(item.id);
         if (event.key === "Delete") {
           event.preventDefault(); event.stopPropagation();
-          const index = itemIndex(item.id);
           if (index < 0) return;
           const bar = { id: item.id, type: "bar", beats: ["", "", "", ""] };
           items[index] = bar;
-          selected = { id: bar.id, beat: 0 }; selectedRange = []; rangeAnchor = { id: bar.id, beat: 0 };
-          render(); selectCell(bar.id, 0, true); say("Image removed; empty chord row restored.");
+          selected = { id: bar.id, beat: rememberedSectionColumn };
+          selectedRange = []; rangeAnchor = { id: bar.id, beat: rememberedSectionColumn };
+          render(); selectCell(bar.id, rememberedSectionColumn, true);
+          say("Image removed; empty chord row restored.");
           return;
         }
-        if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) return;
+        if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter", " "].includes(event.key)) return;
         event.preventDefault(); event.stopPropagation();
-        const index = itemIndex(item.id);
-        const direction = (event.key === "ArrowUp" || event.key === "ArrowLeft") ? -1 : 1;
-        if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-          for (let i = index + direction; i >= 0 && i < items.length; i += direction) {
-            if (items[i].type === "bar") { selectCell(items[i].id, direction < 0 ? 3 : 0, true); return; }
-            if (items[i].type === "section") {
-              const heading = area.querySelector('tr[data-id="' + items[i].id + '"] .section-editor');
-              if (heading) heading.focus(); return;
+        if (index < 0) return;
+        const col = Math.max(0, Math.min(3, rememberedSectionColumn));
+
+        // Enter and Space advance one chart row from an image just as they do during
+        // chord entry. A chord row starts at column one; image rows keep their frame.
+        if (event.key === "Enter" || event.key === " ") {
+          const destination = index + 1;
+          if (destination >= items.length) {
+            const bar = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
+            items.splice(index + 1, 0, bar);
+            render(); selectCell(bar.id, 0, true);
+          } else focusItemAt(destination, 0, true);
+          return;
+        }
+
+        if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+          const direction = event.key === "ArrowUp" ? -1 : 1;
+          const destination = index + direction;
+          if (destination < 0) { td.focus({ preventScroll: true }); return; }
+          if (destination >= items.length) {
+            const bar = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
+            items.splice(index + 1, 0, bar);
+            selected = { id: bar.id, beat: col };
+            selectedRange = []; rangeAnchor = { id: bar.id, beat: col };
+            render(); selectCell(bar.id, col, true);
+            return;
+          }
+          const destinationItem = items[destination];
+          if (destinationItem.type === "bar") {
+            selectCell(destinationItem.id, col, true);
+            if (!editState || editState.id !== destinationItem.id || editState.beat !== col) {
+              const cell = currentCell();
+              if (cell) beginEdit(cell, null, false);
+            } else if (editState.input && document.activeElement !== editState.input) {
+              editState.input.focus({ preventScroll: true });
+            }
+          } else {
+            focusItemAt(destination, col, true);
+            if (destinationItem.type === "image") {
+              const nextImageCell = area.querySelector('tr[data-id="' + destinationItem.id + '"] .image-cell');
+              if (nextImageCell) nextImageCell.focus({ preventScroll: true });
             }
           }
-          td.focus(); return;
+          return;
         }
-        const destination = index + direction;
-        if (destination < 0 || destination >= items.length) { td.focus(); return; }
-        focusItemAt(destination, rememberedSectionColumn, true);
+
+        // Horizontal arrows are intentionally inert on image rows. Keeping focus
+        // on the image prevents browser scrolling and accidental focus loss.
+        if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+          td.focus({ preventScroll: true });
+          return;
+        }
       });
       const img = document.createElement("img");
       img.src = item.data;
@@ -725,6 +788,9 @@ function selectCell(id, beat, focus = false) {
       // clear the entire chord; the updated input value is saved on the next navigation.
       if (event.key === "Escape") {
         event.stopPropagation(); bar.beats[beat] = oldValue; editState = null; render(); selectCell(id, beat, true);
+      } else if (event.key === "Enter" && event.shiftKey) {
+        event.stopPropagation();
+        advanceCellAfterShiftEnter();
       } else if (event.key === "Enter") {
         event.stopPropagation();
         advanceCellAfterEnter();
@@ -825,18 +891,21 @@ function selectCell(id, beat, focus = false) {
     if (event.key === "Delete" || event.key === "Backspace") { event.preventDefault(); event.stopPropagation(); const bar = getBar(id); if (bar) bar.beats[beat] = ""; render(); selectCell(id, beat, true); return; }
   }
   function addBarAfter(itemId = selected.id) {
+    if (editState) commitEdit();
     let index = itemIndex(itemId); if (index < 0) index = items.length - 1;
     const bar = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
     items.splice(index + 1, 0, bar); selected = { id: bar.id, beat: 0 };
     render(); selectCell(bar.id, 0, true); say("Bar added.");
   }
   function addRowAt(index, beat = 0) {
+    if (editState) commitEdit();
     const bar = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
     items.splice(Math.max(0, Math.min(index, items.length)), 0, bar);
     selected = { id: bar.id, beat: Math.max(0, Math.min(3, beat)) };
     render(); selectCell(bar.id, selected.beat, true); say("Chord row added.");
   }
   function addSelectedRow(direction) {
+    if (editState) commitEdit();
     const index = itemIndex(selected.id);
     if (index < 0) { say("Select a row first."); return; }
     addRowAt(index + (direction > 0 ? 1 : 0), selected.beat || 0);
@@ -880,26 +949,30 @@ function selectCell(id, beat, focus = false) {
     if (index < 0 || getItem(selected.id)?.type !== "bar") return;
     const oldBeat = selected.beat;
     items.splice(index, 1);
-    // Prefer the next chord row below; if none exists, use the closest row above.
-    let target = null;
-    for (let i = index; i < items.length; i++) {
-      if (items[i].type === "bar") { target = items[i]; break; }
+    // Keep the caret at the same visual position when possible: after deleting
+    // a row, the item that was immediately below slides into its place. Only
+    // when the deleted row was the final item do we move up to the previous item.
+    let targetIndex;
+    if (index < items.length) {
+      targetIndex = index;
+    } else {
+      targetIndex = items.length - 1;
     }
-    if (!target) {
-      for (let i = Math.min(index - 1, items.length - 1); i >= 0; i--) {
-        if (items[i].type === "bar") { target = items[i]; break; }
-      }
+    if (targetIndex < 0) {
+      const bar = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
+      items.splice(0, 0, bar);
+      targetIndex = 0;
     }
-    if (!target) {
-      target = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
-      items.splice(Math.min(index, items.length), 0, target);
-    }
+    selectedRange = [];
+    const target = items[targetIndex];
     selected = { id: target.id, beat: oldBeat };
+    rangeAnchor = { id: target.id, beat: oldBeat };
     render();
-    selectCell(target.id, oldBeat, true);
+    focusItemAt(targetIndex, oldBeat, true);
     say("Chord row deleted.");
   }
   function addSection() {
+    if (editState) commitEdit();
     const existing = items.filter(item => item.type === "section").length;
     let name = "New Section";
     if (items.some(item => item.type === "section" && item.text === name)) {
@@ -916,16 +989,41 @@ function selectCell(id, beat, focus = false) {
   function insertImages(files) {
     const chosen = Array.from(files).filter(file => file.type.startsWith("image/"));
     if (!chosen.length) return;
-    let index = itemIndex(selected.id); if (index < 0) index = items.length - 1;
-    const loaded = []; let remaining = chosen.length;
+    if (editState) commitEdit();
+    let index = itemIndex(selected.id);
+    if (index < 0) index = Math.max(0, items.length - 1);
+    const targetId = selected.id;
+    const loaded = []; let remaining = chosen.length; let failed = false;
     chosen.forEach(file => {
       const reader = new FileReader();
       reader.onload = () => {
         loaded.push({ id: idCounter++, type: "image", data: reader.result, alt: file.name, caption: "" });
         remaining--;
-        if (!remaining) { items.splice(index + 1, 0, ...loaded); render(); say(loaded.length + " image(s) inserted and embedded in the song."); }
+        if (!remaining) {
+          // Replace the selected row with the image(s), then return immediately to
+          // editable chord-cell mode in the row below the inserted image block.
+          const currentIndex = itemIndex(targetId);
+          const insertAt = currentIndex >= 0 ? currentIndex : Math.min(index, items.length);
+          items.splice(insertAt, currentIndex >= 0 ? 1 : 0, ...loaded);
+
+          let nextIndex = insertAt + loaded.length;
+          let nextItem = items[nextIndex];
+          // The destination must be an editable four-cell row. If the image block
+          // is at the end (or the next item is a section/image), create a row directly below it.
+          if (!nextItem || nextItem.type !== "bar") {
+            const bar = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
+            items.splice(nextIndex, 0, bar);
+            nextItem = bar;
+          }
+          const nextBeat = Math.max(0, Math.min(3, Number(selected.beat) || 0));
+          selected = { id: nextItem.id, beat: nextBeat };
+          selectedRange = []; rangeAnchor = { id: nextItem.id, beat: nextBeat };
+          render();
+          selectCell(nextItem.id, nextBeat, true);
+          say(loaded.length + " image(s) inserted. Ready to edit the chord row below.");
+        }
       };
-      reader.onerror = () => { remaining--; say("Could not read " + file.name + "."); };
+      reader.onerror = () => { remaining--; failed = true; if (!remaining) say("Could not read one or more selected images."); };
       reader.readAsDataURL(file);
     });
   }
@@ -961,21 +1059,23 @@ function selectCell(id, beat, focus = false) {
   addRowBelowButton.addEventListener("click", () => addSelectedRow(1));
   removeRowButton.addEventListener("click", removeSelectedRow);
   document.getElementById("insertImageButton").addEventListener("click", () => imageInput.click());
-  thickLineButton.addEventListener("click", () => {
-    if (selected.id === null || getItem(selected.id)?.type !== "bar") return;
-    const id = selected.id;
+  function toggleThickLineForRow(id) {
+    if (id === null || getItem(id)?.type !== "bar") return;
     const key = String(id);
     if (thickLines.has(key)) thickLines.delete(key);
     else thickLines.add(key);
-    // Update the visible row in place so the line changes immediately without
-    // re-rendering the active chord editor or disturbing its blinking caret.
+    // Update in place so the line changes immediately without disturbing the caret.
     const row = area.querySelector('tr[data-id="' + id + '"]');
     if (row) row.querySelectorAll(".chord-cell").forEach(cell => {
       cell.classList.toggle("thick-line-below", thickLines.has(key));
     });
-    const isThick = thickLines.has(key);
-    thickLineButton.textContent = isThick ? "Make Line Below Thin" : "Make Line Below Thick";
+    const isSelectedRow = selected.id === id;
+    if (isSelectedRow) thickLineButton.textContent = thickLines.has(key) ? "Make Line Below Thin" : "Make Line Below Thick";
     updateToolbar();
+  }
+  thickLineButton.addEventListener("click", () => {
+    if (selected.id === null || getItem(selected.id)?.type !== "bar") return;
+    toggleThickLineForRow(selected.id);
   });
   imageInput.addEventListener("change", () => { insertImages(imageInput.files); imageInput.value = ""; });
   document.getElementById("saveButton").addEventListener("click", saveSong);
@@ -1005,6 +1105,37 @@ function selectCell(id, beat, focus = false) {
   }, true);
 
   document.addEventListener("keydown", event => {
+    // Image-row navigation is handled by the focused image cell. This capture guard
+    // prevents the browser from scrolling if focus briefly shifts during a render.
+    const activeImageCell = event.target && event.target.closest && event.target.closest(".image-cell");
+    if (!readingMode && activeImageCell && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+      event.preventDefault();
+      event.stopPropagation();
+      const row = activeImageCell.closest("tr[data-id]");
+      const rowId = row ? Number(row.dataset.id) : null;
+      const rowIndex = rowId === null ? -1 : itemIndex(rowId);
+      if (rowIndex >= 0 && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
+        activeImageCell.focus({ preventScroll: true });
+        return;
+      }
+      if (rowIndex >= 0 && (event.key === "ArrowUp" || event.key === "ArrowDown")) {
+        const direction = event.key === "ArrowDown" ? 1 : -1;
+        const destination = rowIndex + direction;
+        if (destination < 0) { activeImageCell.focus({ preventScroll: true }); return; }
+        if (destination >= items.length) {
+          if (direction > 0) {
+            const bar = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
+            items.splice(rowIndex + 1, 0, bar);
+            selected = { id: bar.id, beat: rememberedSectionColumn };
+            selectedRange = []; rangeAnchor = { id: bar.id, beat: rememberedSectionColumn };
+            render(); selectCell(bar.id, rememberedSectionColumn, true);
+          } else activeImageCell.focus({ preventScroll: true });
+          return;
+        }
+        focusItemAt(destination, rememberedSectionColumn, true);
+        return;
+      }
+    }
     // Tab is reserved for chart-cell navigation; never let the browser move focus to toolbar/page controls.
     if (event.key === "Tab" && !readingMode) {
       event.preventDefault();
@@ -1020,7 +1151,7 @@ function selectCell(id, beat, focus = false) {
       return;
     }
     // Keep browser/page scrolling from consuming the requested navigation shortcuts.
-    if (["Home", "End", "PageUp", "PageDown"].includes(event.key)) event.preventDefault();
+    if (["End", "PageUp", "PageDown"].includes(event.key)) event.preventDefault();
     if (event.ctrlKey && event.key.toLowerCase() === "h") {
       event.preventDefault(); event.stopPropagation();
       if (!helpDialog.open) helpDialog.showModal();
@@ -1035,7 +1166,7 @@ function selectCell(id, beat, focus = false) {
     const isTextEntry = shortcutTarget && (shortcutTarget.isContentEditable || shortcutTarget.matches("input, textarea, select"));
     if (!isTextEntry && event.key === "PageDown") { event.preventDefault(); event.stopPropagation(); addRowBelowButton.click(); return; }
     if (!isTextEntry && event.key === "PageUp") { event.preventDefault(); event.stopPropagation(); addRowAboveButton.click(); return; }
-    if (event.key === "Home") {
+    if (event.ctrlKey && event.key === "Enter") {
       event.preventDefault(); event.stopPropagation();
       if (editState) commitEdit();
       addSection();
