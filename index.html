@@ -118,9 +118,9 @@ body.reading #fitButton { display:inline-block !important; position:fixed; top:6
         <tr><th>Ctrl + L</th><td>➖ Toggle thick/thin line below the selected row</td></tr>
         <tr><th>Home</th><td>🏷️ Add section</td></tr>
         <tr><th>Ctrl + H</th><td>❓ Open this Help window</td></tr>
+        <tr><th>Ctrl + I</th><td>🖼️ Insert image</td></tr>
         <tr><th>Ctrl + Delete</th><td>🗑️ Delete the selected chord row</td></tr>
         <tr><th>Arrow keys</th><td>↔️ Navigate between chord cells and rows</td></tr>
-        <tr><th>Enter / F2</th><td>✏️ Enter or leave chord editing</td></tr>
         <tr><th>Delete</th><td>⌫ Clear the selected chord</td></tr>
         <tr><th>Ctrl + C / Ctrl + V</th><td>📋 Copy / paste a chord cell</td></tr>
       </tbody>
@@ -316,7 +316,8 @@ function selectCell(id, beat, focus = false) {
       const target = area.querySelector('tr[data-id="' + item.id + '"] .section-editor');
       if (target) target.focus();
     } else if (item.type === "image") {
-      const target = area.querySelector('tr[data-id="' + item.id + '"] .image-caption');
+      rememberedSectionColumn = Math.max(0, Math.min(3, beat));
+      const target = area.querySelector('tr[data-id="' + item.id + '"] .image-cell');
       if (target) target.focus();
     }
     return true;
@@ -369,15 +370,19 @@ function selectCell(id, beat, focus = false) {
       // Navigate through the chart's vertical structure, including section-title rows.
       let destination = -1;
       for (let i = index + direction; i >= 0 && i < items.length; i += direction) {
-        if (items[i].type === "image") continue;
         destination = i;
         break;
       }
       if (destination >= 0 && items[destination].type === "section") {
-        commitEdit();
         render();
         const headingInput = area.querySelector('tr[data-id="' + items[destination].id + '"] .section-editor');
         if (headingInput) headingInput.focus();
+        return;
+      }
+      if (destination >= 0 && items[destination].type === "image") {
+        render();
+        const imageCell = area.querySelector('tr[data-id="' + items[destination].id + '"] .image-cell');
+        if (imageCell) imageCell.focus();
         return;
       }
       if (destination >= 0 && items[destination].type === "bar") {
@@ -523,12 +528,14 @@ function selectCell(id, beat, focus = false) {
           // down enters this section's first chord row, keeping the remembered column.
           if (direction > 0) {
             for (let i = index + 1; i < items.length; i++) {
-              if (items[i].type === "bar") { selectCell(items[i].id, rememberedSectionColumn, true); return; }
               if (items[i].type === "section") break;
+              if (items[i].type === "bar") { selectCell(items[i].id, rememberedSectionColumn, true); return; }
+              if (items[i].type === "image") { focusItemAt(i, rememberedSectionColumn, true); return; }
             }
           } else {
             for (let i = index - 1; i >= 0; i--) {
               if (items[i].type === "bar") { selectCell(items[i].id, rememberedSectionColumn, true); return; }
+              if (items[i].type === "image") { focusItemAt(i, rememberedSectionColumn, true); return; }
               if (items[i].type === "section") break;
             }
           }
@@ -585,6 +592,39 @@ function selectCell(id, beat, focus = false) {
       const td = document.createElement("td");
       td.className = "image-cell";
       td.colSpan = 4;
+      td.tabIndex = 0;
+      td.setAttribute("aria-label", "Inserted image row. Use arrow keys to navigate; Delete to replace with an empty chord row.");
+      td.addEventListener("focus", () => selectRow(item.id));
+      td.addEventListener("keydown", event => {
+        if (readingMode) { event.preventDefault(); return; }
+        if (event.key === "Delete") {
+          event.preventDefault(); event.stopPropagation();
+          const index = itemIndex(item.id);
+          if (index < 0) return;
+          const bar = { id: item.id, type: "bar", beats: ["", "", "", ""] };
+          items[index] = bar;
+          selected = { id: bar.id, beat: 0 }; selectedRange = []; rangeAnchor = { id: bar.id, beat: 0 };
+          render(); selectCell(bar.id, 0, true); say("Image removed; empty chord row restored.");
+          return;
+        }
+        if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) return;
+        event.preventDefault(); event.stopPropagation();
+        const index = itemIndex(item.id);
+        const direction = (event.key === "ArrowUp" || event.key === "ArrowLeft") ? -1 : 1;
+        if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+          for (let i = index + direction; i >= 0 && i < items.length; i += direction) {
+            if (items[i].type === "bar") { selectCell(items[i].id, direction < 0 ? 3 : 0, true); return; }
+            if (items[i].type === "section") {
+              const heading = area.querySelector('tr[data-id="' + items[i].id + '"] .section-editor');
+              if (heading) heading.focus(); return;
+            }
+          }
+          td.focus(); return;
+        }
+        const destination = index + direction;
+        if (destination < 0 || destination >= items.length) { td.focus(); return; }
+        focusItemAt(destination, rememberedSectionColumn, true);
+      });
       const img = document.createElement("img");
       img.src = item.data;
       img.alt = item.alt || "Inserted sheet music";
@@ -1001,6 +1041,11 @@ function selectCell(id, beat, focus = false) {
       addSection();
       return;
     }
+    if (event.ctrlKey && event.key.toLowerCase() === "i") {
+      event.preventDefault(); event.stopPropagation();
+      if (!readingMode) imageInput.click();
+      return;
+    }
     if (event.ctrlKey && event.key.toLowerCase() === "l") { event.preventDefault(); event.stopPropagation(); if (!thickLineButton.disabled) thickLineButton.click(); return; }
     if (event.ctrlKey && event.key === "Delete") {
       const target = event.target;
@@ -1022,7 +1067,7 @@ function selectCell(id, beat, focus = false) {
     }
     if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Delete", "Backspace"].includes(event.key)) return;
     const target = event.target;
-    if (target && (target.classList.contains("section-editor") || target.classList.contains("image-caption") || target === titleInput)) return;
+    if (target && (target.classList.contains("section-editor") || target.classList.contains("image-caption") || target.classList.contains("image-cell") || target === titleInput)) return;
     if (editState) return; // The active editor handles these keys and prevents browser scrolling.
     if (selected.id === null || getItem(selected.id)?.type !== "bar") return;
     const cell = currentCell(); if (!cell) return;
