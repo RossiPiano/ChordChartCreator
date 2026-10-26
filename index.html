@@ -1,1251 +1,1797 @@
+
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>My Chord Chart</title>
+<title>Chord Chart Creator NEW — Version 2305</title>
 <style>
-  :root { --ink:#fff; --muted:#d1d5db; --grid:#cfd5de; --paper:#fff; --head:#eef2f7; --select:#6b7280; --cell-bg:#1f2937; }
-  * { box-sizing:border-box; }
-  body { margin:0; background:#f5f6f8; color:#202633; font-family:Arial,Helvetica,sans-serif; }
-  button,input { font:inherit; }
-  button { border:1px solid #c8ced8; border-radius:4px; padding:6px 9px; background:#fff; color:#202633; cursor:pointer; }
-  button:hover:not(:disabled) { background:#f0f4fa; }
-  button:disabled { opacity:.45; cursor:not-allowed; }
-  button:focus-visible { outline:2px solid #1a73e8; outline-offset:1px; }
-  header,nav,main,.status { width:100%; max-width:1000px; margin-left:auto; margin-right:auto; }
-  header { padding:12px 12px 4px; display:flex; align-items:center; justify-content:space-between; gap:8px; }
-  h1 { font-size:1.35rem; margin:0; font-weight:700; }
-  nav { display:flex; flex-wrap:wrap; gap:5px; padding:6px 12px 10px; }
-  nav button { font-size:.83rem; padding:6px 8px; }
-  nav .primary { background:#1a73e8; color:#fff; border-color:#1a73e8; }
-  nav .primary:hover:not(:disabled) { background:#155fc0; }
-  nav .row-action { background:#f8fafc; }
-  main { padding:0 12px 24px; }
-  #songTitle { width:100%; display:block; border:1px solid transparent; border-radius:2px; padding:4px 2px 8px; margin:0; font-size:clamp(1.2rem,4vw,1.65rem); font-weight:700; color:#202633; background:transparent; }
-  #songTitle:focus { background:#fff; border-color:#1a73e8; outline:none; }
-  #document { width:100%; }
-  table { border-collapse:collapse; table-layout:fixed; width:100%; background:var(--paper); border:0; }
-  col { width:25%; }
-  td { border:1px solid var(--section-color,#ec4899); padding:0; vertical-align:middle; }
-  tr.group-start > td { border-top-width:2px; }
-  tr.group-end > td { border-bottom-width:2px; }
-  tr.group-start > td:first-child, tr.group-end > td:first-child { border-left-width:2px; }
-  tr.group-start > td:last-child, tr.group-end > td:last-child { border-right-width:2px; }
-  tr.group-middle > td:first-child { border-left-width:2px; }
-  tr.group-middle > td:last-child { border-right-width:2px; }
-  .chord-cell { height:40px; min-height:40px; padding:2px 3px; overflow:hidden; white-space:nowrap; text-overflow:clip; text-align:center; font-size:17px; font-weight:600; line-height:1.2; cursor:cell; background:#fff; color:var(--section-color,#ec4899); user-select:none; }
-  .chord-cell sup { font-size:0.68em; line-height:0; vertical-align:super; }
-  .chord-cell .slash-symbol, .chord-cell .slash-bass { font-size:1em; line-height:inherit; display:inline-block; position:relative; vertical-align:baseline; }
-  .chord-cell .slash-symbol { top:0.12em; }
-  .chord-cell .slash-bass { top:0.25em; }
-  .chord-cell.thick-line-below { border-bottom:3px solid var(--section-color,#ec4899) !important; }
-  .chord-cell.range-selected { background: #dbeafe !important; box-shadow: inset 0 0 0 1px #60a5fa; }
-.chord-cell.selected { outline:none !important; position:relative; z-index:2; }
-  .chord-cell.editing { padding:2px 3px; background:#fff; height:40px; min-height:40px; }
-.cell-editor { width:100%; height:100%; min-width:0; border:0; outline:0; padding:2px 3px; box-sizing:border-box; background:#fff; color:inherit; text-align:center; font-size:inherit; font-weight:inherit; line-height:inherit; white-space:nowrap; }
+:root {
+  --ink:#202633;
+  --grid:#cfd5de;
+  --blue:#1a73e8;
+  --cell-height:42px;
+}
+* { box-sizing:border-box; }
+body {
+  position:relative;
+  margin:0;
+  background:#f5f6f8;
+  color:var(--ink);
+  font-family:Arial,Helvetica,sans-serif;
+}
+button,input,select { font:inherit; }
+button {
+  border:1px solid #c8ced8;
+  border-radius:4px;
+  padding:6px 9px;
+  background:white;
+  color:var(--ink);
+  cursor:pointer;
+}
+button:hover:not(:disabled) { background:#f0f4fa; }
+button:disabled { opacity:.45; cursor:not-allowed; }
+header,nav,main,.status {
+  width:100%;
+  max-width:1100px;
+  margin:auto;
+}
+header {
+  position:relative;
+  z-index:20;
+  padding:6px 12px 4px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+}
+header h1 { font-size:clamp(.9rem,3.5vw,1.25rem); margin:0; white-space:nowrap; }
+.header-actions { display:flex; align-items:center; justify-content:flex-end; gap:5px; flex-shrink:0; }
+.header-actions button { min-height:34px; padding:5px 8px; white-space:nowrap; }
+#menuButton { min-width:38px; font-size:1.1rem; }
+#menuButton[aria-expanded="true"] { background:#d9dee7; border-color:#8b95a5; color:#111827; }
+nav {
+  position:absolute;
+  z-index:30;
+  top:43px;
+  left:max(0px,calc((100vw - 1100px)/2));
+  right:max(0px,calc((100vw - 1100px)/2));
+  max-height:min(70vh,560px);
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  padding:8px 12px 10px;
+  background:#fff;
+  border:1px solid #d5dae3;
+  border-top:0;
+  box-shadow:0 8px 18px #11182720;
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+  opacity:0;
+  visibility:hidden;
+  transform:translateY(-7px);
+  transition:opacity .16s ease,transform .16s ease,visibility .16s;
+}
+body.menu-open nav { opacity:1; visibility:visible; transform:translateY(0); }
+nav button,nav label,nav select { font-size:.83rem; }
+nav button,nav select { min-height:34px; }
+nav label { display:flex; align-items:center; }
+.primary { background:#1a73e8; color:white; border-color:#1a73e8; }
+main { padding:0 12px 24px; }
+.title-row {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:0 0 2px;
+  min-width:0;
+}
+#songTitle {
+  flex:1 1 auto;
+  min-width:0;
+  width:100%;
+  display:block;
+  border:1px solid transparent;
+  padding:2px 2px 3px;
+  margin:0;
+  font-size:clamp(1.2rem,4vw,1.65rem);
+  font-weight:700;
+  background:transparent;
+  color:var(--ink);
+}
+#fitButton { flex:0 0 auto; white-space:nowrap; }
+#songTitle:focus { background:white; border-color:var(--blue); outline:none; }
+#document { width:100%; overflow-x:auto; }
+.chart {
+  border-collapse:collapse;
+  table-layout:fixed;
+  width:100%;
+  background:white;
+}
+.chart col { width:var(--col-width,25%); }
+.chart td {
+  border:1px solid var(--section-color,#ec4899);
+  padding:0;
+  vertical-align:middle;
+}
+.chart td.chord-cell { padding:2px 4px; }
+.chart tr.group-start>td { border-top-width:2px; }
+.chart tr.group-end>td { border-bottom-width:2px; }
+.chart tr.group-start>td:first-child,
+.chart tr.group-end>td:first-child,
+.chart tr.group-middle>td:first-child { border-left-width:2px; }
+.chart tr.group-start>td:last-child,
+.chart tr.group-end>td:last-child,
+.chart tr.group-middle>td:last-child { border-right-width:2px; }
 
-  .section-cell { background:var(--section-color,#ec4899); color:#fff; font-size:.82rem; font-weight:800; letter-spacing:.07em; text-transform:none; padding:5px 6px; height:34px; }
-  .section-editor { width:100%; border:0; outline:0; padding:0; background:transparent; color:#fff; font-weight:inherit; letter-spacing:inherit; text-transform:none; }
-  .section-editor::selection, .cell-editor::selection { background:#64748b; color:#fff; }
-  .section-row.row-selected > td { box-shadow:none !important; }
-  .image-row.row-selected > td { box-shadow:inset 0 0 0 2px #9ca3af; }
-  .image-cell { padding:2px; background:var(--cell-bg); }
-  .image-cell img { display:block; width:100%; height:auto; }
-  .image-caption { width:100%; display:block; border:0; border-top:1px solid var(--section-color,#ec4899); padding:3px; color:#fff; background:var(--cell-bg); font-size:.75rem; outline:0; }
-  .spacer-row td { height:34px; border:0 !important; background:#fff; padding:0; }
-  .help { color:#687386; font-size:.78rem; line-height:1.4; margin:8px 0 0; }
-  #helpDialog { width:min(620px, calc(100vw - 28px)); max-height:min(78vh, 720px); border:1px solid #c8ced8; border-radius:10px; padding:0; color:#202633; box-shadow:0 16px 50px #0003; }
-  #helpDialog::backdrop { background:#11182788; }
-  .help-dialog-header { position:sticky; top:0; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 14px; background:#f8fafc; border-bottom:1px solid #d8dee8; }
-  .help-dialog-header h2 { font-size:1.1rem; margin:0; }
-  .help-dialog-content { overflow-y:auto; max-height:calc(min(78vh, 720px) - 58px); padding:10px 14px 16px; }
-  .shortcut-table { border-collapse:collapse; width:100%; background:#fff; }
-  .shortcut-table th,.shortcut-table td { border-bottom:1px solid #e5e7eb; padding:9px 7px; text-align:left; vertical-align:top; }
-  .shortcut-table th { width:38%; white-space:nowrap; color:#374151; }
-  .status { color:#687386; font-size:.75rem; padding:0 12px 12px; }
-  #fileInput,#imageInput { display:none; }
-  body.reading { background:#fff; }
-  body.reading header { display:flex !important; position:fixed; top:0; right:0; left:0; z-index:9999; padding:8px 4px; min-height:40px; box-sizing:border-box; background:#fff; overflow:visible; }
-body.reading header h1 { display:block !important; margin:0; padding:4px 90px 4px 4px; font-size:1.2rem; line-height:1.4; overflow:visible; }
-body.reading nav,body.reading .status,body.reading .help,body.reading .image-caption { display:none !important; }
-body.reading #fitButton { display:inline-block !important; position:fixed; top:6px; right:6px; z-index:9999; }
-  body.reading main { max-width:none; padding:0 2px 12px; }
-  body.reading #document { pointer-events:none; }
-  body.reading .chord-cell.range-selected { background: #dbeafe !important; box-shadow: inset 0 0 0 1px #60a5fa; }
-.chord-cell.selected { outline:none !important; }
-  body.reading .row-selected > td { box-shadow:none !important; }
-  body.reading #songTitle { pointer-events:none; }
-  body.reading #songTitle { border:0; padding:1px 0 4px; font-size:clamp(1.05rem,4.8vw,1.5rem); }
-  body.reading .chord-cell { height:40px; min-height:40px; padding:2px 3px; font-size:clamp(12px,3.7vw,19px); background:#fff; color:var(--section-color,#ec4899); }
-  body.reading .section-cell { padding:4px 2px; height:29px; }
-  body.reading .spacer-row td { height:29px; }
-  body.reading .image-cell { padding:0; }
-  @media (min-width:760px) { .chord-cell, .chord-cell.editing, body.reading .chord-cell { height:44px; min-height:44px; font-size:19px; } }
+.chord-cell {
+  height:var(--cell-height);
+  min-width:0;
+  padding:2px 3px;
+  overflow:hidden;
+  background:white;
+  color:var(--section-color,#ec4899);
+  font-size:22px;
+  font-weight:600;
+  line-height:1.2;
+  text-align:left;
+  cursor:cell;
+  vertical-align:middle;
+}
+.chord-cell.selected { outline:none; }
+body.crop-mode .chord-symbol,body.crop-mode .rest-symbol { opacity:.45; }
+.chord-cell.thick-line-below {
+  border-bottom:2px solid var(--section-color,#ec4899)!important;
+}
+.chord-cell.skipped-cell {
+  position:relative;
+  background:#d6d9de!important;
+  color:transparent!important;
+}
+.chord-cell.skipped-cell .cell-content { color:transparent!important; }
+.chord-cell.skipped-cell::before,
+.chord-cell.skipped-cell::after {
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background-repeat:no-repeat;
+  background-size:100% 100%;
+}
+.chord-cell.skipped-cell::before {
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M2 2L98 98' fill='none' stroke='%23dc2626' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.chord-cell.skipped-cell::after {
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M2 98L98 2' fill='none' stroke='%23dc2626' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.rest-symbol { font-size:1.35em; font-weight:700; line-height:1; }
+.chord-cell sup { font-size:.68em; line-height:0; vertical-align:super; }
+
+.chord-symbol { display:inline-block; flex:0 0 auto; width:max-content; max-width:none; white-space:nowrap; overflow:visible; }
+.cell-content {
+  display:flex;
+  align-items:center;
+  width:100%;
+  height:100%;
+  min-width:0;
+  text-align:left;
+  overflow:hidden;
+}
+.subcells {
+  display:flex;
+  width:100%;
+  height:100%;
+  min-width:0;
+  align-items:stretch;
+}
+.subcell {
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  text-align:left;
+  flex:1 1 0;
+  min-width:0;
+  overflow:hidden;
+  white-space:nowrap;
+  padding:0 2px;
+  position:relative;
+}
+.subcell+.subcell { border-left:1px dotted #aeb7c5; }
+.subcell { padding-left:4px; padding-right:2px; }
+.slash-symbol,.slash-bass {
+  display:inline-block;
+  position:relative;
+  font-size:1em;
+  line-height:inherit;
+}
+.slash-symbol { top:.12em; }
+.slash-bass { top:.25em; }
+
+.cell-editor {
+  display:block;
+  width:100%;
+  height:100%;
+  min-width:0;
+  padding:2px 1px;
+  border:0;
+  border-radius:0;
+  outline:0;
+  background:white;
+  color:inherit;
+  text-align:left;
+  font-size:inherit;
+  font-weight:inherit;
+  line-height:inherit;
+}
+.subcell .cell-editor { padding:0; }
+.section-cell {
+  height:34px;
+  padding:5px 6px!important;
+  background:var(--section-color,#ec4899);
+  color:white;
+  font-size:22px;
+  font-weight:800;
+  letter-spacing:.02em;
+  line-height:1;
+}
+.section-editor {
+  width:100%;
+  border:0;
+  outline:0;
+  padding:0;
+  background:transparent;
+  color:white;
+  font-weight:inherit;
+  letter-spacing:inherit;
+}
+.spacer-row td { height:20px; border:0!important; background:white; }
+.chart tbody>.spacer-row:first-child { display:none; }
+.image-cell { padding:0!important; background:white; }
+.image-cell.image-selected { outline:3px solid #8b95a5; outline-offset:-3px; }
+.image-viewport { position:relative; width:100%; overflow:hidden; background:transparent; }
+.image-viewport img { display:block; width:100%; height:auto; }
+.image-viewport.cropped { aspect-ratio:var(--crop-ratio); }
+.image-viewport.cropped img { position:absolute; max-width:none; width:var(--crop-image-width); left:var(--crop-left); top:var(--crop-top); }
+.image-tools { display:flex; gap:6px; padding:5px 0 1px; flex-wrap:wrap; }
+.image-tools button,.crop-actions button { min-height:34px; opacity:1!important; }
+.image-tools button { font-size:.82rem; }
+.crop-panel { display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
+.crop-stage { position:relative; display:inline-block; max-width:100%; line-height:0; touch-action:none; }
+.crop-stage>img { display:block; max-width:100%; max-height:60vh; width:auto; height:auto; }
+.crop-frame { position:absolute; border:2px solid #fff; box-shadow:0 0 0 9999px #0008; cursor:move; touch-action:none; }
+.crop-handle { position:absolute; width:12px; height:12px; border:2px solid #fff; border-radius:2px; background:#1a73e8; transform:translate(-50%,-50%); touch-action:none; }
+.crop-handle[data-handle="n"],.crop-handle[data-handle="s"] { left:50%; cursor:ns-resize; }
+.crop-handle[data-handle="n"] { top:0; }
+.crop-handle[data-handle="s"] { top:100%; }
+.crop-handle[data-handle="e"],.crop-handle[data-handle="w"] { top:50%; cursor:ew-resize; }
+.crop-handle[data-handle="e"] { left:100%; }
+.crop-handle[data-handle="w"] { left:0; }
+.crop-handle[data-handle="nw"] { left:0; top:0; cursor:nwse-resize; }
+.crop-handle[data-handle="se"] { left:100%; top:100%; cursor:nwse-resize; }
+.crop-handle[data-handle="ne"] { left:100%; top:0; cursor:nesw-resize; }
+.crop-handle[data-handle="sw"] { left:0; top:100%; cursor:nesw-resize; }
+.crop-actions { display:flex; gap:6px; flex-wrap:wrap; }
+.crop-actions button { background:#fff; color:var(--ink); border-color:#c8ced8; }
+body.reading .image-tools,body.reading .crop-panel { display:none!important; }
+.status { padding:0 12px 12px; font-size:.76rem; color:#687386; }
+#fileInput,#imageInput { display:none; }
+
+#helpDialog {
+  width:min(640px,calc(100vw - 24px));
+  max-height:80vh;
+  border:1px solid #c8ced8;
+  border-radius:10px;
+  padding:0;
+}
+#helpDialog::backdrop { background:#11182788; }
+.help-head {
+  position:sticky;
+  top:0;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px;
+  background:#f8fafc;
+  border-bottom:1px solid #d8dee8;
+}
+.help-head h2 { margin:0; font-size:1.1rem; }
+.help-body { padding:12px; overflow:auto; max-height:65vh; }
+.help-body table { width:100%; border-collapse:collapse; }
+.help-body th,.help-body td {
+  padding:8px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:left;
+}
+body.reading { background:white; }
+body.reading nav,body.reading .status,body.reading #menuButton { display:none!important; }
+body.reading header { display:flex; padding:4px 8px 2px; }
+body.reading header h1 { font-size:clamp(.78rem,3vw,1rem); }
+body.reading .header-actions { gap:4px; }
+body.reading .header-actions button { min-height:30px; padding:4px 6px; font-size:.78rem; }
+body.reading main { max-width:none; padding:0 3px 12px; }
+body.reading .title-row { gap:5px; margin:0 0 1px; }
+body.reading #document { pointer-events:none; }
+body.reading #songTitle { pointer-events:none; border:0; padding:1px 0; font-size:clamp(1rem,4vw,1.4rem); }
+body.reading #fitButton { padding:4px 7px; font-size:.82rem; }
+body.reading .chord-cell,body.reading .section-cell { font-size:clamp(12px,3.7vw,21px); }
+@media(max-width:540px) {
+  header { padding:5px 7px 3px; gap:4px; }
+  header h1 { font-size:.82rem; }
+  .header-actions { gap:3px; }
+  .header-actions button { font-size:.72rem; min-height:31px; padding:4px 5px; }
+  #menuButton { min-width:32px; font-size:1rem; }
+  nav { top:39px; left:0; right:0; padding:7px; }
+  .title-row { gap:4px; }
+}
+@media(min-width:760px) {
+  .chord-cell { font-size:23px; }
+  .section-cell { font-size:23px; }
+}
 </style>
 </head>
 <body>
 <header>
-  <h1>My Chord Chart</h1>
-  <button id="fitButton" type="button">▶️ Play View</button>
+  <h1>🎼 Chord Chart Creator</h1>
+  <div class="header-actions">
+    <button id="fitButton" type="button">▶️ Play View</button>
+    <button id="helpButton" type="button">❓ Help</button>
+    <button id="menuButton" type="button" aria-label="Toggle chart tools" aria-expanded="false" aria-controls="toolMenu">☰</button>
+  </div>
 </header>
-<nav aria-label="Document tools">
-  <button id="addBarButton" class="primary" type="button">🎼 Add Bar</button>
-  <button id="addSectionButton" type="button">🏷️ Add Section</button>
-  <button id="addRowAboveButton" class="row-action" type="button" disabled>⬆️ Add 1 Row Above</button>
-  <button id="addRowBelowButton" class="row-action" type="button" disabled>⬇️ Add 1 Row Below</button>
-  <button id="removeRowButton" class="row-action" type="button" disabled>🗑️ Remove Row</button>
-<button id="thickLineButton" class="row-action" type="button" disabled>➖ Make Line Below Thick</button>
-  <button id="insertImageButton" type="button">🖼️ Insert Image…</button>
-  <button id="saveButton" type="button">💾 Save Song…</button>
-  <button id="loadButton" type="button">📂 Load Song…</button>
-  <button id="helpButton" type="button">❓ Help</button>
-  <input id="fileInput" type="file" accept="application/json,.json">
+
+<nav id="toolMenu" aria-label="Chart tools">
+  <button id="addBarButton" class="primary">🎼 Add Bar</button>
+  <label for="columnCountSelect">Columns:</label>
+  <select id="columnCountSelect" aria-label="Number of columns">
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4" selected>4</option>
+    <option value="5">5</option>
+    <option value="6">6</option>
+    <option value="7">7</option>
+    <option value="8">8</option>
+    <option value="9">9</option>
+    <option value="10">10</option>
+    <option value="11">11</option>
+    <option value="12">12</option>
+  </select>
+  <button id="addSectionButton">🏷️ Add Section</button>
+  <button id="aboveButton">⬆️ Add Row Above</button>
+  <button id="belowButton">⬇️ Add Row Below</button>
+  <button id="removeButton">🗑️ Remove Row</button>
+  <button id="lineButton">➖ Make Line Below Thick</button>
+  <button id="divideButton" type="button">➕ Add Beat-Cell (Ctrl+Space)</button>
+  <button id="imageButton">🖼️ Insert Image…</button>
+  <button id="saveButton">💾 Save Song…</button>
+  <button id="loadButton">📂 Load Song…</button>
+  <input id="fileInput" type="file" accept=".json,application/json">
   <input id="imageInput" type="file" accept="image/*" multiple>
 </nav>
-<main>
-  <input id="songTitle" aria-label="Song title" value="My Chord Chart" spellcheck="false">
-  <div id="document" aria-label="Song chord chart"></div>
 
+<main>
+  <div class="title-row">
+    <input id="songTitle" aria-label="Song title" value="My Chord Chart">
+  </div>
+  <div id="document"></div>
 </main>
-<div class="status" id="status" role="status" aria-live="polite">Ready. Save your song to keep a portable copy.</div>
-<dialog id="helpDialog" aria-labelledby="helpTitle">
-  <div class="help-dialog-header"><h2 id="helpTitle">❓ Keyboard Shortcuts</h2><button id="closeHelpButton" type="button">✖️ Close</button></div>
-  <div class="help-dialog-content">
-    <table class="shortcut-table">
-      <tbody>
-        <tr><th>PageDown</th><td>⬇️ Add 1 row below</td></tr>
-        <tr><th>PageUp</th><td>⬆️ Add 1 row above</td></tr>
-        <tr><th>Ctrl + L</th><td>➖ Toggle thick/thin line below the selected row</td></tr>
-        <tr><th>Ctrl + Enter</th><td>🏷️ Add section</td></tr>
-        <tr><th>Ctrl + H</th><td>❓ Open this Help window</td></tr>
-        <tr><th>Ctrl + I</th><td>🖼️ Insert image</td></tr>
-        <tr><th>Ctrl + Delete</th><td>🗑️ Delete the selected chord row</td></tr>
-        <tr><th>Arrow keys</th><td>↔️ Navigate between chord cells and rows</td></tr>
-        <tr><th>Delete</th><td>⌫ Clear the selected chord</td></tr>
-        <tr><th>Ctrl + C / Ctrl + V</th><td>📋 Copy / paste a chord cell</td></tr>
-      </tbody>
-    </table>
+<div class="status" id="status" role="status">Ready.</div>
+
+<dialog id="helpDialog">
+  <div class="help-head">
+    <h2>❓ Keyboard Shortcuts</h2>
+    <button id="closeHelpButton">✖️ Close</button>
+  </div>
+  <div class="help-body">
+    <table><tbody>
+      <tr><th>Ctrl + 1…9</th><td>Divide the selected cell into 1–9 beat-cells (Ctrl+1 returns it to one cell)</td></tr>
+      <tr><th>Ctrl + 0</th><td>Divide the selected cell into 10 beat-cells</td></tr>
+      <tr><th>Ctrl + Space</th><td>Add one beat-cell division and focus the new beat-cell</td></tr>
+      <tr><th>[ / ]</th><td>Insert a cell to the left / right of the selected cell</td></tr>
+      <tr><th>\</th><td>Remove the selected cell (a row must keep at least one cell)</td></tr>
+      <tr><th>z / Z</th><td>Enter a quarter-rest symbol</td></tr>
+      <tr><th>x / X</th><td>Mark the selected cell as skipped (gray background with red cross)</td></tr>
+      <tr><th>Space</th><td>While editing a chord, save it and move right</td></tr>
+      <tr><th>Enter</th><td>While editing, save the chord and move to the next row; when a cell is selected, begin editing</td></tr>
+      <tr><th>Shift + Enter</th><td>While editing, toggle the row's bottom line and move down</td></tr>
+      <tr><th>Arrow keys</th><td>Navigate left/right between cells and up/down between rows and section headings; Down at the bottom creates a new row</td></tr>
+      <tr><th>Tab / Shift + Tab</th><td>Move right / left between cells</td></tr>
+      <tr><th>F2</th><td>Edit the selected cell</td></tr>
+      <tr><th>PageUp / PageDown</th><td>Add a row above / below when a cell (not a text editor) is selected</td></tr>
+      <tr><th>Ctrl + L</th><td>Toggle the selected row's bottom-line thickness</td></tr>
+      <tr><th>Ctrl + Enter</th><td>Add a new section</td></tr>
+      <tr><th>Section name End</th><td>Marks the end of the chart and removes all content below it</td></tr>
+      <tr><th>Ctrl + H</th><td>Open Help</td></tr>
+      <tr><th>Ctrl + S</th><td>Save song as a named JSON file</td></tr>
+      <tr><th>Ctrl + O</th><td>Open a JSON song file</td></tr>
+      <tr><th>Ctrl + I</th><td>Insert image</td></tr>
+      <tr><th>Ctrl + Delete</th><td>Delete the selected row or section and its contents</td></tr>
+      <tr><th>Ctrl/Cmd + C / V</th><td>Copy / paste the selected beat-cell's chord</td></tr>
+      <tr><th>Delete</th><td>Clear the selected chord; while editing, clear the chord and keep the editor active</td></tr>
+      <tr><th>Escape</th><td>Cancel the current chord edit and restore its previous value; close Help if it is open</td></tr>
+    </tbody></table>
   </div>
 </dialog>
 
 <script>
 (() => {
-  "use strict";
-  const area = document.getElementById("document");
-  const titleInput = document.getElementById("songTitle");
-  const fileInput = document.getElementById("fileInput");
-  const imageInput = document.getElementById("imageInput");
-  const status = document.getElementById("status");
-  const helpDialog = document.getElementById("helpDialog");
-  const addRowAboveButton = document.getElementById("addRowAboveButton");
-  const addRowBelowButton = document.getElementById("addRowBelowButton");
-  const removeRowButton = document.getElementById("removeRowButton");
-  const thickLineButton = document.getElementById("thickLineButton");
-  let idCounter = 1;
-  let selected = { id: null, beat: 0 };
-  let thickLines = new Set();
-  let readingMode = false;
-  let editState = null;
-  let clipboardText = "";
-  let rangeAnchor = null;
-  let selectedRange = [];
+"use strict";
 
-  let items = [
-    { id: idCounter++, type: "section", text: "Intro" },
-    { id: idCounter++, type: "bar", beats: ["", "", "", ""] }
-  ];
+const $ = selector => document.querySelector(selector);
+const area = $("#document");
+const titleInput = $("#songTitle");
+const status = $("#status");
+const fileInput = $("#fileInput");
+const imageInput = $("#imageInput");
+const helpDialog = $("#helpDialog");
+const divideButton = $("#divideButton");
 
-  const sectionColors = {
-    intro: "#38BDF8", outro: "#38BDF8", verse: "#22C55E",
-    "pre-chorus": "#F59E0B", chorus: "#EF4444", bridge: "#A855F7",
-    instrumental: "#4B5563", custom: "#EC4899"
-  };
-  function say(message) { status.textContent = message; }
-  function itemIndex(id) { return items.findIndex(item => item.id === id); }
-  function getItem(id) { return items.find(item => item.id === id); }
-  function getBar(id) { const item = getItem(id); return item && item.type === "bar" ? item : null; }
-  function currentCell() { return area.querySelector('.chord-cell[data-id="' + selected.id + '"][data-beat="' + selected.beat + '"]'); }
-  function normalizeChord(value) {
-    const raw = String(value || "").trim();
-    if (!raw) return "";
-    const match = raw.match(/^([a-g])((?:##|bb|[#b])?)(.*)$/i);
-    if (!match) return convertAccidentals(raw);
-    const rootLetter = match[1].toUpperCase();
-    const rootAccidental = convertAccidentals(match[2] || "");
-    const root = rootLetter + rootAccidental;
-    let suffix = match[3] || "";
+const sectionColors = {
+  intro:"#38BDF8", outro:"#38BDF8", verse:"#22C55E",
+  "pre-chorus":"#F59E0B", chorus:"#EF4444",
+  bridge:"#A855F7", instrumental:"#4B5563", custom:"#EC4899"
+};
 
-    // Triangle / major-seventh shorthand. Uppercase M means major; lowercase m stays minor.
-    if (/^M/.test(suffix)) suffix = "Δ" + suffix.slice(1);
-    else if (/^[tT]/.test(suffix)) suffix = "Δ" + suffix.slice(1);
-    else {
-      // Half-diminished forms are checked before diminished forms.
-      const half = suffix.match(/^(?:m7\(?b5\)?|m75b|halfdim(?:7)?|hdim(?:7)?|half(?:dim)?(?:7)?|hd(?:im)?(?:7)?|h(?:dim)?(?:7)?)(.*)$/i);
-      if (half) return root + "ø" + convertAccidentals(half[1]);
-      const dim = suffix.match(/^(?:dim|di)(?:7)?(.*)$/i);
-      if (dim) return root + "o" + convertAccidentals(dim[1]);
-      const aug = suffix.match(/^aug(?:mented)?(.*)$/i);
-      if (aug) return root + "+" + convertAccidentals(aug[1]);
-      // Spellings such as Dmaj7, DMa7 and DM7 all become the triangle symbol.
-      const major = suffix.match(/^(?:maj(?:or)?7?|ma7?)(.*)$/i) || suffix.match(/^M7(.*)$/);
-      if (major) return root + "Δ" + convertAccidentals(major[1]);
-      suffix = convertAccidentals(suffix);
-    }
-    return root + convertAccidentals(suffix);
+let idCounter = 1;
+let items = [
+  {id:idCounter++,type:"section",text:"Intro"},
+  {id:idCounter++,type:"bar",beats:["","","",""],divisions:{}}
+];
+let thickLines = new Set();
+let selected = {id:items[1].id,beat:0,sub:0};
+let editState = null;
+let readingMode = false;
+let clipboardText = "";
+let cropEditingId = null;
+let cropWorking = null;
+
+function say(message) { status.textContent = message; }
+function itemIndex(id) { return items.findIndex(item => item.id === id); }
+function getItem(id) { return items.find(item => item.id === id); }
+function getBar(id) {
+  const item = getItem(id);
+  return item && item.type === "bar" ? item : null;
+}
+function currentCell() {
+  return area.querySelector(
+    `.chord-cell[data-id="${selected.id}"][data-beat="${selected.beat}"]`
+  );
+}
+function getValues(bar,beat) {
+  const divided = bar.divisions && bar.divisions[beat];
+  return Array.isArray(divided) && divided.length
+    ? divided : [String(bar.beats[beat] ?? "")];
+}
+function setValues(bar,beat,values) {
+  if (!bar.divisions) bar.divisions = {};
+  if (values.length > 1) {
+    bar.divisions[beat] = values.map(v=>String(v ?? ""));
+    bar.beats[beat] = values[0] || "";
+  } else {
+    delete bar.divisions[beat];
+    bar.beats[beat] = String(values[0] ?? "");
   }
-  function convertAccidentals(text) {
-    return String(text || "")
-      .replace(/##/g, "𝄪").replace(/bb/g, "𝄫")
-      .replace(/#/g, "♯").replace(/b/g, "♭");
-  }
-  function chordDisplayParts(value) {
-    const chord = normalizeChord(value);
-    if (!chord) return { base: "", superscript: "", bass: "" };
-    // In slash chords, keep the bass note after the slash visually lowered.
-    const slashAt = chord.indexOf("/");
-    const mainChord = slashAt >= 0 ? chord.slice(0, slashAt) : chord;
-    const bass = slashAt >= 0 ? chord.slice(slashAt + 1) : "";
-    const special = mainChord.match(/^([A-G](?:𝄪|𝄫|♯|♭)?)([Δoø+])(.*)$/);
-    if (special) return { base: special[1], superscript: special[2] + special[3], bass };
-    const root = mainChord.match(/^([A-G](?:𝄪|𝄫|♯|♭)?)(.*)$/);
-    if (!root) return { base: mainChord, superscript: "", bass };
-    const suffix = root[2];
-    // Chord quality and extensions from 7 onward are raised; sus/add/omit/alterations are also raised.
-    const marker = suffix.search(/(?:13|11|9|7|5|sus|add|omit|\(|[♯♭]\d)/i);
-    if (marker < 0) return { base: mainChord, superscript: "", bass };
-    return { base: root[1] + suffix.slice(0, marker), superscript: suffix.slice(marker), bass };
-  }
-  function renderChordText(cell, value) {
-    const parts = chordDisplayParts(value);
-    cell.replaceChildren(document.createTextNode(parts.base));
-    if (parts.superscript) {
-      const sup = document.createElement("sup");
-      sup.textContent = parts.superscript;
-      cell.append(sup);
-    }
-    if (parts.bass) {
-      // Keep slash-chord characters at full size; lower the slash slightly and bass note a little more.
-      const slash = document.createElement("span");
-      slash.className = "slash-symbol";
-      slash.textContent = "/";
-      cell.append(slash);
-      const bass = document.createElement("span");
-      bass.className = "slash-bass";
-      bass.textContent = parts.bass;
-      cell.append(bass);
-    }
-  }
-  function sectionColor(text) {
-    const normalized = String(text || "").trim().toLowerCase().replace(/[_\s]+/g, "-");
-    if (/^intro(?:\b|[-\d])/.test(normalized) || /^outro(?:\b|[-\d])/.test(normalized)) return sectionColors.intro;
-    if (/^pre-?chorus(?:\b|[-\d])/.test(normalized)) return sectionColors["pre-chorus"];
-    if (/^verse(?:\b|[-\d])/.test(normalized)) return sectionColors.verse;
-    if (/^chorus(?:\b|[-\d])/.test(normalized)) return sectionColors.chorus;
-    if (/^bridge(?:\b|[-\d])/.test(normalized)) return sectionColors.bridge;
-    if (/^instrumental(?:\b|[-\d])/.test(normalized)) return sectionColors.instrumental;
-    return sectionColors.custom;
-  }
-  function updateToolbar() {
-    const exists = !!getItem(selected.id);
-    addRowAboveButton.disabled = !exists;
-    addRowBelowButton.disabled = !exists;
-    removeRowButton.disabled = !exists;
-    const isBar = exists && getItem(selected.id)?.type === "bar";
-    thickLineButton.disabled = !isBar;
-    const key = String(selected.id);
-    thickLineButton.textContent = isBar && thickLines.has(key)
-      ? "Make Line Below Thin"
-      : "Make Line Below Thick";
+}
+function normalizeAccidentals(value) {
+  return String(value || "")
+    .replace(/##/g,"𝄪").replace(/bb/g,"𝄫")
+    .replace(/#/g,"♯").replace(/b/g,"♭");
+}
+function normalizeOneChord(raw) {
+  raw = String(raw ?? "").trim();
+  if (!raw || /^[xXzZ]$/.test(raw)) return raw;
+
+  const slash = raw.indexOf("/");
+  if (slash >= 0) {
+    const main = normalizeOneChord(raw.slice(0,slash));
+    const bassRaw = raw.slice(slash+1).trim();
+    const bassMatch = bassRaw.match(/^([a-g])((?:##|bb|[#b])?)(.*)$/i);
+    const bass = bassMatch
+      ? bassMatch[1].toUpperCase() +
+        normalizeAccidentals(bassMatch[2]) +
+        normalizeAccidentals(bassMatch[3])
+      : normalizeAccidentals(bassRaw);
+    return main + "/" + bass;
   }
 
-function selectCell(id, beat, focus = false) {
-    if (!selectedRange.length || (selected.id !== id || selected.beat !== beat)) { selectedRange = []; rangeAnchor = {id, beat}; }
-    selected = { id, beat };
+  const match = raw.match(/^([a-g])((?:##|bb|[#b])?)(.*)$/i);
+  if (!match) return normalizeAccidentals(raw);
 
-    area.querySelectorAll(".chord-cell").forEach(cell => {
-      cell.classList.toggle(
-        "selected",
-        Number(cell.dataset.id) === id &&
-        Number(cell.dataset.beat) === beat
-      );
-    });
+  const root = match[1].toUpperCase() + normalizeAccidentals(match[2] || "");
+  let suffix = match[3] || "";
 
-    area.querySelectorAll("tr[data-id]").forEach(row => {
-      row.classList.toggle(
-        "row-selected",
-        Number(row.dataset.id) === id
-      );
-    });
+  // Capital M and T/t are explicit major-seventh triangle shortcuts.
+  if (/^M/.test(suffix) || /^[tT]/.test(suffix)) {
+    suffix = "Δ" + suffix.slice(1);
+  } else {
+    const half = suffix.match(
+      /^(?:m7\(?b5\)?|halfdim(?:7)?|hdim(?:7)?|half(?:dim)?(?:7)?|hd(?:im)?(?:7)?|h(?:dim)?(?:7)?)(.*)$/i
+    );
+    if (half) return root + "ø" + normalizeAccidentals(half[1]);
 
-    area.querySelectorAll(".chord-cell").forEach(cell => {
-      const key = Number(cell.dataset.id) + ":" + Number(cell.dataset.beat);
-      cell.classList.toggle("range-selected", selectedRange.includes(key));
-    });
-    updateToolbar();
+    const dim = suffix.match(/^(?:dim|di)(?:7)?(.*)$/i);
+    if (dim) return root + "o" + normalizeAccidentals(dim[1]);
 
-    if (focus) {
-      const cell = currentCell();
-      if (cell) {
-        if (!editState) beginEdit(cell, null, false);
-        else if (editState.id !== id || editState.beat !== beat) { commitEdit(); const fresh = currentCell(); if (fresh) beginEdit(fresh, null, false); }
-      }
-    }
+    const aug = suffix.match(/^aug(?:mented)?(.*)$/i);
+    if (aug) return root + "+" + normalizeAccidentals(aug[1]);
+
+    // Do not parse the "ma" inside "Cmadd9" as a major quality.
+    const major = suffix.match(/^(?:maj(?:or)?7?|ma7?)(.*)$/);
+    if (major) return root + "Δ" + normalizeAccidentals(major[1]);
+    if (/^M7/.test(suffix)) return root + "Δ" + normalizeAccidentals(suffix.slice(2));
   }
+  return root + normalizeAccidentals(suffix);
+}
+function normalizeChord(value) { return normalizeOneChord(value); }
 
-  function selectRow(id) {
-    if (editState) commitEdit();
-    const item = getItem(id);
-    if (!item) return;
-    selected = { id, beat: 0 };
-    area.querySelectorAll(".chord-cell").forEach(cell => cell.classList.remove("selected"));
-    area.querySelectorAll("tr[data-id]").forEach(row => row.classList.toggle("row-selected", Number(row.dataset.id) === id));
-    updateToolbar();
+function chordParts(value) {
+  const chord = normalizeChord(value);
+  if (!chord || /^[xXzZ]$/.test(chord)) return {base:chord,sup:"",bass:""};
+  const slash = chord.indexOf("/");
+  const main = slash >= 0 ? chord.slice(0,slash) : chord;
+  const bass = slash >= 0 ? chord.slice(slash+1) : "";
+  const special = main.match(/^([A-G](?:𝄪|𝄫|♯|♭)?)([Δoø+])(.*)$/);
+  if (special) return {base:special[1],sup:special[2]+special[3],bass};
+  const root = main.match(/^([A-G](?:𝄪|𝄫|♯|♭)?)(.*)$/);
+  if (!root) return {base:main,sup:"",bass};
+  const suffix = root[2];
+  const marker = suffix.search(/(?:13|11|9|7|5|sus|add|omit|\(|[♯♭]\d)/i);
+  if (marker < 0) return {base:main,sup:"",bass};
+  return {base:root[1]+suffix.slice(0,marker),sup:suffix.slice(marker),bass};
+}
+function renderChordContent(container,value) {
+  container.replaceChildren();
+  const raw = String(value ?? "");
+  if (/^[zZ]$/.test(raw)) {
+    const rest = document.createElement("span");
+    rest.className = "rest-symbol";
+    rest.textContent = "𝄽";
+    container.append(rest);
+    return;
   }
-  function focusItemAt(index, beat = 0, keepCellEditing = false) {
-    if (index < 0 || index >= items.length) return false;
-    const item = items[index];
-    if (item.type === "bar") {
-      const nextBeat = Math.max(0, Math.min(3, beat));
-      selectCell(item.id, nextBeat, true);
-      return true;
-    }
-    selectRow(item.id);
+  if (/^[xX]$/.test(raw)) return;
+  const p = chordParts(raw);
+  const symbol = document.createElement("span");
+  symbol.className = "chord-symbol";
+  symbol.append(document.createTextNode(p.base));
+  if (p.sup) {
+    const sup = document.createElement("sup");
+    sup.textContent = p.sup;
+    symbol.append(sup);
+  }
+  if (p.bass) {
+    const slash = document.createElement("span");
+    slash.className = "slash-symbol";
+    slash.textContent = "/";
+    const bass = document.createElement("span");
+    bass.className = "slash-bass";
+    bass.textContent = p.bass;
+    symbol.append(slash,bass);
+  }
+  container.append(symbol);
+}
+function sectionColor(text) {
+  const key = String(text || "").trim().toLowerCase().replace(/[_\s]+/g,"-");
+  if (/^intro(?:\b|[-\d])/.test(key)) return sectionColors.intro;
+  if (/^outro(?:\b|[-\d])/.test(key)) return sectionColors.outro;
+  if (/^pre-?chorus(?:\b|[-\d])/.test(key)) return sectionColors["pre-chorus"];
+  if (/^verse(?:\b|[-\d])/.test(key)) return sectionColors.verse;
+  if (/^chorus(?:\b|[-\d])/.test(key)) return sectionColors.chorus;
+  if (/^bridge(?:\b|[-\d])/.test(key)) return sectionColors.bridge;
+  if (/^instrumental(?:\b|[-\d])/.test(key)) return sectionColors.instrumental;
+  if (key === "end") return "#6b7280";
+  return sectionColors.custom;
+}
+function maxColumns() {
+  const selector = $("#columnCountSelect");
+  const count = Number(selector?.value);
+  return Number.isInteger(count) && count >= 1 && count <= 12 ? count : 4;
+}
+function makeBar(count=maxColumns()) {
+  return {id:idCounter++,type:"bar",
+    beats:Array.from({length:count},()=>""),divisions:{}};
+}
+function updateToolbar() {
+  const item = getItem(selected.id);
+  const isBar = item?.type === "bar";
+  $("#removeButton").disabled = !item;
+  $("#aboveButton").disabled = !item;
+  $("#belowButton").disabled = !item;
+  $("#lineButton").disabled = !isBar;
+  $("#divideButton").disabled = !isBar;
+  $("#lineButton").textContent = isBar && thickLines.has(String(item.id))
+    ? "➖ Make Line Below Thin" : "➖ Make Line Below Thick";
+}
+function groupInfo() {
+  let active = null;
+  let color = sectionColors.custom;
+  const map = new Map();
+  for (const item of items) {
     if (item.type === "section") {
-      const input = area.querySelector('.section-editor');
-      const target = area.querySelector('tr[data-id="' + item.id + '"] .section-editor');
-      if (target) target.focus();
-    } else if (item.type === "image") {
-      rememberedSectionColumn = Math.max(0, Math.min(3, beat));
-      const target = area.querySelector('tr[data-id="' + item.id + '"] .image-cell');
-      if (target) target.focus();
+      active = item.id;
+      color = sectionColor(item.text);
     }
-    return true;
+    map.set(item.id,{group:active,color});
   }
-  function moveFromItem(id, beat, direction, vertical, keepCellEditing = false) {
-    const index = itemIndex(id);
-    if (index < 0 || getItem(id)?.type !== "bar") return;
-    // Horizontal arrows move one cell at a time, then wrap to the adjacent chord row.
-    if (!vertical) {
-      const nextBeat = beat + direction;
-      if (nextBeat >= 0 && nextBeat < 4) {
-        selectCell(id, nextBeat, true);
-        if (keepCellEditing) beginEdit(currentCell(), null, false);
-        return;
-      }
-    }
-    // Navigate only between chord rows; section headings and images must not steal focus.
-    for (let i = index + direction; i >= 0 && i < items.length; i += direction) {
-      if (items[i].type !== "bar") continue;
-      const targetBeat = vertical ? beat : (direction > 0 ? 0 : 3);
-      selectCell(items[i].id, targetBeat, true);
-      if (keepCellEditing) beginEdit(currentCell(), null, false);
-      return;
-    }
-    // Down-arrow at the bottom creates a row in the same column.
-    if (vertical && direction > 0) {
-      const bar = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
-      items.splice(index + 1, 0, bar);
-      selected = { id: bar.id, beat: Math.max(0, Math.min(3, beat)) };
-      render();
-      selectCell(bar.id, selected.beat, true);
-      if (keepCellEditing) beginEdit(currentCell(), null, false);
-    }
-  }
-  let rememberedSectionColumn = 0;
-  function moveWhileEditing(direction, vertical) {
-    if (!editState || readingMode) return;
-    const { id, beat } = editState;
-    rememberedSectionColumn = beat;
-    // Save the chord before moving, then immediately create a fresh editor in the destination cell.
-    commitEdit();
-    selectedRange = [];
-    rangeAnchor = { id, beat };
-    const index = itemIndex(id);
-    if (index < 0) return;
+  return map;
+}
 
-    let targetId = id;
-    let targetBeat = beat;
-    if (vertical) {
-      // Navigate through the chart's vertical structure, including section-title rows.
-      let destination = -1;
-      for (let i = index + direction; i >= 0 && i < items.length; i += direction) {
-        destination = i;
-        break;
-      }
-      if (destination >= 0 && items[destination].type === "section") {
-        render();
-        const headingInput = area.querySelector('tr[data-id="' + items[destination].id + '"] .section-editor');
-        if (headingInput) headingInput.focus();
-        return;
-      }
-      if (destination >= 0 && items[destination].type === "image") {
-        render();
-        const imageCell = area.querySelector('tr[data-id="' + items[destination].id + '"] .image-cell');
-        if (imageCell) imageCell.focus();
-        return;
-      }
-      if (destination >= 0 && items[destination].type === "bar") {
-        targetId = items[destination].id;
-      } else if (direction > 0) {
-        const bar = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
-        items.splice(index + 1, 0, bar);
-        targetId = bar.id;
-      }
-    } else {
-      targetBeat = beat + direction;
-      if (targetBeat < 0 || targetBeat > 3) {
-        const rowDirection = direction > 0 ? 1 : -1;
-        targetBeat = direction > 0 ? 0 : 3;
-        targetId = null;
-        for (let i = index + rowDirection; i >= 0 && i < items.length; i += rowDirection) {
-          if (items[i].type === "bar") { targetId = items[i].id; break; }
-        }
-        if (targetId === null && direction > 0) {
-          const bar = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
-          items.splice(index + 1, 0, bar);
-          targetId = bar.id;
-        }
-        if (targetId === null) { targetId = id; targetBeat = beat; }
-      }
-    }
-    render();
-    selectCell(targetId, targetBeat, true);
-  }
+function fitChordFonts(root) {
+  if (!root) return;
+  const candidates = root.querySelectorAll(".chord-cell .cell-content, .chord-cell .subcell");
+  candidates.forEach(el => {
+    const symbol = el.querySelector(":scope > .chord-symbol, :scope > .rest-symbol");
+    if (!symbol) return;
 
-  function advanceCellAfterSpace() {
-    if (!editState || readingMode) return;
-    const { id, beat } = editState;
-    commitEdit();
-    selectedRange = [];
-    rangeAnchor = { id, beat };
-    if (beat < 3) {
-      selectCell(id, beat + 1, true);
-      return;
-    }
-    // At the end of a row, move to the first cell of the next chord row,
-    // skipping section headings and other non-chord rows.
-    const index = itemIndex(id);
-    for (let i = index + 1; i < items.length; i++) {
-      if (items[i].type === "bar") {
-        selectCell(items[i].id, 0, true);
-        return;
-      }
-    }
-    const bar = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
-    items.push(bar);
-    render();
-    selectCell(bar.id, 0, true);
-  }
+    // Always start from the cell's normal size so repeated renders do not progressively shrink text.
+    const cell = el.closest(".chord-cell");
+    const base = parseFloat(getComputedStyle(cell || el).fontSize) || 22;
+    el.style.fontSize = `${base}px`;
+    symbol.style.fontSize = `${base}px`;
 
-  function advanceCellAfterEnter() {
-    if (!editState || readingMode) return;
-    const { id, beat } = editState;
-    commitEdit();
-    selectedRange = [];
-    rangeAnchor = { id, beat };
-    const index = itemIndex(id);
-    // Enter moves to the first (leftmost) cell of the next chord row, skipping headings/images.
-    for (let i = index + 1; i < items.length; i++) {
-      if (items[i].type === "bar") {
-        selectCell(items[i].id, 0, true);
-        return;
-      }
-    }
-    const bar = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
-    items.push(bar);
-    render();
-    selectCell(bar.id, 0, true);
-  }
+    // A flex item normally shrinks to its container. Disable that behavior before measuring,
+    // otherwise getBoundingClientRect() can report the clipped width rather than the chord's
+    // true, fully formatted width (including superscripts and slash-bass notation).
+    symbol.style.flex = "0 0 auto";
+    symbol.style.width = "max-content";
+    symbol.style.maxWidth = "none";
+    symbol.style.overflow = "visible";
 
-  function advanceCellAfterShiftEnter() {
-    if (!editState || readingMode) return;
-    const sourceId = editState.id;
-    const sourceBeat = editState.beat;
-    // Save the chord first, then toggle its bottom line, then explicitly focus the
-    // destination editor. This avoids losing the caret during the line update.
-    commitEdit();
-    toggleThickLineForRow(sourceId);
-    selectedRange = [];
-    rangeAnchor = { id: sourceId, beat: sourceBeat };
-    const index = itemIndex(sourceId);
-    for (let i = index + 1; i < items.length; i++) {
-      if (items[i].type === "bar") {
-        selectCell(items[i].id, 0, true);
-        return;
-      }
-    }
-    const bar = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
-    items.push(bar);
-    render();
-    selectCell(bar.id, 0, true);
-  }
+    const styles = getComputedStyle(el);
+    const horizontalPadding = (parseFloat(styles.paddingLeft) || 0) +
+      (parseFloat(styles.paddingRight) || 0);
+    // clientWidth includes an element's padding, so remove it and leave a small border-safety gap.
+    const available = Math.max(1, el.clientWidth - horizontalPadding - 1.5);
+    let size = base;
+    let measured = symbol.getBoundingClientRect().width;
 
-  function setGroupStyles(row, color, position) {
-    row.style.setProperty("--section-color", color);
-    row.classList.add("group-" + position);
+    // Measure the actual DOM after the final chord markup and CSS have been applied.
+    // Scale proportionally, then make small corrections for font hinting and fractional pixels.
+    let attempts = 0;
+    while (measured > available && size > 1 && attempts++ < 100) {
+      const ratio = available / measured;
+      size = Math.max(1, size * Math.min(0.97, ratio * 0.985));
+      el.style.fontSize = `${size}px`;
+      symbol.style.fontSize = `${size}px`;
+      measured = symbol.getBoundingClientRect().width;
+    }
+    while (measured > available && size > 0.5 && attempts++ < 150) {
+      size = Math.max(0.5, size - 0.2);
+      el.style.fontSize = `${size}px`;
+      symbol.style.fontSize = `${size}px`;
+      measured = symbol.getBoundingClientRect().width;
+    }
+
+    // Keep the fitted font size on the symbol itself as well as its wrapper. This ensures the
+    // superscript remains proportional to the final chord size and the measured width stays valid.
+    if (measured > available) {
+      size = Math.max(0.5, size * available / measured * 0.95);
+      el.style.fontSize = `${size}px`;
+      symbol.style.fontSize = `${size}px`;
+    }
+  });
+}
+function cropRectFor(item) {
+  return item.crop ? {...item.crop} : {x:0,y:0,w:100,h:100};
+}
+function applyCropFrame(frame, crop) {
+  frame.style.left = `${crop.x}%`;
+  frame.style.top = `${crop.y}%`;
+  frame.style.width = `${crop.w}%`;
+  frame.style.height = `${crop.h}%`;
+}
+function makeCropEditor(item) {
+  const panel = document.createElement("div");
+  panel.className = "crop-panel";
+  const stage = document.createElement("div");
+  stage.className = "crop-stage";
+  const img = document.createElement("img");
+  img.src = item.data;
+  img.alt = item.alt || "Image crop preview";
+  stage.append(img);
+  const frame = document.createElement("div");
+  frame.className = "crop-frame";
+  frame.setAttribute("aria-hidden","true");
+  const handles = ["n","s","e","w","nw","ne","sw","se"];
+  handles.forEach(name=>{
+    const handle=document.createElement("div");
+    handle.className="crop-handle";
+    handle.dataset.handle=name;
+    handle.tabIndex=-1;
+    handle.setAttribute("aria-hidden","true");
+    frame.append(handle);
+  });
+  stage.append(frame);
+  const actions = document.createElement("div");
+  actions.className = "crop-actions";
+  const apply = document.createElement("button");
+  apply.type = "button"; apply.textContent = "Apply Crop";
+  apply.addEventListener("click",()=>{
+    item.crop={...cropWorking};
+    item.width=img.naturalWidth||item.width;
+    item.height=img.naturalHeight||item.height;
+    cropEditingId=null; cropWorking=null; render();
+  });
+  const cancel = document.createElement("button");
+  cancel.type = "button"; cancel.textContent = "Cancel";
+  cancel.addEventListener("click",()=>{ cropEditingId=null; cropWorking=null; render(); });
+  actions.append(apply,cancel);
+  panel.append(stage,actions);
+
+  const syncFrame=()=>applyCropFrame(frame,cropWorking);
+  if (img.complete && img.naturalWidth) {
+    item.width=img.naturalWidth; item.height=img.naturalHeight;
   }
-  function makeRow(item, color, groupPosition) {
+  img.addEventListener("load",()=>{
+    item.width=img.naturalWidth; item.height=img.naturalHeight;
+    syncFrame();
+  });
+  syncFrame();
+
+  function clamp(value,min,max){return Math.max(min,Math.min(max,value));}
+  function startDrag(event,kind){
+    if (readingMode) return;
+    event.preventDefault(); event.stopPropagation();
+    const rect=stage.getBoundingClientRect();
+    const start={x:event.clientX,y:event.clientY,crop:{...cropWorking}};
+    const target=event.currentTarget;
+    target.setPointerCapture?.(event.pointerId);
+    const move=ev=>{
+      const dx=(ev.clientX-start.x)/rect.width*100;
+      const dy=(ev.clientY-start.y)/rect.height*100;
+      const c={...start.crop};
+      const min=5;
+      if(kind==="move"){
+        c.x=clamp(start.crop.x+dx,0,100-c.w);
+        c.y=clamp(start.crop.y+dy,0,100-c.h);
+      } else {
+        if(kind.includes("w")){const nx=clamp(start.crop.x+dx,0,start.crop.x+start.crop.w-min);c.w=start.crop.w+(start.crop.x-nx);c.x=nx;}
+        if(kind.includes("e")) c.w=clamp(start.crop.w+dx,min,100-start.crop.x);
+        if(kind.includes("n")){const ny=clamp(start.crop.y+dy,0,start.crop.y+start.crop.h-min);c.h=start.crop.h+(start.crop.y-ny);c.y=ny;}
+        if(kind.includes("s")) c.h=clamp(start.crop.h+dy,min,100-start.crop.y);
+      }
+      cropWorking=c; syncFrame();
+    };
+    const stop=()=>{
+      target.removeEventListener("pointermove",move);
+      target.removeEventListener("pointerup",stop);
+      target.removeEventListener("pointercancel",stop);
+    };
+    target.addEventListener("pointermove",move);
+    target.addEventListener("pointerup",stop,{once:true});
+    target.addEventListener("pointercancel",stop,{once:true});
+  }
+  frame.addEventListener("pointerdown",event=>{
+    const handle=event.target.closest(".crop-handle");
+    startDrag(event,handle?handle.dataset.handle:"move");
+  });
+  return panel;
+}
+
+function render() {
+  document.body.classList.toggle("crop-mode",cropEditingId!==null && !readingMode);
+  // Render always rebuilds the chart. Editing is attached afterward to a fresh node.
+  const table = document.createElement("table");
+  table.className = "chart";
+  table.setAttribute("aria-label","Chord chart grid");
+
+  const cols = document.createElement("colgroup");
+  const max = maxColumns();
+  for (let i=0;i<max;i++) {
+    const col = document.createElement("col");
+    col.style.setProperty("--col-width",(100/max)+"%");
+    cols.append(col);
+  }
+  table.append(cols);
+
+  const tbody = document.createElement("tbody");
+  const groups = groupInfo();
+
+  items.forEach((item,index) => {
+    const info = groups.get(item.id);
+    const prev = index ? groups.get(items[index-1].id) : null;
+    const next = index+1<items.length ? groups.get(items[index+1].id) : null;
+    const starts = !prev || prev.group !== info.group;
+    const ends = !next || next.group !== info.group;
+
+    if (item.type === "section") {
+      const spacer = document.createElement("tr");
+      spacer.className = "spacer-row";
+      const blank = document.createElement("td");
+      blank.colSpan = max;
+      spacer.append(blank);
+      tbody.append(spacer);
+    }
+
     const tr = document.createElement("tr");
     tr.dataset.id = item.id;
-    tr.style.setProperty("--section-color", color);
-    if (groupPosition === "start" || groupPosition === "middle" || groupPosition === "end") setGroupStyles(tr, color, groupPosition);
+    tr.style.setProperty("--section-color",info.color);
+    tr.classList.add(starts ? "group-start" : "group-middle");
+    if (ends) tr.classList.add("group-end");
 
     if (item.type === "section") {
-      tr.classList.add("section-row");
       const td = document.createElement("td");
       td.className = "section-cell";
-      td.colSpan = 4;
+      td.colSpan = max;
       const input = document.createElement("input");
       input.className = "section-editor";
       input.value = item.text;
-      input.setAttribute("aria-label", "Section heading");
-      input.spellcheck = false;
-      input.addEventListener("focus", () => selectRow(item.id));
-      input.addEventListener("click", () => selectRow(item.id));
-      input.addEventListener("input", () => {
+      input.readOnly = readingMode;
+      input.setAttribute("aria-label","Section heading");
+      input.addEventListener("input",() => {
+        const start = input.selectionStart, end = input.selectionEnd;
         item.text = input.value;
-        const nextColor = sectionColor(item.text);
-        // Re-render after editing ends so the entire section receives its new color.
-        tr.style.setProperty("--section-color", nextColor);
-        td.style.backgroundColor = nextColor;
-        let active = false;
-        items.forEach(entry => {
-          if (entry.id === item.id) active = true;
-          else if (entry.type === "section") active = false;
-          if (active && entry.id !== item.id) {
-            const row = area.querySelector('tr[data-id="' + entry.id + '"]');
-            if (row) row.style.setProperty("--section-color", nextColor);
-            if (row) row.querySelectorAll("td").forEach(cell => { cell.style.borderColor = nextColor; });
-          }
-        });
-        td.style.borderColor = nextColor;
-        say("Section color updated. Press Enter or move focus to apply the full section styling.");
+        // End is a terminal marker: remove every row or section after it.
+        if (String(item.text).trim().toLowerCase() === "end") {
+          const at = itemIndex(item.id);
+          if (at >= 0 && at < items.length - 1) items.splice(at + 1);
+          selected = {id:item.id,beat:0,sub:0};
+        }
+        const freshStart = start, freshEnd = end;
+        render();
+        const fresh = area.querySelector(`tr[data-id="${item.id}"] .section-editor`);
+        if (fresh) {
+          fresh.focus();
+          try { fresh.setSelectionRange(freshStart,freshEnd); } catch {}
+        }
       });
-      input.dataset.originalText = item.text;
-      input.addEventListener("keydown", event => {
-        if (event.key === "Enter") {
-          event.preventDefault(); event.stopPropagation();
-          // Commit the section name, apply its styling, then enter the first chord
-          // cell in the next chord row. Section text is already updated on input.
-          item.text = input.value;
-          const sectionIndex = itemIndex(item.id);
-          render();
-          for (let i = sectionIndex + 1; i < items.length; i++) {
-            if (items[i].type === "bar") { selectCell(items[i].id, 0, true); return; }
-            if (items[i].type === "section") break;
-          }
-          input.focus();
-          input.setSelectionRange(input.value.length, input.value.length);
-          return;
-        }
-        if (event.key === "Escape") {
-          event.preventDefault(); item.text = input.dataset.originalText; input.value = item.text; render();
-          return;
-        }
+      input.addEventListener("keydown",event => {
         if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-          event.preventDefault(); event.stopPropagation();
           const direction = event.key === "ArrowDown" ? 1 : -1;
-          const index = itemIndex(item.id);
-          // Section headings are real navigation stops: up reaches the preceding chord row;
-          // down enters this section's first chord row, keeping the remembered column.
-          if (direction > 0) {
-            for (let i = index + 1; i < items.length; i++) {
-              if (items[i].type === "section") break;
-              if (items[i].type === "bar") { selectCell(items[i].id, rememberedSectionColumn, true); return; }
-              if (items[i].type === "image") { focusItemAt(i, rememberedSectionColumn, true); return; }
-            }
-          } else {
-            for (let i = index - 1; i >= 0; i--) {
-              if (items[i].type === "bar") { selectCell(items[i].id, rememberedSectionColumn, true); return; }
-              if (items[i].type === "image") { focusItemAt(i, rememberedSectionColumn, true); return; }
-              if (items[i].type === "section") break;
-            }
+          if (canMoveVertical(item.id,direction)) {
+            event.preventDefault();
+            event.stopPropagation();
+            moveVertical(item.id,0,direction,0);
           }
-          // At the chart boundary, keep focus in the section title instead of allowing
-          // the browser to move the text caret or leave cell-entry navigation.
-          input.focus();
-        } else if (event.key === "Tab") {
-          event.preventDefault(); event.stopPropagation();
-          const index = itemIndex(item.id);
-          if (event.shiftKey) {
-            for (let i = index - 1; i >= 0; i--) if (items[i].type === "bar") { selectCell(items[i].id, 3, true); beginEdit(currentCell(), null, false); return; }
-          } else {
-            for (let i = index + 1; i < items.length; i++) if (items[i].type === "bar") { selectCell(items[i].id, 0, true); beginEdit(currentCell(), null, false); return; }
-          }
-        } else if (event.key === "ArrowLeft" && input.selectionStart === 0 && input.selectionEnd === 0) {
-          event.preventDefault(); event.stopPropagation();
-          const index = itemIndex(item.id);
-          for (let i = index - 1; i >= 0; i--) if (items[i].type === "bar") { selectCell(items[i].id, 3, true); beginEdit(currentCell(), null, false); return; }
-        } else if (event.key === "ArrowRight" && input.selectionStart === input.value.length && input.selectionEnd === input.value.length) {
-          event.preventDefault(); event.stopPropagation();
-          const index = itemIndex(item.id);
-          for (let i = index + 1; i < items.length; i++) if (items[i].type === "bar") { selectCell(items[i].id, 0, true); beginEdit(currentCell(), null, false); return; }
-        }
+        } else if (event.key === "Enter") {
+          event.preventDefault();
+          const next = items.slice(itemIndex(item.id)+1).find(i=>i.type==="bar");
+          if (next) selectCell(next.id,0,0,true);
+        } else if (event.key === "Escape") input.blur();
       });
       td.append(input);
       tr.append(td);
     } else if (item.type === "bar") {
-      item.beats.forEach((value, beat) => {
+      item.beats.forEach((value,beat) => {
         const td = document.createElement("td");
         td.className = "chord-cell";
-        td.style.color = color;
-        td.tabIndex = 0;
         td.dataset.id = item.id;
         td.dataset.beat = beat;
-        renderChordText(td, value || "");
-        td.addEventListener("click", event => {
-          event.stopPropagation();
+        td.tabIndex = 0;
+        td.style.setProperty("--section-color",info.color);
+
+        const values = getValues(item,beat);
+        if (values.some(v=>/^[xX]$/.test(String(v).trim()))) {
+          td.classList.add("skipped-cell");
+          td.setAttribute("aria-label","Skipped cell");
+        }
+
+        const content = document.createElement("div");
+        content.className = "cell-content";
+
+        if (values.length > 1) {
+          const subcells = document.createElement("div");
+          subcells.className = "subcells";
+          values.forEach((subValue,sub) => {
+            const part = document.createElement("div");
+            part.className = "subcell";
+            part.dataset.sub = sub;
+            renderChordContent(part,subValue);
+            subcells.append(part);
+          });
+          content.append(subcells);
+        } else {
+          renderChordContent(content,value);
+        }
+
+        td.append(content);
+        if (thickLines.has(String(item.id))) td.classList.add("thick-line-below");
+        if (selected.id===item.id && selected.beat===beat) td.classList.add("selected");
+
+        td.addEventListener("click",event => {
           if (readingMode) return;
-          if (editState) {
-            if (editState.id === item.id && editState.beat === beat) return;
-            commitEdit();
-          }
-          if (selected.id === item.id && selected.beat === beat) {
-            beginEdit(td);
-          } else {
-            selectCell(item.id, beat, true);
-          }
+          const subNode = event.target.closest(".subcell");
+          const sub = subNode ? Number(subNode.dataset.sub) : 0;
+
+          if (editState && editState.id===item.id &&
+              editState.beat===beat && editState.sub===sub) return;
+
+          if (editState) commitEdit();
+          selected = {id:item.id,beat,sub};
+          render();
+          beginEdit(currentCell(),null,false);
         });
-        td.addEventListener("keydown", event => handleCellKey(event, td));
+        td.addEventListener("keydown",event=>handleCellKey(event,td));
         tr.append(td);
       });
-      tr.addEventListener("click", event => { if (!event.target.closest(".chord-cell")) selectRow(item.id); });
     } else if (item.type === "image") {
-      tr.classList.add("image-row");
       const td = document.createElement("td");
+      td.colSpan = max;
       td.className = "image-cell";
-      td.colSpan = 4;
       td.tabIndex = 0;
-      td.setAttribute("aria-label", "Inserted image row. Use arrow keys to navigate; Delete to replace with an empty chord row.");
-      td.addEventListener("focus", () => selectRow(item.id));
-      td.addEventListener("keydown", event => {
-        if (readingMode) { event.preventDefault(); return; }
-        const index = itemIndex(item.id);
-        if (event.key === "Delete") {
-          event.preventDefault(); event.stopPropagation();
-          if (index < 0) return;
-          const bar = { id: item.id, type: "bar", beats: ["", "", "", ""] };
-          items[index] = bar;
-          selected = { id: bar.id, beat: rememberedSectionColumn };
-          selectedRange = []; rangeAnchor = { id: bar.id, beat: rememberedSectionColumn };
-          render(); selectCell(bar.id, rememberedSectionColumn, true);
-          say("Image removed; empty chord row restored.");
-          return;
+      if (selected.id === item.id) td.classList.add("image-selected");
+      if (cropEditingId===item.id && !readingMode) {
+        td.append(makeCropEditor(item));
+      } else {
+        const crop=cropRectFor(item);
+        const cropped=!!item.crop && (crop.x>0 || crop.y>0 || crop.w<100 || crop.h<100);
+        const viewport=document.createElement("div");
+        viewport.className="image-viewport"+(cropped?" cropped":"");
+        const img=document.createElement("img");
+        img.src=item.data;
+        img.alt=item.alt||"Inserted image";
+        if (cropped && item.width && item.height) {
+          viewport.style.setProperty("--crop-ratio",String((item.width*crop.w)/(item.height*crop.h)));
+          viewport.style.setProperty("--crop-image-width",`${10000/crop.w}%`);
+          viewport.style.setProperty("--crop-left",`${-crop.x/crop.w*100}%`);
+          viewport.style.setProperty("--crop-top",`${-crop.y/crop.h*100}%`);
         }
-        if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter", " "].includes(event.key)) return;
-        event.preventDefault(); event.stopPropagation();
-        if (index < 0) return;
-        const col = Math.max(0, Math.min(3, rememberedSectionColumn));
-
-        // Enter and Space advance one chart row from an image just as they do during
-        // chord entry. A chord row starts at column one; image rows keep their frame.
-        if (event.key === "Enter" || event.key === " ") {
-          const destination = index + 1;
-          if (destination >= items.length) {
-            const bar = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
-            items.splice(index + 1, 0, bar);
-            render(); selectCell(bar.id, 0, true);
-          } else focusItemAt(destination, 0, true);
-          return;
-        }
-
-        if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-          const direction = event.key === "ArrowUp" ? -1 : 1;
-          const destination = index + direction;
-          if (destination < 0) { td.focus({ preventScroll: true }); return; }
-          if (destination >= items.length) {
-            const bar = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
-            items.splice(index + 1, 0, bar);
-            selected = { id: bar.id, beat: col };
-            selectedRange = []; rangeAnchor = { id: bar.id, beat: col };
-            render(); selectCell(bar.id, col, true);
-            return;
+        img.addEventListener("load",()=>{
+          if (!item.width || !item.height) {
+            item.width=img.naturalWidth; item.height=img.naturalHeight;
+            if (cropped) render();
           }
-          const destinationItem = items[destination];
-          if (destinationItem.type === "bar") {
-            selectCell(destinationItem.id, col, true);
-            if (!editState || editState.id !== destinationItem.id || editState.beat !== col) {
-              const cell = currentCell();
-              if (cell) beginEdit(cell, null, false);
-            } else if (editState.input && document.activeElement !== editState.input) {
-              editState.input.focus({ preventScroll: true });
-            }
-          } else {
-            focusItemAt(destination, col, true);
-            if (destinationItem.type === "image") {
-              const nextImageCell = area.querySelector('tr[data-id="' + destinationItem.id + '"] .image-cell');
-              if (nextImageCell) nextImageCell.focus({ preventScroll: true });
-            }
-          }
-          return;
+        },{once:true});
+        viewport.append(img); td.append(viewport);
+        if (!readingMode) {
+          const tools=document.createElement("div");
+          tools.className="image-tools";
+          const cropButton=document.createElement("button");
+          cropButton.type="button"; cropButton.textContent="✂️ Crop Image";
+          cropButton.addEventListener("click",()=>{
+            if (editState) commitEdit();
+            cropEditingId=item.id; cropWorking=cropRectFor(item); render();
+          });
+          tools.append(cropButton); td.append(tools);
         }
-
-        // Horizontal arrows are intentionally inert on image rows. Keeping focus
-        // on the image prevents browser scrolling and accidental focus loss.
-        if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-          td.focus({ preventScroll: true });
-          return;
+      }
+      td.addEventListener("click",event=>{
+        if (readingMode || event.target.closest("button,.crop-panel")) return;
+        if (editState) commitEdit();
+        selected={id:item.id,beat:0,sub:0};
+        render();
+        const fresh=area.querySelector(`tr[data-id="${item.id}"] .image-cell`);
+        if (fresh) { fresh.classList.add("image-selected"); fresh.focus(); }
+      });
+      td.addEventListener("keydown",event=>{
+        if (event.key==="Delete" && !event.ctrlKey && !event.metaKey) {
+          event.preventDefault();
+          const idx=itemIndex(item.id);
+          if (idx>=0) items[idx]=makeBar(maxColumns());
+          selected={id:items[Math.max(0,idx)].id,beat:0,sub:0};
+          render();
+          beginEdit(currentCell(),null,false);
         }
       });
-      const img = document.createElement("img");
-      img.src = item.data;
-      img.alt = item.alt || "Inserted sheet music";
-      td.append(img);
-      const caption = document.createElement("input");
-      caption.className = "image-caption";
-      caption.placeholder = "Optional image note";
-      caption.value = item.caption || "";
-      caption.setAttribute("aria-label", "Image caption");
-      caption.addEventListener("input", () => { item.caption = caption.value; });
-      td.append(caption);
-      td.addEventListener("click", () => selectRow(item.id));
       tr.append(td);
     }
-    if (Number(selected.id) === item.id) tr.classList.add("row-selected");
-    return tr;
-  }
-
-  function render() {
-    if (editState) return;
-    const table = document.createElement("table");
-    table.setAttribute("aria-label", "Chord chart grid");
-    const colgroup = document.createElement("colgroup");
-    for (let i = 0; i < 4; i++) colgroup.append(document.createElement("col"));
-    table.append(colgroup);
-    const tbody = document.createElement("tbody");
-
-    let activeSection = null;
-    let activeColor = sectionColors.custom;
-    const groupFor = new Map();
-    items.forEach(item => {
-      if (item.type === "section") { activeSection = item; activeColor = sectionColor(item.text); }
-      groupFor.set(item.id, { color: activeColor, group: activeSection ? activeSection.id : "default" });
-    });
-    items.forEach((item, index) => {
-      const info = groupFor.get(item.id);
-      const prev = index > 0 ? groupFor.get(items[index - 1].id) : null;
-      const next = index + 1 < items.length ? groupFor.get(items[index + 1].id) : null;
-      const starts = !prev || prev.group !== info.group;
-      const ends = !next || next.group !== info.group;
-      const position = starts && ends ? "start" : starts ? "start" : ends ? "end" : "middle";
-      if (item.type === "section") {
-        const spacer = document.createElement("tr");
-        spacer.className = "spacer-row";
-        const blank = document.createElement("td"); blank.colSpan = 4; blank.setAttribute("aria-hidden", "true");
-        spacer.append(blank); tbody.append(spacer);
-      }
-      const row = makeRow(item, info.color, position);
-      if (item.type === "bar") {
-        if (thickLines.has(String(item.id))) {
-          row.querySelectorAll(".chord-cell").forEach(cell => cell.classList.add("thick-line-below"));
-        }
-      }
-      if (starts && ends) row.classList.add("group-end");
-      tbody.append(row);
-    });
-    table.append(tbody);
-    area.replaceChildren(table);
-    area.querySelectorAll(".chord-cell").forEach(cell => cell.classList.toggle(
-      "selected", Number(cell.dataset.id) === selected.id && Number(cell.dataset.beat) === selected.beat
-    ));
-    area.querySelectorAll("tr[data-id]").forEach(row => row.classList.toggle("row-selected", Number(row.dataset.id) === selected.id));
-    updateToolbar();
-  }
-
-  function beginEdit(cell, replaceWith = null, selectAll = false) {
-    if (readingMode || !cell || !cell.classList.contains("chord-cell")) return;
-    if (editState) commitEdit();
-    const id = Number(cell.dataset.id), beat = Number(cell.dataset.beat);
-    const bar = getBar(id);
-    if (!bar) return;
-    const oldValue = bar.beats[beat] || "";
-    const input = document.createElement("input");
-    input.className = "cell-editor";
-    input.type = "text";
-    input.value = replaceWith === null ? oldValue : replaceWith;
-    input.setAttribute("aria-label", "Edit chord");
-    input.autocomplete = "off"; input.spellcheck = false;
-    cell.classList.add("editing"); cell.replaceChildren(input);
-    editState = { id, beat, oldValue, input };
-    input.focus();
-    input.setSelectionRange(input.value.length, input.value.length);
-    input.addEventListener("keydown", event => {
-      if (event.key === " ") {
-        event.preventDefault(); event.stopPropagation();
-        advanceCellAfterSpace();
-        return;
-      }
-      if (event.key === "Tab") {
-        event.preventDefault(); event.stopPropagation();
-        moveWhileEditing(event.shiftKey ? -1 : 1, false);
-        return;
-      }
-      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Delete", "Enter"].includes(event.key)) {
-        event.preventDefault();
-      }
-      // Backspace edits the chord text naturally, one character at a time. It must not
-      // clear the entire chord; the updated input value is saved on the next navigation.
-      if (event.key === "Escape") {
-        event.stopPropagation(); bar.beats[beat] = oldValue; editState = null; render(); selectCell(id, beat, true);
-      } else if (event.key === "Enter" && event.shiftKey) {
-        event.stopPropagation();
-        advanceCellAfterShiftEnter();
-      } else if (event.key === "Enter") {
-        event.stopPropagation();
-        advanceCellAfterEnter();
-      } else if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
-        event.stopPropagation(); moveWhileEditing(event.key === "ArrowRight" ? 1 : -1, false);
-      } else if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-        event.stopPropagation(); moveWhileEditing(event.key === "ArrowDown" ? 1 : -1, true);
-      } else if (event.key === "Delete") {
-        event.stopPropagation(); input.value = ""; bar.beats[beat] = ""; editState.oldValue = oldValue;
-      } else if (event.key === "Backspace") {
-        // Allow the native text input behavior: remove only the character before the caret.
-        event.stopPropagation();
-      }
-    });
-    // Android IME fallback: some phone keyboards (including Samsung Keyboard)
-    // do not consistently expose Space/Enter through keydown. Keep the desktop
-    // keyboard path above unchanged; only use these compatibility hooks on Android.
-    if (/Android/i.test(navigator.userAgent || "")) {
-      // If Enter is delivered through beforeinput instead of keydown, remember a
-      // held Shift key when the keyboard/browser exposes it.
-      let androidShiftHeld = false;
-      input.addEventListener("keydown", event => {
-        if (event.key === "Shift") androidShiftHeld = true;
-      });
-      input.addEventListener("keyup", event => {
-        if (event.key === "Shift") androidShiftHeld = false;
-      });
-      input.addEventListener("blur", () => { androidShiftHeld = false; });
-      input.addEventListener("beforeinput", event => {
-        if (!editState || editState.input !== input || readingMode) return;
-        const isSpace = event.inputType === "insertText" && event.data === " ";
-        const isEnter = event.inputType === "insertLineBreak" ||
-                        event.inputType === "insertParagraph" ||
-                        (event.inputType === "insertText" && (event.data === "\\n" || event.data === "\\r"));
-        if (!isSpace && !isEnter) return;
-        event.preventDefault();
-        event.stopPropagation();
-        if (isSpace) advanceCellAfterSpace();
-        else if (event.shiftKey || androidShiftHeld) advanceCellAfterShiftEnter();
-        else advanceCellAfterEnter();
-      });
-    }
-    input.addEventListener("blur", () => {
-      if (editState && editState.input === input) commitEdit();
-    });
-  }
-  function commitEdit() {
-    if (!editState) return;
-    const { id, beat, input } = editState;
-    const bar = getBar(id);
-    if (bar) bar.beats[beat] = normalizeChord(input.value);
-    editState = null;
-    selected = { id, beat };
-    render();
-    const cell = currentCell(); if (cell) cell.classList.add("selected");
-  }
-  function applyRange(targetId, targetBeat) {
-    if (!rangeAnchor) rangeAnchor = { id: selected.id, beat: selected.beat };
-    const bars = items.filter(item => item.type === "bar");
-    const aRow = bars.findIndex(item => item.id === rangeAnchor.id);
-    const bRow = bars.findIndex(item => item.id === targetId);
-    if (aRow < 0 || bRow < 0) return;
-    const r0 = Math.min(aRow,bRow), r1 = Math.max(aRow,bRow);
-    const c0 = Math.min(rangeAnchor.beat,targetBeat), c1 = Math.max(rangeAnchor.beat,targetBeat);
-    selectedRange = [];
-    for (let r=r0;r<=r1;r++) for (let c=c0;c<=c1;c++) selectedRange.push(bars[r].id+":"+c);
-    selected = {id:targetId,beat:targetBeat};
-    area.querySelectorAll(".chord-cell").forEach(cell => {
-      const key = Number(cell.dataset.id)+":"+Number(cell.dataset.beat);
-      cell.classList.toggle("selected", Number(cell.dataset.id)===targetId && Number(cell.dataset.beat)===targetBeat);
-      cell.classList.toggle("range-selected", selectedRange.includes(key));
-    });
-    updateToolbar();
-  }
-  function copyRange() {
-    if (!selectedRange.length) { const bar=getBar(selected.id); clipboardText=bar ? bar.beats[selected.beat] : ""; return; }
-    const bars=items.filter(item=>item.type==="bar");
-    const coords=selectedRange.map(k=>k.split(":").map(Number));
-    const rows=[...new Set(coords.map(([id])=>bars.findIndex(b=>b.id===id)))].sort((a,b)=>a-b);
-    const cols=[...new Set(coords.map(([,beat])=>beat))].sort((a,b)=>a-b);
-    clipboardText=rows.map(r=>cols.map(c=>bars[r]?.beats[c]||"").join("\t")).join("\n");
-  }
-  function pasteRange() {
-    if (!clipboardText) return;
-    const lines=clipboardText.split(/\r?\n/).map(line=>line.split("\t"));
-    const bars=items.filter(item=>item.type==="bar");
-    let start=bars.findIndex(b=>b.id===selected.id); if(start<0) return;
-    lines.forEach((line,r)=>{
-      while (start+r>=bars.length) { const bar={id:idCounter++,type:"bar",beats:["","","",""]}; items.push(bar); bars.push(bar); }
-      line.forEach((value,c)=>{const beat=selected.beat+c;if(beat<4) bars[start+r].beats[beat]=normalizeChord(value);});
-    });
-    selectedRange=[]; render(); selectCell(selected.id,selected.beat,true);
-  }
-  function moveHorizontal(id, beat, direction) {
-    const index = itemIndex(id);
-    if (index < 0) return;
-    if (getItem(id)?.type === "bar") {
-      const nextBeat = beat + direction;
-      if (nextBeat >= 0 && nextBeat < 4) { selectCell(id, nextBeat, true); return; }
-    }
-    moveFromItem(id, beat, direction, false, false);
-  }
-  function moveVertical(id, beat, direction) {
-    moveFromItem(id, beat, direction, true, false);
-  }
-  function handleCellKey(event, cell) {
-    if (readingMode) { event.preventDefault(); return; }
-    const id = Number(cell.dataset.id), beat = Number(cell.dataset.beat);
-    if (event.ctrlKey || event.metaKey) {
-      if (event.key.toLowerCase() === "c") { const bar = getBar(id); clipboardText = bar ? bar.beats[beat] : ""; event.preventDefault(); return; }
-      if (event.key.toLowerCase() === "v") {
-        event.preventDefault();
-        if (clipboardText !== "") { const bar = getBar(id); if (bar) { bar.beats[beat] = clipboardText; render(); selectCell(id, beat, true); } }
-        return;
-      }
-    }
-    if (event.key === "Enter" || event.key === "F2") {
-      event.preventDefault();
-      if (selected.id === id && selected.beat === beat && !editState) beginEdit(cell);
-      return;
-    }
-    if (event.key === "ArrowRight") { event.preventDefault(); moveHorizontal(id, beat, 1); return; }
-    if (event.key === "ArrowLeft") { event.preventDefault(); moveHorizontal(id, beat, -1); return; }
-    if (event.key === "ArrowDown") { event.preventDefault(); moveVertical(id, beat, 1); return; }
-    if (event.key === "ArrowUp") { event.preventDefault(); moveVertical(id, beat, -1); return; }
-    if (event.key === "Delete" || event.key === "Backspace") { event.preventDefault(); event.stopPropagation(); const bar = getBar(id); if (bar) bar.beats[beat] = ""; render(); selectCell(id, beat, true); return; }
-  }
-  function addBarAfter(itemId = selected.id) {
-    if (editState) commitEdit();
-    let index = itemIndex(itemId); if (index < 0) index = items.length - 1;
-    const bar = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
-    items.splice(index + 1, 0, bar); selected = { id: bar.id, beat: 0 };
-    render(); selectCell(bar.id, 0, true); say("Bar added.");
-  }
-  function addRowAt(index, beat = 0) {
-    if (editState) commitEdit();
-    const bar = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
-    items.splice(Math.max(0, Math.min(index, items.length)), 0, bar);
-    selected = { id: bar.id, beat: Math.max(0, Math.min(3, beat)) };
-    render(); selectCell(bar.id, selected.beat, true); say("Chord row added.");
-  }
-  function addSelectedRow(direction) {
-    if (editState) commitEdit();
-    const index = itemIndex(selected.id);
-    if (index < 0) { say("Select a row first."); return; }
-    addRowAt(index + (direction > 0 ? 1 : 0), selected.beat || 0);
-  }
-  function removeSelectedRow() {
-    const index = itemIndex(selected.id);
-    if (index < 0) { say("Select a row first."); return; }
-    const item = items[index];
-    const label = item.type === "section" ? "section heading" : item.type === "image" ? "image row" : "chord row";
-    items.splice(index, 1);
-    selected = { id: null, beat: 0 };
-    render(); say("Row removed.");
-  }
-  function deleteSection(sectionId) {
-    const index = itemIndex(sectionId);
-    if (index < 0 || items[index]?.type !== "section") return;
-    let end = index + 1;
-    while (end < items.length && items[end].type !== "section") end++;
-    items.splice(index, end - index);
-    // Return focus to a nearby chord row, preferring the row now occupying the deleted section's position.
-    let target = null;
-    for (let i = Math.min(index, items.length - 1); i < items.length; i++) {
-      if (items[i].type === "bar") { target = items[i]; break; }
-    }
-    if (!target) {
-      for (let i = Math.min(index - 1, items.length - 1); i >= 0; i--) {
-        if (items[i].type === "bar") { target = items[i]; break; }
-      }
-    }
-    if (!target) {
-      target = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
-      items.splice(Math.min(index, items.length), 0, target);
-    }
-    selected = { id: target.id, beat: 0 };
-    selectedRange = []; rangeAnchor = { id: target.id, beat: 0 };
-    render(); selectCell(target.id, 0, true); say("Section deleted.");
-  }
-  function deleteCurrentChordRow() {
-    if (editState) commitEdit();
-    const index = itemIndex(selected.id);
-    if (index < 0 || getItem(selected.id)?.type !== "bar") return;
-    const oldBeat = selected.beat;
-    items.splice(index, 1);
-    // Keep the caret at the same visual position when possible: after deleting
-    // a row, the item that was immediately below slides into its place. Only
-    // when the deleted row was the final item do we move up to the previous item.
-    let targetIndex;
-    if (index < items.length) {
-      targetIndex = index;
-    } else {
-      targetIndex = items.length - 1;
-    }
-    if (targetIndex < 0) {
-      const bar = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
-      items.splice(0, 0, bar);
-      targetIndex = 0;
-    }
-    selectedRange = [];
-    const target = items[targetIndex];
-    selected = { id: target.id, beat: oldBeat };
-    rangeAnchor = { id: target.id, beat: oldBeat };
-    render();
-    focusItemAt(targetIndex, oldBeat, true);
-    say("Chord row deleted.");
-  }
-  function addSection() {
-    if (editState) commitEdit();
-    const existing = items.filter(item => item.type === "section").length;
-    let name = "New Section";
-    if (items.some(item => item.type === "section" && item.text === name)) {
-      let n = 2; while (items.some(item => item.type === "section" && item.text === name + " " + n)) n++;
-      name = name + " " + n;
-    }
-    const section = { id: idCounter++, type: "section", text: name };
-    let index = itemIndex(selected.id); if (index < 0) index = items.length - 1;
-    const bar = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
-    items.splice(index + 1, 0, section, bar);
-    selected = { id: bar.id, beat: 0 }; selectedRange = []; rangeAnchor = {id:bar.id,beat:0};
-    render(); selectCell(bar.id, 0, true); say("Section added.");
-  }
-  function insertImages(files) {
-    const chosen = Array.from(files).filter(file => file.type.startsWith("image/"));
-    if (!chosen.length) return;
-    if (editState) commitEdit();
-    let index = itemIndex(selected.id);
-    if (index < 0) index = Math.max(0, items.length - 1);
-    const targetId = selected.id;
-    const loaded = []; let remaining = chosen.length; let failed = false;
-    chosen.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        loaded.push({ id: idCounter++, type: "image", data: reader.result, alt: file.name, caption: "" });
-        remaining--;
-        if (!remaining) {
-          // Replace the selected row with the image(s), then return immediately to
-          // editable chord-cell mode in the row below the inserted image block.
-          const currentIndex = itemIndex(targetId);
-          const insertAt = currentIndex >= 0 ? currentIndex : Math.min(index, items.length);
-          items.splice(insertAt, currentIndex >= 0 ? 1 : 0, ...loaded);
-
-          let nextIndex = insertAt + loaded.length;
-          let nextItem = items[nextIndex];
-          // The destination must be an editable four-cell row. If the image block
-          // is at the end (or the next item is a section/image), create a row directly below it.
-          if (!nextItem || nextItem.type !== "bar") {
-            const bar = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
-            items.splice(nextIndex, 0, bar);
-            nextItem = bar;
-          }
-          const nextBeat = Math.max(0, Math.min(3, Number(selected.beat) || 0));
-          selected = { id: nextItem.id, beat: nextBeat };
-          selectedRange = []; rangeAnchor = { id: nextItem.id, beat: nextBeat };
-          render();
-          selectCell(nextItem.id, nextBeat, true);
-          say(loaded.length + " image(s) inserted. Ready to edit the chord row below.");
-        }
-      };
-      reader.onerror = () => { remaining--; failed = true; if (!remaining) say("Could not read one or more selected images."); };
-      reader.readAsDataURL(file);
-    });
-  }
-  function saveSong() {
-    const data = { format: "my-chord-chart", version: 3, title: titleInput.value, items };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob), link = document.createElement("a");
-    const name = (titleInput.value.trim() || "my-chord-chart").replace(/[\\/:*?"<>|]+/g, "-").replace(/\s+/g, "-").slice(0, 80);
-    link.href = url; link.download = name + ".json"; document.body.append(link); link.click(); link.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000); say("Song saved, including embedded images.");
-  }
-  function loadSong(file) {
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const data = JSON.parse(reader.result);
-        if (data.format !== "my-chord-chart" || !Array.isArray(data.items)) throw new Error("Unsupported song file.");
-        items = data.items.map(item => {
-          if (item.type === "section") return { id: idCounter++, type: "section", text: String(item.text || "") };
-          if (item.type === "bar") { const beats = Array.isArray(item.beats) ? item.beats.slice(0,4).map(v => normalizeChord(v)) : []; while (beats.length < 4) beats.push(""); return { id:idCounter++, type:"bar", beats }; }
-          if (item.type === "image" && typeof item.data === "string" && item.data.startsWith("data:image/")) return { id:idCounter++, type:"image", data:item.data, alt:String(item.alt || "Inserted sheet music"), caption:String(item.caption || "") };
-          return null;
-        }).filter(Boolean);
-        titleInput.value = String(data.title || "My Chord Chart"); selected = { id:null, beat:0 }; render(); say("Song loaded.");
-      } catch (error) { alert("Could not load this song file.\n" + error.message); say("Load failed."); }
-    };
-    reader.onerror = () => say("Could not read the selected file."); reader.readAsText(file);
-  }
-
-  document.getElementById("addBarButton").addEventListener("click", () => addBarAfter());
-  document.getElementById("addSectionButton").addEventListener("click", addSection);
-  addRowAboveButton.addEventListener("click", () => addSelectedRow(-1));
-  addRowBelowButton.addEventListener("click", () => addSelectedRow(1));
-  removeRowButton.addEventListener("click", removeSelectedRow);
-  document.getElementById("insertImageButton").addEventListener("click", () => imageInput.click());
-  function toggleThickLineForRow(id) {
-    if (id === null || getItem(id)?.type !== "bar") return;
-    const key = String(id);
-    if (thickLines.has(key)) thickLines.delete(key);
-    else thickLines.add(key);
-    // Update in place so the line changes immediately without disturbing the caret.
-    const row = area.querySelector('tr[data-id="' + id + '"]');
-    if (row) row.querySelectorAll(".chord-cell").forEach(cell => {
-      cell.classList.toggle("thick-line-below", thickLines.has(key));
-    });
-    const isSelectedRow = selected.id === id;
-    if (isSelectedRow) thickLineButton.textContent = thickLines.has(key) ? "Make Line Below Thin" : "Make Line Below Thick";
-    updateToolbar();
-  }
-  thickLineButton.addEventListener("click", () => {
-    if (selected.id === null || getItem(selected.id)?.type !== "bar") return;
-    toggleThickLineForRow(selected.id);
+    tbody.append(tr);
   });
-  imageInput.addEventListener("change", () => { insertImages(imageInput.files); imageInput.value = ""; });
-  document.getElementById("saveButton").addEventListener("click", saveSong);
-  document.getElementById("loadButton").addEventListener("click", () => fileInput.click());
-  fileInput.addEventListener("change", () => { if (fileInput.files[0]) loadSong(fileInput.files[0]); fileInput.value = ""; });
-  document.getElementById("helpButton").addEventListener("click", () => { if (!helpDialog.open) helpDialog.showModal(); });
-  document.getElementById("closeHelpButton").addEventListener("click", () => helpDialog.close());
-  document.getElementById("fitButton").addEventListener("click", () => {
-    readingMode = !readingMode; document.body.classList.toggle("reading", readingMode);
-    document.getElementById("fitButton").textContent = readingMode ? "✏️ Edit View" : "▶️ Play View";
-    titleInput.readOnly = readingMode;
-    area.querySelectorAll(".section-editor, .image-caption").forEach(input => { input.readOnly = readingMode; });
-    if (readingMode) { if (document.activeElement) document.activeElement.blur(); say("Play View is on."); } else say("Editing mode is on.");
-  });
-  // In Edit View, clicking toolbar/blank areas should not steal the active chord-entry caret.
-  // Actual chord cells and text editors remain clickable so users can intentionally change position.
-  document.addEventListener("mousedown", event => {
-    if (readingMode || !editState) return;
-    const target = event.target;
-    if (target && target.closest(".chord-cell, .cell-editor, .section-editor, .image-caption, dialog, button, input[type=\"file\"]")) {
-      // Buttons are allowed to execute; prevent their mouse-focus transfer only.
-      if (target.closest("button")) event.preventDefault();
-      return;
-    }
-    event.preventDefault();
-    editState.input.focus();
-  }, true);
 
-  document.addEventListener("keydown", event => {
-    // Image-row navigation is handled by the focused image cell. This capture guard
-    // prevents the browser from scrolling if focus briefly shifts during a render.
-    const activeImageCell = event.target && event.target.closest && event.target.closest(".image-cell");
-    if (!readingMode && activeImageCell && ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) {
+  table.append(tbody);
+  area.replaceChildren(table);
+  fitChordFonts(table);
+  updateToolbar();
+}
+
+function selectCell(id,beat,sub=0,focus=true) {
+  const bar = getBar(id);
+  if (!bar) return;
+  beat = Math.max(0,Math.min(bar.beats.length-1,beat));
+  const values = getValues(bar,beat);
+  sub = Math.max(0,Math.min(values.length-1,sub));
+  if (editState) commitEdit();
+  selected = {id,beat,sub};
+  render();
+  if (focus && !readingMode) beginEdit(currentCell(),null,false);
+}
+
+function beginEdit(cell,replaceWith=null,selectAll=false) {
+  if (readingMode || !cell || !cell.classList.contains("chord-cell")) return;
+  if (editState) commitEdit();
+
+  const id = Number(cell.dataset.id);
+  const beat = Number(cell.dataset.beat);
+  const bar = getBar(id);
+  if (!bar) return;
+
+  const values = getValues(bar,beat);
+  // Temporarily remove the skip overlay while editing so the caret and text remain visible.
+  cell.classList.remove("skipped-cell");
+  const sub = Math.max(0,Math.min(values.length-1,selected.sub||0));
+  const oldValue = values[sub] || "";
+
+  // Crucial: put the input INSIDE the target beat-cell, not over the entire bar-cell.
+  // This keeps all dotted division lines visible during editing.
+  let host;
+  if (values.length > 1) {
+    host = cell.querySelector(`.subcell[data-sub="${sub}"]`);
+  } else {
+    host = cell.querySelector(".cell-content");
+  }
+  if (!host) return;
+
+  const input = document.createElement("input");
+  input.className = "cell-editor";
+  input.type = "text";
+  input.value = replaceWith===null ? oldValue : replaceWith;
+  input.autocomplete = "off";
+  input.spellcheck = false;
+  input.setAttribute("aria-label","Edit chord beat-cell");
+
+  host.replaceChildren(input);
+  editState = {id,beat,sub,oldValue,input,host};
+  selected = {id,beat,sub};
+  input.focus();
+  if (selectAll) input.select();
+  else input.setSelectionRange(input.value.length,input.value.length);
+
+  input.addEventListener("input",() => {
+    // The input itself displays every typed character immediately.
+    // Do not rerender on each keystroke; that would destroy the caret.
+  });
+
+  input.addEventListener("keydown",event=>{
+    if (event.ctrlKey && event.key==="Enter") {
       event.preventDefault();
       event.stopPropagation();
-      const row = activeImageCell.closest("tr[data-id]");
-      const rowId = row ? Number(row.dataset.id) : null;
-      const rowIndex = rowId === null ? -1 : itemIndex(rowId);
-      if (rowIndex >= 0 && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
-        activeImageCell.focus({ preventScroll: true });
-        return;
-      }
-      if (rowIndex >= 0 && (event.key === "ArrowUp" || event.key === "ArrowDown")) {
-        const direction = event.key === "ArrowDown" ? 1 : -1;
-        const destination = rowIndex + direction;
-        if (destination < 0) { activeImageCell.focus({ preventScroll: true }); return; }
-        if (destination >= items.length) {
-          if (direction > 0) {
-            const bar = { id: idCounter++, type: "bar", beats: ["", "", "", ""] };
-            items.splice(rowIndex + 1, 0, bar);
-            selected = { id: bar.id, beat: rememberedSectionColumn };
-            selectedRange = []; rangeAnchor = { id: bar.id, beat: rememberedSectionColumn };
-            render(); selectCell(bar.id, rememberedSectionColumn, true);
-          } else activeImageCell.focus({ preventScroll: true });
-          return;
-        }
-        focusItemAt(destination, rememberedSectionColumn, true);
-        return;
-      }
-    }
-    // Tab is reserved for chart-cell navigation; never let the browser move focus to toolbar/page controls.
-    if (event.key === "Tab" && !readingMode) {
-      event.preventDefault();
-      const target = event.target;
-      if (target && target.classList.contains("cell-editor")) return; // handled by the cell editor
-      if (target && target.classList.contains("section-editor")) return; // handled by the section editor
-      if (editState) { moveWhileEditing(event.shiftKey ? -1 : 1, false); return; }
-      if (selected.id !== null && getItem(selected.id)?.type === "bar") {
-        const beat = selected.beat;
-        if (event.shiftKey) moveFromItem(selected.id, beat, -1, false, true);
-        else moveFromItem(selected.id, beat, 1, false, true);
-      }
-      return;
-    }
-    // Keep browser/page scrolling from consuming the requested navigation shortcuts.
-    if (["End", "PageUp", "PageDown"].includes(event.key)) event.preventDefault();
-    if (event.ctrlKey && event.key.toLowerCase() === "h") {
-      event.preventDefault(); event.stopPropagation();
-      if (!helpDialog.open) helpDialog.showModal();
-      return;
-    }
-    if (event.key === "Escape" && helpDialog.open) { helpDialog.close(); return; }
-    if (event.key === "Escape" && readingMode) { readingMode = false; document.body.classList.remove("reading"); document.getElementById("fitButton").textContent = "▶️ Play View"; titleInput.readOnly = false; area.querySelectorAll(".section-editor, .image-caption").forEach(input => { input.readOnly = false; }); say("Editing mode is on."); return; }
-    if (readingMode) return;
-    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase()==="c") { event.preventDefault(); copyRange(); return; }
-    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase()==="v") { event.preventDefault(); pasteRange(); return; }
-    const shortcutTarget = event.target;
-    const isTextEntry = shortcutTarget && (shortcutTarget.isContentEditable || shortcutTarget.matches("input, textarea, select"));
-    if (!isTextEntry && event.key === "PageDown") { event.preventDefault(); event.stopPropagation(); addRowBelowButton.click(); return; }
-    if (!isTextEntry && event.key === "PageUp") { event.preventDefault(); event.stopPropagation(); addRowAboveButton.click(); return; }
-    if (event.ctrlKey && event.key === "Enter") {
-      event.preventDefault(); event.stopPropagation();
-      if (editState) commitEdit();
+      commitEdit();
       addSection();
       return;
     }
-    if (event.ctrlKey && event.key.toLowerCase() === "i") {
-      event.preventDefault(); event.stopPropagation();
-      if (!readingMode) imageInput.click();
+    if (event.key==="Delete" && !event.ctrlKey && !event.metaKey) {
+      event.preventDefault();
+      event.stopPropagation();
+      input.value="";
+      commitEdit();
+      beginEdit(currentCell(),null,false);
       return;
     }
-    if (event.ctrlKey && event.key.toLowerCase() === "l") { event.preventDefault(); event.stopPropagation(); if (!thickLineButton.disabled) thickLineButton.click(); return; }
-    if (event.ctrlKey && event.key === "Delete") {
-      const target = event.target;
-      if (target && target.classList.contains("section-editor")) {
-        event.preventDefault(); event.stopPropagation();
-        const row = target.closest("tr[data-id]");
-        const sectionId = row ? Number(row.dataset.id) : selected.id;
-        deleteSection(sectionId);
-        return;
-      }
-      if (target && (target.classList.contains("image-caption") || target === titleInput)) return;
-      if (selected.id !== null && getItem(selected.id)?.type === "section") {
-        event.preventDefault(); event.stopPropagation(); deleteSection(selected.id); return;
-      }
-      if (selected.id !== null && getItem(selected.id)?.type === "bar") {
-        event.preventDefault(); event.stopPropagation(); deleteCurrentChordRow();
+    if (event.ctrlKey && /^[0-9]$/.test(event.key)) {
+      event.preventDefault();
+      event.stopPropagation();
+      const digit = Number(event.key);
+      commitEdit();
+      divideCell(id,beat,digit===0?10:digit);
+      return;
+    }
+    if (event.key===" " && !event.ctrlKey) {
+      event.preventDefault();
+      event.stopPropagation();
+      advanceSpace();
+      return;
+    }
+    if (event.key==="Enter" && event.shiftKey) {
+      event.preventDefault();
+      event.stopPropagation();
+      commitEdit();
+      toggleLine(id);
+      advanceDown(id);
+      return;
+    }
+    if (event.key==="Enter") {
+      event.preventDefault();
+      event.stopPropagation();
+      commitEdit();
+      advanceDown(id);
+      return;
+    }
+    if (event.key==="Tab") {
+      event.preventDefault();
+      event.stopPropagation();
+      commitEdit();
+      moveHorizontal(id,beat,event.shiftKey?-1:1,sub);
+      return;
+    }
+    if (event.key==="ArrowLeft" || event.key==="ArrowRight") {
+      const dir = event.key === "ArrowRight" ? 1 : -1;
+      if (canMoveHorizontal(id,beat,dir,sub)) {
+        event.preventDefault();
+        event.stopPropagation();
+        commitEdit();
+        moveHorizontal(id,beat,dir,sub);
+      } else {
+        event.preventDefault();
+        event.stopPropagation();
       }
       return;
     }
-    if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Delete", "Backspace"].includes(event.key)) return;
-    const target = event.target;
-    if (target && (target.classList.contains("section-editor") || target.classList.contains("image-caption") || target.classList.contains("image-cell") || target === titleInput)) return;
-    if (editState) return; // The active editor handles these keys and prevents browser scrolling.
-    if (selected.id === null || getItem(selected.id)?.type !== "bar") return;
-    const cell = currentCell(); if (!cell) return;
-    event.preventDefault(); event.stopPropagation();
-    if (event.key === "ArrowLeft") moveHorizontal(selected.id, selected.beat, -1);
-    else if (event.key === "ArrowRight") moveHorizontal(selected.id, selected.beat, 1);
-    else if (event.key === "ArrowUp") moveVertical(selected.id, selected.beat, -1);
-    else if (event.key === "ArrowDown") moveVertical(selected.id, selected.beat, 1);
-    else { const bar = getBar(selected.id); if (bar) bar.beats[selected.beat] = ""; render(); selectCell(selected.id, selected.beat, true); }
-  }, true);
+    if (event.key==="ArrowUp" || event.key==="ArrowDown") {
+      const direction = event.key === "ArrowDown" ? 1 : -1;
+      event.preventDefault();
+      event.stopPropagation();
+      if (canMoveVertical(id,direction)) {
+        commitEdit();
+        moveVertical(id,beat,direction,sub);
+      }
+      return;
+    }
+    if (event.key==="Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+      setSubValue(id,beat,sub,oldValue);
+      editState = null;
+      selected = {id,beat,sub};
+      render();
+      beginEdit(currentCell(),null,false);
+    }
+  });
+
+  input.addEventListener("blur",()=>{
+    const state=editState;
+    if (state && state.input===input) {
+      setTimeout(()=>{
+        if (editState===state && editState.input===input) commitEdit();
+      },80);
+    }
+  });
+}
+
+function setSubValue(id,beat,sub,value) {
+  const bar = getBar(id);
+  if (!bar) return;
+  const values = getValues(bar,beat);
+  while (values.length<=sub) values.push("");
+  values[sub] = String(value ?? "");
+  setValues(bar,beat,values);
+}
+function commitEdit() {
+  if (!editState) return;
+  const {id,beat,sub,input} = editState;
+  const value = normalizeChord(input.value);
+  if (getBar(id)) setSubValue(id,beat,sub,value);
+  editState = null;
+  selected = {id,beat,sub};
   render();
-  // Start in Edit View with the first chord cell focused and a visible caret.
-  const startupBar = items.find(item => item.type === "bar");
-  if (startupBar) {
-    selected = { id: startupBar.id, beat: 0 };
-    selectedRange = [];
-    rangeAnchor = { id: startupBar.id, beat: 0 };
-    selectCell(startupBar.id, 0, true);
+}
+
+function divideCell(id,beat,count) {
+  const bar = getBar(id);
+  if (!bar) return;
+  if (editState) commitEdit();
+
+  const values = getValues(bar,beat);
+  if (count<=1) {
+    setValues(bar,beat,[values.join("")]);
+    selected = {id,beat,sub:0};
+  } else {
+    const joined = values.join("");
+    const next = Array.from({length:count},(_,i)=>i===0?joined:"");
+    setValues(bar,beat,next);
+    selected = {id,beat,sub:0};
   }
+
+  // Render immediately, then start editing in the newly rendered target.
+  render();
+  beginEdit(currentCell(),null,false);
+  say(count===1 ? "Cell division removed." :
+      `Cell divided into ${count} editable beat-cells.`);
+}
+
+function canMoveHorizontal(id,beat,direction,sub=0) {
+  const bar = getBar(id);
+  if (!bar) return false;
+  const values = getValues(bar,beat);
+  const nextSub = sub + direction;
+  if (nextSub >= 0 && nextSub < values.length) return true;
+  const nextBeat = beat + direction;
+  return nextBeat >= 0 && nextBeat < bar.beats.length;
+}
+function moveHorizontal(id,beat,direction,sub=0) {
+  const bar = getBar(id);
+  if (!bar || !canMoveHorizontal(id,beat,direction,sub)) return false;
+  const values = getValues(bar,beat);
+  const nextSub = sub + direction;
+  if (nextSub >= 0 && nextSub < values.length) {
+    selected = {id,beat,sub:nextSub};
+  } else {
+    const nextBeat = beat + direction;
+    const nextValues = getValues(bar,nextBeat);
+    selected = {id,beat:nextBeat,sub:direction > 0 ? 0 : nextValues.length-1};
+  }
+  render();
+  beginEdit(currentCell(),null,false);
+  return true;
+}
+function focusSection(id) {
+  selected = {id,beat:0,sub:0};
+  render();
+  const input = area.querySelector(`tr[data-id="${id}"] .section-editor`);
+  if (input && !readingMode) input.focus();
+}
+function canMoveVertical(id,direction) {
+  const idx = itemIndex(id);
+  if (idx < 0) return false;
+  const current = items[idx];
+  if (direction > 0 && current.type === "section" && String(current.text).trim().toLowerCase() === "end") return false;
+  for (let i=idx+direction;i>=0&&i<items.length;i+=direction) {
+    if (items[i].type === "bar" || items[i].type === "section" || items[i].type === "image") return true;
+  }
+  return direction > 0;
+}
+function moveVertical(id,beat,direction,sub=0) {
+  const idx = itemIndex(id);
+  if (idx < 0) return false;
+  for (let i=idx+direction;i>=0&&i<items.length;i+=direction) {
+    const target = items[i];
+    if (target.type === "section") {
+      if (editState) commitEdit();
+      focusSection(target.id);
+      return true;
+    }
+    if (target.type === "image") {
+      if (editState) commitEdit();
+      selected = {id:target.id,beat:0,sub:0};
+      render();
+      const imageCell = area.querySelector(`tr[data-id="${target.id}"] .image-cell`);
+      if (imageCell) {
+        imageCell.classList.add("image-selected");
+        imageCell.focus();
+      }
+      return true;
+    }
+    if (target.type === "bar") {
+      if (editState) commitEdit();
+      const b = Math.min(Math.max(0,beat),target.beats.length-1);
+      selected = {id:target.id,beat:b,sub:Math.min(sub,getValues(target,b).length-1)};
+      render();
+      beginEdit(currentCell(),null,false);
+      return true;
+    }
+  }
+  if (direction > 0) {
+    if (editState) commitEdit();
+    const target = makeBar(Math.max(maxColumns(),beat+1));
+    items.splice(idx+1,0,target);
+    selected = {id:target.id,beat:Math.min(Math.max(0,beat),target.beats.length-1),sub:0};
+    render();
+    beginEdit(currentCell(),null,false);
+    return true;
+  }
+  return false;
+}
+function addDivisionAtCurrent() {
+  if (editState) commitEdit();
+  const bar=getBar(selected.id);
+  if (!bar) return;
+  const values=getValues(bar,selected.beat);
+  values.push("");
+  setValues(bar,selected.beat,values);
+  selected={id:bar.id,beat:selected.beat,sub:values.length-1};
+  render();
+  beginEdit(currentCell(),null,false);
+  say(`Cell divided into ${values.length} beat-cells.`);
+}
+function advanceSpace() {
+  if (!editState) return;
+  const {id,beat,sub} = editState;
+  commitEdit();
+  moveHorizontal(id,beat,1,sub);
+}
+function advanceDown(id) {
+  const idx = itemIndex(id);
+  for (let i=idx+1;i<items.length;i++) {
+    if (items[i].type==="bar") {
+      selected = {id:items[i].id,beat:0,sub:0};
+      render();
+      beginEdit(currentCell(),null,false);
+      return;
+    }
+  }
+  const bar = makeBar(maxColumns());
+  items.splice(idx+1,0,bar);
+  selected = {id:bar.id,beat:0,sub:0};
+  render();
+  beginEdit(currentCell(),null,false);
+}
+
+function handleCellKey(event,cell) {
+  if (readingMode) { event.preventDefault(); return; }
+  const id = Number(cell.dataset.id), beat = Number(cell.dataset.beat);
+  if (event.ctrlKey && /^[0-9]$/.test(event.key)) {
+    event.preventDefault();
+    divideCell(id,beat,Number(event.key)===0?10:Number(event.key));
+    return;
+  }
+  if (event.ctrlKey || event.metaKey) {
+    if (event.key.toLowerCase()==="c") {
+      event.preventDefault();
+      const bar=getBar(id);
+      clipboardText=bar?String(getValues(bar,beat)[selected.sub||0]??""):"";
+      return;
+    }
+    if (event.key.toLowerCase()==="v") {
+      event.preventDefault();
+      if (clipboardText!=="") {
+        setSubValue(id,beat,selected.sub||0,clipboardText);
+        selected={id,beat,sub:selected.sub||0};
+        render();
+        beginEdit(currentCell(),null,false);
+      }
+      return;
+    }
+  }
+  if (event.key==="Enter" || event.key==="F2") {
+    event.preventDefault();
+    selected={id,beat,sub:0};
+    beginEdit(currentCell());
+    return;
+  }
+  if (event.key==="ArrowRight" || event.key==="ArrowLeft") {
+    const direction = event.key === "ArrowRight" ? 1 : -1;
+    event.preventDefault();
+    if (canMoveHorizontal(id,beat,direction,selected.sub||0)) moveHorizontal(id,beat,direction,selected.sub||0);
+    return;
+  }
+  if (event.key==="ArrowDown" || event.key==="ArrowUp") {
+    const direction = event.key === "ArrowDown" ? 1 : -1;
+    event.preventDefault();
+    if (canMoveVertical(id,direction)) moveVertical(id,beat,direction,selected.sub||0);
+    return;
+  }
+  if (event.key==="Delete" && !event.ctrlKey && !event.metaKey) {
+    event.preventDefault();
+    event.stopPropagation();
+    setSubValue(id,beat,selected.sub||0,"");
+    render();
+    beginEdit(currentCell(),null,false);
+  }
+}
+
+function addRowAt(index,beat=0,count=maxColumns()) {
+  const bar = makeBar(count);
+  items.splice(Math.max(0,Math.min(index,items.length)),0,bar);
+  selected = {id:bar.id,beat:Math.min(beat,count-1),sub:0};
+  render();
+  beginEdit(currentCell(),null,false);
+}
+function addRow(direction) {
+  if (editState) commitEdit();
+  const idx = itemIndex(selected.id);
+  if (idx<0) { addRowAt(items.length,0,maxColumns()); return; }
+  const current = items[idx];
+  const endIndex = items.findIndex(i=>i.type==="section" && String(i.text).trim().toLowerCase()==="end");
+  let insertion = idx+(direction>0?1:0);
+  if (endIndex>=0) insertion=Math.min(insertion,endIndex);
+  addRowAt(insertion,selected.beat||0,maxColumns());
+}
+function addSection() {
+  if (editState) commitEdit();
+  let name="New Section", n=2;
+  while (items.some(i=>i.type==="section"&&i.text===name)) name=`New Section ${n++}`;
+  const section={id:idCounter++,type:"section",text:name};
+  const bar=makeBar(maxColumns());
+  const idx=itemIndex(selected.id);
+  const endIndex=items.findIndex(i=>i.type==="section" && String(i.text).trim().toLowerCase()==="end");
+  let insertion=idx>=0?idx+1:items.length;
+  if (endIndex>=0) insertion=Math.min(insertion,endIndex);
+  items.splice(insertion,0,section,bar);
+  selected={id:bar.id,beat:0,sub:0};
+  render();
+  beginEdit(currentCell(),null,false);
+}
+function addBar() {
+  if (editState) commitEdit();
+  const idx=itemIndex(selected.id);
+  const bar=makeBar(maxColumns());
+  const endIndex=items.findIndex(i=>i.type==="section" && String(i.text).trim().toLowerCase()==="end");
+  let insertion=idx>=0?idx+1:items.length;
+  if (endIndex>=0) insertion=Math.min(insertion,endIndex);
+  items.splice(insertion,0,bar);
+  selected={id:bar.id,beat:0,sub:0};
+  render();
+  beginEdit(currentCell(),null,false);
+}
+function removeRow() {
+  if (editState) commitEdit();
+  const idx=itemIndex(selected.id);
+  if (idx<0) return;
+  const item=items[idx];
+
+  if (item.type==="bar" && items.filter(i=>i.type==="bar").length===1) {
+    item.beats=Array(maxColumns()).fill("");
+    item.divisions={};
+    thickLines.delete(String(item.id));
+  } else {
+    items.splice(idx,1);
+    thickLines.delete(String(item.id));
+  }
+  const next=items.slice(Math.min(idx,items.length-1)).find(i=>i.type==="bar")
+    || [...items].reverse().find(i=>i.type==="bar");
+  if (!next) {
+    const bar=makeBar(maxColumns());
+    items.push(bar);
+    selected={id:bar.id,beat:0,sub:0};
+  } else selected={id:next.id,beat:0,sub:0};
+  render();
+  if (getBar(selected.id)) beginEdit(currentCell(),null,false);
+}
+function insertCell(direction) {
+  if (editState) commitEdit();
+  const bar=getBar(selected.id);
+  if (!bar) return;
+  const index=selected.beat+(direction<0?0:1);
+  bar.beats.splice(index,0,"");
+  const nextDivisions={};
+  Object.keys(bar.divisions||{}).forEach(key=>{
+    const n=Number(key);
+    nextDivisions[n>=index?n+1:n]=bar.divisions[key];
+  });
+  bar.divisions=nextDivisions;
+  selected={id:bar.id,beat:index,sub:0};
+  render();
+  beginEdit(currentCell(),null,false);
+}
+function removeCell() {
+  if (editState) commitEdit();
+  const bar=getBar(selected.id);
+  if (!bar) return;
+  if (bar.beats.length<=1) {
+    say("A row must contain at least one cell.");
+    return;
+  }
+  const index=selected.beat;
+  bar.beats.splice(index,1);
+  const nextDivisions={};
+  Object.keys(bar.divisions||{}).forEach(key=>{
+    const n=Number(key);
+    if (n<index) nextDivisions[n]=bar.divisions[key];
+    else if (n>index) nextDivisions[n-1]=bar.divisions[key];
+  });
+  bar.divisions=nextDivisions;
+  selected={id:bar.id,beat:Math.min(index,bar.beats.length-1),sub:0};
+  render();
+  beginEdit(currentCell(),null,false);
+}
+function toggleLine(id) {
+  if (editState) commitEdit();
+  const key=String(id);
+  if (thickLines.has(key)) thickLines.delete(key);
+  else thickLines.add(key);
+  render();
+  updateToolbar();
+}
+
+function insertImages(files) {
+  const chosen=Array.from(files).filter(f=>f.type.startsWith("image/"));
+  if (!chosen.length) return;
+  if (editState) commitEdit();
+  const idx=Math.max(0,itemIndex(selected.id));
+  const loaded=[];
+  let remaining=chosen.length;
+  chosen.forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=()=>{
+      loaded.push({id:idCounter++,type:"image",data:reader.result,alt:file.name,crop:null,width:0,height:0});
+      if (--remaining===0) {
+        items.splice(idx,1,...loaded);
+        let target=items[idx+loaded.length];
+        if (!target || target.type!=="bar") {
+          target=makeBar(maxColumns());
+          items.splice(idx+loaded.length,0,target);
+        }
+        selected={id:target.id,beat:0,sub:0};
+        render();
+        beginEdit(currentCell(),null,false);
+      }
+    };
+    reader.onerror=()=>say("Could not read one or more images.");
+    reader.readAsDataURL(file);
+  });
+}
+
+function saveSong() {
+  if (editState) commitEdit();
+  const data={
+    format:"my-chord-chart",
+    version:5,
+    title:titleInput.value,
+    items:items.map(item=>{
+      if (item.type==="bar") {
+        return {
+          ...item,
+          beats:[...item.beats],
+          divisions:Object.fromEntries(
+            Object.entries(item.divisions||{}).map(([k,v])=>[k,[...v]])
+          )
+        };
+      }
+      if (item.type==="image") return {...item,crop:item.crop?{...item.crop}:null};
+      return {...item};
+    }),
+    thickLines:[...thickLines]
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const link=document.createElement("a");
+  const suggested=(titleInput.value.trim()||"my-chord-chart")
+    .replace(/[\\/:*?"<>|]+/g,"-").replace(/\s+/g,"-").slice(0,80);
+  const requested=prompt("Save JSON as (filename, without .json):",suggested);
+  if (requested===null) { URL.revokeObjectURL(url); return; }
+  const name=(requested.trim()||suggested)
+    .replace(/[\\/:*?"<>|]+/g,"-").replace(/\s+/g,"-").slice(0,100);
+  link.href=url;
+  link.download=name.replace(/\.json$/i,"")+".json";
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  say("Song saved, including images, divisions and line styles.");
+}
+function loadSong(file) {
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try {
+      const data=JSON.parse(reader.result);
+      if (data.format!=="my-chord-chart" || !Array.isArray(data.items))
+        throw new Error("Unsupported song file.");
+
+      idCounter=1;
+      items=data.items.map(item=>{
+        if (item.type==="section") {
+          return {id:idCounter++,type:"section",text:String(item.text||"")};
+        }
+        if (item.type==="bar") {
+          const beats=Array.isArray(item.beats)
+            ? item.beats.map(v=>String(v??"")) : Array(maxColumns()).fill("");
+          if (!beats.length) beats.push("");
+          const divisions={};
+          if (item.divisions && typeof item.divisions==="object") {
+            Object.entries(item.divisions).forEach(([key,values])=>{
+              const idx=Number(key);
+              if (Number.isInteger(idx)&&idx>=0&&idx<beats.length&&
+                  Array.isArray(values)&&values.length>1) {
+                divisions[idx]=values.map(v=>String(v??""));
+              }
+            });
+          }
+          return {id:idCounter++,type:"bar",beats,divisions};
+        }
+        if (item.type==="image" && typeof item.data==="string" &&
+            item.data.startsWith("data:image/")) {
+          return {id:idCounter++,type:"image",data:item.data,
+            alt:String(item.alt||"Inserted image"),crop:item.crop&&typeof item.crop==="object"?{
+              x:Number(item.crop.x)||0,y:Number(item.crop.y)||0,
+              w:Number(item.crop.w)||100,h:Number(item.crop.h)||100
+            }:null,width:Number(item.width)||0,height:Number(item.height)||0};
+        }
+        return null;
+      }).filter(Boolean);
+
+      if (!items.some(i=>i.type==="bar")) items.push(makeBar(maxColumns()));
+      titleInput.value=String(data.title||"My Chord Chart");
+      thickLines=new Set((Array.isArray(data.thickLines)?data.thickLines:[]).map(String));
+      const bar=items.find(i=>i.type==="bar");
+      selected={id:bar.id,beat:0,sub:0};
+      render();
+      beginEdit(currentCell(),null,false);
+      say("Song loaded.");
+    } catch(error) {
+      alert("Could not load this song file.\n"+error.message);
+      say("Load failed.");
+    }
+  };
+  reader.onerror=()=>say("Could not read the selected file.");
+  reader.readAsText(file);
+}
+function copyCurrent() {
+  const bar=getBar(selected.id);
+  clipboardText=bar?String(getValues(bar,selected.beat)[selected.sub]??""):"";
+}
+function pasteCurrent() {
+  if (editState) commitEdit();
+  const bar=getBar(selected.id);
+  if (!bar || clipboardText==="") return;
+  setSubValue(bar.id,selected.beat,selected.sub||0,clipboardText);
+  render();
+  beginEdit(currentCell(),null,false);
+}
+
+$("#columnCountSelect").addEventListener("change",() => {
+  if (editState) commitEdit();
+  render();
+  say(`Chart set to ${maxColumns()} columns.`);
+});
+
+$("#addBarButton").addEventListener("click",addBar);
+$("#addSectionButton").addEventListener("click",addSection);
+$("#aboveButton").addEventListener("click",()=>addRow(-1));
+$("#belowButton").addEventListener("click",()=>addRow(1));
+$("#removeButton").addEventListener("click",removeRow);
+$("#lineButton").addEventListener("click",()=>toggleLine(selected.id));
+$("#imageButton").addEventListener("click",()=>imageInput.click());
+$("#saveButton").addEventListener("click",saveSong);
+$("#loadButton").addEventListener("click",()=>fileInput.click());
+$("#helpButton").addEventListener("click",()=>helpDialog.showModal());
+$("#closeHelpButton").addEventListener("click",()=>helpDialog.close());
+$("#menuButton").addEventListener("click",()=>{
+  const open=document.body.classList.toggle("menu-open");
+  $("#menuButton").setAttribute("aria-expanded",String(open));
+  $("#menuButton").textContent="☰";
+  $("#menuButton").setAttribute("aria-label",open?"Close chart tools":"Open chart tools");
+});
+
+document.addEventListener("click",event=>{
+  if (!document.body.classList.contains("menu-open")) return;
+  if (event.target.closest("#toolMenu,#menuButton")) return;
+  document.body.classList.remove("menu-open");
+  $("#menuButton").setAttribute("aria-expanded","false");
+  $("#menuButton").setAttribute("aria-label","Open chart tools");
+});
+
+divideButton.addEventListener("click",addDivisionAtCurrent);
+
+fileInput.addEventListener("change",()=>{
+  if (fileInput.files[0]) loadSong(fileInput.files[0]);
+  fileInput.value="";
+});
+imageInput.addEventListener("change",()=>{
+  insertImages(imageInput.files);
+  imageInput.value="";
+});
+$("#fitButton").addEventListener("click",()=>{
+  if (editState) commitEdit();
+  readingMode=!readingMode;
+  if (readingMode) {
+    cropEditingId=null; cropWorking=null;
+    document.body.classList.remove("menu-open");
+    $("#menuButton").setAttribute("aria-expanded","false");
+    $("#menuButton").textContent="☰";
+    $("#menuButton").setAttribute("aria-label","Open chart tools");
+  }
+  document.body.classList.toggle("reading",readingMode);
+  $("#fitButton").textContent=readingMode?"✏️ Edit View":"▶️ Play View";
+  titleInput.readOnly=readingMode;
+  area.querySelectorAll(".section-editor").forEach(el=>el.readOnly=readingMode);
+  render();
+  window.scrollTo({top:0,behavior:"instant"});
+  if (!readingMode && getBar(selected.id)) beginEdit(currentCell(),null,false);
+});
+
+document.addEventListener("keydown",event=>{
+  if (event.key==="Escape" && helpDialog.open) {
+    helpDialog.close();
+    return;
+  }
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase()==="s") {
+    event.preventDefault();
+    if (!readingMode) saveSong();
+    return;
+  }
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase()==="o") {
+    event.preventDefault();
+    if (!readingMode) fileInput.click();
+    return;
+  }
+  if (readingMode) return;
+
+  const target=event.target;
+  const inEditor=target instanceof HTMLInputElement &&
+    (target.classList.contains("cell-editor") ||
+     target.classList.contains("section-editor") ||
+     target.id==="songTitle");
+
+  if (event.ctrlKey && event.key.toLowerCase()==="h") {
+    event.preventDefault();
+    helpDialog.showModal();
+    return;
+  }
+  if (event.ctrlKey && event.key.toLowerCase()==="i") {
+    event.preventDefault();
+    imageInput.click();
+    return;
+  }
+  if (event.ctrlKey && event.key.toLowerCase()==="l") {
+    event.preventDefault();
+    toggleLine(selected.id);
+    return;
+  }
+  if (event.ctrlKey && (event.key===" " || event.code==="Space")) {
+    event.preventDefault();
+    event.stopPropagation();
+    addDivisionAtCurrent();
+    return;
+  }
+  if (event.ctrlKey && event.key==="Enter") {
+    event.preventDefault();
+    event.stopPropagation();
+    if (editState) commitEdit();
+    addSection();
+    return;
+  }
+  if (event.ctrlKey && event.key==="Delete") {
+    event.preventDefault();
+    if (getItem(selected.id)?.type==="section") {
+      const idx=itemIndex(selected.id);
+      let end=idx+1;
+      while (end<items.length && items[end].type!=="section") end++;
+      items.splice(idx,end-idx);
+      if (!items.some(i=>i.type==="bar")) items.push(makeBar(maxColumns()));
+      const bar=items.find(i=>i.type==="bar");
+      selected={id:bar.id,beat:0,sub:0};
+      render();
+      beginEdit(currentCell(),null,false);
+    } else removeRow();
+    return;
+  }
+  if (event.ctrlKey && /^[0-9]$/.test(event.key) && !inEditor) {
+    event.preventDefault();
+    divideCell(selected.id,selected.beat,Number(event.key)===0?10:Number(event.key));
+    return;
+  }
+  if (event.key==="PageDown" && !inEditor) {
+    event.preventDefault();
+    addRow(1);
+    return;
+  }
+  if (event.key==="PageUp" && !inEditor) {
+    event.preventDefault();
+    addRow(-1);
+    return;
+  }
+  if (inEditor) return;
+
+  if (event.key==="[" || event.key==="]") {
+    event.preventDefault();
+    insertCell(event.key==="["?-1:1);
+    return;
+  }
+  if (event.key==="\\") {
+    event.preventDefault();
+    removeCell();
+    return;
+  }
+  if ((event.ctrlKey||event.metaKey) && event.key.toLowerCase()==="c") {
+    event.preventDefault();
+    copyCurrent();
+    return;
+  }
+  if ((event.ctrlKey||event.metaKey) && event.key.toLowerCase()==="v") {
+    event.preventDefault();
+    pasteCurrent();
+    return;
+  }
+  if (event.key==="Tab") {
+    event.preventDefault();
+    moveHorizontal(selected.id,selected.beat,event.shiftKey?-1:1,selected.sub||0);
+    return;
+  }
+  if (event.key==="ArrowLeft" || event.key==="ArrowRight") {
+    const direction = event.key === "ArrowRight" ? 1 : -1;
+    event.preventDefault();
+    if (canMoveHorizontal(selected.id,selected.beat,direction,selected.sub||0)) {
+      moveHorizontal(selected.id,selected.beat,direction,selected.sub||0);
+    }
+    return;
+  }
+  if (event.key==="ArrowUp" || event.key==="ArrowDown") {
+    const direction = event.key === "ArrowDown" ? 1 : -1;
+    event.preventDefault();
+    if (canMoveVertical(selected.id,direction)) {
+      moveVertical(selected.id,selected.beat,direction,selected.sub||0);
+    }
+    return;
+  }
+  if (event.key==="Delete" && !event.ctrlKey && !event.metaKey) {
+    if (getBar(selected.id)) {
+      event.preventDefault();
+      setSubValue(selected.id,selected.beat,selected.sub||0,"");
+      render();
+      beginEdit(currentCell(),null,false);
+    }
+  }
+});
+
+render();
+const startup=items.find(i=>i.type==="bar");
+if (startup) {
+  selected={id:startup.id,beat:0,sub:0};
+  render();
+  beginEdit(currentCell(),null,false);
+}
+window.addEventListener("resize", () => {
+  const chart = area.querySelector(".chart");
+  if (chart) fitChordFonts(chart);
+});
 })();
 </script>
 </body>
