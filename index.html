@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chord Chart Creator NEW — Version 2305</title>
+<title>Chord Chart Creator NEW — Version 2306</title>
 <style>
 :root {
   --ink:#202633;
@@ -22,6 +22,7 @@ body {
 }
 button,input,select { font:inherit; }
 button {
+  font-size:.78rem;
   border:1px solid #c8ced8;
   border-radius:4px;
   padding:6px 9px;
@@ -30,6 +31,7 @@ button {
   cursor:pointer;
 }
 button:hover:not(:disabled) { background:#f0f4fa; }
+button { white-space:nowrap; }
 button:disabled { opacity:.45; cursor:not-allowed; }
 header,nav,main,.status {
   width:100%;
@@ -45,7 +47,7 @@ header {
   align-items:center;
   gap:8px;
 }
-header h1 { font-size:clamp(.9rem,3.5vw,1.25rem); margin:0; white-space:nowrap; }
+header h1 { font-size:1.25rem; margin:0; white-space:nowrap; flex-shrink:0; }
 .header-actions { display:flex; align-items:center; justify-content:flex-end; gap:5px; flex-shrink:0; }
 .header-actions button { min-height:34px; padding:5px 8px; white-space:nowrap; }
 #menuButton { min-width:38px; font-size:1.1rem; }
@@ -73,7 +75,7 @@ nav {
   transition:opacity .16s ease,transform .16s ease,visibility .16s;
 }
 body.menu-open nav { opacity:1; visibility:visible; transform:translateY(0); }
-nav button,nav label,nav select { font-size:.83rem; }
+nav button,nav label,nav select { font-size:.78rem; }
 nav button,nav select { min-height:34px; }
 nav label { display:flex; align-items:center; }
 .primary { background:#1a73e8; color:white; border-color:#1a73e8; }
@@ -302,23 +304,17 @@ body.reading .image-tools,body.reading .crop-panel { display:none!important; }
   text-align:left;
 }
 body.reading { background:white; }
-body.reading nav,body.reading .status,body.reading #menuButton { display:none!important; }
-body.reading header { display:flex; padding:4px 8px 2px; }
-body.reading header h1 { font-size:clamp(.78rem,3vw,1rem); }
-body.reading .header-actions { gap:4px; }
-body.reading .header-actions button { min-height:30px; padding:4px 6px; font-size:.78rem; }
+body.reading .image-tools,body.reading .crop-panel { display:none!important; }
 body.reading main { max-width:none; padding:0 3px 12px; }
-body.reading .title-row { gap:5px; margin:0 0 1px; }
 body.reading #document { pointer-events:none; }
-body.reading #songTitle { pointer-events:none; border:0; padding:1px 0; font-size:clamp(1rem,4vw,1.4rem); }
-body.reading #fitButton { padding:4px 7px; font-size:.82rem; }
-body.reading .chord-cell,body.reading .section-cell { font-size:clamp(12px,3.7vw,21px); }
+body.reading #songTitle { pointer-events:none; border:0; }
+#fitButton[aria-pressed="true"] { opacity:.62; background:#e1e5eb; border-color:#9aa3b2; box-shadow:inset 0 1px 2px #11182724; }
 @media(max-width:540px) {
-  header { padding:5px 7px 3px; gap:4px; }
+  header { padding:6px 7px 4px; gap:4px; }
   header h1 { font-size:.82rem; }
   .header-actions { gap:3px; }
-  .header-actions button { font-size:.72rem; min-height:31px; padding:4px 5px; }
-  #menuButton { min-width:32px; font-size:1rem; }
+  .header-actions button { font-size:.78rem; min-height:31px; padding:4px 6px; }
+  #menuButton { min-width:32px; font-size:.78rem; }
   nav { top:39px; left:0; right:0; padding:7px; }
   .title-row { gap:4px; }
 }
@@ -332,14 +328,13 @@ body.reading .chord-cell,body.reading .section-cell { font-size:clamp(12px,3.7vw
 <header>
   <h1>🎼 Chord Chart Creator</h1>
   <div class="header-actions">
-    <button id="fitButton" type="button">▶️ Play View</button>
+    <button id="fitButton" type="button" aria-pressed="true">✏️ Edit</button>
     <button id="helpButton" type="button">❓ Help</button>
     <button id="menuButton" type="button" aria-label="Toggle chart tools" aria-expanded="false" aria-controls="toolMenu">☰</button>
   </div>
 </header>
 
 <nav id="toolMenu" aria-label="Chart tools">
-  <button id="addBarButton" class="primary">🎼 Add Bar</button>
   <label for="columnCountSelect">Columns:</label>
   <select id="columnCountSelect" aria-label="Number of columns">
     <option value="1">1</option>
@@ -359,6 +354,7 @@ body.reading .chord-cell,body.reading .section-cell { font-size:clamp(12px,3.7vw
   <button id="aboveButton">⬆️ Add Row Above</button>
   <button id="belowButton">⬇️ Add Row Below</button>
   <button id="removeButton">🗑️ Remove Row</button>
+  <button id="removeSectionButton">🗑️ Remove Section</button>
   <button id="lineButton">➖ Make Line Below Thick</button>
   <button id="divideButton" type="button">➕ Add Beat-Cell (Ctrl+Space)</button>
   <button id="imageButton">🖼️ Insert Image…</button>
@@ -405,6 +401,7 @@ body.reading .chord-cell,body.reading .section-cell { font-size:clamp(12px,3.7vw
       <tr><th>Ctrl + O</th><td>Open a JSON song file</td></tr>
       <tr><th>Ctrl + I</th><td>Insert image</td></tr>
       <tr><th>Ctrl + Delete</th><td>Delete the selected row or section and its contents</td></tr>
+      <tr><th>Remove Section</th><td>Remove the current section and all rows/images up to the next section</td></tr>
       <tr><th>Ctrl/Cmd + C / V</th><td>Copy / paste the selected beat-cell's chord</td></tr>
       <tr><th>Delete</th><td>Clear the selected chord; while editing, clear the chord and keep the editor active</td></tr>
       <tr><th>Escape</th><td>Cancel the current chord edit and restore its previous value; close Help if it is open</td></tr>
@@ -594,6 +591,7 @@ function updateToolbar() {
   const item = getItem(selected.id);
   const isBar = item?.type === "bar";
   $("#removeButton").disabled = !item;
+  $("#removeSectionButton").disabled = !items.some(i=>i.type==="section");
   $("#aboveButton").disabled = !item;
   $("#belowButton").disabled = !item;
   $("#lineButton").disabled = !isBar;
@@ -816,6 +814,7 @@ function render() {
       input.className = "section-editor";
       input.value = item.text;
       input.readOnly = readingMode;
+      input.addEventListener("focus",()=>{ selected={id:item.id,beat:0,sub:0}; });
       input.setAttribute("aria-label","Section heading");
       input.addEventListener("input",() => {
         const start = input.selectionStart, end = input.selectionEnd;
@@ -1381,6 +1380,28 @@ function addBar() {
   render();
   beginEdit(currentCell(),null,false);
 }
+function removeSection() {
+  if (readingMode) return;
+  if (editState) commitEdit();
+  const activeSection=document.activeElement?.classList?.contains("section-editor")
+    ? Number(document.activeElement.closest("tr")?.dataset.id) : null;
+  let targetId=activeSection && getItem(activeSection)?.type==="section" ? activeSection : selected.id;
+  let idx=itemIndex(targetId);
+  if (idx<0 || items[idx]?.type!=="section") {
+    for (let i=Math.min(idx<0?items.length-1:idx,items.length-1);i>=0;i--) {
+      if (items[i].type==="section") { idx=i; break; }
+    }
+  }
+  if (idx<0 || items[idx]?.type!=="section") { say("Select a section to remove it."); return; }
+  let end=idx+1;
+  while (end<items.length && items[end].type!=="section") end++;
+  items.splice(idx,end-idx);
+  if (!items.some(i=>i.type==="bar")) items.push(makeBar(maxColumns()));
+  const next=items.slice(Math.min(idx,items.length-1)).find(i=>i.type==="bar") || items.find(i=>i.type==="bar");
+  selected={id:next.id,beat:0,sub:0};
+  render();
+  if (!readingMode) beginEdit(currentCell(),null,false);
+}
 function removeRow() {
   if (editState) commitEdit();
   const idx=itemIndex(selected.id);
@@ -1592,11 +1613,11 @@ $("#columnCountSelect").addEventListener("change",() => {
   say(`Chart set to ${maxColumns()} columns.`);
 });
 
-$("#addBarButton").addEventListener("click",addBar);
 $("#addSectionButton").addEventListener("click",addSection);
 $("#aboveButton").addEventListener("click",()=>addRow(-1));
 $("#belowButton").addEventListener("click",()=>addRow(1));
-$("#removeButton").addEventListener("click",removeRow);
+$("#removeButton").addEventListener("click",()=>{ if (!readingMode) removeRow(); });
+$("#removeSectionButton").addEventListener("click",removeSection);
 $("#lineButton").addEventListener("click",()=>toggleLine(selected.id));
 $("#imageButton").addEventListener("click",()=>imageInput.click());
 $("#saveButton").addEventListener("click",saveSong);
@@ -1617,6 +1638,18 @@ document.addEventListener("click",event=>{
   $("#menuButton").setAttribute("aria-expanded","false");
   $("#menuButton").setAttribute("aria-label","Open chart tools");
 });
+
+// In read-only mode, the menu remains available, but only Save and Load actions work.
+$("#toolMenu").addEventListener("click",event=>{
+  if (!readingMode) return;
+  const control=event.target.closest("button,select,label");
+  if (!control || control.id==="saveButton" || control.id==="loadButton") return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+},true);
+$("#columnCountSelect").addEventListener("change",event=>{
+  if (readingMode) { event.preventDefault(); event.stopImmediatePropagation(); return; }
+},true);
 
 divideButton.addEventListener("click",addDivisionAtCurrent);
 
@@ -1639,7 +1672,8 @@ $("#fitButton").addEventListener("click",()=>{
     $("#menuButton").setAttribute("aria-label","Open chart tools");
   }
   document.body.classList.toggle("reading",readingMode);
-  $("#fitButton").textContent=readingMode?"✏️ Edit View":"▶️ Play View";
+  $("#fitButton").textContent="✏️ Edit";
+  $("#fitButton").setAttribute("aria-pressed",String(!readingMode));
   titleInput.readOnly=readingMode;
   area.querySelectorAll(".section-editor").forEach(el=>el.readOnly=readingMode);
   render();
