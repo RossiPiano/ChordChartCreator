@@ -4,13 +4,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chord Chart Creator NEW — Version 2306</title>
+<title>Chord Chart Creator NEW — Version 2310</title>
 <style>
 :root {
   --ink:#202633;
   --grid:#cfd5de;
   --blue:#1a73e8;
   --cell-height:42px;
+  --chord-font-size:24px;
 }
 * { box-sizing:border-box; }
 body {
@@ -22,7 +23,8 @@ body {
 }
 button,input,select { font:inherit; }
 button {
-  font-size:.78rem;
+  font-size:.85rem;
+  font-weight:600;
   border:1px solid #c8ced8;
   border-radius:4px;
   padding:6px 9px;
@@ -47,11 +49,24 @@ header {
   align-items:center;
   gap:8px;
 }
-header h1 { font-size:1.25rem; margin:0; white-space:nowrap; flex-shrink:0; }
+header h1 { font-size:var(--chord-font-size); line-height:1.15; margin:0; white-space:nowrap; flex-shrink:0; }
+header { width:100%; max-width:none; }
+.header-actions { margin-left:auto; }
 .header-actions { display:flex; align-items:center; justify-content:flex-end; gap:5px; flex-shrink:0; }
-.header-actions button { min-height:34px; padding:5px 8px; white-space:nowrap; }
+.header-actions button { font-size:.85rem; min-height:36px; padding:5px 9px; white-space:nowrap; }
 #menuButton { min-width:38px; font-size:1.1rem; }
-#menuButton[aria-expanded="true"] { background:#d9dee7; border-color:#8b95a5; color:#111827; }
+#menuButton[aria-expanded="true"],
+#helpButton[aria-expanded="true"] {
+  background:#d9dee7;
+  border-color:#8b95a5;
+  color:#111827;
+}
+#fitButton[aria-pressed="true"] {
+  background:white;
+  border-color:#8b95a5;
+  color:var(--ink);
+  box-shadow:inset 0 1px 2px #11182724;
+}
 nav {
   position:absolute;
   z-index:30;
@@ -67,19 +82,26 @@ nav {
   border-top:0;
   box-shadow:0 8px 18px #11182720;
   display:flex;
-  flex-wrap:wrap;
-  gap:5px;
+  flex-direction:column;
+  align-items:stretch;
+  gap:7px;
   opacity:0;
   visibility:hidden;
   transform:translateY(-7px);
   transition:opacity .16s ease,transform .16s ease,visibility .16s;
 }
 body.menu-open nav { opacity:1; visibility:visible; transform:translateY(0); }
-nav button,nav label,nav select { font-size:.78rem; }
-nav button,nav select { min-height:34px; }
+nav button,nav label,nav select { font-size:.85rem; }
+nav button,nav select { min-height:36px; }
+nav button,nav select { width:100%; }
 nav label { display:flex; align-items:center; }
+nav label { padding:2px 0; }
+.column-setting { display:flex; align-items:center; gap:8px; width:100%; }
+.column-setting label { flex:0 0 auto; padding:0; }
+nav .column-setting select { width:auto; min-width:76px; flex:0 0 auto; }
+nav select { background:#fff; color:var(--ink); border:1px solid #c8ced8; border-radius:4px; padding:6px 9px; }
 .primary { background:#1a73e8; color:white; border-color:#1a73e8; }
-main { padding:0 12px 24px; }
+main { width:100%; max-width:none; margin:0; padding:0 12px 24px; }
 .title-row {
   display:flex;
   align-items:center;
@@ -95,7 +117,7 @@ main { padding:0 12px 24px; }
   border:1px solid transparent;
   padding:2px 2px 3px;
   margin:0;
-  font-size:clamp(1.2rem,4vw,1.65rem);
+  font-size:var(--chord-font-size);
   font-weight:700;
   background:transparent;
   color:var(--ink);
@@ -115,7 +137,7 @@ main { padding:0 12px 24px; }
   padding:0;
   vertical-align:middle;
 }
-.chart td.chord-cell { padding:2px 4px; }
+.chart td.chord-cell { padding:1px 3px; }
 .chart tr.group-start>td { border-top-width:2px; }
 .chart tr.group-end>td { border-bottom-width:2px; }
 .chart tr.group-start>td:first-child,
@@ -128,11 +150,11 @@ main { padding:0 12px 24px; }
 .chord-cell {
   height:var(--cell-height);
   min-width:0;
-  padding:2px 3px;
+  padding:1px 2px;
   overflow:hidden;
   background:white;
   color:var(--section-color,#ec4899);
-  font-size:22px;
+  font-size:var(--chord-font-size);
   font-weight:600;
   line-height:1.2;
   text-align:left;
@@ -194,11 +216,11 @@ body.crop-mode .chord-symbol,body.crop-mode .rest-symbol { opacity:.45; }
   min-width:0;
   overflow:hidden;
   white-space:nowrap;
-  padding:0 2px;
+  padding:0 1px;
   position:relative;
 }
 .subcell+.subcell { border-left:1px dotted #aeb7c5; }
-.subcell { padding-left:4px; padding-right:2px; }
+.subcell { padding-left:2px; padding-right:1px; }
 .slash-symbol,.slash-bass {
   display:inline-block;
   position:relative;
@@ -230,7 +252,7 @@ body.crop-mode .chord-symbol,body.crop-mode .rest-symbol { opacity:.45; }
   padding:5px 6px!important;
   background:var(--section-color,#ec4899);
   color:white;
-  font-size:22px;
+  font-size:var(--chord-font-size);
   font-weight:800;
   letter-spacing:.02em;
   line-height:1;
@@ -257,8 +279,9 @@ body.crop-mode .chord-symbol,body.crop-mode .rest-symbol { opacity:.45; }
 .image-tools button,.crop-actions button { min-height:34px; opacity:1!important; }
 .image-tools button { font-size:.82rem; }
 .crop-panel { display:flex; flex-direction:column; align-items:flex-start; gap:8px; }
-.crop-stage { position:relative; display:inline-block; max-width:100%; line-height:0; touch-action:none; }
-.crop-stage>img { display:block; max-width:100%; max-height:60vh; width:auto; height:auto; }
+/* Keep the crop preview at exactly the same rendered width as the normal chart image. */
+.crop-stage { position:relative; display:block; width:100%; max-width:100%; line-height:0; touch-action:none; }
+.crop-stage>img { display:block; width:100%; max-width:100%; max-height:none; height:auto; }
 .crop-frame { position:absolute; border:2px solid #fff; box-shadow:0 0 0 9999px #0008; cursor:move; touch-action:none; }
 .crop-handle { position:absolute; width:12px; height:12px; border:2px solid #fff; border-radius:2px; background:#1a73e8; transform:translate(-50%,-50%); touch-action:none; }
 .crop-handle[data-handle="n"],.crop-handle[data-handle="s"] { left:50%; cursor:ns-resize; }
@@ -274,29 +297,41 @@ body.crop-mode .chord-symbol,body.crop-mode .rest-symbol { opacity:.45; }
 .crop-actions { display:flex; gap:6px; flex-wrap:wrap; }
 .crop-actions button { background:#fff; color:var(--ink); border-color:#c8ced8; }
 body.reading .image-tools,body.reading .crop-panel { display:none!important; }
-.status { padding:0 12px 12px; font-size:.76rem; color:#687386; }
 #fileInput,#imageInput { display:none; }
 
 #helpDialog {
-  width:min(640px,calc(100vw - 24px));
-  max-height:80vh;
-  border:1px solid #c8ced8;
-  border-radius:10px;
+  position:absolute;
+  z-index:31;
+  top:43px;
+  left:max(0px,calc((100vw - 1100px)/2));
+  right:max(0px,calc((100vw - 1100px)/2));
+  width:auto;
+  max-height:min(70vh,560px);
+  margin:0;
   padding:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  border:1px solid #d5dae3;
+  border-top:0;
+  border-radius:0 0 8px 8px;
+  background:#fff;
+  box-shadow:0 8px 18px #11182720;
 }
-#helpDialog::backdrop { background:#11182788; }
+#helpDialog[hidden] { display:none; }
 .help-head {
   position:sticky;
   top:0;
+  z-index:1;
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:12px;
+  gap:10px;
+  padding:10px 12px;
   background:#f8fafc;
   border-bottom:1px solid #d8dee8;
 }
 .help-head h2 { margin:0; font-size:1.1rem; }
-.help-body { padding:12px; overflow:auto; max-height:65vh; }
+.help-body { padding:12px; overflow:visible; }
 .help-body table { width:100%; border-collapse:collapse; }
 .help-body th,.help-body td {
   padding:8px;
@@ -305,22 +340,22 @@ body.reading .image-tools,body.reading .crop-panel { display:none!important; }
 }
 body.reading { background:white; }
 body.reading .image-tools,body.reading .crop-panel { display:none!important; }
-body.reading main { max-width:none; padding:0 3px 12px; }
 body.reading #document { pointer-events:none; }
-body.reading #songTitle { pointer-events:none; border:0; }
-#fitButton[aria-pressed="true"] { opacity:.62; background:#e1e5eb; border-color:#9aa3b2; box-shadow:inset 0 1px 2px #11182724; }
+body.reading #songTitle { pointer-events:none; border-color:transparent; }
 @media(max-width:540px) {
   header { padding:6px 7px 4px; gap:4px; }
-  header h1 { font-size:.82rem; }
+  main { padding:0 7px 24px; }
+  header h1 { font-size:var(--chord-font-size); }
   .header-actions { gap:3px; }
-  .header-actions button { font-size:.78rem; min-height:31px; padding:4px 6px; }
-  #menuButton { min-width:32px; font-size:.78rem; }
-  nav { top:39px; left:0; right:0; padding:7px; }
+  .header-actions button { font-size:.85rem; min-height:34px; padding:4px 6px; }
+  #menuButton { min-width:34px; font-size:1rem; }
+  nav,#helpDialog { top:39px; left:0; right:0; }
+  nav { padding:8px; }
+  #helpDialog { max-height:calc(100vh - 39px); }
   .title-row { gap:4px; }
 }
 @media(min-width:760px) {
-  .chord-cell { font-size:23px; }
-  .section-cell { font-size:23px; }
+  :root { --chord-font-size:25px; }
 }
 </style>
 </head>
@@ -329,14 +364,15 @@ body.reading #songTitle { pointer-events:none; border:0; }
   <h1>🎼 Chord Chart Creator</h1>
   <div class="header-actions">
     <button id="fitButton" type="button" aria-pressed="true">✏️ Edit</button>
-    <button id="helpButton" type="button">❓ Help</button>
+    <button id="helpButton" type="button" aria-expanded="false" aria-controls="helpDialog">❓ Help</button>
     <button id="menuButton" type="button" aria-label="Toggle chart tools" aria-expanded="false" aria-controls="toolMenu">☰</button>
   </div>
 </header>
 
 <nav id="toolMenu" aria-label="Chart tools">
-  <label for="columnCountSelect">Columns:</label>
-  <select id="columnCountSelect" aria-label="Number of columns">
+  <div class="column-setting">
+    <label for="columnCountSelect">Columns:</label>
+    <select id="columnCountSelect" aria-label="Number of columns">
     <option value="1">1</option>
     <option value="2">2</option>
     <option value="3">3</option>
@@ -349,7 +385,8 @@ body.reading #songTitle { pointer-events:none; border:0; }
     <option value="10">10</option>
     <option value="11">11</option>
     <option value="12">12</option>
-  </select>
+    </select>
+  </div>
   <button id="addSectionButton">🏷️ Add Section</button>
   <button id="aboveButton">⬆️ Add Row Above</button>
   <button id="belowButton">⬇️ Add Row Below</button>
@@ -370,9 +407,8 @@ body.reading #songTitle { pointer-events:none; border:0; }
   </div>
   <div id="document"></div>
 </main>
-<div class="status" id="status" role="status">Ready.</div>
 
-<dialog id="helpDialog">
+<section id="helpDialog" aria-label="Keyboard shortcuts" hidden>
   <div class="help-head">
     <h2>❓ Keyboard Shortcuts</h2>
     <button id="closeHelpButton">✖️ Close</button>
@@ -407,7 +443,7 @@ body.reading #songTitle { pointer-events:none; border:0; }
       <tr><th>Escape</th><td>Cancel the current chord edit and restore its previous value; close Help if it is open</td></tr>
     </tbody></table>
   </div>
-</dialog>
+</section>
 
 <script>
 (() => {
@@ -416,7 +452,6 @@ body.reading #songTitle { pointer-events:none; border:0; }
 const $ = selector => document.querySelector(selector);
 const area = $("#document");
 const titleInput = $("#songTitle");
-const status = $("#status");
 const fileInput = $("#fileInput");
 const imageInput = $("#imageInput");
 const helpDialog = $("#helpDialog");
@@ -441,7 +476,7 @@ let clipboardText = "";
 let cropEditingId = null;
 let cropWorking = null;
 
-function say(message) { status.textContent = message; }
+function say(message) { /* Status messages are intentionally hidden. */ }
 function itemIndex(id) { return items.findIndex(item => item.id === id); }
 function getItem(id) { return items.find(item => item.id === id); }
 function getBar(id) {
@@ -1020,7 +1055,7 @@ function beginEdit(cell,replaceWith=null,selectAll=false) {
   host.replaceChildren(input);
   editState = {id,beat,sub,oldValue,input,host};
   selected = {id,beat,sub};
-  input.focus();
+  input.focus({preventScroll:true});
   if (selectAll) input.select();
   else input.setSelectionRange(input.value.length,input.value.length);
 
@@ -1622,21 +1657,35 @@ $("#lineButton").addEventListener("click",()=>toggleLine(selected.id));
 $("#imageButton").addEventListener("click",()=>imageInput.click());
 $("#saveButton").addEventListener("click",saveSong);
 $("#loadButton").addEventListener("click",()=>fileInput.click());
-$("#helpButton").addEventListener("click",()=>helpDialog.showModal());
-$("#closeHelpButton").addEventListener("click",()=>helpDialog.close());
-$("#menuButton").addEventListener("click",()=>{
-  const open=document.body.classList.toggle("menu-open");
-  $("#menuButton").setAttribute("aria-expanded",String(open));
-  $("#menuButton").textContent="☰";
-  $("#menuButton").setAttribute("aria-label",open?"Close chart tools":"Open chart tools");
-});
-
-document.addEventListener("click",event=>{
-  if (!document.body.classList.contains("menu-open")) return;
-  if (event.target.closest("#toolMenu,#menuButton")) return;
+function closeToolPanels() {
   document.body.classList.remove("menu-open");
   $("#menuButton").setAttribute("aria-expanded","false");
   $("#menuButton").setAttribute("aria-label","Open chart tools");
+  helpDialog.hidden=true;
+  $("#helpButton").setAttribute("aria-expanded","false");
+}
+$("#helpButton").addEventListener("click",()=>{
+  const open=helpDialog.hidden;
+  closeToolPanels();
+  if (open) {
+    helpDialog.hidden=false;
+    $("#helpButton").setAttribute("aria-expanded","true");
+  }
+});
+$("#closeHelpButton").addEventListener("click",closeToolPanels);
+$("#menuButton").addEventListener("click",()=>{
+  const open=!document.body.classList.contains("menu-open");
+  closeToolPanels();
+  if (open) {
+    document.body.classList.add("menu-open");
+    $("#menuButton").setAttribute("aria-expanded","true");
+    $("#menuButton").setAttribute("aria-label","Close chart tools");
+  }
+});
+
+document.addEventListener("click",event=>{
+  if (event.target.closest("#toolMenu,#menuButton,#helpDialog,#helpButton")) return;
+  closeToolPanels();
 });
 
 // In read-only mode, the menu remains available, but only Save and Load actions work.
@@ -1666,10 +1715,7 @@ $("#fitButton").addEventListener("click",()=>{
   readingMode=!readingMode;
   if (readingMode) {
     cropEditingId=null; cropWorking=null;
-    document.body.classList.remove("menu-open");
-    $("#menuButton").setAttribute("aria-expanded","false");
-    $("#menuButton").textContent="☰";
-    $("#menuButton").setAttribute("aria-label","Open chart tools");
+    closeToolPanels();
   }
   document.body.classList.toggle("reading",readingMode);
   $("#fitButton").textContent="✏️ Edit";
@@ -1677,13 +1723,12 @@ $("#fitButton").addEventListener("click",()=>{
   titleInput.readOnly=readingMode;
   area.querySelectorAll(".section-editor").forEach(el=>el.readOnly=readingMode);
   render();
-  window.scrollTo({top:0,behavior:"instant"});
   if (!readingMode && getBar(selected.id)) beginEdit(currentCell(),null,false);
 });
 
 document.addEventListener("keydown",event=>{
-  if (event.key==="Escape" && helpDialog.open) {
-    helpDialog.close();
+  if (event.key==="Escape" && (!helpDialog.hidden || document.body.classList.contains("menu-open"))) {
+    closeToolPanels();
     return;
   }
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase()==="s") {
