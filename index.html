@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chord Chart Creator NEW — Version 2310</title>
+<title>Chord Chart Creator NEW — Version 2322</title>
 <style>
 :root {
   --ink:#202633;
@@ -49,9 +49,10 @@ header {
   align-items:center;
   gap:8px;
 }
-header h1 { font-size:var(--chord-font-size); line-height:1.15; margin:0; white-space:nowrap; flex-shrink:0; }
-header { width:100%; max-width:none; }
-.header-actions { margin-left:auto; }
+header h1 { font-size:.85rem; line-height:1.15; margin:0; white-space:nowrap; flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; }
+header { width:100%; max-width:none; min-width:0; }
+html,body { max-width:100%; overflow-x:hidden; }
+.header-actions { margin-left:auto; min-width:0; }
 .header-actions { display:flex; align-items:center; justify-content:flex-end; gap:5px; flex-shrink:0; }
 .header-actions button { font-size:.85rem; min-height:36px; padding:5px 9px; white-space:nowrap; }
 #menuButton { min-width:38px; font-size:1.1rem; }
@@ -162,6 +163,9 @@ main { width:100%; max-width:none; margin:0; padding:0 12px 24px; }
   vertical-align:middle;
 }
 .chord-cell.selected { outline:none; }
+.chord-cell.multi-selected,.section-cell.multi-selected,.image-cell.multi-selected { outline:2px solid #9ca3af!important; outline-offset:-2px; }
+.subcell.multi-selected { outline:2px solid #9ca3af; outline-offset:-2px; background:#e5e7eb; }
+.chord-cell.multi-selected { background:#e5e7eb; }
 body.crop-mode .chord-symbol,body.crop-mode .rest-symbol { opacity:.45; }
 .chord-cell.thick-line-below {
   border-bottom:2px solid var(--section-color,#ec4899)!important;
@@ -235,7 +239,7 @@ body.crop-mode .chord-symbol,body.crop-mode .rest-symbol { opacity:.45; }
   width:100%;
   height:100%;
   min-width:0;
-  padding:2px 1px;
+  padding:0 1px;
   border:0;
   border-radius:0;
   outline:0;
@@ -270,7 +274,8 @@ body.crop-mode .chord-symbol,body.crop-mode .rest-symbol { opacity:.45; }
 .spacer-row td { height:20px; border:0!important; background:white; }
 .chart tbody>.spacer-row:first-child { display:none; }
 .image-cell { padding:0!important; background:white; }
-.image-cell.image-selected { outline:3px solid #8b95a5; outline-offset:-3px; }
+.image-cell.image-selected { outline:none; }
+.image-cell.image-positioned:not(.multi-selected) { outline:3px solid #ec4899; outline-offset:-3px; }
 .image-viewport { position:relative; width:100%; overflow:hidden; background:transparent; }
 .image-viewport img { display:block; width:100%; height:auto; }
 .image-viewport.cropped { aspect-ratio:var(--crop-ratio); }
@@ -338,15 +343,15 @@ body.reading .image-tools,body.reading .crop-panel { display:none!important; }
   border-bottom:1px solid #e5e7eb;
   text-align:left;
 }
-body.reading { background:white; }
+body.reading { background:#f5f6f8; }
 body.reading .image-tools,body.reading .crop-panel { display:none!important; }
-body.reading #document { pointer-events:none; }
 body.reading #songTitle { pointer-events:none; border-color:transparent; }
 @media(max-width:540px) {
   header { padding:6px 7px 4px; gap:4px; }
   main { padding:0 7px 24px; }
-  header h1 { font-size:var(--chord-font-size); }
+  header h1 { font-size:.85rem; flex:0 1 auto; }
   .header-actions { gap:3px; }
+  header h1 { max-width:35vw; }
   .header-actions button { font-size:.85rem; min-height:34px; padding:4px 6px; }
   #menuButton { min-width:34px; font-size:1rem; }
   nav,#helpDialog { top:39px; left:0; right:0; }
@@ -363,8 +368,9 @@ body.reading #songTitle { pointer-events:none; border-color:transparent; }
 <header>
   <h1>🎼 Chord Chart Creator</h1>
   <div class="header-actions">
-    <button id="fitButton" type="button" aria-pressed="true">✏️ Edit</button>
-    <button id="helpButton" type="button" aria-expanded="false" aria-controls="helpDialog">❓ Help</button>
+    <button id="quickLoadButton" type="button" aria-label="Load Song" title="Load Song">💾</button>
+    <button id="fitButton" type="button" aria-label="Switch to Edit Mode" title="Edit" aria-pressed="false">✏️</button>
+    <button id="helpButton" type="button" aria-label="Help" title="Help" aria-expanded="false" aria-controls="helpDialog">❓</button>
     <button id="menuButton" type="button" aria-label="Toggle chart tools" aria-expanded="false" aria-controls="toolMenu">☰</button>
   </div>
 </header>
@@ -422,23 +428,29 @@ body.reading #songTitle { pointer-events:none; border-color:transparent; }
       <tr><th>\</th><td>Remove the selected cell (a row must keep at least one cell)</td></tr>
       <tr><th>z / Z</th><td>Enter a quarter-rest symbol</td></tr>
       <tr><th>x / X</th><td>Mark the selected cell as skipped (gray background with red cross)</td></tr>
-      <tr><th>Space</th><td>While editing a chord, save it and move right</td></tr>
-      <tr><th>Enter</th><td>While editing, save the chord and move to the next row; when a cell is selected, begin editing</td></tr>
+      <tr><th>Space</th><td>Save the chord and move right; at the last cell, move to the next visual row</td></tr>
+      <tr><th>Enter</th><td>Move to the next visual row; at the bottom of the chart, create a row below. With a selection, move below its bottom-left edge.</td></tr>
       <tr><th>Shift + Enter</th><td>While editing, toggle the row's bottom line and move down</td></tr>
-      <tr><th>Arrow keys</th><td>Navigate left/right between cells and up/down between rows and section headings; Down at the bottom creates a new row</td></tr>
-      <tr><th>Tab / Shift + Tab</th><td>Move right / left between cells</td></tr>
+      <tr><th>Ctrl + Shift + Enter</th><td>Insert a new row below the current row, anywhere in the chart</td></tr>
+      <tr><th>Arrow keys</th><td>Navigate left/right between cells and up/down between rows and section headings; Arrow keys never create rows</td></tr>
+      <tr><th>Tab / Shift + Tab</th><td>Move right / left between cells; at row edges, continue to the next/previous row</td></tr>
       <tr><th>F2</th><td>Edit the selected cell</td></tr>
+      <tr><th>Shift + Arrow keys</th><td>Extend a rectangular cell selection in Edit Mode</td></tr>
+      <tr><th>Arrow keys / Enter (with selection)</th><td>Clear the selection and move outside its edge: Right from the top-right, Down or Enter below the bottom-left, Left from the top-left, or Up above the top-left. Navigation stops at the chart boundary and never creates a row.</td></tr>
+      <tr><th>Ctrl/Cmd + click</th><td>Select or deselect individual cells, including nonadjacent cells</td></tr>
       <tr><th>PageUp / PageDown</th><td>Add a row above / below when a cell (not a text editor) is selected</td></tr>
       <tr><th>Ctrl + L</th><td>Toggle the selected row's bottom-line thickness</td></tr>
-      <tr><th>Ctrl + Enter</th><td>Add a new section</td></tr>
+      <tr><th>Ctrl + Enter</th><td>Create a new section heading below the current position and edit its name</td></tr>
+      <tr><th>Enter (section name)</th><td>Create the section’s first row if needed, then focus its first (leftmost) cell</td></tr>
       <tr><th>Section name End</th><td>Marks the end of the chart and removes all content below it</td></tr>
       <tr><th>Ctrl + H</th><td>Open Help</td></tr>
       <tr><th>Ctrl + S</th><td>Save song as a named JSON file</td></tr>
       <tr><th>Ctrl + O</th><td>Open a JSON song file</td></tr>
       <tr><th>Ctrl + I</th><td>Insert image</td></tr>
-      <tr><th>Ctrl + Delete</th><td>Delete the selected row or section and its contents</td></tr>
+      <tr><th>Ctrl + Delete</th><td>Delete the current row and move to the next visual row below</td></tr>
+      <tr><th>Ctrl + Shift + Delete</th><td>Delete the entire current section, including its rows and images</td></tr>
       <tr><th>Remove Section</th><td>Remove the current section and all rows/images up to the next section</td></tr>
-      <tr><th>Ctrl/Cmd + C / V</th><td>Copy / paste the selected beat-cell's chord</td></tr>
+      <tr><th>Ctrl/Cmd + C / V</th><td>Copy / paste selected cells or ranges in Edit Mode</td></tr>
       <tr><th>Delete</th><td>Clear the selected chord; while editing, clear the chord and keep the editor active</td></tr>
       <tr><th>Escape</th><td>Cancel the current chord edit and restore its previous value; close Help if it is open</td></tr>
     </tbody></table>
@@ -465,20 +477,27 @@ const sectionColors = {
 
 let idCounter = 1;
 let items = [
-  {id:idCounter++,type:"section",text:"Intro"},
-  {id:idCounter++,type:"bar",beats:["","","",""],divisions:{}}
+  {id:idCounter++,type:"section",text:""}
 ];
+let startupSectionId = items[0].id;
 let thickLines = new Set();
-let selected = {id:items[1].id,beat:0,sub:0};
+let selected = {id:items[0].id,beat:0,sub:0};
 let editState = null;
-let readingMode = false;
+let readingMode = true;
 let clipboardText = "";
+let selectedKeys = new Set();
+let selectionAnchor = null;
+let clipboardMatrix = null;
 let cropEditingId = null;
 let cropWorking = null;
 
 function say(message) { /* Status messages are intentionally hidden. */ }
 function itemIndex(id) { return items.findIndex(item => item.id === id); }
 function getItem(id) { return items.find(item => item.id === id); }
+function isStartupSectionEditable(item) {
+  return !!item && item.type === "section" && item.id === startupSectionId &&
+    !items.some(entry => entry.type === "bar");
+}
 function getBar(id) {
   const item = getItem(id);
   return item && item.type === "bar" ? item : null;
@@ -487,6 +506,42 @@ function currentCell() {
   return area.querySelector(
     `.chord-cell[data-id="${selected.id}"][data-beat="${selected.beat}"]`
   );
+}
+
+// Keep the active caret/selection endpoint visible after every chart navigation action.
+// The request token prevents an older deferred scroll from overriding a newer destination.
+let scrollRequestToken = 0;
+function scrollTargetIntoView(element, alignStart=false) {
+  if (!element) return;
+  const token = ++scrollRequestToken;
+  requestAnimationFrame(() => {
+    if (token !== scrollRequestToken || !element.isConnected) return;
+    if (alignStart) {
+      element.scrollIntoView({block:"start", inline:"nearest", behavior:"auto"});
+      return;
+    }
+    const rect = element.getBoundingClientRect();
+    const top = 4;
+    const bottom = Math.max(top, window.innerHeight - 4);
+    if (rect.top < top || rect.bottom > bottom) {
+      element.scrollIntoView({block:"nearest", inline:"nearest", behavior:"auto"});
+    }
+  });
+}
+function elementForRef(ref) {
+  if (!ref) return null;
+  const row = area.querySelector(`tr[data-id="${ref.id}"]`);
+  if (!row) return null;
+  if (ref.type === "section") return row.querySelector(".section-cell") || row;
+  if (ref.type === "image") return row.querySelector(".image-cell") || row;
+  if (ref.type === "bar") {
+    const cell = row.querySelector(`.chord-cell[data-beat="${ref.beat}"]`);
+    return cell?.querySelector(`.subcell[data-sub="${ref.sub}"]`) || cell || row;
+  }
+  return row;
+}
+function scrollCurrentRefIntoView(alignStart=false) {
+  scrollTargetIntoView(elementForRef(currentRef()), alignStart);
 }
 function getValues(bar,beat) {
   const divided = bar.divisions && bar.divisions[beat];
@@ -748,7 +803,7 @@ function makeCropEditor(item) {
   cancel.type = "button"; cancel.textContent = "Cancel";
   cancel.addEventListener("click",()=>{ cropEditingId=null; cropWorking=null; render(); });
   actions.append(apply,cancel);
-  panel.append(stage,actions);
+  panel.append(actions,stage);
 
   const syncFrame=()=>applyCropFrame(frame,cropWorking);
   if (img.complete && img.naturalWidth) {
@@ -800,6 +855,192 @@ function makeCropEditor(item) {
   return panel;
 }
 
+function refKey(ref) {
+  if (!ref) return "";
+  if (ref.type==="bar") return `b:${ref.id}:${ref.beat}:${ref.sub}`;
+  return `${ref.type[0]}:${ref.id}`;
+}
+function currentRef() {
+  const item=getItem(selected.id);
+  if (!item) return null;
+  if (item.type==="bar") return {type:"bar",id:item.id,beat:selected.beat||0,sub:selected.sub||0};
+  return {type:item.type,id:item.id,beat:0,sub:0};
+}
+function rowRefs(item) {
+  if (item.type==="bar") {
+    const refs=[];
+    item.beats.forEach((_,beat)=>getValues(item,beat).forEach((__,sub)=>refs.push({type:"bar",id:item.id,beat,sub})));
+    return refs;
+  }
+  return [{type:item.type,id:item.id,beat:0,sub:0}];
+}
+function locateRef(ref) {
+  const row=itemIndex(ref?.id);
+  if (row<0) return null;
+  const refs=rowRefs(items[row]);
+  const col=refs.findIndex(candidate=>refKey(candidate)===refKey(ref));
+  return col<0?null:{row,col,ref:refs[col]};
+}
+function refValue(ref) {
+  const item=getItem(ref.id);
+  if (!item) return null;
+  if (ref.type==="bar" && item.type==="bar") return {type:"bar",value:String(getValues(item,ref.beat)[ref.sub]??"")};
+  if (ref.type==="section" && item.type==="section") return {type:"section",value:String(item.text??"")};
+  if (ref.type==="image" && item.type==="image") return {type:"image",value:{data:item.data,alt:item.alt,crop:item.crop?{...item.crop}:null,width:item.width,height:item.height}};
+  return null;
+}
+function setRefValue(ref,descriptor) {
+  const item=getItem(ref.id);
+  if (!item || !descriptor || item.type!==descriptor.type) return;
+  if (item.type==="bar") setSubValue(item.id,ref.beat,ref.sub,descriptor.value);
+  else if (item.type==="section") item.text=String(descriptor.value??"");
+  else if (item.type==="image" && descriptor.value) {
+    item.data=descriptor.value.data; item.alt=descriptor.value.alt||"Inserted image";
+    item.crop=descriptor.value.crop?{...descriptor.value.crop}:null;
+    item.width=Number(descriptor.value.width)||0; item.height=Number(descriptor.value.height)||0;
+  }
+}
+function rectangularRefs(anchor,current) {
+  const a=locateRef(anchor), c=locateRef(current);
+  if (!a||!c) return new Set([refKey(current)]);
+  const rowMin=Math.min(a.row,c.row), rowMax=Math.max(a.row,c.row);
+  const colMin=Math.min(a.col,c.col), colMax=Math.max(a.col,c.col);
+  const keys=new Set();
+  for (let r=rowMin;r<=rowMax;r++) {
+    const refs=rowRefs(items[r]);
+    for (let col=colMin;col<=Math.min(colMax,refs.length-1);col++) {
+      if (col>=0) keys.add(refKey(refs[col]));
+    }
+  }
+  return keys;
+}
+function navigateFromSelection(key) {
+  if (!selectedKeys.size || !["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(key)) return false;
+  const locations=[];
+  for (let row=0;row<items.length;row++) {
+    rowRefs(items[row]).forEach((ref,col)=>{ if (selectedKeys.has(refKey(ref))) locations.push({row,col,ref}); });
+  }
+  if (!locations.length) { selectedKeys.clear(); selectionAnchor=null; return false; }
+
+  // Navigate from the rectangular selection's bounding edges:
+  // Left/Right stay aligned with its top row; Up/Down stay aligned
+  // with its leftmost column. Enter delegates to this function as ArrowDown.
+  const topRow=Math.min(...locations.map(x=>x.row));
+  const bottomRow=Math.max(...locations.map(x=>x.row));
+  const leftCol=Math.min(...locations.map(x=>x.col));
+  const rightCol=Math.max(...locations.map(x=>x.col));
+  const topLeft=locations.find(x=>x.row===topRow && x.col===leftCol) ||
+    locations.filter(x=>x.row===topRow).reduce((a,b)=>b.col<a.col?b:a);
+  const topRight=locations.find(x=>x.row===topRow && x.col===rightCol) ||
+    locations.filter(x=>x.row===topRow).reduce((a,b)=>b.col>a.col?b:a);
+  const bottomLeft=locations.find(x=>x.row===bottomRow && x.col===leftCol) ||
+    locations.filter(x=>x.row===bottomRow).reduce((a,b)=>b.col<a.col?b:a);
+
+  let target=null;
+  if (key==="ArrowRight") {
+    target=rowRefs(items[topRow])[rightCol+1] || topRight.ref;
+  } else if (key==="ArrowLeft") {
+    target=rowRefs(items[topRow])[leftCol-1] || topLeft.ref;
+  } else {
+    const edge=key==="ArrowDown"?bottomLeft:topLeft;
+    const nextRow=edge.row+(key==="ArrowDown"?1:-1);
+    if (nextRow>=0 && nextRow<items.length) {
+      const refs=rowRefs(items[nextRow]);
+      target=refs[leftCol] || null;
+    }
+    // At the chart boundary, keep the caret on the selection edge; never create a row.
+    if (!target) target=edge.ref;
+  }
+
+  selectedKeys.clear(); selectionAnchor=null;
+  if (editState) commitEdit();
+  selected={id:target.id,beat:target.beat||0,sub:target.sub||0};
+  render();
+  if (target.type==="bar") beginEdit(currentCell(),null,false);
+  else if (target.type==="section") {
+    const input=area.querySelector(`tr[data-id="${target.id}"] .section-editor`);
+    if (input) { input.focus({preventScroll:true}); input.setSelectionRange(input.value.length,input.value.length); }
+    scrollTargetIntoView(elementForRef(target));
+  } else {
+    const imageCell=area.querySelector(`tr[data-id="${target.id}"] .image-cell`);
+    if (imageCell) { imageCell.focus({preventScroll:true}); scrollTargetIntoView(imageCell); }
+  }
+  return true;
+}
+function extendSelection(direction) {
+  const current=currentRef();
+  if (!current) return;
+  if (!selectionAnchor) selectionAnchor=current;
+  const loc=locateRef(current);
+  if (!loc) return;
+  let target=null;
+  if (direction===-1 || direction===1) {
+    const refs=rowRefs(items[loc.row]);
+    const next=refs[loc.col+direction];
+    if (next) target=next;
+    else {
+      for (let r=loc.row+direction;r>=0&&r<items.length;r+=direction) {
+        const nextRefs=rowRefs(items[r]);
+        if (nextRefs.length) { target=nextRefs[direction>0?0:nextRefs.length-1]; break; }
+      }
+    }
+  } else {
+    const rowDirection=direction<0?-1:1;
+    for (let r=loc.row+rowDirection;r>=0&&r<items.length;r+=rowDirection) {
+      const refs=rowRefs(items[r]);
+      if (refs.length) { target=refs[Math.min(loc.col,refs.length-1)]; break; }
+    }
+    // Extending a selection stops at the chart boundary; it does not insert rows.
+  }
+  if (!target) return;
+  selected={id:target.id,beat:target.beat||0,sub:target.sub||0};
+  selectedKeys=rectangularRefs(selectionAnchor,target);
+  render();
+  scrollTargetIntoView(elementForRef(target));
+}
+function copyCurrent() {
+  const ref=currentRef();
+  if (!ref) { clipboardText=""; clipboardMatrix=null; return; }
+  if (!selectedKeys.size) selectedKeys=new Set([refKey(ref)]);
+  const locations=[];
+  for (let r=0;r<items.length;r++) {
+    const refs=rowRefs(items[r]);
+    refs.forEach((cell,col)=>{ if (selectedKeys.has(refKey(cell))) locations.push({row:r,col,ref:cell}); });
+  }
+  if (!locations.length) return;
+  const minRow=Math.min(...locations.map(x=>x.row)), maxRow=Math.max(...locations.map(x=>x.row));
+  const minCol=Math.min(...locations.map(x=>x.col)), maxCol=Math.max(...locations.map(x=>x.col));
+  clipboardMatrix=[];
+  for (let r=minRow;r<=maxRow;r++) {
+    const refs=rowRefs(items[r]);
+    const row=[];
+    for (let c=minCol;c<=maxCol;c++) row.push(c<refs.length&&selectedKeys.has(refKey(refs[c]))?refValue(refs[c]):null);
+    clipboardMatrix.push(row);
+  }
+  const only=clipboardMatrix.length===1&&clipboardMatrix[0].length===1?clipboardMatrix[0][0]:null;
+  clipboardText=only?.type==="bar"?String(only.value??""):"";
+}
+function pasteCurrent() {
+  if (editState) commitEdit();
+  if (!clipboardMatrix) { if (clipboardText!=="") { const ref=currentRef(); if (ref?.type==="bar") setRefValue(ref,{type:"bar",value:clipboardText}); render(); } return; }
+  const destination=currentRef();
+  const start=locateRef(destination);
+  if (!start) return;
+  for (let r=0;r<clipboardMatrix.length;r++) {
+    const targetRowIndex=start.row+r;
+    if (targetRowIndex>=items.length) break;
+    const refs=rowRefs(items[targetRowIndex]);
+    for (let c=0;c<clipboardMatrix[r].length;c++) {
+      const targetCol=start.col+c;
+      if (targetCol>=refs.length) break;
+      const descriptor=clipboardMatrix[r][c];
+      if (descriptor) setRefValue(refs[targetCol],descriptor);
+    }
+  }
+  selectedKeys.clear(); selectionAnchor=null;
+  render();
+  if (!readingMode && getBar(selected.id)) beginEdit(currentCell(),null,false);
+}
 function render() {
   document.body.classList.toggle("crop-mode",cropEditingId!==null && !readingMode);
   // Render always rebuilds the chart. Editing is attached afterward to a fresh node.
@@ -844,11 +1085,31 @@ function render() {
     if (item.type === "section") {
       const td = document.createElement("td");
       td.className = "section-cell";
+      if (selectedKeys.has(refKey({type:"section",id:item.id}))) td.classList.add("multi-selected");
       td.colSpan = max;
+      td.addEventListener("click",event=>{
+        if (readingMode) {
+          if (isStartupSectionEditable(item)) {
+            const editor=td.querySelector(".section-editor");
+            if (editor) { editor.focus(); editor.setSelectionRange(editor.value.length,editor.value.length); }
+          }
+          return;
+        }
+        if (event.ctrlKey || event.metaKey) {
+          if (editState) commitEdit();
+          const ref={type:"section",id:item.id}, key=refKey(ref);
+          if (selectedKeys.has(key)) selectedKeys.delete(key); else selectedKeys.add(key);
+          selectionAnchor=ref; selected={id:item.id,beat:0,sub:0}; render();
+          scrollTargetIntoView(elementForRef(ref));
+          return;
+        }
+        selectedKeys.clear(); selectionAnchor=null; selected={id:item.id,beat:0,sub:0};
+        scrollTargetIntoView(td);
+      });
       const input = document.createElement("input");
       input.className = "section-editor";
       input.value = item.text;
-      input.readOnly = readingMode;
+      input.readOnly = readingMode && !isStartupSectionEditable(item);
       input.addEventListener("focus",()=>{ selected={id:item.id,beat:0,sub:0}; });
       input.setAttribute("aria-label","Section heading");
       input.addEventListener("input",() => {
@@ -864,22 +1125,88 @@ function render() {
         render();
         const fresh = area.querySelector(`tr[data-id="${item.id}"] .section-editor`);
         if (fresh) {
-          fresh.focus();
+          fresh.focus({preventScroll:true});
           try { fresh.setSelectionRange(freshStart,freshEnd); } catch {}
+          scrollTargetIntoView(fresh);
         }
       });
       input.addEventListener("keydown",event => {
-        if (event.key === "ArrowUp" || event.key === "ArrowDown") {
-          const direction = event.key === "ArrowDown" ? 1 : -1;
+        if (readingMode) {
+          if (isStartupSectionEditable(item) && event.key === "Enter") {
+            event.preventDefault(); event.stopPropagation();
+            // Naming the initial section is allowed in the default Play Mode. Enter/Down
+            // commits that name, switches to Edit Mode, creates the first row, and edits its first cell.
+            readingMode = false;
+            document.body.classList.remove("reading");
+            titleInput.readOnly = false;
+            $("#fitButton").setAttribute("aria-label","Switch to Play Mode");
+            $("#fitButton").title = "Play Mode";
+            $("#fitButton").setAttribute("aria-pressed","true");
+            const firstBar = createFirstRow(item.id);
+            if (firstBar) selected = {id:firstBar.id,beat:0,sub:0};
+            render();
+            if (firstBar) beginEdit(currentCell(),null,false);
+          }
+          return;
+        }
+        if (event.ctrlKey && event.shiftKey && event.key === "Enter") {
+          event.preventDefault(); event.stopPropagation();
+          if (editState) commitEdit();
+          selected={id:item.id,beat:0,sub:0};
+          addRow(1);
+          return;
+        }
+        if (event.ctrlKey && event.key === "Enter") {
+          event.preventDefault(); event.stopPropagation(); addSection(); return;
+        }
+        if (event.key === "Enter") {
+          event.preventDefault(); event.stopPropagation();
+          // Enter on a section heading creates its first row when needed, or
+          // focuses the existing first row. Always start at the leftmost cell.
+          if (String(item.text).trim().toLowerCase() === "end") return;
+          const firstBar = createFirstRow(item.id);
+          if (firstBar) {
+            selected = {id:firstBar.id,beat:0,sub:0};
+            render();
+            beginEdit(currentCell(),null,false);
+          }
+          return;
+        }
+        if (event.shiftKey && ["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key)) {
+          event.preventDefault(); event.stopPropagation();
+          const direction=event.key==="ArrowLeft"?-1:event.key==="ArrowRight"?1:event.key==="ArrowUp"?-2:2;
+          extendSelection(direction); return;
+        }
+        if (event.key === "Tab") {
+          event.preventDefault(); event.stopPropagation();
+          if (event.shiftKey) {
+            const idx=itemIndex(item.id);
+            for (let i=idx-1;i>=0;i--) if (items[i].type==="bar") {
+              const previous=items[i], beat=previous.beats.length-1;
+              selected={id:previous.id,beat,sub:getValues(previous,beat).length-1};
+              render(); beginEdit(currentCell(),null,false); return;
+            }
+          }
+          const next=createFirstRow(item.id);
+          if (next) selectCell(next.id,0,0,true);
+          return;
+        }
+        if (["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key) && navigateFromSelection(event.key)) {
+          event.preventDefault(); event.stopPropagation(); return;
+        }
+        if (event.key === "ArrowUp") {
+          const direction = -1;
           if (canMoveVertical(item.id,direction)) {
-            event.preventDefault();
-            event.stopPropagation();
+            event.preventDefault(); event.stopPropagation();
             moveVertical(item.id,0,direction,0);
           }
         } else if (event.key === "Enter") {
-          event.preventDefault();
-          const next = items.slice(itemIndex(item.id)+1).find(i=>i.type==="bar");
-          if (next) selectCell(next.id,0,0,true);
+          event.preventDefault(); event.stopPropagation();
+          advanceDown(item.id);
+        } else if (event.key === "ArrowDown") {
+          event.preventDefault(); event.stopPropagation();
+          if (canMoveVertical(item.id,1)) moveVertical(item.id,0,1,0);
+          // ArrowDown only navigates; row creation is reserved for Enter.
         } else if (event.key === "Escape") input.blur();
       });
       td.append(input);
@@ -909,6 +1236,7 @@ function render() {
             const part = document.createElement("div");
             part.className = "subcell";
             part.dataset.sub = sub;
+            if (selectedKeys.has(refKey({type:"bar",id:item.id,beat,sub}))) part.classList.add("multi-selected");
             renderChordContent(part,subValue);
             subcells.append(part);
           });
@@ -920,9 +1248,30 @@ function render() {
         td.append(content);
         if (thickLines.has(String(item.id))) td.classList.add("thick-line-below");
         if (selected.id===item.id && selected.beat===beat) td.classList.add("selected");
+        if (values.length===1 && selectedKeys.has(refKey({type:"bar",id:item.id,beat,sub:0}))) td.classList.add("multi-selected");
 
         td.addEventListener("click",event => {
           if (readingMode) return;
+          const clickedSubNode=event.target.closest(".subcell");
+          const clickedSub=clickedSubNode?Number(clickedSubNode.dataset.sub):0;
+          if (event.shiftKey) {
+            const anchor=selectionAnchor || currentRef() || {type:"bar",id:item.id,beat,sub:clickedSub};
+            if (editState) commitEdit();
+            const ref={type:"bar",id:item.id,beat,sub:clickedSub};
+            selectionAnchor=anchor;
+            selectedKeys=rectangularRefs(anchor,ref);
+            selected={id:item.id,beat,sub:clickedSub};
+            render();
+            return;
+          }
+          if (event.ctrlKey || event.metaKey) {
+            if (editState) commitEdit();
+            const ref={type:"bar",id:item.id,beat,sub:clickedSub}, key=refKey(ref);
+            if (selectedKeys.has(key)) selectedKeys.delete(key); else selectedKeys.add(key);
+            selectionAnchor=ref; selected={id:item.id,beat,sub:clickedSub}; render();
+            return;
+          }
+          selectedKeys.clear(); selectionAnchor=null;
           const subNode = event.target.closest(".subcell");
           const sub = subNode ? Number(subNode.dataset.sub) : 0;
 
@@ -942,7 +1291,10 @@ function render() {
       td.colSpan = max;
       td.className = "image-cell";
       td.tabIndex = 0;
+      const imageRefKey = refKey({type:"image",id:item.id});
       if (selected.id === item.id) td.classList.add("image-selected");
+      if (selectedKeys.has(imageRefKey)) td.classList.add("multi-selected");
+      else if (selected.id === item.id) td.classList.add("image-positioned");
       if (cropEditingId===item.id && !readingMode) {
         td.append(makeCropEditor(item));
       } else {
@@ -965,28 +1317,58 @@ function render() {
             if (cropped) render();
           }
         },{once:true});
-        viewport.append(img); td.append(viewport);
         if (!readingMode) {
           const tools=document.createElement("div");
           tools.className="image-tools";
           const cropButton=document.createElement("button");
           cropButton.type="button"; cropButton.textContent="✂️ Crop Image";
-          cropButton.addEventListener("click",()=>{
+          const activateCrop = event => {
+            event.preventDefault(); event.stopPropagation();
+            if (cropEditingId===item.id) return;
             if (editState) commitEdit();
             cropEditingId=item.id; cropWorking=cropRectFor(item); render();
-          });
+            const cropRow=area.querySelector(`tr[data-id="${item.id}"]`);
+            scrollTargetIntoView(cropRow,true);
+          };
+          cropButton.addEventListener("pointerdown",activateCrop);
+          cropButton.addEventListener("click",event=>{ event.preventDefault(); event.stopPropagation(); });
           tools.append(cropButton); td.append(tools);
         }
+        viewport.append(img); td.append(viewport);
       }
       td.addEventListener("click",event=>{
         if (readingMode || event.target.closest("button,.crop-panel")) return;
+        if (event.ctrlKey || event.metaKey) {
+          if (editState) commitEdit();
+          const ref={type:"image",id:item.id}, key=refKey(ref);
+          if (selectedKeys.has(key)) selectedKeys.delete(key); else selectedKeys.add(key);
+          selectionAnchor=ref; selected={id:item.id,beat:0,sub:0}; render(); return;
+        }
+        selectedKeys.clear(); selectionAnchor=null;
         if (editState) commitEdit();
         selected={id:item.id,beat:0,sub:0};
         render();
         const fresh=area.querySelector(`tr[data-id="${item.id}"] .image-cell`);
-        if (fresh) { fresh.classList.add("image-selected"); fresh.focus(); }
+        if (fresh) { fresh.classList.add("image-selected"); fresh.focus({preventScroll:true}); scrollTargetIntoView(fresh); }
       });
       td.addEventListener("keydown",event=>{
+        if (event.ctrlKey && event.shiftKey && event.key==="Enter") {
+          event.preventDefault(); event.stopPropagation();
+          if (editState) commitEdit();
+          selected={id:item.id,beat:0,sub:0};
+          addRow(1);
+          return;
+        }
+        if (event.key==="Enter" || event.key==="ArrowDown") {
+          event.preventDefault(); event.stopPropagation();
+          advanceDown(item.id);
+          return;
+        }
+        if (event.key==="ArrowUp") {
+          event.preventDefault(); event.stopPropagation();
+          moveVertical(item.id,0,-1,0);
+          return;
+        }
         if (event.key==="Delete" && !event.ctrlKey && !event.metaKey) {
           event.preventDefault();
           const idx=itemIndex(item.id);
@@ -1016,6 +1398,7 @@ function selectCell(id,beat,sub=0,focus=true) {
   if (editState) commitEdit();
   selected = {id,beat,sub};
   render();
+  scrollCurrentRefIntoView();
   if (focus && !readingMode) beginEdit(currentCell(),null,false);
 }
 
@@ -1058,6 +1441,7 @@ function beginEdit(cell,replaceWith=null,selectAll=false) {
   input.focus({preventScroll:true});
   if (selectAll) input.select();
   else input.setSelectionRange(input.value.length,input.value.length);
+  scrollTargetIntoView(input);
 
   input.addEventListener("input",() => {
     // The input itself displays every typed character immediately.
@@ -1065,6 +1449,13 @@ function beginEdit(cell,replaceWith=null,selectAll=false) {
   });
 
   input.addEventListener("keydown",event=>{
+    if (event.ctrlKey && event.shiftKey && event.key==="Enter") {
+      event.preventDefault(); event.stopPropagation();
+      commitEdit();
+      selected={id,beat,sub};
+      addRow(1);
+      return;
+    }
     if (event.ctrlKey && event.key==="Enter") {
       event.preventDefault();
       event.stopPropagation();
@@ -1088,6 +1479,14 @@ function beginEdit(cell,replaceWith=null,selectAll=false) {
       divideCell(id,beat,digit===0?10:digit);
       return;
     }
+    if (event.shiftKey && ["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key)) {
+      event.preventDefault(); event.stopPropagation();
+      const direction=event.key==="ArrowLeft"?-1:event.key==="ArrowRight"?1:event.key==="ArrowUp"?-2:2;
+      commitEdit(); extendSelection(direction); return;
+    }
+    if (["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key) && navigateFromSelection(event.key)) {
+      event.preventDefault(); event.stopPropagation(); return;
+    }
     if (event.key===" " && !event.ctrlKey) {
       event.preventDefault();
       event.stopPropagation();
@@ -1102,21 +1501,29 @@ function beginEdit(cell,replaceWith=null,selectAll=false) {
       advanceDown(id);
       return;
     }
+    if (event.key==="Enter" && selectedKeys.size && navigateFromSelection("ArrowDown")) {
+      event.preventDefault(); event.stopPropagation();
+      return;
+    }
     if (event.key==="Enter") {
       event.preventDefault();
       event.stopPropagation();
       commitEdit();
-      advanceDown(id);
+      if (isBottomChartRow(id)) addRowBelowFirstCell();
+      else advanceDown(id);
       return;
     }
     if (event.key==="Tab") {
       event.preventDefault();
       event.stopPropagation();
       commitEdit();
-      moveHorizontal(id,beat,event.shiftKey?-1:1,sub);
+      moveTab(event.shiftKey?-1:1,id,beat,sub);
       return;
     }
-    if (event.key==="ArrowLeft" || event.key==="ArrowRight") {
+    if (["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key) && navigateFromSelection(event.key)) {
+    event.preventDefault(); event.stopPropagation(); return;
+  }
+  if (event.key==="ArrowLeft" || event.key==="ArrowRight") {
       const dir = event.key === "ArrowRight" ? 1 : -1;
       if (canMoveHorizontal(id,beat,dir,sub)) {
         event.preventDefault();
@@ -1211,6 +1618,7 @@ function canMoveHorizontal(id,beat,direction,sub=0) {
   return nextBeat >= 0 && nextBeat < bar.beats.length;
 }
 function moveHorizontal(id,beat,direction,sub=0) {
+  selectedKeys.clear(); selectionAnchor=null;
   const bar = getBar(id);
   if (!bar || !canMoveHorizontal(id,beat,direction,sub)) return false;
   const values = getValues(bar,beat);
@@ -1227,10 +1635,26 @@ function moveHorizontal(id,beat,direction,sub=0) {
   return true;
 }
 function focusSection(id) {
+  selectedKeys.clear(); selectionAnchor=null;
   selected = {id,beat:0,sub:0};
   render();
   const input = area.querySelector(`tr[data-id="${id}"] .section-editor`);
-  if (input && !readingMode) input.focus();
+  if (input && !readingMode) {
+    input.focus({preventScroll:true});
+    input.setSelectionRange(input.value.length,input.value.length);
+    scrollTargetIntoView(input);
+  } else scrollCurrentRefIntoView();
+}
+function isBottomChartRow(id) {
+  const idx=itemIndex(id);
+  if (idx<0) return false;
+  for (let i=idx+1;i<items.length;i++) {
+    const item=items[i];
+    // The End marker is a terminal boundary, not chart content.
+    if (item.type==="section" && String(item.text).trim().toLowerCase()==="end") return true;
+    return false;
+  }
+  return true;
 }
 function canMoveVertical(id,direction) {
   const idx = itemIndex(id);
@@ -1240,9 +1664,10 @@ function canMoveVertical(id,direction) {
   for (let i=idx+direction;i>=0&&i<items.length;i+=direction) {
     if (items[i].type === "bar" || items[i].type === "section" || items[i].type === "image") return true;
   }
-  return direction > 0;
+  return false;
 }
 function moveVertical(id,beat,direction,sub=0) {
+  selectedKeys.clear(); selectionAnchor=null;
   const idx = itemIndex(id);
   if (idx < 0) return false;
   for (let i=idx+direction;i>=0&&i<items.length;i+=direction) {
@@ -1259,7 +1684,8 @@ function moveVertical(id,beat,direction,sub=0) {
       const imageCell = area.querySelector(`tr[data-id="${target.id}"] .image-cell`);
       if (imageCell) {
         imageCell.classList.add("image-selected");
-        imageCell.focus();
+        imageCell.focus({preventScroll:true});
+        scrollTargetIntoView(imageCell);
       }
       return true;
     }
@@ -1272,15 +1698,7 @@ function moveVertical(id,beat,direction,sub=0) {
       return true;
     }
   }
-  if (direction > 0) {
-    if (editState) commitEdit();
-    const target = makeBar(Math.max(maxColumns(),beat+1));
-    items.splice(idx+1,0,target);
-    selected = {id:target.id,beat:Math.min(Math.max(0,beat),target.beats.length-1),sub:0};
-    render();
-    beginEdit(currentCell(),null,false);
-    return true;
-  }
+  // Vertical navigation is strictly non-structural: it never creates rows.
   return false;
 }
 function addDivisionAtCurrent() {
@@ -1295,32 +1713,89 @@ function addDivisionAtCurrent() {
   beginEdit(currentCell(),null,false);
   say(`Cell divided into ${values.length} beat-cells.`);
 }
+function moveTab(direction,id=selected.id,beat=selected.beat,sub=selected.sub||0) {
+  selectedKeys.clear(); selectionAnchor=null;
+  if (canMoveHorizontal(id,beat,direction,sub)) return moveHorizontal(id,beat,direction,sub);
+  const idx=itemIndex(id);
+  if (direction>0) {
+    advanceDown(id);
+    return true;
+  }
+  for (let i=idx-1;i>=0;i--) {
+    const item=items[i];
+    if (item.type==="bar") {
+      const lastBeat=item.beats.length-1;
+      const lastSub=getValues(item,lastBeat).length-1;
+      selected={id:item.id,beat:lastBeat,sub:lastSub};
+      render(); beginEdit(currentCell(),null,false);
+      return true;
+    }
+    if (item.type==="section") { focusSection(item.id); return true; }
+  }
+  return false;
+}
 function advanceSpace() {
   if (!editState) return;
   const {id,beat,sub} = editState;
   commitEdit();
-  moveHorizontal(id,beat,1,sub);
+  if (!moveTab(1,id,beat,sub)) advanceDown(id);
 }
+function focusImagePosition(id) {
+  selectedKeys.clear();
+  selectionAnchor = null;
+  selected = {id,beat:0,sub:0};
+  render();
+  const imageCell = area.querySelector(`tr[data-id="${id}"] .image-cell`);
+  if (imageCell) {
+    imageCell.classList.add("image-positioned");
+    imageCell.focus({preventScroll:true});
+    scrollTargetIntoView(imageCell);
+  }
+}
+
+// Enter follows the next visual chart row, regardless of its type. Chord rows
+// receive an editor, section headings receive focus, and image rows use a pink
+// position outline because they cannot contain a text caret.
 function advanceDown(id) {
   const idx = itemIndex(id);
-  for (let i=idx+1;i<items.length;i++) {
-    if (items[i].type==="bar") {
-      selected = {id:items[i].id,beat:0,sub:0};
+  if (idx < 0) return;
+  const next = items[idx+1];
+  if (next) {
+    if (next.type === "bar") {
+      selected = {id:next.id,beat:0,sub:0};
       render();
       beginEdit(currentCell(),null,false);
       return;
     }
+    if (next.type === "image") {
+      focusImagePosition(next.id);
+      return;
+    }
+    if (next.type === "section") {
+      focusSection(next.id);
+      return;
+    }
   }
-  const bar = makeBar(maxColumns());
-  items.splice(idx+1,0,bar);
-  selected = {id:bar.id,beat:0,sub:0};
-  render();
-  beginEdit(currentCell(),null,false);
+  // Enter navigation does not create rows; chord-editor Enter uses
+  // addRowBelowFirstCell() to insert a row explicitly.
+  const current = getBar(id);
+  if (current) {
+    selected = {id,beat:0,sub:0};
+    render();
+    beginEdit(currentCell(),null,false);
+  }
 }
 
 function handleCellKey(event,cell) {
   if (readingMode) { event.preventDefault(); return; }
   const id = Number(cell.dataset.id), beat = Number(cell.dataset.beat);
+  if (event.ctrlKey && event.shiftKey && event.key==="Enter") {
+    event.preventDefault(); event.stopPropagation();
+    if (editState) commitEdit();
+    selected={id,beat,sub:selected.sub||0};
+    addRow(1);
+    return;
+  }
   if (event.ctrlKey && /^[0-9]$/.test(event.key)) {
     event.preventDefault();
     divideCell(id,beat,Number(event.key)===0?10:Number(event.key));
@@ -1329,26 +1804,32 @@ function handleCellKey(event,cell) {
   if (event.ctrlKey || event.metaKey) {
     if (event.key.toLowerCase()==="c") {
       event.preventDefault();
-      const bar=getBar(id);
-      clipboardText=bar?String(getValues(bar,beat)[selected.sub||0]??""):"";
+      selected={id,beat,sub:selected.sub||0}; copyCurrent();
       return;
     }
     if (event.key.toLowerCase()==="v") {
       event.preventDefault();
-      if (clipboardText!=="") {
-        setSubValue(id,beat,selected.sub||0,clipboardText);
-        selected={id,beat,sub:selected.sub||0};
-        render();
-        beginEdit(currentCell(),null,false);
-      }
+      selected={id,beat,sub:selected.sub||0}; pasteCurrent();
       return;
     }
+  }
+  if (event.key==="Enter" && selectedKeys.size && navigateFromSelection("ArrowDown")) {
+    event.preventDefault(); event.stopPropagation();
+    return;
   }
   if (event.key==="Enter" || event.key==="F2") {
     event.preventDefault();
     selected={id,beat,sub:0};
     beginEdit(currentCell());
     return;
+  }
+  if (event.shiftKey && ["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key)) {
+    event.preventDefault(); event.stopPropagation();
+    const direction=event.key==="ArrowLeft"?-1:event.key==="ArrowRight"?1:event.key==="ArrowUp"?-2:2;
+    extendSelection(direction); return;
+  }
+  if (["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key) && navigateFromSelection(event.key)) {
+    event.preventDefault(); event.stopPropagation(); return;
   }
   if (event.key==="ArrowRight" || event.key==="ArrowLeft") {
     const direction = event.key === "ArrowRight" ? 1 : -1;
@@ -1371,12 +1852,21 @@ function handleCellKey(event,cell) {
   }
 }
 
+function addRowBelowFirstCell() {
+  // Preserve the current visual row as the insertion anchor, but always focus
+  // the new row's first (leftmost) beat-cell.
+  if (editState) commitEdit();
+  const anchorId = selected.id;
+  selected = {id:anchorId,beat:0,sub:0};
+  addRow(1);
+}
 function addRowAt(index,beat=0,count=maxColumns()) {
   const bar = makeBar(count);
   items.splice(Math.max(0,Math.min(index,items.length)),0,bar);
   selected = {id:bar.id,beat:Math.min(beat,count-1),sub:0};
   render();
   beginEdit(currentCell(),null,false);
+  scrollCurrentRefIntoView();
 }
 function addRow(direction) {
   if (editState) commitEdit();
@@ -1388,20 +1878,34 @@ function addRow(direction) {
   if (endIndex>=0) insertion=Math.min(insertion,endIndex);
   addRowAt(insertion,selected.beat||0,maxColumns());
 }
-function addSection() {
-  if (editState) commitEdit();
-  let name="New Section", n=2;
-  while (items.some(i=>i.type==="section"&&i.text===name)) name=`New Section ${n++}`;
-  const section={id:idCounter++,type:"section",text:name};
+function createFirstRow(sectionId) {
+  const sectionIndex=itemIndex(sectionId);
+  if (sectionIndex<0 || getItem(sectionId)?.type!=="section") return null;
+  const nextSectionIndex=items.findIndex((item,index)=>index>sectionIndex&&item.type==="section");
+  const end=nextSectionIndex<0?items.length:nextSectionIndex;
+  const existing=items.slice(sectionIndex+1,end).find(item=>item.type==="bar");
+  if (existing) return existing;
   const bar=makeBar(maxColumns());
+  items.splice(sectionIndex+1,0,bar);
+  return bar;
+}
+function addSection() {
+  if (readingMode) return;
+  if (editState) commitEdit();
+  const section={id:idCounter++,type:"section",text:""};
   const idx=itemIndex(selected.id);
   const endIndex=items.findIndex(i=>i.type==="section" && String(i.text).trim().toLowerCase()==="end");
   let insertion=idx>=0?idx+1:items.length;
   if (endIndex>=0) insertion=Math.min(insertion,endIndex);
-  items.splice(insertion,0,section,bar);
-  selected={id:bar.id,beat:0,sub:0};
+  items.splice(insertion,0,section);
+  selected={id:section.id,beat:0,sub:0};
   render();
-  beginEdit(currentCell(),null,false);
+  const input=area.querySelector(`tr[data-id="${section.id}"] .section-editor`);
+  if (input) {
+    input.focus({preventScroll:true});
+    input.setSelectionRange(0,0);
+    scrollTargetIntoView(input);
+  } else scrollCurrentRefIntoView();
 }
 function addBar() {
   if (editState) commitEdit();
@@ -1437,11 +1941,14 @@ function removeSection() {
   render();
   if (!readingMode) beginEdit(currentCell(),null,false);
 }
-function removeRow() {
+function removeRow(moveCaretUp=false) {
   if (editState) commitEdit();
   const idx=itemIndex(selected.id);
   if (idx<0) return;
   const item=items[idx];
+  const previous = idx>0 ? items[idx-1] : null;
+  const previousBeat = selected.beat||0;
+  const previousSub = selected.sub||0;
 
   if (item.type==="bar" && items.filter(i=>i.type==="bar").length===1) {
     item.beats=Array(maxColumns()).fill("");
@@ -1451,15 +1958,30 @@ function removeRow() {
     items.splice(idx,1);
     thickLines.delete(String(item.id));
   }
-  const next=items.slice(Math.min(idx,items.length-1)).find(i=>i.type==="bar")
-    || [...items].reverse().find(i=>i.type==="bar");
-  if (!next) {
-    const bar=makeBar(maxColumns());
-    items.push(bar);
-    selected={id:bar.id,beat:0,sub:0};
-  } else selected={id:next.id,beat:0,sub:0};
+
+  if (moveCaretUp && previous && getItem(previous.id)) {
+    if (previous.type==="bar") {
+      const beat=Math.min(previousBeat,previous.beats.length-1);
+      selected={id:previous.id,beat,sub:Math.min(previousSub,getValues(previous,beat).length-1)};
+    } else {
+      selected={id:previous.id,beat:0,sub:0};
+    }
+  } else {
+    // After deletion, the item now occupying the deleted item's index is the
+    // immediate visual row below. Do not skip images or section headings.
+    let next = items[Math.min(idx,items.length-1)] || null;
+    if (!next) {
+      next=makeBar(maxColumns());
+      items.push(next);
+    }
+    selected={id:next.id,beat:0,sub:0};
+  }
   render();
-  if (getBar(selected.id)) beginEdit(currentCell(),null,false);
+  const target=getItem(selected.id);
+  if (target?.type==="bar") beginEdit(currentCell(),null,false);
+  else if (target?.type==="section") focusSection(target.id);
+  else if (target?.type==="image") focusImagePosition(target.id);
+  else scrollCurrentRefIntoView();
 }
 function insertCell(direction) {
   if (editState) commitEdit();
@@ -1525,9 +2047,14 @@ function insertImages(files) {
           target=makeBar(maxColumns());
           items.splice(idx+loaded.length,0,target);
         }
-        selected={id:target.id,beat:0,sub:0};
+        selected={id:loaded[0].id,beat:0,sub:0};
         render();
-        beginEdit(currentCell(),null,false);
+        const firstImageRow=area.querySelector(`tr[data-id="${loaded[0].id}"]`);
+        const firstImageCell=firstImageRow?.querySelector(".image-cell");
+        if (firstImageCell) {
+          firstImageCell.focus({preventScroll:true});
+          scrollTargetIntoView(firstImageRow,true);
+        }
       }
     };
     reader.onerror=()=>say("Could not read one or more images.");
@@ -1612,6 +2139,7 @@ function loadSong(file) {
         }
         return null;
       }).filter(Boolean);
+      startupSectionId = null;
 
       if (!items.some(i=>i.type==="bar")) items.push(makeBar(maxColumns()));
       titleInput.value=String(data.title||"My Chord Chart");
@@ -1619,7 +2147,7 @@ function loadSong(file) {
       const bar=items.find(i=>i.type==="bar");
       selected={id:bar.id,beat:0,sub:0};
       render();
-      beginEdit(currentCell(),null,false);
+      if (!readingMode) beginEdit(currentCell(),null,false);
       say("Song loaded.");
     } catch(error) {
       alert("Could not load this song file.\n"+error.message);
@@ -1628,18 +2156,6 @@ function loadSong(file) {
   };
   reader.onerror=()=>say("Could not read the selected file.");
   reader.readAsText(file);
-}
-function copyCurrent() {
-  const bar=getBar(selected.id);
-  clipboardText=bar?String(getValues(bar,selected.beat)[selected.sub]??""):"";
-}
-function pasteCurrent() {
-  if (editState) commitEdit();
-  const bar=getBar(selected.id);
-  if (!bar || clipboardText==="") return;
-  setSubValue(bar.id,selected.beat,selected.sub||0,clipboardText);
-  render();
-  beginEdit(currentCell(),null,false);
 }
 
 $("#columnCountSelect").addEventListener("change",() => {
@@ -1657,6 +2173,7 @@ $("#lineButton").addEventListener("click",()=>toggleLine(selected.id));
 $("#imageButton").addEventListener("click",()=>imageInput.click());
 $("#saveButton").addEventListener("click",saveSong);
 $("#loadButton").addEventListener("click",()=>fileInput.click());
+$("#quickLoadButton").addEventListener("click",()=>fileInput.click());
 function closeToolPanels() {
   document.body.classList.remove("menu-open");
   $("#menuButton").setAttribute("aria-expanded","false");
@@ -1718,12 +2235,20 @@ $("#fitButton").addEventListener("click",()=>{
     closeToolPanels();
   }
   document.body.classList.toggle("reading",readingMode);
-  $("#fitButton").textContent="✏️ Edit";
+  $("#fitButton").textContent="✏️";
+  $("#fitButton").setAttribute("aria-label",readingMode?"Switch to Edit Mode":"Switch to Play Mode");
+  $("#fitButton").title=readingMode?"Edit":"Play Mode";
   $("#fitButton").setAttribute("aria-pressed",String(!readingMode));
   titleInput.readOnly=readingMode;
   area.querySelectorAll(".section-editor").forEach(el=>el.readOnly=readingMode);
   render();
-  if (!readingMode && getBar(selected.id)) beginEdit(currentCell(),null,false);
+  if (!readingMode) {
+    if (getBar(selected.id)) beginEdit(currentCell(),null,false);
+    else if (getItem(selected.id)?.type==="section") {
+      const sectionInput=area.querySelector(`tr[data-id="${selected.id}"] .section-editor`);
+      if (sectionInput) { sectionInput.focus(); sectionInput.setSelectionRange(sectionInput.value.length,sectionInput.value.length); }
+    }
+  }
 });
 
 document.addEventListener("keydown",event=>{
@@ -1770,6 +2295,13 @@ document.addEventListener("keydown",event=>{
     addDivisionAtCurrent();
     return;
   }
+  if (event.ctrlKey && event.shiftKey && event.key==="Enter") {
+    event.preventDefault();
+    event.stopPropagation();
+    if (editState) commitEdit();
+    addRow(1);
+    return;
+  }
   if (event.ctrlKey && event.key==="Enter") {
     event.preventDefault();
     event.stopPropagation();
@@ -1777,19 +2309,16 @@ document.addEventListener("keydown",event=>{
     addSection();
     return;
   }
-  if (event.ctrlKey && event.key==="Delete") {
+  if (event.ctrlKey && event.shiftKey && event.key==="Delete") {
     event.preventDefault();
-    if (getItem(selected.id)?.type==="section") {
-      const idx=itemIndex(selected.id);
-      let end=idx+1;
-      while (end<items.length && items[end].type!=="section") end++;
-      items.splice(idx,end-idx);
-      if (!items.some(i=>i.type==="bar")) items.push(makeBar(maxColumns()));
-      const bar=items.find(i=>i.type==="bar");
-      selected={id:bar.id,beat:0,sub:0};
-      render();
-      beginEdit(currentCell(),null,false);
-    } else removeRow();
+    event.stopPropagation();
+    removeSection();
+    return;
+  }
+  if (event.ctrlKey && !event.shiftKey && event.key==="Delete") {
+    event.preventDefault();
+    event.stopPropagation();
+    removeRow(false);
     return;
   }
   if (event.ctrlKey && /^[0-9]$/.test(event.key) && !inEditor) {
@@ -1808,6 +2337,15 @@ document.addEventListener("keydown",event=>{
     return;
   }
   if (inEditor) return;
+
+  // A Shift+mouse-click rectangle leaves focus outside a cell editor, so its
+  // navigation keys must be handled here as well as by the editor handlers.
+  // Enter shares the same destination as ArrowDown.
+  if (event.key==="Enter" && selectedKeys.size && navigateFromSelection("ArrowDown")) {
+    event.preventDefault();
+    event.stopPropagation();
+    return;
+  }
 
   if (event.key==="[" || event.key==="]") {
     event.preventDefault();
@@ -1829,9 +2367,19 @@ document.addEventListener("keydown",event=>{
     pasteCurrent();
     return;
   }
+  if (event.shiftKey && ["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key)) {
+    event.preventDefault();
+    const direction=event.key==="ArrowLeft"?-1:event.key==="ArrowRight"?1:event.key==="ArrowUp"?-2:2;
+    extendSelection(direction); return;
+  }
   if (event.key==="Tab") {
     event.preventDefault();
-    moveHorizontal(selected.id,selected.beat,event.shiftKey?-1:1,selected.sub||0);
+    moveTab(event.shiftKey?-1:1,selected.id,selected.beat,selected.sub||0);
+    return;
+  }
+  if (["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key) && navigateFromSelection(event.key)) {
+    event.preventDefault();
+    event.stopPropagation();
     return;
   }
   if (event.key==="ArrowLeft" || event.key==="ArrowRight") {
@@ -1860,12 +2408,17 @@ document.addEventListener("keydown",event=>{
   }
 });
 
+document.body.classList.toggle("reading",readingMode);
+titleInput.readOnly=readingMode;
+$("#fitButton").textContent="✏️";
+$("#fitButton").setAttribute("aria-pressed","false");
+$("#fitButton").setAttribute("aria-label","Switch to Edit Mode");
 render();
-const startup=items.find(i=>i.type==="bar");
-if (startup) {
-  selected={id:startup.id,beat:0,sub:0};
-  render();
-  beginEdit(currentCell(),null,false);
+const initialSectionInput = area.querySelector(`tr[data-id="${startupSectionId}"] .section-editor`);
+if (initialSectionInput && isStartupSectionEditable(getItem(startupSectionId))) {
+  initialSectionInput.focus({preventScroll:true});
+  initialSectionInput.setSelectionRange(initialSectionInput.value.length,initialSectionInput.value.length);
+  scrollTargetIntoView(initialSectionInput);
 }
 window.addEventListener("resize", () => {
   const chart = area.querySelector(".chart");
