@@ -471,7 +471,7 @@ const divideButton = $("#divideButton");
 
 const sectionColors = {
   intro:"#38BDF8", outro:"#38BDF8", verse:"#22C55E",
-  "pre-chorus":"#F59E0B", chorus:"#EF4444",
+  "pre-chorus":"#F59E0B", "post-chorus":"#A16207", chorus:"#EF4444",
   bridge:"#A855F7", instrumental:"#4B5563", custom:"#EC4899"
 };
 
@@ -661,6 +661,7 @@ function sectionColor(text) {
   if (/^intro(?:\b|[-\d])/.test(key)) return sectionColors.intro;
   if (/^outro(?:\b|[-\d])/.test(key)) return sectionColors.outro;
   if (/^pre-?chorus(?:\b|[-\d])/.test(key)) return sectionColors["pre-chorus"];
+  if (/^post-?chorus(?:\b|[-\d])/.test(key)) return sectionColors["post-chorus"];
   if (/^verse(?:\b|[-\d])/.test(key)) return sectionColors.verse;
   if (/^chorus(?:\b|[-\d])/.test(key)) return sectionColors.chorus;
   if (/^bridge(?:\b|[-\d])/.test(key)) return sectionColors.bridge;
