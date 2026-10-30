@@ -272,6 +272,10 @@ body.crop-mode .chord-symbol,body.crop-mode .rest-symbol { opacity:.45; }
   padding:0; margin:0; background:transparent; color:inherit; font-weight:inherit;
   letter-spacing:inherit;
 }
+.section-editor.highlighted-section-editor {
+  height:auto; min-height:1.15em; max-height:none; resize:none; overflow:hidden;
+  white-space:pre-wrap; overflow-wrap:anywhere; vertical-align:top;
+}
 .section-left-note,.section-note-editor {
   display:block; flex:0 0 auto; min-width:0; width:100%; min-height:1.15em; height:1.15em;
   max-height:none; box-sizing:border-box; resize:none; overflow:hidden; overflow-wrap:anywhere;
@@ -281,7 +285,7 @@ body.crop-mode .chord-symbol,body.crop-mode .rest-symbol { opacity:.45; }
 .section-left-note { text-align:left; }
 .section-left-note[hidden] { display:none; }
 .section-note-editor { flex:1 1 50%; width:50%; font-weight:400; text-align:right; }
-.section-cell.highlighted { color:#292524; }
+.section-cell.highlighted { color:#292524; background:#FACC15; }
 .spacer-row td { height:20px; border:0!important; background:white; }
 .chart tbody>.spacer-row:first-child { display:none; }
 .image-cell { padding:0!important; background:white; }
@@ -441,7 +445,10 @@ body.reading #songTitle { pointer-events:none; border-color:transparent; }
       <tr><th>Ctrl + E</th><td>Toggle Edit Mode / Play Mode</td></tr>
       <tr><th>Alt + Enter (section name / left note)</th><td>Open or insert a new line in the left-aligned multiline note below the section name</td></tr>
       <tr><th>Ctrl + Space (section-cell)</th><td>Focus the right-aligned multiline note</td></tr>
-      <tr><th>Alt + T</th><td>Turn the current bar row into a light-yellow section-cell; press again on a section-cell to restore its normal section color</td></tr>
+      <tr><th>Alt + T</th><td>Turn the current bar row into a yellow multiline notes-cell; press again on a section-cell to restore its normal section color. Works on the initial top section too.</td></tr>
+      <tr><th>Enter (yellow notes-cell)</th><td>Insert a new line; arrow keys move the text caret normally. This cell does not create chord rows.</td></tr>
+      <tr><th>Ctrl + Up / Ctrl + Down (yellow notes-cell)</th><td>Move out of the yellow notes-cell to the row above / below</td></tr>
+      <tr><th>Ctrl + Delete (yellow notes-cell)</th><td>Delete the yellow notes-cell row (the permanent top section-cell is cleared instead)</td></tr>
       <tr><th>Shift + Space</th><td>Insert a space at the end of the current bar-cell, beat-cell, or section name</td></tr>
       <tr><th>[ / ]</th><td>Insert a cell to the left / right of the selected cell</td></tr>
       <tr><th>\</th><td>Remove the selected cell (a row must keep at least one cell)</td></tr>
@@ -450,7 +457,7 @@ body.reading #songTitle { pointer-events:none; border-color:transparent; }
       <tr><th>Space</th><td>Save the chord and move right; at the last cell, move to the next visual row</td></tr>
       <tr><th>Enter</th><td>Move to the next visual row; at the bottom of the chart, create a row below. With a selection, move below its bottom-left edge.</td></tr>
       <tr><th>Shift + Enter</th><td>While editing, toggle the row's bottom line and move down</td></tr>
-      <tr><th>Ctrl + Shift + Enter</th><td>Insert a new row below the current row, anywhere in the chart</td></tr>
+      <tr><th>Ctrl + Shift + Enter</th><td>Insert a new row below the current row; disabled in yellow notes-cells</td></tr>
       <tr><th>Arrow keys</th><td>Navigate left/right between cells and up/down between rows and section headings; Arrow keys never create rows</td></tr>
       <tr><th>Tab / Shift + Tab</th><td>Move right / left between cells; at row edges, continue to the next/previous row</td></tr>
       <tr><th>F2</th><td>Edit the selected cell</td></tr>
@@ -459,7 +466,7 @@ body.reading #songTitle { pointer-events:none; border-color:transparent; }
       <tr><th>Ctrl/Cmd + click</th><td>Select or deselect individual cells, including nonadjacent cells</td></tr>
       <tr><th>PageUp / PageDown</th><td>Add a row above / below when a cell (not a text editor) is selected</td></tr>
       <tr><th>Ctrl + L</th><td>Toggle the selected row's bottom-line thickness</td></tr>
-      <tr><th>Ctrl + Enter</th><td>Create a new section heading below the current position and edit its name</td></tr>
+      <tr><th>Ctrl + Enter</th><td>Create a new section heading below the current position; in a yellow notes-cell, create a normal section below it</td></tr>
       <tr><th>Enter (section name)</th><td>Create the section’s first row if needed, then focus its first (leftmost) cell</td></tr>
       <tr><th>Section name End</th><td>Marks the end of the chart and removes all content below it</td></tr>
       <tr><th>Ctrl + H</th><td>Open Help</td></tr>
@@ -771,7 +778,7 @@ function groupInfo() {
   for (const item of items) {
     if (item.type === "section") {
       active = item.id;
-      color = item.highlighted ? "#FEF08A" : sectionColor(item.text);
+      color = item.highlighted ? "#FACC15" : sectionColor(item.text);
     }
     map.set(item.id,{group:active,color});
   }
@@ -1198,8 +1205,10 @@ function render() {
         selectedKeys.clear(); selectionAnchor=null; selected={id:item.id,beat:0,sub:0};
         scrollTargetIntoView(td);
       });
-      const input = document.createElement("input");
+      const input = document.createElement(item.highlighted ? "textarea" : "input");
       input.className = "section-editor";
+      if (item.highlighted) input.classList.add("highlighted-section-editor");
+      if (item.highlighted) input.rows=1;
       input.value = item.text;
       input.readOnly = readingMode && !isStartupSectionEditable(item);
       input.addEventListener("focus",()=>{ selected={id:item.id,beat:0,sub:0}; });
@@ -1223,6 +1232,22 @@ function render() {
         }
       });
       input.addEventListener("keydown",event => {
+        if (item.highlighted && event.ctrlKey && !event.shiftKey && event.key==="Delete") {
+          event.preventDefault(); event.stopPropagation();
+          selected={id:item.id,beat:0,sub:0};
+          removeRow(false);
+          return;
+        }
+        if (item.highlighted && event.ctrlKey && !event.altKey && (event.key==="ArrowUp" || event.key==="ArrowDown")) {
+          event.preventDefault(); event.stopPropagation();
+          leaveHighlightedNotes(item.id,event.key==="ArrowUp"?-1:1);
+          return;
+        }
+        if (item.highlighted && (event.key==="Enter" || ["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key)) && !event.ctrlKey && !event.altKey && !event.metaKey) {
+          // Let the textarea behave like a normal text editor: Enter inserts a line,
+          // and arrow keys move the caret between characters and lines.
+          return;
+        }
         if (event.key===" " && event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey) {
           event.preventDefault(); event.stopPropagation();
           input.setRangeText(" ",input.value.length,input.value.length,"end");
@@ -1263,6 +1288,15 @@ function render() {
         }
         if (event.ctrlKey && (event.key===" " || event.code==="Space")) {
           event.preventDefault(); event.stopPropagation(); focusSectionNote(item.id); return;
+        }
+        if (item.highlighted && (event.ctrlKey || event.metaKey) && event.key==="Enter") {
+          event.preventDefault(); event.stopPropagation();
+          if (event.ctrlKey && !event.shiftKey) addSection(item.id);
+          return;
+        }
+        if (item.highlighted && event.key==="Tab") {
+          event.preventDefault(); event.stopPropagation();
+          return;
         }
         if (event.ctrlKey && event.shiftKey && event.key === "Enter") {
           event.preventDefault(); event.stopPropagation();
@@ -1344,6 +1378,9 @@ function render() {
       const resizeNote=()=>{
         fitTextarea(input);
         fitTextarea(leftNoteInput);
+        const rightLineCount=Math.max(1,String(noteInput.value||"").split("\n").length);
+        noteInput.style.fontSize=rightLineCount>=2?"0.5em":"1em";
+        noteInput.style.lineHeight="1.15";
         fitTextarea(noteInput);
         leftNoteInput.hidden=!leftNoteInput.value && document.activeElement!==leftNoteInput;
         const leftHeight=input.getBoundingClientRect().height+(leftNoteInput.hidden?0:leftNoteInput.getBoundingClientRect().height);
@@ -1361,6 +1398,22 @@ function render() {
       leftNoteInput.addEventListener("input",()=>{ item.leftNote=leftNoteInput.value; resizeNote(); });
       noteInput.addEventListener("input",()=>{ item.note=noteInput.value; resizeNote(); });
       leftNoteInput.addEventListener("keydown",event=>{
+        if (item.highlighted && (event.ctrlKey || event.metaKey) && event.key==="Enter") {
+          event.preventDefault(); event.stopPropagation();
+          if (event.ctrlKey && !event.shiftKey) addSection(item.id);
+          return;
+        }
+        if (item.highlighted && event.key==="Tab") {
+          event.preventDefault(); event.stopPropagation();
+          return;
+        }
+        if (event.ctrlKey && !event.shiftKey && event.key==="Delete") {
+          event.preventDefault(); event.stopPropagation(); selected={id:item.id,beat:0,sub:0}; removeRow(false); return;
+        }
+        if (item.highlighted && event.ctrlKey && !event.altKey && (event.key==="ArrowUp" || event.key==="ArrowDown")) {
+          event.preventDefault(); event.stopPropagation(); leaveHighlightedNotes(item.id,event.key==="ArrowUp"?-1:1); return;
+        }
+        if (item.highlighted && !event.ctrlKey && !event.altKey && !event.metaKey && (event.key==="Enter" || ["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key))) return;
         if (event.altKey && event.key==="Enter") {
           event.preventDefault(); event.stopPropagation();
           const start=leftNoteInput.selectionStart,end=leftNoteInput.selectionEnd;
@@ -1376,6 +1429,22 @@ function render() {
         }
       });
       noteInput.addEventListener("keydown",event=>{
+        if (item.highlighted && (event.ctrlKey || event.metaKey) && event.key==="Enter") {
+          event.preventDefault(); event.stopPropagation();
+          if (event.ctrlKey && !event.shiftKey) addSection(item.id);
+          return;
+        }
+        if (item.highlighted && event.key==="Tab") {
+          event.preventDefault(); event.stopPropagation();
+          return;
+        }
+        if (event.ctrlKey && !event.shiftKey && event.key==="Delete") {
+          event.preventDefault(); event.stopPropagation(); selected={id:item.id,beat:0,sub:0}; removeRow(false); return;
+        }
+        if (item.highlighted && event.ctrlKey && !event.altKey && (event.key==="ArrowUp" || event.key==="ArrowDown")) {
+          event.preventDefault(); event.stopPropagation(); leaveHighlightedNotes(item.id,event.key==="ArrowUp"?-1:1); return;
+        }
+        if (item.highlighted && !event.ctrlKey && !event.altKey && !event.metaKey && (event.key==="Enter" || ["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key))) return;
         if (event.altKey && event.key==="Enter") {
           event.preventDefault(); event.stopPropagation();
           const start=noteInput.selectionStart,end=noteInput.selectionEnd;
@@ -2108,16 +2177,17 @@ function createFirstRow(sectionId) {
   items.splice(sectionIndex+1,0,bar);
   return bar;
 }
-function addSection() {
+function addSection(afterId=selected.id) {
   if (readingMode) return;
   if (editState) commitEdit();
   const section={id:idCounter++,type:"section",text:""};
-  const idx=itemIndex(selected.id);
+  const idx=itemIndex(afterId);
   const endIndex=items.findIndex(i=>i.type==="section" && String(i.text).trim().toLowerCase()==="end");
   let insertion=idx>=0?idx+1:items.length;
   if (endIndex>=0) insertion=Math.min(insertion,endIndex);
   items.splice(insertion,0,section);
   selected={id:section.id,beat:0,sub:0};
+  selectedKeys.clear(); selectionAnchor=null;
   render();
   const input=area.querySelector(`tr[data-id="${section.id}"] .section-editor`);
   if (input) {
@@ -2171,6 +2241,22 @@ function removeSection() {
   selected={id:next.id,beat:0,sub:0};
   render();
   if (!readingMode) beginEdit(currentCell(),null,false);
+}
+function leaveHighlightedNotes(id,direction) {
+  const idx=itemIndex(id);
+  const target=items[idx+direction];
+  if (!target) return;
+  selected={id:target.id,beat:0,sub:0};
+  selectedKeys.clear(); selectionAnchor=null;
+  if (target.type==="section") {
+    render();
+    const editor=area.querySelector(`tr[data-id="${target.id}"] .section-editor`);
+    if (editor) { editor.focus({preventScroll:true}); editor.setSelectionRange(editor.value.length,editor.value.length); }
+  } else {
+    selected={id:target.id,beat:0,sub:0};
+    render();
+    beginEdit(currentCell(),null,false);
+  }
 }
 function removeRow(moveCaretUp=false) {
   if (editState) commitEdit();
@@ -2509,11 +2595,15 @@ const shortcutKey=(event,key,code,keyCode)=>
   String(event.key||"").toLowerCase()===key || event.code===code || event.keyCode===keyCode;
 document.addEventListener("keydown",event=>{
   const t=shortcutKey(event,"t","KeyT",84);
-  if (event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey && t && !readingMode) {
+  const activeRow=event.target?.closest?.("tr[data-id]");
+  const activeItem=activeRow?getItem(Number(activeRow.dataset.id)):null;
+  const canToggleStartup=readingMode && isStartupSectionEditable(activeItem);
+  if (event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey && t && (!readingMode || canToggleStartup)) {
     event.preventDefault(); event.stopImmediatePropagation();
+    if (readingMode && canToggleStartup) toggleEditMode();
     const historyBefore=chartSnapshot();
     if (editState) commitEdit();
-    const current=getItem(selected.id);
+    const current=getItem(activeItem?.id ?? selected.id);
     if (current?.type==="section") {
       current.highlighted=!current.highlighted;
     } else if (current?.type==="bar") {
@@ -2597,6 +2687,21 @@ document.addEventListener("keydown",event=>{
     else addDivisionAtCurrent();
     return;
   }
+  const activeSectionRow=target?.closest?.("tr[data-id]");
+  const activeSectionItem=activeSectionRow ? getItem(Number(activeSectionRow.dataset.id)) : null;
+  const selectedSectionItem=getItem(selected.id);
+  const highlightedContext=activeSectionItem?.highlighted ? activeSectionItem :
+    (selectedSectionItem?.highlighted ? selectedSectionItem : null);
+  if (highlightedContext && event.key==="Enter" && (event.ctrlKey || event.metaKey)) {
+    event.preventDefault(); event.stopPropagation();
+    if (event.ctrlKey && !event.shiftKey && !inEditor) addSection(highlightedContext.id);
+    return;
+  }
+  if (highlightedContext && (event.key==="Tab" ||
+      (event.ctrlKey && event.shiftKey && event.key==="Enter") ||
+      (event.key==="PageDown" || event.key==="PageUp"))) {
+    event.preventDefault(); event.stopPropagation(); return;
+  }
   if (event.ctrlKey && event.shiftKey && event.key==="Enter") {
     event.preventDefault();
     event.stopPropagation();
@@ -2620,6 +2725,7 @@ document.addEventListener("keydown",event=>{
   if (event.ctrlKey && !event.shiftKey && event.key==="Delete") {
     event.preventDefault();
     event.stopPropagation();
+    if (activeSectionItem?.type==="section") selected={id:activeSectionItem.id,beat:0,sub:0};
     removeRow(false);
     return;
   }
