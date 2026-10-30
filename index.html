@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chord Chart Creator NEW — Version 2322</title>
+<title>Chord Chart Creator NEW — Version 2327</title>
 <style>
 :root {
   --ink:#202633;
@@ -49,7 +49,7 @@ header {
   align-items:center;
   gap:8px;
 }
-header h1 { font-size:.85rem; line-height:1.15; margin:0; white-space:nowrap; flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; }
+header h1 { font-size:clamp(.55rem,.85rem,2.8vw); line-height:1.15; margin:0; white-space:nowrap; flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; }
 header { width:100%; max-width:none; min-width:0; }
 html,body { max-width:100%; overflow-x:hidden; }
 .header-actions { margin-left:auto; min-width:0; }
@@ -69,12 +69,12 @@ html,body { max-width:100%; overflow-x:hidden; }
   box-shadow:inset 0 1px 2px #11182724;
 }
 nav {
-  position:absolute;
-  z-index:30;
+  position:fixed;
+  z-index:1000;
   top:43px;
   left:max(0px,calc((100vw - 1100px)/2));
   right:max(0px,calc((100vw - 1100px)/2));
-  max-height:min(70vh,560px);
+  max-height:calc(100vh - 43px);
   overflow-y:auto;
   overscroll-behavior:contain;
   padding:8px 12px 10px;
@@ -252,8 +252,11 @@ body.crop-mode .chord-symbol,body.crop-mode .rest-symbol { opacity:.45; }
 }
 .subcell .cell-editor { padding:0; }
 .section-cell {
-  height:34px;
-  padding:5px 6px!important;
+  min-height:0;
+  height:auto;
+  max-height:none;
+  overflow:visible;
+  padding:4px 6px!important;
   background:var(--section-color,#ec4899);
   color:white;
   font-size:var(--chord-font-size);
@@ -261,16 +264,24 @@ body.crop-mode .chord-symbol,body.crop-mode .rest-symbol { opacity:.45; }
   letter-spacing:.02em;
   line-height:1;
 }
+.section-content { display:flex; align-items:stretch; justify-content:space-between; gap:10px; min-height:1.15em; width:100%; overflow:visible; }
+.section-left { flex:1 1 50%; min-width:0; display:flex; flex-direction:column; align-items:stretch; }
 .section-editor {
-  width:100%;
-  border:0;
-  outline:0;
-  padding:0;
-  background:transparent;
-  color:white;
-  font-weight:inherit;
+  display:block; flex:0 0 auto; min-width:0; width:100%; height:1.15em;
+  box-sizing:border-box; font-size:inherit; line-height:1.15; border:0; outline:0;
+  padding:0; margin:0; background:transparent; color:inherit; font-weight:inherit;
   letter-spacing:inherit;
 }
+.section-left-note,.section-note-editor {
+  display:block; flex:0 0 auto; min-width:0; width:100%; min-height:1.15em; height:1.15em;
+  max-height:none; box-sizing:border-box; resize:none; overflow:hidden; overflow-wrap:anywhere;
+  border:0; outline:0; padding:0; margin:0; background:transparent; color:inherit;
+  font:800 1em/1.15 Arial,Helvetica,sans-serif; letter-spacing:inherit; white-space:pre-wrap;
+}
+.section-left-note { text-align:left; }
+.section-left-note[hidden] { display:none; }
+.section-note-editor { flex:1 1 50%; width:50%; font-weight:400; text-align:right; }
+.section-cell.highlighted { color:#292524; }
 .spacer-row td { height:20px; border:0!important; background:white; }
 .chart tbody>.spacer-row:first-child { display:none; }
 .image-cell { padding:0!important; background:white; }
@@ -305,13 +316,13 @@ body.reading .image-tools,body.reading .crop-panel { display:none!important; }
 #fileInput,#imageInput { display:none; }
 
 #helpDialog {
-  position:absolute;
-  z-index:31;
+  position:fixed;
+  z-index:1001;
   top:43px;
   left:max(0px,calc((100vw - 1100px)/2));
   right:max(0px,calc((100vw - 1100px)/2));
   width:auto;
-  max-height:min(70vh,560px);
+  max-height:calc(100vh - 43px);
   margin:0;
   padding:0;
   overflow-y:auto;
@@ -351,10 +362,10 @@ body.reading #songTitle { pointer-events:none; border-color:transparent; }
   main { padding:0 7px 24px; }
   header h1 { font-size:.85rem; flex:0 1 auto; }
   .header-actions { gap:3px; }
-  header h1 { max-width:35vw; }
+  header h1 { max-width:none; font-size:clamp(.5rem,3vw,.85rem); }
   .header-actions button { font-size:.85rem; min-height:34px; padding:4px 6px; }
   #menuButton { min-width:34px; font-size:1rem; }
-  nav,#helpDialog { top:39px; left:0; right:0; }
+  nav,#helpDialog { position:fixed; top:39px; left:0; right:0; max-height:calc(100vh - 39px); }
   nav { padding:8px; }
   #helpDialog { max-height:calc(100vh - 39px); }
   .title-row { gap:4px; }
@@ -368,7 +379,8 @@ body.reading #songTitle { pointer-events:none; border-color:transparent; }
 <header>
   <h1>🎼 Chord Chart Creator</h1>
   <div class="header-actions">
-    <button id="quickLoadButton" type="button" aria-label="Load Song" title="Load Song">💾</button>
+    <button id="quickLoadButton" type="button" aria-label="Load Song" title="Load Song">💾⬆️</button>
+    <button id="quickSaveButton" type="button" aria-label="Save Song" title="Save Song">💾⬇️</button>
     <button id="fitButton" type="button" aria-label="Switch to Edit Mode" title="Edit" aria-pressed="false">✏️</button>
     <button id="helpButton" type="button" aria-label="Help" title="Help" aria-expanded="false" aria-controls="helpDialog">❓</button>
     <button id="menuButton" type="button" aria-label="Toggle chart tools" aria-expanded="false" aria-controls="toolMenu">☰</button>
@@ -422,8 +434,15 @@ body.reading #songTitle { pointer-events:none; border-color:transparent; }
   <div class="help-body">
     <table><tbody>
       <tr><th>Ctrl + 1…9</th><td>Divide the selected cell into 1–9 beat-cells (Ctrl+1 returns it to one cell)</td></tr>
-      <tr><th>Ctrl + 0</th><td>Divide the selected cell into 10 beat-cells</td></tr>
-      <tr><th>Ctrl + Space</th><td>Add one beat-cell division and focus the new beat-cell</td></tr>
+      <tr><th>Ctrl + 0</th><td>Remove all beat-cell divisions from the current bar-cell</td></tr>
+      <tr><th>Ctrl + Space</th><td>In a bar-cell, add one beat-cell division; in a section-cell, open its right-aligned note field</td></tr>
+      <tr><th>Ctrl + Shift + Space</th><td>Remove one beat-cell division from the current bar-cell, if at least two remain</td></tr>
+      <tr><th>Ctrl + Z / Ctrl + Shift + Z / Ctrl + Y</th><td>Undo / Redo chart changes (Ctrl + Shift + Z is the preferred Redo shortcut)</td></tr>
+      <tr><th>Ctrl + E</th><td>Toggle Edit Mode / Play Mode</td></tr>
+      <tr><th>Alt + Enter (section name / left note)</th><td>Open or insert a new line in the left-aligned multiline note below the section name</td></tr>
+      <tr><th>Ctrl + Space (section-cell)</th><td>Focus the right-aligned multiline note</td></tr>
+      <tr><th>Alt + T</th><td>Turn the current bar row into a light-yellow section-cell; press again on a section-cell to restore its normal section color</td></tr>
+      <tr><th>Shift + Space</th><td>Insert a space at the end of the current bar-cell, beat-cell, or section name</td></tr>
       <tr><th>[ / ]</th><td>Insert a cell to the left / right of the selected cell</td></tr>
       <tr><th>\</th><td>Remove the selected cell (a row must keep at least one cell)</td></tr>
       <tr><th>z / Z</th><td>Enter a quarter-rest symbol</td></tr>
@@ -444,7 +463,7 @@ body.reading #songTitle { pointer-events:none; border-color:transparent; }
       <tr><th>Enter (section name)</th><td>Create the section’s first row if needed, then focus its first (leftmost) cell</td></tr>
       <tr><th>Section name End</th><td>Marks the end of the chart and removes all content below it</td></tr>
       <tr><th>Ctrl + H</th><td>Open Help</td></tr>
-      <tr><th>Ctrl + S</th><td>Save song as a named JSON file</td></tr>
+      <tr><th>Ctrl + Shift + S / Ctrl + S</th><td>Save song as a named JSON file (Ctrl + Shift + S preferred; Ctrl + S fallback)</td></tr>
       <tr><th>Ctrl + O</th><td>Open a JSON song file</td></tr>
       <tr><th>Ctrl + I</th><td>Insert image</td></tr>
       <tr><th>Ctrl + Delete</th><td>Delete the current row and move to the next visual row below</td></tr>
@@ -490,6 +509,61 @@ let selectionAnchor = null;
 let clipboardMatrix = null;
 let cropEditingId = null;
 let cropWorking = null;
+
+// Snapshot history records content changes only; caret movement and selection are excluded.
+const undoStack = [];
+const redoStack = [];
+let historyCapture = null;
+let historyRestoring = false;
+function chartSnapshot() {
+  return JSON.stringify({items,thickLines:[...thickLines],title:titleInput.value});
+}
+function syncHistoryButtons() {
+  // Keyboard shortcuts are the primary interface; this keeps history state centralized.
+}
+function recordHistorySnapshot(snapshot) {
+  if (historyRestoring) return;
+  const current=chartSnapshot();
+  if (current===snapshot) return;
+  undoStack.push(current);
+  if (undoStack.length>100) undoStack.shift();
+  redoStack.length=0;
+  syncHistoryButtons();
+}
+function captureHistoryEvent(event) {
+  if (historyRestoring || event.type==="keydown" && (event.ctrlKey||event.metaKey) && ["z","y"].includes(event.key.toLowerCase())) return;
+  const before=chartSnapshot();
+  setTimeout(()=>recordHistorySnapshot(before),0);
+}
+function restoreHistorySnapshot(snapshot) {
+  const data=JSON.parse(snapshot);
+  historyRestoring=true;
+  if (editState) editState=null;
+  items=Array.isArray(data.items)?data.items:[];
+  thickLines=new Set(data.thickLines||[]);
+  titleInput.value=String(data.title||"My Chord Chart");
+  const target=items.find(i=>i.id===selected.id) || items.find(i=>i.type==="bar") || items[0];
+  if (target) selected={id:target.id,beat:0,sub:0};
+  render();
+  historyRestoring=false;
+}
+function undoChart() {
+  if (readingMode || undoStack.length<2) return;
+  if (editState) commitEdit();
+  const current=chartSnapshot();
+  if (undoStack[undoStack.length-1]!==current) undoStack.push(current);
+  if (undoStack.length<2) return;
+  redoStack.push(undoStack.pop());
+  restoreHistorySnapshot(undoStack[undoStack.length-1]);
+}
+function redoChart() {
+  if (readingMode || !redoStack.length) return;
+  if (editState) commitEdit();
+  const next=redoStack.pop();
+  undoStack.push(next);
+  restoreHistorySnapshot(next);
+}
+
 
 function say(message) { /* Status messages are intentionally hidden. */ }
 function itemIndex(id) { return items.findIndex(item => item.id === id); }
@@ -697,7 +771,7 @@ function groupInfo() {
   for (const item of items) {
     if (item.type === "section") {
       active = item.id;
-      color = sectionColor(item.text);
+      color = item.highlighted ? "#FEF08A" : sectionColor(item.text);
     }
     map.set(item.id,{group:active,color});
   }
@@ -885,7 +959,7 @@ function locateRef(ref) {
 function refValue(ref) {
   const item=getItem(ref.id);
   if (!item) return null;
-  if (ref.type==="bar" && item.type==="bar") return {type:"bar",value:String(getValues(item,ref.beat)[ref.sub]??"")};
+  if (ref.type==="bar" && item.type==="bar") return {type:"bar",value:String(getValues(item,ref.beat)[ref.sub]??""),sourceBeat:ref.beat,sourceSub:ref.sub,splitCount:getValues(item,ref.beat).length};
   if (ref.type==="section" && item.type==="section") return {type:"section",value:String(item.text??"")};
   if (ref.type==="image" && item.type==="image") return {type:"image",value:{data:item.data,alt:item.alt,crop:item.crop?{...item.crop}:null,width:item.width,height:item.height}};
   return null;
@@ -1030,12 +1104,27 @@ function pasteCurrent() {
   for (let r=0;r<clipboardMatrix.length;r++) {
     const targetRowIndex=start.row+r;
     if (targetRowIndex>=items.length) break;
-    const refs=rowRefs(items[targetRowIndex]);
     for (let c=0;c<clipboardMatrix[r].length;c++) {
+      let refs=rowRefs(items[targetRowIndex]);
       const targetCol=start.col+c;
       if (targetCol>=refs.length) break;
       const descriptor=clipboardMatrix[r][c];
-      if (descriptor) setRefValue(refs[targetCol],descriptor);
+      if (!descriptor) continue;
+      // Recreate each source beat-cell's split structure before writing its subcells.
+      if (descriptor.type==="bar" && descriptor.sourceSub===0 && descriptor.splitCount>1) {
+        const anchor=refs[targetCol];
+        if (anchor?.type==="bar") {
+          const targetBar=getBar(anchor.id);
+          const existing=getValues(targetBar,anchor.beat);
+          if (existing.length!==descriptor.splitCount) {
+            const next=Array.from({length:descriptor.splitCount},(_,i)=>existing[i]??"");
+            setValues(targetBar,anchor.beat,next);
+            refs=rowRefs(items[targetRowIndex]);
+          }
+        }
+      }
+      const target=refs[targetCol];
+      if (target) setRefValue(target,descriptor);
     }
   }
   selectedKeys.clear(); selectionAnchor=null;
@@ -1086,6 +1175,8 @@ function render() {
     if (item.type === "section") {
       const td = document.createElement("td");
       td.className = "section-cell";
+      if (item.highlighted) td.classList.add("highlighted");
+      if (Number(item.height)>0) td.style.height=`${Number(item.height)}px`;
       if (selectedKeys.has(refKey({type:"section",id:item.id}))) td.classList.add("multi-selected");
       td.colSpan = max;
       td.addEventListener("click",event=>{
@@ -1132,6 +1223,26 @@ function render() {
         }
       });
       input.addEventListener("keydown",event => {
+        if (event.key===" " && event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey) {
+          event.preventDefault(); event.stopPropagation();
+          input.setRangeText(" ",input.value.length,input.value.length,"end");
+          return;
+        }
+        if (event.altKey && event.key==="Enter") {
+          event.preventDefault(); event.stopPropagation();
+          // The initial startup heading is editable in Play Mode. Switch to Edit Mode
+          // before opening its left note, otherwise the reading-mode Enter handler
+          // mistakenly treats Alt+Enter as the command to create the first bar row.
+          if (readingMode && isStartupSectionEditable(item)) toggleEditMode();
+          const leftNote=area.querySelector(`tr[data-id="${item.id}"] .section-left-note`);
+          if (leftNote) {
+            leftNote.hidden=false;
+            leftNote.focus({preventScroll:true});
+            leftNote.setSelectionRange(leftNote.value.length,leftNote.value.length);
+            leftNote._resizeSectionNote?.();
+          }
+          return;
+        }
         if (readingMode) {
           if (isStartupSectionEditable(item) && event.key === "Enter") {
             event.preventDefault(); event.stopPropagation();
@@ -1149,6 +1260,9 @@ function render() {
             if (firstBar) beginEdit(currentCell(),null,false);
           }
           return;
+        }
+        if (event.ctrlKey && (event.key===" " || event.code==="Space")) {
+          event.preventDefault(); event.stopPropagation(); focusSectionNote(item.id); return;
         }
         if (event.ctrlKey && event.shiftKey && event.key === "Enter") {
           event.preventDefault(); event.stopPropagation();
@@ -1210,7 +1324,80 @@ function render() {
           // ArrowDown only navigates; row creation is reserved for Enter.
         } else if (event.key === "Escape") input.blur();
       });
-      td.append(input);
+      const leftNoteInput=document.createElement("textarea");
+      leftNoteInput.className="section-left-note";
+      leftNoteInput.value=String(item.leftNote??"");
+      leftNoteInput.readOnly=readingMode;
+      leftNoteInput.rows=1;
+      leftNoteInput.setAttribute("aria-label","Section note (left aligned)");
+      leftNoteInput.hidden=!leftNoteInput.value;
+      const noteInput=document.createElement("textarea");
+      noteInput.className="section-note-editor";
+      noteInput.value=String(item.note??"");
+      noteInput.readOnly=readingMode;
+      noteInput.rows=1;
+      noteInput.setAttribute("aria-label","Section note (right aligned)");
+      const fitTextarea=textarea=>{
+        textarea.style.height="1.15em";
+        textarea.style.height=`${Math.max(textarea.scrollHeight,parseFloat(getComputedStyle(textarea).lineHeight)||1)}px`;
+      };
+      const resizeNote=()=>{
+        fitTextarea(input);
+        fitTextarea(leftNoteInput);
+        fitTextarea(noteInput);
+        leftNoteInput.hidden=!leftNoteInput.value && document.activeElement!==leftNoteInput;
+        const leftHeight=input.getBoundingClientRect().height+(leftNoteInput.hidden?0:leftNoteInput.getBoundingClientRect().height);
+        const rightHeight=noteInput.getBoundingClientRect().height;
+        const contentHeight=Math.max(leftHeight,rightHeight);
+        sectionContent.style.height=`${contentHeight}px`;
+        // Persist the content height; the section cell adds equal 4px top/bottom padding.
+        item.height=Math.ceil(contentHeight);
+        td.style.height=`${item.height}px`;
+      };
+      noteInput._resizeSectionNote=resizeNote;
+      leftNoteInput._resizeSectionNote=resizeNote;
+      leftNoteInput.addEventListener("focus",resizeNote);
+      leftNoteInput.addEventListener("blur",resizeNote);
+      leftNoteInput.addEventListener("input",()=>{ item.leftNote=leftNoteInput.value; resizeNote(); });
+      noteInput.addEventListener("input",()=>{ item.note=noteInput.value; resizeNote(); });
+      leftNoteInput.addEventListener("keydown",event=>{
+        if (event.altKey && event.key==="Enter") {
+          event.preventDefault(); event.stopPropagation();
+          const start=leftNoteInput.selectionStart,end=leftNoteInput.selectionEnd;
+          leftNoteInput.setRangeText("\n",start,end,"end");
+          leftNoteInput.dispatchEvent(new Event("input",{bubbles:true}));
+          return;
+        }
+        if (event.key==="Escape") leftNoteInput.blur();
+        if (event.key==="Enter" && !event.altKey) {
+          event.preventDefault(); event.stopPropagation();
+          const firstBar=createFirstRow(item.id);
+          if (firstBar) { selected={id:firstBar.id,beat:0,sub:0}; render(); beginEdit(currentCell(),null,false); }
+        }
+      });
+      noteInput.addEventListener("keydown",event=>{
+        if (event.altKey && event.key==="Enter") {
+          event.preventDefault(); event.stopPropagation();
+          const start=noteInput.selectionStart,end=noteInput.selectionEnd;
+          noteInput.setRangeText("\n",start,end,"end");
+          noteInput.dispatchEvent(new Event("input",{bubbles:true}));
+          return;
+        }
+        if (event.key==="Escape") noteInput.blur();
+        if (event.key==="Enter" && !event.altKey) {
+          event.preventDefault(); event.stopPropagation();
+          const firstBar=createFirstRow(item.id);
+          if (firstBar) { selected={id:firstBar.id,beat:0,sub:0}; render(); beginEdit(currentCell(),null,false); }
+        }
+      });
+      const sectionContent=document.createElement("div");
+      sectionContent.className="section-content";
+      const leftGroup=document.createElement("div");
+      leftGroup.className="section-left";
+      leftGroup.append(input,leftNoteInput);
+      sectionContent.append(leftGroup,noteInput);
+      td.append(sectionContent);
+      resizeNote();
       tr.append(td);
     } else if (item.type === "bar") {
       item.beats.forEach((value,beat) => {
@@ -1386,6 +1573,8 @@ function render() {
 
   table.append(tbody);
   area.replaceChildren(table);
+  // Measure section notes only after the table is attached, when their actual widths are known.
+  table.querySelectorAll(".section-note-editor").forEach(note=>note._resizeSectionNote?.());
   fitChordFonts(table);
   updateToolbar();
 }
@@ -1472,13 +1661,11 @@ function beginEdit(cell,replaceWith=null,selectAll=false) {
       beginEdit(currentCell(),null,false);
       return;
     }
-    if (event.ctrlKey && /^[0-9]$/.test(event.key)) {
-      event.preventDefault();
-      event.stopPropagation();
-      const digit = Number(event.key);
-      commitEdit();
-      divideCell(id,beat,digit===0?10:digit);
-      return;
+    if (event.ctrlKey && event.code==="Digit0") {
+      event.preventDefault(); event.stopPropagation(); commitEdit(); divideCell(id,beat,1); return;
+    }
+    if (event.ctrlKey && /^[1-9]$/.test(event.key)) {
+      event.preventDefault(); event.stopPropagation(); const digit=Number(event.key); commitEdit(); divideCell(id,beat,digit); return;
     }
     if (event.shiftKey && ["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key)) {
       event.preventDefault(); event.stopPropagation();
@@ -1487,6 +1674,11 @@ function beginEdit(cell,replaceWith=null,selectAll=false) {
     }
     if (["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(event.key) && navigateFromSelection(event.key)) {
       event.preventDefault(); event.stopPropagation(); return;
+    }
+    if (event.key===" " && event.shiftKey && !event.ctrlKey && !event.altKey && !event.metaKey) {
+      event.preventDefault(); event.stopPropagation();
+      input.setRangeText(" ",input.value.length,input.value.length,"end");
+      return;
     }
     if (event.key===" " && !event.ctrlKey) {
       event.preventDefault();
@@ -1499,7 +1691,8 @@ function beginEdit(cell,replaceWith=null,selectAll=false) {
       event.stopPropagation();
       commitEdit();
       toggleLine(id);
-      advanceDown(id);
+      if (isBottomChartRow(id)) addRowBelowFirstCell();
+      else advanceDown(id);
       return;
     }
     if (event.key==="Enter" && selectedKeys.size && navigateFromSelection("ArrowDown")) {
@@ -1578,12 +1771,16 @@ function setSubValue(id,beat,sub,value) {
 }
 function commitEdit() {
   if (!editState) return;
+  const historyBefore=chartSnapshot();
   const {id,beat,sub,input} = editState;
-  const value = normalizeChord(input.value);
+  const rawValue = input.value;
+  const trailingWhitespace = rawValue.match(/\s+$/)?.[0] || "";
+  const value = normalizeChord(rawValue.trimEnd()) + trailingWhitespace;
   if (getBar(id)) setSubValue(id,beat,sub,value);
   editState = null;
   selected = {id,beat,sub};
   render();
+  setTimeout(()=>recordHistorySnapshot(historyBefore),0);
 }
 
 function divideCell(id,beat,count) {
@@ -1702,6 +1899,24 @@ function moveVertical(id,beat,direction,sub=0) {
   // Vertical navigation is strictly non-structural: it never creates rows.
   return false;
 }
+function removeDivisionAtCurrent() {
+  if (editState) commitEdit();
+  const bar=getBar(selected.id);
+  if (!bar) return;
+  const values=getValues(bar,selected.beat);
+  if (values.length<2) return;
+  const sub=Math.max(0,Math.min(values.length-1,selected.sub||0));
+  if (sub>0) { values[sub-1]=String(values[sub-1]??"")+String(values[sub]??""); values.splice(sub,1); selected.sub=sub-1; }
+  else { values[1]=String(values[0]??"")+String(values[1]??""); values.splice(0,1); selected.sub=0; }
+  setValues(bar,selected.beat,values);
+  render();
+  beginEdit(currentCell(),null,false);
+}
+function focusSectionNote(id) {
+  if (editState) commitEdit();
+  const note=area.querySelector(`tr[data-id="${id}"] .section-note-editor`);
+  if (note) { note.focus({preventScroll:true}); note.setSelectionRange(note.value.length,note.value.length); scrollTargetIntoView(note); }
+}
 function addDivisionAtCurrent() {
   if (editState) commitEdit();
   const bar=getBar(selected.id);
@@ -1797,10 +2012,11 @@ function handleCellKey(event,cell) {
     addRow(1);
     return;
   }
-  if (event.ctrlKey && /^[0-9]$/.test(event.key)) {
-    event.preventDefault();
-    divideCell(id,beat,Number(event.key)===0?10:Number(event.key));
-    return;
+  if (event.ctrlKey && event.code==="Digit0") {
+    event.preventDefault(); divideCell(id,beat,1); return;
+  }
+  if (event.ctrlKey && /^[1-9]$/.test(event.key)) {
+    event.preventDefault(); divideCell(id,beat,Number(event.key)); return;
   }
   if (event.ctrlKey || event.metaKey) {
     if (event.key.toLowerCase()==="c") {
@@ -1863,7 +2079,9 @@ function addRowBelowFirstCell() {
 }
 function addRowAt(index,beat=0,count=maxColumns()) {
   const bar = makeBar(count);
-  items.splice(Math.max(0,Math.min(index,items.length)),0,bar);
+  // The chart's first visual row is structurally reserved for its section heading.
+  const minimumIndex=items[0]?.type==="section"?1:0;
+  items.splice(Math.max(minimumIndex,Math.min(index,items.length)),0,bar);
   selected = {id:bar.id,beat:Math.min(beat,count-1),sub:0};
   render();
   beginEdit(currentCell(),null,false);
@@ -1935,6 +2153,18 @@ function removeSection() {
   if (idx<0 || items[idx]?.type!=="section") { say("Select a section to remove it."); return; }
   let end=idx+1;
   while (end<items.length && items[end].type!=="section") end++;
+  if (idx===0) {
+    // The first section-cell is a permanent chart anchor. Remove its section rows,
+    // but retain a blank top section-cell so the chart can never start with a bar.
+    const top=items[0];
+    top.text=""; top.note=""; top.leftNote=""; top.height=0; top.highlighted=false;
+    items.splice(1,end-1);
+    if (!items.some(i=>i.type==="bar")) items.push(makeBar(maxColumns()));
+    selected={id:top.id,beat:0,sub:0};
+    render();
+    if (!readingMode) focusSection(top.id);
+    return;
+  }
   items.splice(idx,end-idx);
   if (!items.some(i=>i.type==="bar")) items.push(makeBar(maxColumns()));
   const next=items.slice(Math.min(idx,items.length-1)).find(i=>i.type==="bar") || items.find(i=>i.type==="bar");
@@ -1950,6 +2180,20 @@ function removeRow(moveCaretUp=false) {
   const previous = idx>0 ? items[idx-1] : null;
   const previousBeat = selected.beat||0;
   const previousSub = selected.sub||0;
+
+  if (idx===0 && item.type==="section") {
+    // Never remove the chart's mandatory top section-cell. Ctrl+Delete clears it
+    // back to a blank, normal-color section-cell so it can be reused or highlighted.
+    item.text="";
+    item.note="";
+    item.leftNote="";
+    item.height=0;
+    item.highlighted=false;
+    selected={id:item.id,beat:0,sub:0};
+    render();
+    if (!readingMode) focusSection(item.id);
+    return;
+  }
 
   if (item.type==="bar" && items.filter(i=>i.type==="bar").length===1) {
     item.beats=Array(maxColumns()).fill("");
@@ -2033,6 +2277,7 @@ function toggleLine(id) {
 function insertImages(files) {
   const chosen=Array.from(files).filter(f=>f.type.startsWith("image/"));
   if (!chosen.length) return;
+  const historyBefore=chartSnapshot();
   if (editState) commitEdit();
   const idx=Math.max(0,itemIndex(selected.id));
   const loaded=[];
@@ -2099,7 +2344,7 @@ function saveSong() {
   link.click();
   link.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
-  say("Song saved, including images, divisions and line styles.");
+  say("Song saved, including section notes and heights, images, divisions and line styles.");
 }
 function loadSong(file) {
   const reader=new FileReader();
@@ -2112,7 +2357,7 @@ function loadSong(file) {
       idCounter=1;
       items=data.items.map(item=>{
         if (item.type==="section") {
-          return {id:idCounter++,type:"section",text:String(item.text||"")};
+          return {id:idCounter++,type:"section",text:String(item.text||""),note:String(item.note||""),leftNote:String(item.leftNote||""),height:Number(item.height)||0,highlighted:!!item.highlighted};
         }
         if (item.type==="bar") {
           const beats=Array.isArray(item.beats)
@@ -2140,6 +2385,9 @@ function loadSong(file) {
         }
         return null;
       }).filter(Boolean);
+      if (!items.length || items[0].type!=="section") {
+        items.unshift({id:idCounter++,type:"section",text:"",note:"",leftNote:"",height:0,highlighted:false});
+      }
       startupSectionId = null;
 
       if (!items.some(i=>i.type==="bar")) items.push(makeBar(maxColumns()));
@@ -2147,6 +2395,7 @@ function loadSong(file) {
       thickLines=new Set((Array.isArray(data.thickLines)?data.thickLines:[]).map(String));
       const bar=items.find(i=>i.type==="bar");
       selected={id:bar.id,beat:0,sub:0};
+      undoStack.length=0; redoStack.length=0; undoStack.push(chartSnapshot());
       render();
       if (!readingMode) beginEdit(currentCell(),null,false);
       say("Song loaded.");
@@ -2175,6 +2424,7 @@ $("#imageButton").addEventListener("click",()=>imageInput.click());
 $("#saveButton").addEventListener("click",saveSong);
 $("#loadButton").addEventListener("click",()=>fileInput.click());
 $("#quickLoadButton").addEventListener("click",()=>fileInput.click());
+$("#quickSaveButton").addEventListener("click",saveSong);
 function closeToolPanels() {
   document.body.classList.remove("menu-open");
   $("#menuButton").setAttribute("aria-expanded","false");
@@ -2228,7 +2478,7 @@ imageInput.addEventListener("change",()=>{
   insertImages(imageInput.files);
   imageInput.value="";
 });
-$("#fitButton").addEventListener("click",()=>{
+function toggleEditMode() {
   if (editState) commitEdit();
   readingMode=!readingMode;
   if (readingMode) {
@@ -2241,7 +2491,7 @@ $("#fitButton").addEventListener("click",()=>{
   $("#fitButton").title=readingMode?"Edit":"Play Mode";
   $("#fitButton").setAttribute("aria-pressed",String(!readingMode));
   titleInput.readOnly=readingMode;
-  area.querySelectorAll(".section-editor").forEach(el=>el.readOnly=readingMode);
+  area.querySelectorAll(".section-editor,.section-left-note,.section-note-editor").forEach(el=>el.readOnly=readingMode);
   render();
   if (!readingMode) {
     if (getBar(selected.id)) beginEdit(currentCell(),null,false);
@@ -2250,29 +2500,76 @@ $("#fitButton").addEventListener("click",()=>{
       if (sectionInput) { sectionInput.focus(); sectionInput.setSelectionRange(sectionInput.value.length,sectionInput.value.length); }
     }
   }
-});
+}
+$("#fitButton").addEventListener("click",toggleEditMode);
+
+// Handle browser-sensitive shortcuts in capture phase, before Chromium or editor handlers.
+// Ctrl+Shift+Z is the preferred Redo shortcut; Ctrl+Y remains a fallback.
+const shortcutKey=(event,key,code,keyCode)=>
+  String(event.key||"").toLowerCase()===key || event.code===code || event.keyCode===keyCode;
+document.addEventListener("keydown",event=>{
+  const t=shortcutKey(event,"t","KeyT",84);
+  if (event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey && t && !readingMode) {
+    event.preventDefault(); event.stopImmediatePropagation();
+    const historyBefore=chartSnapshot();
+    if (editState) commitEdit();
+    const current=getItem(selected.id);
+    if (current?.type==="section") {
+      current.highlighted=!current.highlighted;
+    } else if (current?.type==="bar") {
+      const index=itemIndex(current.id);
+      items[index]={id:current.id,type:"section",text:"",note:"",leftNote:"",height:0,highlighted:true};
+      thickLines.delete(String(current.id));
+    } else return;
+    selected={id:current.id,beat:0,sub:0};
+    selectedKeys.clear(); selectionAnchor=null;
+    render();
+    recordHistorySnapshot(historyBefore);
+    const editor=area.querySelector(`tr[data-id="${current.id}"] .section-editor`);
+    if (editor) { editor.focus({preventScroll:true}); editor.setSelectionRange(editor.value.length,editor.value.length); }
+    return;
+  }
+  if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
+  const z=shortcutKey(event,"z","KeyZ",90);
+  const y=shortcutKey(event,"y","KeyY",89);
+  const o=shortcutKey(event,"o","KeyO",79);
+  const s=shortcutKey(event,"s","KeyS",83);
+  if (z) {
+    event.preventDefault(); event.stopImmediatePropagation();
+    if (event.shiftKey) redoChart(); else undoChart();
+    return;
+  }
+  if (y && !event.shiftKey) {
+    event.preventDefault(); event.stopImmediatePropagation(); redoChart(); return;
+  }
+  if (o && !event.shiftKey) {
+    event.preventDefault(); event.stopImmediatePropagation();
+    if (!readingMode) fileInput.click();
+    return;
+  }
+  if (s) {
+    event.preventDefault(); event.stopImmediatePropagation();
+    if (!readingMode) saveSong();
+    return;
+  }
+},true);
 
 document.addEventListener("keydown",event=>{
   if (event.key==="Escape" && (!helpDialog.hidden || document.body.classList.contains("menu-open"))) {
     closeToolPanels();
     return;
   }
-  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase()==="s") {
-    event.preventDefault();
-    if (!readingMode) saveSong();
-    return;
-  }
-  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase()==="o") {
-    event.preventDefault();
-    if (!readingMode) fileInput.click();
-    return;
+  if (event.ctrlKey && !event.altKey && event.key.toLowerCase()==="e") {
+    event.preventDefault(); toggleEditMode(); return;
   }
   if (readingMode) return;
 
   const target=event.target;
-  const inEditor=target instanceof HTMLInputElement &&
+  const inEditor=(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) &&
     (target.classList.contains("cell-editor") ||
      target.classList.contains("section-editor") ||
+     target.classList.contains("section-left-note") ||
+     target.classList.contains("section-note-editor") ||
      target.id==="songTitle");
 
   if (event.ctrlKey && event.key.toLowerCase()==="h") {
@@ -2290,10 +2587,14 @@ document.addEventListener("keydown",event=>{
     toggleLine(selected.id);
     return;
   }
+  if (event.ctrlKey && event.shiftKey && (event.key===" " || event.code==="Space")) {
+    event.preventDefault(); event.stopPropagation();
+    removeDivisionAtCurrent(); return;
+  }
   if (event.ctrlKey && (event.key===" " || event.code==="Space")) {
-    event.preventDefault();
-    event.stopPropagation();
-    addDivisionAtCurrent();
+    event.preventDefault(); event.stopPropagation();
+    if (getItem(selected.id)?.type==="section") focusSectionNote(selected.id);
+    else addDivisionAtCurrent();
     return;
   }
   if (event.ctrlKey && event.shiftKey && event.key==="Enter") {
@@ -2322,10 +2623,13 @@ document.addEventListener("keydown",event=>{
     removeRow(false);
     return;
   }
-  if (event.ctrlKey && /^[0-9]$/.test(event.key) && !inEditor) {
+  if (event.ctrlKey && event.code==="Digit0" && !inEditor) {
     event.preventDefault();
-    divideCell(selected.id,selected.beat,Number(event.key)===0?10:Number(event.key));
+    if (getBar(selected.id)) divideCell(selected.id,selected.beat,1);
     return;
+  }
+  if (event.ctrlKey && /^[1-9]$/.test(event.key) && !inEditor) {
+    event.preventDefault(); divideCell(selected.id,selected.beat,Number(event.key)); return;
   }
   if (event.key==="PageDown" && !inEditor) {
     event.preventDefault();
@@ -2411,6 +2715,8 @@ document.addEventListener("keydown",event=>{
 
 document.body.classList.toggle("reading",readingMode);
 titleInput.readOnly=readingMode;
+undoStack.push(chartSnapshot());
+["click","input","change","keydown"].forEach(type=>document.addEventListener(type,captureHistoryEvent,true));
 $("#fitButton").textContent="✏️";
 $("#fitButton").setAttribute("aria-pressed","false");
 $("#fitButton").setAttribute("aria-label","Switch to Edit Mode");
