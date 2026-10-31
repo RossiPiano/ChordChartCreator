@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chord Chart Creator NEW — Version 2327</title>
+<title>Chord Chart Creator NEW — Version 2335</title>
 <style>
 :root {
   --ink:#202633;
@@ -93,6 +93,7 @@ nav {
 }
 body.menu-open nav { opacity:1; visibility:visible; transform:translateY(0); }
 nav button,nav label,nav select { font-size:.85rem; }
+.menu-label { width:100%; padding:7px 2px 1px; border-bottom:1px solid #d5dae3; color:#586174; font-size:.76rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; }
 nav button,nav select { min-height:36px; }
 nav button,nav select { width:100%; }
 nav label { display:flex; align-items:center; }
@@ -385,7 +386,7 @@ body.reading #songTitle { pointer-events:none; border-color:transparent; }
   <div class="header-actions">
     <button id="quickLoadButton" type="button" aria-label="Load Song" title="Load Song">💾⬆️</button>
     <button id="quickSaveButton" type="button" aria-label="Save Song" title="Save Song">💾⬇️</button>
-    <button id="fitButton" type="button" aria-label="Switch to Edit Mode" title="Edit" aria-pressed="false">✏️</button>
+    <button id="fitButton" type="button" aria-label="Switch to Play Mode" title="Play Mode" aria-pressed="true">✏️</button>
     <button id="helpButton" type="button" aria-label="Help" title="Help" aria-expanded="false" aria-controls="helpDialog">❓</button>
     <button id="menuButton" type="button" aria-label="Toggle chart tools" aria-expanded="false" aria-controls="toolMenu">☰</button>
   </div>
@@ -395,30 +396,56 @@ body.reading #songTitle { pointer-events:none; border-color:transparent; }
   <div class="column-setting">
     <label for="columnCountSelect">Columns:</label>
     <select id="columnCountSelect" aria-label="Number of columns">
-    <option value="1">1</option>
-    <option value="2">2</option>
-    <option value="3">3</option>
-    <option value="4" selected>4</option>
-    <option value="5">5</option>
-    <option value="6">6</option>
-    <option value="7">7</option>
-    <option value="8">8</option>
-    <option value="9">9</option>
-    <option value="10">10</option>
-    <option value="11">11</option>
-    <option value="12">12</option>
+    <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+    <option value="4" selected>4</option><option value="5">5</option><option value="6">6</option>
+    <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+    <option value="10">10</option><option value="11">11</option><option value="12">12</option>
     </select>
   </div>
-  <button id="addSectionButton">🏷️ Add Section</button>
-  <button id="aboveButton">⬆️ Add Row Above</button>
-  <button id="belowButton">⬇️ Add Row Below</button>
-  <button id="removeButton">🗑️ Remove Row</button>
-  <button id="removeSectionButton">🗑️ Remove Section</button>
-  <button id="lineButton">➖ Make Line Below Thick</button>
-  <button id="divideButton" type="button">➕ Add Beat-Cell (Ctrl+Space)</button>
-  <button id="imageButton">🖼️ Insert Image…</button>
-  <button id="saveButton">💾 Save Song…</button>
-  <button id="loadButton">📂 Load Song…</button>
+  <div class="menu-label">History and mode</div>
+  <button id="undoButton" type="button">↶ Undo</button>
+  <button id="redoButton" type="button">↷ Redo</button>
+  <button id="menuEditButton" type="button">✏️ Toggle Edit / Play Mode</button>
+  <div class="menu-label">Rows and sections</div>
+  <button id="addSectionButton" type="button">🏷️ Add Section</button>
+  <button id="aboveButton" type="button">⬆️ Add Row Above</button>
+  <button id="belowButton" type="button">⬇️ Add Row Below</button>
+  <button id="addSeparatedRowButton" type="button">↧ Add Separated Row Below</button>
+  <button id="separateNextButton" type="button">↕️ Separate from Next Row</button>
+  <button id="connectAboveButton" type="button">↕️ Connect to Row Above</button>
+  <button id="removeButton" type="button">🗑️ Remove Row</button>
+  <button id="removeHeadingButton" type="button">🏷️ Remove Section Heading Only</button>
+  <button id="removeSectionButton" type="button">🗑️ Remove Entire Section</button>
+  <button id="lineButton" type="button">➖ Make Line Below Thick</button>
+  <div class="menu-label">Cells and chords</div>
+  <button id="divideButton" type="button">➕ Add Beat-Cell</button>
+  <button id="removeDivisionButton" type="button">➖ Remove Beat-Cell Division</button>
+  <div class="column-setting"><label for="divisionCountSelect">Set divisions:</label>
+    <select id="divisionCountSelect" aria-label="Number of beat-cells">
+      <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+      <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+      <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+    </select>
+    <button id="setDivisionButton" type="button">Set</button>
+  </div>
+  <button id="insertCellLeftButton" type="button">⬅️ Insert Cell Left</button>
+  <button id="insertCellRightButton" type="button">➡️ Insert Cell Right</button>
+  <button id="removeCellButton" type="button">✖️ Remove Cell</button>
+  <button id="editCellButton" type="button">⌨️ Edit Selected Cell</button>
+  <button id="clearChordButton" type="button">⌫ Clear Chord</button>
+  <button id="appendSpaceButton" type="button">␠ Append Space</button>
+  <button id="restButton" type="button">𝄽 Insert Quarter-Rest</button>
+  <button id="skipButton" type="button">✕ Mark Cell as Skipped</button>
+  <button id="copyButton" type="button">📋 Copy Selection</button>
+  <button id="pasteButton" type="button">📥 Paste Selection</button>
+  <div class="menu-label">Section notes and media</div>
+  <button id="toggleNotesCellButton" type="button">🟨 Toggle Yellow Notes-Cell</button>
+  <button id="leftNoteButton" type="button">📝 Edit Left-Aligned Section Note</button>
+  <button id="rightNoteButton" type="button">📝 Edit Right-Aligned Section Note</button>
+  <button id="imageButton" type="button">🖼️ Insert Image…</button>
+  <div class="menu-label">Song files</div>
+  <button id="saveButton" type="button">💾 Save Song…</button>
+  <button id="loadButton" type="button">📂 Load Song…</button>
   <input id="fileInput" type="file" accept=".json,application/json">
   <input id="imageInput" type="file" accept="image/*" multiple>
 </nav>
@@ -441,14 +468,14 @@ body.reading #songTitle { pointer-events:none; border-color:transparent; }
       <tr><th>Ctrl + 0</th><td>Remove all beat-cell divisions from the current bar-cell</td></tr>
       <tr><th>Ctrl + Space</th><td>In a bar-cell, add one beat-cell division; in a section-cell, open its right-aligned note field</td></tr>
       <tr><th>Ctrl + Shift + Space</th><td>Remove one beat-cell division from the current bar-cell, if at least two remain</td></tr>
-      <tr><th>Ctrl + Z / Ctrl + Shift + Z / Ctrl + Y</th><td>Undo / Redo chart changes (Ctrl + Shift + Z is the preferred Redo shortcut)</td></tr>
+      <tr><th>Ctrl + Z / Ctrl + Y</th><td>Undo / Redo chart changes (Ctrl + Shift + Z is also supported as Redo, but Ctrl + Y is the more reliable alternative in some browsers)</td></tr>
       <tr><th>Ctrl + E</th><td>Toggle Edit Mode / Play Mode</td></tr>
       <tr><th>Alt + Enter (section name / left note)</th><td>Open or insert a new line in the left-aligned multiline note below the section name</td></tr>
       <tr><th>Ctrl + Space (section-cell)</th><td>Focus the right-aligned multiline note</td></tr>
       <tr><th>Alt + T</th><td>Turn the current bar row into a yellow multiline notes-cell; press again on a section-cell to restore its normal section color. Works on the initial top section too.</td></tr>
       <tr><th>Enter (yellow notes-cell)</th><td>Insert a new line; arrow keys move the text caret normally. This cell does not create chord rows.</td></tr>
       <tr><th>Ctrl + Up / Ctrl + Down (yellow notes-cell)</th><td>Move out of the yellow notes-cell to the row above / below</td></tr>
-      <tr><th>Ctrl + Delete (yellow notes-cell)</th><td>Delete the yellow notes-cell row (the permanent top section-cell is cleared instead)</td></tr>
+      <tr><th>Ctrl + Delete (yellow notes-cell)</th><td>Remove only the yellow notes-cell; keep following rows, which inherit the previous section color. The permanent top section-cell is cleared instead.</td></tr>
       <tr><th>Shift + Space</th><td>Insert a space at the end of the current bar-cell, beat-cell, or section name</td></tr>
       <tr><th>[ / ]</th><td>Insert a cell to the left / right of the selected cell</td></tr>
       <tr><th>\</th><td>Remove the selected cell (a row must keep at least one cell)</td></tr>
@@ -456,7 +483,9 @@ body.reading #songTitle { pointer-events:none; border-color:transparent; }
       <tr><th>x / X</th><td>Mark the selected cell as skipped (gray background with red cross)</td></tr>
       <tr><th>Space</th><td>Save the chord and move right; at the last cell, move to the next visual row</td></tr>
       <tr><th>Enter</th><td>Move to the next visual row; at the bottom of the chart, create a row below. With a selection, move below its bottom-left edge.</td></tr>
-      <tr><th>Shift + Enter</th><td>While editing, toggle the row's bottom line and move down</td></tr>
+      <tr><th>Shift + Enter</th><td>Create a new chord row below, visually separated from the current group</td></tr>
+      <tr><th>Shift + Alt + Enter</th><td>Separate the next row below from the current row without adding or removing rows; move to that next row</td></tr>
+      <tr><th>Shift + Alt + Delete</th><td>Connect the current row to the row above without adding or removing rows; move to the row above</td></tr>
       <tr><th>Ctrl + Shift + Enter</th><td>Insert a new row below the current row; disabled in yellow notes-cells</td></tr>
       <tr><th>Arrow keys</th><td>Navigate left/right between cells and up/down between rows and section headings; Arrow keys never create rows</td></tr>
       <tr><th>Tab / Shift + Tab</th><td>Move right / left between cells; at row edges, continue to the next/previous row</td></tr>
@@ -465,16 +494,17 @@ body.reading #songTitle { pointer-events:none; border-color:transparent; }
       <tr><th>Arrow keys / Enter (with selection)</th><td>Clear the selection and move outside its edge: Right from the top-right, Down or Enter below the bottom-left, Left from the top-left, or Up above the top-left. Navigation stops at the chart boundary and never creates a row.</td></tr>
       <tr><th>Ctrl/Cmd + click</th><td>Select or deselect individual cells, including nonadjacent cells</td></tr>
       <tr><th>PageUp / PageDown</th><td>Add a row above / below when a cell (not a text editor) is selected</td></tr>
-      <tr><th>Ctrl + L</th><td>Toggle the selected row's bottom-line thickness</td></tr>
+      <tr><th>Ctrl + L</th><td>Toggle the selected row's bottom-line thickness, then move to the next visual row below</td></tr>
       <tr><th>Ctrl + Enter</th><td>Create a new section heading below the current position; in a yellow notes-cell, create a normal section below it</td></tr>
       <tr><th>Enter (section name)</th><td>Create the section’s first row if needed, then focus its first (leftmost) cell</td></tr>
       <tr><th>Section name End</th><td>Marks the end of the chart and removes all content below it</td></tr>
       <tr><th>Ctrl + H</th><td>Open Help</td></tr>
-      <tr><th>Ctrl + Shift + S / Ctrl + S</th><td>Save song as a named JSON file (Ctrl + Shift + S preferred; Ctrl + S fallback)</td></tr>
+      <tr><th>Ctrl + S</th><td>Save the song as a JSON file</td></tr>
       <tr><th>Ctrl + O</th><td>Open a JSON song file</td></tr>
       <tr><th>Ctrl + I</th><td>Insert image</td></tr>
-      <tr><th>Ctrl + Delete</th><td>Delete the current row and move to the next visual row below</td></tr>
+      <tr><th>Ctrl + Delete</th><td>On a section-cell, remove only that heading and let its rows inherit the previous section color; on a chord row, delete that row</td></tr>
       <tr><th>Ctrl + Shift + Delete</th><td>Delete the entire current section, including its rows and images</td></tr>
+      <tr><th>Hamburger menu</th><td>Provides touch-accessible controls for editing, row and section operations, cell divisions, chord entry, notes, images, copy/paste, undo/redo, and song files</td></tr>
       <tr><th>Remove Section</th><td>Remove the current section and all rows/images up to the next section</td></tr>
       <tr><th>Ctrl/Cmd + C / V</th><td>Copy / paste selected cells or ranges in Edit Mode</td></tr>
       <tr><th>Delete</th><td>Clear the selected chord; while editing, clear the chord and keep the editor active</td></tr>
@@ -509,7 +539,7 @@ let startupSectionId = items[0].id;
 let thickLines = new Set();
 let selected = {id:items[0].id,beat:0,sub:0};
 let editState = null;
-let readingMode = true;
+let readingMode = false;
 let clipboardText = "";
 let selectedKeys = new Set();
 let selectionAnchor = null;
@@ -768,19 +798,30 @@ function updateToolbar() {
   $("#belowButton").disabled = !item;
   $("#lineButton").disabled = !isBar;
   $("#divideButton").disabled = !isBar;
+  ["removeDivisionButton","setDivisionButton","insertCellLeftButton","insertCellRightButton","removeCellButton","editCellButton","clearChordButton","appendSpaceButton","restButton","skipButton"].forEach(id=>{ const el=$("#"+id); if(el) el.disabled=!isBar; });
+  $("#removeHeadingButton").disabled = item?.type!=="section";
+  $("#separateNextButton").disabled = !isBar || items[itemIndex(item.id)+1]?.type!=="bar";
+  $("#connectAboveButton").disabled = !isBar || items[itemIndex(item.id)-1]?.type!=="bar";
+  $("#leftNoteButton").disabled = item?.type!=="section";
+  $("#rightNoteButton").disabled = item?.type!=="section";
   $("#lineButton").textContent = isBar && thickLines.has(String(item.id))
     ? "➖ Make Line Below Thin" : "➖ Make Line Below Thick";
 }
 function groupInfo() {
   let active = null;
+  let group = null;
   let color = sectionColors.custom;
   const map = new Map();
   for (const item of items) {
     if (item.type === "section") {
       active = item.id;
+      group = item.id;
       color = item.highlighted ? "#FACC15" : sectionColor(item.text);
+    } else if (item.groupStart) {
+      // Start a visually independent, heading-free group without changing its section color.
+      group = `row-group-${item.id}`;
     }
-    map.set(item.id,{group:active,color});
+    map.set(item.id,{group,color});
   }
   return map;
 }
@@ -1164,7 +1205,7 @@ function render() {
     const starts = !prev || prev.group !== info.group;
     const ends = !next || next.group !== info.group;
 
-    if (item.type === "section") {
+    if (item.type === "section" || item.groupStart) {
       const spacer = document.createElement("tr");
       spacer.className = "spacer-row";
       const blank = document.createElement("td");
@@ -1235,7 +1276,7 @@ function render() {
         if (item.highlighted && event.ctrlKey && !event.shiftKey && event.key==="Delete") {
           event.preventDefault(); event.stopPropagation();
           selected={id:item.id,beat:0,sub:0};
-          removeRow(false);
+          removeSectionCellOnly(item.id);
           return;
         }
         if (item.highlighted && event.ctrlKey && !event.altKey && (event.key==="ArrowUp" || event.key==="ArrowDown")) {
@@ -1255,10 +1296,7 @@ function render() {
         }
         if (event.altKey && event.key==="Enter") {
           event.preventDefault(); event.stopPropagation();
-          // The initial startup heading is editable in Play Mode. Switch to Edit Mode
-          // before opening its left note, otherwise the reading-mode Enter handler
-          // mistakenly treats Alt+Enter as the command to create the first bar row.
-          if (readingMode && isStartupSectionEditable(item)) toggleEditMode();
+          // Open the left-aligned multiline note below the section name.
           const leftNote=area.querySelector(`tr[data-id="${item.id}"] .section-left-note`);
           if (leftNote) {
             leftNote.hidden=false;
@@ -1271,14 +1309,7 @@ function render() {
         if (readingMode) {
           if (isStartupSectionEditable(item) && event.key === "Enter") {
             event.preventDefault(); event.stopPropagation();
-            // Naming the initial section is allowed in the default Play Mode. Enter/Down
-            // commits that name, switches to Edit Mode, creates the first row, and edits its first cell.
-            readingMode = false;
-            document.body.classList.remove("reading");
-            titleInput.readOnly = false;
-            $("#fitButton").setAttribute("aria-label","Switch to Play Mode");
-            $("#fitButton").title = "Play Mode";
-            $("#fitButton").setAttribute("aria-pressed","true");
+            // Create the first row under the initial heading and focus its first cell.
             const firstBar = createFirstRow(item.id);
             if (firstBar) selected = {id:firstBar.id,beat:0,sub:0};
             render();
@@ -1307,6 +1338,11 @@ function render() {
         }
         if (event.ctrlKey && event.key === "Enter") {
           event.preventDefault(); event.stopPropagation(); addSection(); return;
+        }
+        if (event.key === "Enter" && event.shiftKey && !item.highlighted) {
+          event.preventDefault(); event.stopPropagation();
+          addSeparatedRow(item.id);
+          return;
         }
         if (event.key === "Enter") {
           event.preventDefault(); event.stopPropagation();
@@ -1609,6 +1645,12 @@ function render() {
         if (fresh) { fresh.classList.add("image-selected"); fresh.focus({preventScroll:true}); scrollTargetIntoView(fresh); }
       });
       td.addEventListener("keydown",event=>{
+        if (event.shiftKey && !event.ctrlKey && !event.metaKey && event.key==="Enter") {
+          event.preventDefault(); event.stopPropagation();
+          selected={id:item.id,beat:0,sub:0};
+          addSeparatedRow(item.id);
+          return;
+        }
         if (event.ctrlKey && event.shiftKey && event.key==="Enter") {
           event.preventDefault(); event.stopPropagation();
           if (editState) commitEdit();
@@ -1708,6 +1750,12 @@ function beginEdit(cell,replaceWith=null,selectAll=false) {
   });
 
   input.addEventListener("keydown",event=>{
+    if (event.shiftKey && event.altKey && !event.ctrlKey && !event.metaKey && (event.key==="Enter" || event.key==="Delete")) {
+      event.preventDefault(); event.stopPropagation();
+      commitEdit();
+      if (event.key==="Enter") separateNextRow(id); else connectToRowAbove(id);
+      return;
+    }
     if (event.ctrlKey && event.shiftKey && event.key==="Enter") {
       event.preventDefault(); event.stopPropagation();
       commitEdit();
@@ -1759,9 +1807,7 @@ function beginEdit(cell,replaceWith=null,selectAll=false) {
       event.preventDefault();
       event.stopPropagation();
       commitEdit();
-      toggleLine(id);
-      if (isBottomChartRow(id)) addRowBelowFirstCell();
-      else advanceDown(id);
+      addSeparatedRow(id);
       return;
     }
     if (event.key==="Enter" && selectedKeys.size && navigateFromSelection("ArrowDown")) {
@@ -2074,11 +2120,23 @@ function advanceDown(id) {
 function handleCellKey(event,cell) {
   if (readingMode) { event.preventDefault(); return; }
   const id = Number(cell.dataset.id), beat = Number(cell.dataset.beat);
+  if (event.shiftKey && event.altKey && !event.ctrlKey && !event.metaKey && (event.key==="Enter" || event.key==="Delete")) {
+    event.preventDefault(); event.stopPropagation();
+    selected={id,beat,sub:selected.sub||0};
+    if (event.key==="Enter") separateNextRow(id); else connectToRowAbove(id);
+    return;
+  }
   if (event.ctrlKey && event.shiftKey && event.key==="Enter") {
     event.preventDefault(); event.stopPropagation();
     if (editState) commitEdit();
     selected={id,beat,sub:selected.sub||0};
     addRow(1);
+    return;
+  }
+  if (event.key==="Enter" && event.shiftKey && !event.ctrlKey && !event.metaKey) {
+    event.preventDefault(); event.stopPropagation();
+    selected={id,beat,sub:selected.sub||0};
+    addSeparatedRow(id);
     return;
   }
   if (event.ctrlKey && event.code==="Digit0") {
@@ -2101,6 +2159,12 @@ function handleCellKey(event,cell) {
   }
   if (event.key==="Enter" && selectedKeys.size && navigateFromSelection("ArrowDown")) {
     event.preventDefault(); event.stopPropagation();
+    return;
+  }
+  if (!event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey && /^[zZxX]$/.test(event.key)) {
+    event.preventDefault(); event.stopPropagation();
+    selected={id,beat,sub:selected.sub||0};
+    setCurrentChord(event.key.toLowerCase());
     return;
   }
   if (event.key==="Enter" || event.key==="F2") {
@@ -2146,8 +2210,9 @@ function addRowBelowFirstCell() {
   selected = {id:anchorId,beat:0,sub:0};
   addRow(1);
 }
-function addRowAt(index,beat=0,count=maxColumns()) {
+function addRowAt(index,beat=0,count=maxColumns(),groupStart=false) {
   const bar = makeBar(count);
+  if (groupStart) bar.groupStart=true;
   // The chart's first visual row is structurally reserved for its section heading.
   const minimumIndex=items[0]?.type==="section"?1:0;
   items.splice(Math.max(minimumIndex,Math.min(index,items.length)),0,bar);
@@ -2165,6 +2230,15 @@ function addRow(direction) {
   let insertion = idx+(direction>0?1:0);
   if (endIndex>=0) insertion=Math.min(insertion,endIndex);
   addRowAt(insertion,selected.beat||0,maxColumns());
+}
+function addSeparatedRow(afterId=selected.id) {
+  if (editState) commitEdit();
+  const idx=itemIndex(afterId);
+  if (idx<0) return;
+  const endIndex=items.findIndex(i=>i.type==="section" && String(i.text).trim().toLowerCase()==="end");
+  let insertion=idx+1;
+  if (endIndex>=0) insertion=Math.min(insertion,endIndex);
+  addRowAt(insertion,0,maxColumns(),true);
 }
 function createFirstRow(sectionId) {
   const sectionIndex=itemIndex(sectionId);
@@ -2258,6 +2332,34 @@ function leaveHighlightedNotes(id,direction) {
     beginEdit(currentCell(),null,false);
   }
 }
+function removeSectionCellOnly(sectionId=selected.id) {
+  if (editState) commitEdit();
+  const idx=itemIndex(sectionId);
+  const item=items[idx];
+  if (!item || item.type!=="section") return;
+  if (idx===0) {
+    // The first section-cell is the permanent chart anchor; clear it rather than removing it.
+    item.text="";
+    item.note="";
+    item.leftNote="";
+    item.height=0;
+    item.highlighted=false;
+    selected={id:item.id,beat:0,sub:0};
+  } else {
+    // Remove only the heading. Its following rows remain and inherit the previous section color.
+    items.splice(idx,1);
+    const next=items[idx] || items[idx-1] || null;
+    if (!next) return;
+    selected={id:next.id,beat:0,sub:0};
+  }
+  selectedKeys.clear(); selectionAnchor=null;
+  render();
+  const target=getItem(selected.id);
+  if (target?.type==="bar") beginEdit(currentCell(),null,false);
+  else if (target?.type==="section") focusSection(target.id);
+  else if (target?.type==="image") focusImagePosition(target.id);
+}
+
 function removeRow(moveCaretUp=false) {
   if (editState) commitEdit();
   const idx=itemIndex(selected.id);
@@ -2358,6 +2460,58 @@ function toggleLine(id) {
   else thickLines.add(key);
   render();
   updateToolbar();
+  // Ctrl+L is also a quick-editing action: continue in the next visual row.
+  advanceDown(id);
+}
+function separateNextRow(id=selected.id) {
+  if (editState) commitEdit();
+  const idx=itemIndex(id), current=items[idx], next=items[idx+1];
+  if (!current || current.type!=="bar" || !next || next.type!=="bar") return;
+  next.groupStart=true;
+  selected={id:next.id,beat:0,sub:0};
+  selectedKeys.clear(); selectionAnchor=null;
+  render(); beginEdit(currentCell(),null,false);
+}
+function connectToRowAbove(id=selected.id) {
+  if (editState) commitEdit();
+  const idx=itemIndex(id), current=items[idx], previous=items[idx-1];
+  if (!current || current.type!=="bar" || !previous || previous.type!=="bar") return;
+  delete current.groupStart;
+  selected={id:previous.id,beat:0,sub:0};
+  selectedKeys.clear(); selectionAnchor=null;
+  render(); beginEdit(currentCell(),null,false);
+}
+function setCurrentChord(value) {
+  if (editState) commitEdit();
+  const bar=getBar(selected.id);
+  if (!bar) return;
+  setSubValue(bar.id,selected.beat,selected.sub||0,value);
+  render(); beginEdit(currentCell(),null,false);
+}
+function appendSpaceToCurrent() {
+  if (editState) commitEdit();
+  const bar=getBar(selected.id);
+  if (!bar) return;
+  const values=getValues(bar,selected.beat);
+  setCurrentChord(String(values[selected.sub||0]??"")+" ");
+}
+function toggleCurrentNotesCell() {
+  if (readingMode) return;
+  if (editState) commitEdit();
+  const item=getItem(selected.id);
+  if (!item) return;
+  const historyBefore=chartSnapshot();
+  if (item.type==="section") item.highlighted=!item.highlighted;
+  else if (item.type==="bar") {
+    const index=itemIndex(item.id);
+    items[index]={id:item.id,type:"section",text:"",note:"",leftNote:"",height:0,highlighted:true};
+    thickLines.delete(String(item.id));
+  } else return;
+  selected={id:item.id,beat:0,sub:0};
+  selectedKeys.clear(); selectionAnchor=null;
+  render(); recordHistorySnapshot(historyBefore);
+  const editor=area.querySelector(`tr[data-id="${item.id}"] .section-editor`);
+  if (editor) { editor.focus({preventScroll:true}); editor.setSelectionRange(editor.value.length,editor.value.length); }
 }
 
 function insertImages(files) {
@@ -2459,7 +2613,7 @@ function loadSong(file) {
               }
             });
           }
-          return {id:idCounter++,type:"bar",beats,divisions};
+          return {id:idCounter++,type:"bar",beats,divisions,...(item.groupStart?{groupStart:true}:{})};
         }
         if (item.type==="image" && typeof item.data==="string" &&
             item.data.startsWith("data:image/")) {
@@ -2503,9 +2657,31 @@ $("#columnCountSelect").addEventListener("change",() => {
 $("#addSectionButton").addEventListener("click",addSection);
 $("#aboveButton").addEventListener("click",()=>addRow(-1));
 $("#belowButton").addEventListener("click",()=>addRow(1));
+$("#addSeparatedRowButton").addEventListener("click",()=>addSeparatedRow(selected.id));
+$("#separateNextButton").addEventListener("click",()=>separateNextRow(selected.id));
+$("#connectAboveButton").addEventListener("click",()=>connectToRowAbove(selected.id));
 $("#removeButton").addEventListener("click",()=>{ if (!readingMode) removeRow(); });
+$("#removeHeadingButton").addEventListener("click",()=>{ if (!readingMode && getItem(selected.id)?.type==="section") removeSectionCellOnly(selected.id); });
 $("#removeSectionButton").addEventListener("click",removeSection);
 $("#lineButton").addEventListener("click",()=>toggleLine(selected.id));
+$("#removeDivisionButton").addEventListener("click",removeDivisionAtCurrent);
+$("#setDivisionButton").addEventListener("click",()=>divideCell(selected.id,selected.beat,Number($("#divisionCountSelect").value)));
+$("#insertCellLeftButton").addEventListener("click",()=>insertCell(-1));
+$("#insertCellRightButton").addEventListener("click",()=>insertCell(1));
+$("#removeCellButton").addEventListener("click",removeCell);
+$("#editCellButton").addEventListener("click",()=>{ if (getBar(selected.id)) beginEdit(currentCell()); });
+$("#clearChordButton").addEventListener("click",()=>setCurrentChord(""));
+$("#appendSpaceButton").addEventListener("click",appendSpaceToCurrent);
+$("#restButton").addEventListener("click",()=>setCurrentChord("z"));
+$("#skipButton").addEventListener("click",()=>setCurrentChord("x"));
+$("#copyButton").addEventListener("click",copyCurrent);
+$("#pasteButton").addEventListener("click",pasteCurrent);
+$("#toggleNotesCellButton").addEventListener("click",toggleCurrentNotesCell);
+$("#leftNoteButton").addEventListener("click",()=>{ if (getItem(selected.id)?.type==="section") { const el=area.querySelector(`tr[data-id="${selected.id}"] .section-left-note`); if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length);} } });
+$("#rightNoteButton").addEventListener("click",()=>{ if (getItem(selected.id)?.type==="section") focusSectionNote(selected.id); });
+$("#undoButton").addEventListener("click",undoChart);
+$("#redoButton").addEventListener("click",redoChart);
+$("#menuEditButton").addEventListener("click",toggleEditMode);
 $("#imageButton").addEventListener("click",()=>imageInput.click());
 $("#saveButton").addEventListener("click",saveSong);
 $("#loadButton").addEventListener("click",()=>fileInput.click());
@@ -2546,7 +2722,7 @@ document.addEventListener("click",event=>{
 $("#toolMenu").addEventListener("click",event=>{
   if (!readingMode) return;
   const control=event.target.closest("button,select,label");
-  if (!control || control.id==="saveButton" || control.id==="loadButton") return;
+  if (!control || control.id==="saveButton" || control.id==="loadButton" || control.id==="menuEditButton") return;
   event.preventDefault();
   event.stopImmediatePropagation();
 },true);
@@ -2601,22 +2777,8 @@ document.addEventListener("keydown",event=>{
   if (event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey && t && (!readingMode || canToggleStartup)) {
     event.preventDefault(); event.stopImmediatePropagation();
     if (readingMode && canToggleStartup) toggleEditMode();
-    const historyBefore=chartSnapshot();
-    if (editState) commitEdit();
-    const current=getItem(activeItem?.id ?? selected.id);
-    if (current?.type==="section") {
-      current.highlighted=!current.highlighted;
-    } else if (current?.type==="bar") {
-      const index=itemIndex(current.id);
-      items[index]={id:current.id,type:"section",text:"",note:"",leftNote:"",height:0,highlighted:true};
-      thickLines.delete(String(current.id));
-    } else return;
-    selected={id:current.id,beat:0,sub:0};
-    selectedKeys.clear(); selectionAnchor=null;
-    render();
-    recordHistorySnapshot(historyBefore);
-    const editor=area.querySelector(`tr[data-id="${current.id}"] .section-editor`);
-    if (editor) { editor.focus({preventScroll:true}); editor.setSelectionRange(editor.value.length,editor.value.length); }
+    if (activeItem) selected={id:activeItem.id,beat:0,sub:0};
+    toggleCurrentNotesCell();
     return;
   }
   if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
@@ -2673,8 +2835,14 @@ document.addEventListener("keydown",event=>{
     return;
   }
   if (event.ctrlKey && event.key.toLowerCase()==="l") {
-    event.preventDefault();
+    event.preventDefault(); event.stopPropagation();
     toggleLine(selected.id);
+    return;
+  }
+  if (event.shiftKey && event.altKey && !event.ctrlKey && !event.metaKey && !inEditor && (event.key==="Enter" || event.key==="Delete")) {
+    event.preventDefault(); event.stopPropagation();
+    if (editState) commitEdit();
+    if (event.key==="Enter") separateNextRow(selected.id); else connectToRowAbove(selected.id);
     return;
   }
   if (event.ctrlKey && event.shiftKey && (event.key===" " || event.code==="Space")) {
@@ -2725,8 +2893,14 @@ document.addEventListener("keydown",event=>{
   if (event.ctrlKey && !event.shiftKey && event.key==="Delete") {
     event.preventDefault();
     event.stopPropagation();
-    if (activeSectionItem?.type==="section") selected={id:activeSectionItem.id,beat:0,sub:0};
-    removeRow(false);
+    if (activeSectionItem?.type==="section") {
+      selected={id:activeSectionItem.id,beat:0,sub:0};
+      removeSectionCellOnly(activeSectionItem.id);
+    } else if (getItem(selected.id)?.type==="section") {
+      removeSectionCellOnly(selected.id);
+    } else {
+      removeRow(false);
+    }
     return;
   }
   if (event.ctrlKey && event.code==="Digit0" && !inEditor) {
@@ -2748,6 +2922,11 @@ document.addEventListener("keydown",event=>{
     return;
   }
   if (inEditor) return;
+  if (!event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey && /^[zZxX]$/.test(event.key) && getBar(selected.id)) {
+    event.preventDefault(); event.stopPropagation();
+    setCurrentChord(event.key.toLowerCase());
+    return;
+  }
 
   // A Shift+mouse-click rectangle leaves focus outside a cell editor, so its
   // navigation keys must be handled here as well as by the editor handlers.
@@ -2824,8 +3003,9 @@ titleInput.readOnly=readingMode;
 undoStack.push(chartSnapshot());
 ["click","input","change","keydown"].forEach(type=>document.addEventListener(type,captureHistoryEvent,true));
 $("#fitButton").textContent="✏️";
-$("#fitButton").setAttribute("aria-pressed","false");
-$("#fitButton").setAttribute("aria-label","Switch to Edit Mode");
+$("#fitButton").setAttribute("aria-pressed","true");
+$("#fitButton").setAttribute("aria-label","Switch to Play Mode");
+$("#fitButton").title="Play Mode";
 render();
 const initialSectionInput = area.querySelector(`tr[data-id="${startupSectionId}"] .section-editor`);
 if (initialSectionInput && isStartupSectionEditable(getItem(startupSectionId))) {
