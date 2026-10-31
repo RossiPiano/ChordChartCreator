@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chord Chart Creator NEW — Version 2335</title>
+<title>Chord Chart Creator NEW — Version 2337</title>
 <style>
 :root {
   --ink:#202633;
@@ -406,6 +406,10 @@ body.reading #songTitle { pointer-events:none; border-color:transparent; }
   <button id="undoButton" type="button">↶ Undo</button>
   <button id="redoButton" type="button">↷ Redo</button>
   <button id="menuEditButton" type="button">✏️ Toggle Edit / Play Mode</button>
+  <div class="menu-label">Transpose</div>
+  <button id="transposeUpButton" type="button">🔑⬆️ Transpose Up 1 Semitone</button>
+  <button id="transposeDownButton" type="button">🔑⬇️ Transpose Down 1 Semitone</button>
+  <button id="restoreOriginalChordsButton" type="button">↩️ Restore Original Chords</button>
   <div class="menu-label">Rows and sections</div>
   <button id="addSectionButton" type="button">🏷️ Add Section</button>
   <button id="aboveButton" type="button">⬆️ Add Row Above</button>
@@ -470,6 +474,9 @@ body.reading #songTitle { pointer-events:none; border-color:transparent; }
       <tr><th>Ctrl + Shift + Space</th><td>Remove one beat-cell division from the current bar-cell, if at least two remain</td></tr>
       <tr><th>Ctrl + Z / Ctrl + Y</th><td>Undo / Redo chart changes (Ctrl + Shift + Z is also supported as Redo, but Ctrl + Y is the more reliable alternative in some browsers)</td></tr>
       <tr><th>Ctrl + E</th><td>Toggle Edit Mode / Play Mode</td></tr>
+      <tr><th>Alt + =</th><td>Transpose every chord symbol in the chart up 1 semitone, using sharp enharmonic spellings</td></tr>
+      <tr><th>Alt + -</th><td>Transpose every chord symbol in the chart down 1 semitone, using flat enharmonic spellings</td></tr>
+      <tr><th>Alt + 0</th><td>Restore the chord symbols saved before the current transposition cycle</td></tr>
       <tr><th>Alt + Enter (section name / left note)</th><td>Open or insert a new line in the left-aligned multiline note below the section name</td></tr>
       <tr><th>Ctrl + Space (section-cell)</th><td>Focus the right-aligned multiline note</td></tr>
       <tr><th>Alt + T</th><td>Turn the current bar row into a yellow multiline notes-cell; press again on a section-cell to restore its normal section color. Works on the initial top section too.</td></tr>
@@ -504,7 +511,7 @@ body.reading #songTitle { pointer-events:none; border-color:transparent; }
       <tr><th>Ctrl + I</th><td>Insert image</td></tr>
       <tr><th>Ctrl + Delete</th><td>On a section-cell, remove only that heading and let its rows inherit the previous section color; on a chord row, delete that row</td></tr>
       <tr><th>Ctrl + Shift + Delete</th><td>Delete the entire current section, including its rows and images</td></tr>
-      <tr><th>Hamburger menu</th><td>Provides touch-accessible controls for editing, row and section operations, cell divisions, chord entry, notes, images, copy/paste, undo/redo, and song files</td></tr>
+      <tr><th>Hamburger menu</th><td>Provides touch-accessible controls for editing, transposing the whole chart, row and section operations, cell divisions, chord entry, notes, images, copy/paste, undo/redo, and song files</td></tr>
       <tr><th>Remove Section</th><td>Remove the current section and all rows/images up to the next section</td></tr>
       <tr><th>Ctrl/Cmd + C / V</th><td>Copy / paste selected cells or ranges in Edit Mode</td></tr>
       <tr><th>Delete</th><td>Clear the selected chord; while editing, clear the chord and keep the editor active</td></tr>
@@ -721,6 +728,79 @@ function normalizeOneChord(raw) {
 }
 function normalizeChord(value) { return normalizeOneChord(value); }
 
+const sharpPitchNames = ["C","C♯","D","D♯","E","F","F♯","G","G♯","A","A♯","B"];
+const flatPitchNames = ["C","D♭","D","E♭","E","F","G♭","G","A♭","A","B♭","B"];
+const naturalPitchClasses = {C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+function transposeRootToken(value,semitones,spelling) {
+  const match = String(value ?? "").match(/^(\s*)([A-Ga-g])((?:##|bb|𝄪|𝄫|[#b♯♭])?)([\s\S]*)$/);
+  if (!match) return String(value ?? "");
+  const accidental = match[3] || "";
+  const accidentalValue = accidental === "##" || accidental === "𝄪" ? 2 :
+    accidental === "bb" || accidental === "𝄫" ? -2 :
+    accidental === "#" || accidental === "♯" ? 1 :
+    accidental === "b" || accidental === "♭" ? -1 : 0;
+  const pitch = ((naturalPitchClasses[match[2].toUpperCase()] + accidentalValue + semitones) % 12 + 12) % 12;
+  const names = spelling === "sharp" ? sharpPitchNames : flatPitchNames;
+  return match[1] + names[pitch] + match[4];
+}
+function transposeChordSymbol(value,semitones) {
+  const raw = String(value ?? "");
+  const trimmed = raw.trim();
+  if (!trimmed || /^[xXzZ]$/.test(trimmed)) return raw;
+  const leading = raw.match(/^\s*/)?.[0] || "";
+  const trailing = raw.match(/\s*$/)?.[0] || "";
+  const core = raw.slice(leading.length,raw.length-trailing.length || raw.length);
+  const spelling = semitones > 0 ? "sharp" : "flat";
+  const slash = core.indexOf("/");
+  if (slash < 0) return leading + transposeRootToken(core,semitones,spelling) + trailing;
+  const main = core.slice(0,slash);
+  const bass = core.slice(slash+1);
+  return leading + transposeRootToken(main,semitones,spelling) + "/" +
+    transposeRootToken(bass,semitones,spelling) + trailing;
+}
+function transposeChart(semitones) {
+  if (readingMode || ![1,-1].includes(semitones)) return;
+  if (editState) commitEdit();
+  items.forEach(item=>{
+    if (item.type !== "bar") return;
+    // Keep the first-ever chord spellings for this transposition cycle.
+    if (!Array.isArray(item.originalChordValues)) {
+      item.originalChordValues = item.beats.map((_,beat)=>getValues(item,beat).map(value=>String(value ?? "")));
+    }
+    item.beats.forEach((_,beat)=>{
+      const values = getValues(item,beat).map(value=>transposeChordSymbol(value,semitones));
+      setValues(item,beat,values);
+    });
+  });
+  selectedKeys.clear(); selectionAnchor=null;
+  render();
+  if (getBar(selected.id)) beginEdit(currentCell(),null,false);
+}
+function restoreOriginalChords() {
+  if (readingMode) return;
+  if (editState) commitEdit();
+  let restored = false;
+  items.forEach(item=>{
+    if (item.type !== "bar" || !Array.isArray(item.originalChordValues)) return;
+    item.beats.forEach((_,beat)=>{
+      const current = getValues(item,beat);
+      const original = item.originalChordValues[beat];
+      if (Array.isArray(original)) {
+        original.forEach((value,sub)=>{
+          if (sub < current.length) current[sub] = String(value ?? "");
+        });
+        setValues(item,beat,current);
+      }
+    });
+    delete item.originalChordValues;
+    restored = true;
+  });
+  if (!restored) return;
+  selectedKeys.clear(); selectionAnchor=null;
+  render();
+  if (getBar(selected.id)) beginEdit(currentCell(),null,false);
+}
+
 function chordParts(value) {
   const chord = normalizeChord(value);
   if (!chord || /^[xXzZ]$/.test(chord)) return {base:chord,sup:"",bass:""};
@@ -804,6 +884,10 @@ function updateToolbar() {
   $("#connectAboveButton").disabled = !isBar || items[itemIndex(item.id)-1]?.type!=="bar";
   $("#leftNoteButton").disabled = item?.type!=="section";
   $("#rightNoteButton").disabled = item?.type!=="section";
+  const hasBars = items.some(entry=>entry.type==="bar");
+  $("#transposeUpButton").disabled = !hasBars;
+  $("#transposeDownButton").disabled = !hasBars;
+  $("#restoreOriginalChordsButton").disabled = !items.some(entry=>entry.type==="bar" && Array.isArray(entry.originalChordValues));
   $("#lineButton").textContent = isBar && thickLines.has(String(item.id))
     ? "➖ Make Line Below Thin" : "➖ Make Line Below Thick";
 }
@@ -2613,7 +2697,12 @@ function loadSong(file) {
               }
             });
           }
-          return {id:idCounter++,type:"bar",beats,divisions,...(item.groupStart?{groupStart:true}:{})};
+          const originalChordValues = Array.isArray(item.originalChordValues)
+            ? item.originalChordValues.map(values=>Array.isArray(values)?values.map(v=>String(v??"")):[])
+            : null;
+          return {id:idCounter++,type:"bar",beats,divisions,
+            ...(item.groupStart?{groupStart:true}:{}),
+            ...(originalChordValues?{originalChordValues}:{})};
         }
         if (item.type==="image" && typeof item.data==="string" &&
             item.data.startsWith("data:image/")) {
@@ -2682,6 +2771,9 @@ $("#rightNoteButton").addEventListener("click",()=>{ if (getItem(selected.id)?.t
 $("#undoButton").addEventListener("click",undoChart);
 $("#redoButton").addEventListener("click",redoChart);
 $("#menuEditButton").addEventListener("click",toggleEditMode);
+$("#transposeUpButton").addEventListener("click",()=>transposeChart(1));
+$("#transposeDownButton").addEventListener("click",()=>transposeChart(-1));
+$("#restoreOriginalChordsButton").addEventListener("click",restoreOriginalChords);
 $("#imageButton").addEventListener("click",()=>imageInput.click());
 $("#saveButton").addEventListener("click",saveSong);
 $("#loadButton").addEventListener("click",()=>fileInput.click());
@@ -2823,6 +2915,24 @@ document.addEventListener("keydown",event=>{
      target.classList.contains("section-left-note") ||
      target.classList.contains("section-note-editor") ||
      target.id==="songTitle");
+
+  if (event.altKey && !event.ctrlKey && !event.metaKey && !event.shiftKey) {
+    if (event.key==="=") {
+      event.preventDefault(); event.stopPropagation();
+      transposeChart(1);
+      return;
+    }
+    if (event.key==="-") {
+      event.preventDefault(); event.stopPropagation();
+      transposeChart(-1);
+      return;
+    }
+    if (event.key==="0") {
+      event.preventDefault(); event.stopPropagation();
+      restoreOriginalChords();
+      return;
+    }
+  }
 
   if (event.ctrlKey && event.key.toLowerCase()==="h") {
     event.preventDefault();
